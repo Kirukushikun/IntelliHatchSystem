@@ -5,6 +5,11 @@
     'placeholder' => 'Select an option'
 ])
 
+<style>
+    select:invalid { color: #9ca3af; }
+    select option { color: black; }
+</style>
+
 <div class="mb-6">
     @if($label)
         <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 mb-1">
@@ -24,7 +29,7 @@
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
                 : 'border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}"
     >
-        <option value="" disabled selected>{{ $placeholder }}</option>
+        <option value="" disabled selected hidden>{{ $placeholder }}</option>
         {{ $slot }}
     </select>
 
