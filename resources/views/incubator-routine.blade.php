@@ -24,9 +24,19 @@
             <!-- Form Content -->
             <form action="{{ route('incubator-routine.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
-                <x-text-input label="Employee Name" name="employee_name" placeholder="Enter your full name" required="true"/>
-                <x-text-area label="Notes" name="notes" placeholder="Add any notes here..." required="true"/>
-                <x-photo-attach label="Photos" name="photos"/>
+                <x-text-input label="Employee Name" name="employee_name" placeholder="Enter your full name" required/>
+                <x-dropdown label="Shift" name="shift" placeholder="Select shift" required>
+                    <option value="1st Shift">1st Shift</option>
+                    <option value="2nd Shift">2nd Shift</option>
+                    <option value="3rd Shift">3rd Shift</option>
+                </x-dropdown>
+                <x-dropdown label="Check for Alarm system condition" name="alarm_system_condition" required>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Operational">Operational</option>
+                    <option value="Unoperational">Unoperational</option>
+                </x-dropdown>
+                <x-text-area label="Corrective Action" name="corrective_action" placeholder="Enter your answer..." required/>
+                <x-photo-attach label="Attach Photos" name="photos"/>
                 
                 <div class="flex justify-end mt-4">
                     <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
