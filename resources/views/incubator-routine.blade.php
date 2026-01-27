@@ -1,7 +1,7 @@
 <x-layout>
     <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
         <!-- Form/Card Container -->
-        <div class="w-full max-w-lg bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <div class="w-full max-w-lg bg-white rounded-xl shadow-lg px-8 pt-6">
             
             <!-- Title Component -->
             <x-title>
@@ -44,7 +44,6 @@
                     </button>
                 </div>
             </form>
-
         </div>
     </div>
 </x-layout>
