@@ -25,10 +25,7 @@
         class="mt-1 block w-full rounded-lg border px-4 py-2 shadow-sm
             {{ $errors->has($name) 
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
-                : 'border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}">
-        {{ old($name, $value) }}
-    </textarea>
-
+                : 'border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}">{{ old($name, $value) }}</textarea>
 
     @error($name)
         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>

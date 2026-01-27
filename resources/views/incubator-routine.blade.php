@@ -26,7 +26,7 @@
                 @csrf
                 <x-text-input label="Employee Name" name="employee_name" placeholder="Enter your full name" required="true"/>
                 <x-text-area label="Notes" name="notes" placeholder="Add any notes here..." required="true"/>
-                <x-photo-attach label="Photos" name="photos" required="true"/>
+                <x-photo-attach label="Photos" name="photos"/>
                 
                 <div class="flex justify-end mt-4">
                     <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
