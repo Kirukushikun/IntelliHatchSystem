@@ -20,90 +20,90 @@
             @php
             $incubatorSchedule = [
                 '_daily' => [
-                    'shift', 'alarm_system_condition', 'corrective_action', 'corrective_action_photos', 'notes',
-                    'check_incubator_doors_for_air_leakage', 'check_incubator_doors_for_air_leakage_photos',
-                    'drain_water_out_from_air_compressor_tank', 'drain_water_out_from_air_compressor_tank_photos',
-                    'check_water_level_of_blue_tank', 'check_water_level_of_blue_tank_photos'
+                    'shift', 'alarm_system_condition', 'corrective_action',
+                    'check_incubator_doors_for_air_leakage',
+                    'drain_water_out_from_air_compressor_tank',
+                    'check_water_level_of_blue_tank'
                 ],
                 'Monday-1st Shift' => [
-                    'cleaning_of_incubator_floor_area', 'cleaning_of_incubator_floor_area_photos',
-                    'assist_in_random_candling', 'assist_in_random_candling_photos'
+                    'cleaning_of_incubator_floor_area',
+                    'assist_in_random_candling'
                 ],
                 'Monday-2nd Shift' => [
-                    'check_spray_nozzle_and_water_pan', 'check_spray_nozzle_and_water_pan_photos',
-                    'check_incubator_fans_for_vibration', 'check_incubator_fans_for_vibration_photos',
-                    'egg_setting_preparation', 'egg_setting_preparation_photos'
+                    'check_spray_nozzle_and_water_pan',
+                    'check_incubator_fans_for_vibration',
+                    'egg_setting_preparation'
                 ],
                 'Monday-3rd Shift' => [
-                    'checking_of_baggy_against_the_gaskets', 'checking_of_baggy_against_the_gaskets_photos',
-                    'check_curtain_position_and_condition', 'check_curtain_position_and_condition_photos',
-                    'check_rack_baffle_condition', 'check_rack_baffle_condition_photos',
-                    'egg_setting', 'egg_setting_photos',
-                    'record_egg_setting_on_board', 'record_egg_setting_on_board_photos',
-                    'record_egg_setting_time', 'record_egg_setting_time_photos'
+                    'checking_of_baggy_against_the_gaskets',
+                    'check_curtain_position_and_condition',
+                    'check_rack_baffle_condition',
+                    'egg_setting',
+                    'record_egg_setting_on_board',
+                    'record_egg_setting_time'
                 ],
                 'Tuesday-1st Shift' => [],
                 'Tuesday-2nd Shift' => [
-                    'check_wick_for_replacement_washing', 'check_wick_for_replacement_washing_photos',
-                    'cleaning_of_incubator_floor_area', 'cleaning_of_incubator_floor_area_photos',
-                    'clean_and_refill_water_reservoir', 'clean_and_refill_water_reservoir_photos'
+                    'check_wick_for_replacement_washing',
+                    'cleaning_of_incubator_floor_area',
+                    'clean_and_refill_water_reservoir'
                 ],
                 'Tuesday-3rd Shift' => [
-                    'check_spray_nozzle_and_water_pan', 'check_spray_nozzle_and_water_pan_photos',
-                    'check_incubator_fans_for_vibration', 'check_incubator_fans_for_vibration_photos'
+                    'check_spray_nozzle_and_water_pan',
+                    'check_incubator_fans_for_vibration'
                 ],
                 'Wednesday-1st Shift' => [
-                    'cleaning_of_incubator_floor_area', 'cleaning_of_incubator_floor_area_photos',
-                    'cleaning_of_entrance_and_exit_area_flooring', 'cleaning_of_entrance_and_exit_area_flooring_photos'
+                    'cleaning_of_incubator_floor_area',
+                    'cleaning_of_entrance_and_exit_area_flooring'
                 ],
                 'Wednesday-2nd Shift' => [],
                 'Wednesday-3rd Shift' => [
-                    'cleaning_incubator_roof_and_plenum', 'cleaning_incubator_roof_and_plenum_photos',
-                    'check_spray_nozzle_and_water_pan', 'check_spray_nozzle_and_water_pan_photos',
-                    'check_incubator_fans_for_vibration', 'check_incubator_fans_for_vibration_photos'
+                    'cleaning_incubator_roof_and_plenum',
+                    'check_spray_nozzle_and_water_pan',
+                    'check_incubator_fans_for_vibration'
                 ],
                 'Thursday-1st Shift' => [
-                    'cleaning_of_incubator_floor_area', 'cleaning_of_incubator_floor_area_photos'
+                    'cleaning_of_incubator_floor_area'
                 ],
                 'Thursday-2nd Shift' => [
-                    'check_spray_nozzle_and_water_pan', 'check_spray_nozzle_and_water_pan_photos',
-                    'check_incubator_fans_for_vibration', 'check_incubator_fans_for_vibration_photos',
-                    'egg_setting_preparation', 'egg_setting_preparation_photos'
+                    'check_spray_nozzle_and_water_pan',
+                    'check_incubator_fans_for_vibration',
+                    'egg_setting_preparation'
                 ],
                 'Thursday-3rd Shift' => [
-                    'checking_of_baggy_against_the_gaskets', 'checking_of_baggy_against_the_gaskets_photos',
-                    'check_curtain_position_and_condition', 'check_curtain_position_and_condition_photos',
-                    'check_rack_baffle_condition', 'check_rack_baffle_condition_photos',
-                    'egg_setting', 'egg_setting_photos',
-                    'record_egg_setting_on_board', 'record_egg_setting_on_board_photos',
-                    'record_egg_setting_time', 'record_egg_setting_time_photos'
+                    'checking_of_baggy_against_the_gaskets',
+                    'check_curtain_position_and_condition',
+                    'check_rack_baffle_condition',
+                    'egg_setting',
+                    'record_egg_setting_on_board',
+                    'record_egg_setting_time'
                 ],
                 'Friday-1st Shift' => [],
                 'Friday-2nd Shift' => [
-                    'check_wick_for_replacement_washing', 'check_wick_for_replacement_washing_photos',
-                    'cleaning_of_incubator_floor_area', 'cleaning_of_incubator_floor_area_photos',
-                    'clean_and_refill_water_reservoir', 'clean_and_refill_water_reservoir_photos'
+                    'check_wick_for_replacement_washing',
+                    'cleaning_of_incubator_floor_area',
+                    'clean_and_refill_water_reservoir'
                 ],
                 'Friday-3rd Shift' => [
-                    'check_spray_nozzle_and_water_pan', 'check_spray_nozzle_and_water_pan_photos',
-                    'check_incubator_fans_for_vibration', 'check_incubator_fans_for_vibration_photos'
+                    'check_spray_nozzle_and_water_pan',
+                    'check_incubator_fans_for_vibration'
                 ],
                 'Saturday-1st Shift' => [],
                 'Saturday-2nd Shift' => [],
                 'Saturday-3rd Shift' => [
-                    'check_spray_nozzle_and_water_pan', 'check_spray_nozzle_and_water_pan_photos',
-                    'check_incubator_fans_for_vibration', 'check_incubator_fans_for_vibration_photos'
+                    'check_spray_nozzle_and_water_pan',
+                    'check_incubator_fans_for_vibration'
                 ],
                 'Sunday-1st Shift' => [
-                    'cleaning_of_incubator_floor_area', 'cleaning_of_incubator_floor_area_photos'
+                    'cleaning_of_incubator_floor_area'
                 ],
                 'Sunday-2nd Shift' => [
-                    'cleaning_of_incubator_floor_area', 'cleaning_of_incubator_floor_area_photos'
+                    'cleaning_of_incubator_floor_area'
                 ],
                 'Sunday-3rd Shift' => [
-                    'cleaning_incubator_roof_and_plenum', 'cleaning_incubator_roof_and_plenum_photos',
-                    'check_spray_nozzle_and_water_pan', 'check_spray_nozzle_and_water_pan_photos',
-                    'check_incubator_fans_for_vibration', 'check_incubator_fans_for_vibration_photos'
+                    'cleaning_incubator_roof_and_plenum',
+                    'check_spray_nozzle_and_water_pan',
+                    'check_incubator_fans_for_vibration'
                 ],
             ];
             @endphp
@@ -124,14 +124,13 @@
                             <option value="2nd Shift">2nd Shift</option>
                             <option value="3rd Shift">3rd Shift</option>
                         </x-dropdown>
-                        <x-dropdown label="Check for Alarm system condition" name="alarm_system_condition" required>
-                            <option value="N/A" selected>N/A</option>
+                        <x-dropdown label="Check for Alarm system condition" name="alarm_system_condition" placeholder="Select condition" required>
+                            <option value="" hidden>Select condition</option>
                             <option value="Operational">Operational</option>
                             <option value="Unoperational">Unoperational</option>
                         </x-dropdown>
                         <x-text-area label="Corrective Action" name="corrective_action" placeholder="Enter your answer..." required/>
                         <x-photo-attach label="Attach Photos" name="corrective_action_photos"/>
-                        <x-text-area label="Additional Notes" name="notes" placeholder="Any additional observations..."/>
                     </div>
 
                     <!-- Step 2: GENERAL MACHINE - DAILY & SCHEDULED -->
@@ -142,8 +141,8 @@
                         
                         <!-- DAILY ITEM -->
                         <div>
-                            <x-dropdown label="Check incubator doors for air leakage" name="check_incubator_doors_for_air_leakage" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Check incubator doors for air leakage" name="check_incubator_doors_for_air_leakage" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -152,8 +151,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Checking of baggy against the gaskets" name="checking_of_baggy_against_the_gaskets" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Checking of baggy against the gaskets" name="checking_of_baggy_against_the_gaskets" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -162,8 +161,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Check curtain position and condition" name="check_curtain_position_and_condition" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Check curtain position and condition" name="check_curtain_position_and_condition" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -172,8 +171,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Check wick for replacement / washing" name="check_wick_for_replacement_washing" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Check wick for replacement / washing" name="check_wick_for_replacement_washing" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -182,8 +181,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Check spray nozzle and water pan" name="check_spray_nozzle_and_water_pan" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Check spray nozzle and water pan" name="check_spray_nozzle_and_water_pan" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -192,8 +191,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Check incubator fans for vibration" name="check_incubator_fans_for_vibration" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Check incubator fans for vibration" name="check_incubator_fans_for_vibration" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -202,8 +201,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Check rack baffle condition" name="check_rack_baffle_condition" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Check rack baffle condition" name="check_rack_baffle_condition" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -212,8 +211,8 @@
                         
                         <!-- DAILY ITEM -->
                         <div>
-                            <x-dropdown label="Drain water out from air compressor tank" name="drain_water_out_from_air_compressor_tank" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Drain water out from air compressor tank" name="drain_water_out_from_air_compressor_tank" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -229,8 +228,8 @@
                         
                         <!-- SCHEDULED ITEM - Wednesday 3rd & Sunday 3rd -->
                         <div>
-                            <x-dropdown label="Cleaning of incubator roof and plenum" name="cleaning_incubator_roof_and_plenum" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Cleaning of incubator roof and plenum" name="cleaning_incubator_roof_and_plenum" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -246,8 +245,8 @@
                         
                         <!-- DAILY ITEM -->
                         <div>
-                            <x-dropdown label="Check water level of blue tank" name="check_water_level_of_blue_tank" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Check water level of blue tank" name="check_water_level_of_blue_tank" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -256,8 +255,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Cleaning of incubator floor area" name="cleaning_of_incubator_floor_area" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Cleaning of incubator floor area" name="cleaning_of_incubator_floor_area" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -266,8 +265,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Cleaning of entrance and exit area flooring" name="cleaning_of_entrance_and_exit_area_flooring" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Cleaning of entrance and exit area flooring" name="cleaning_of_entrance_and_exit_area_flooring" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -276,8 +275,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Clean and refill water reservoir" name="clean_and_refill_water_reservoir" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Clean and refill water reservoir" name="clean_and_refill_water_reservoir" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -293,8 +292,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Egg setting preparation" name="egg_setting_preparation" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Egg setting preparation" name="egg_setting_preparation" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -303,8 +302,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Egg setting" name="egg_setting" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Egg setting" name="egg_setting" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -314,7 +313,7 @@
                         <!-- SCHEDULED ITEM -->
                         <div>
                             <x-dropdown label="Record egg setting on board" name="record_egg_setting_on_board" required>
-                                <option value="N/A" selected>N/A</option>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -323,8 +322,8 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Record egg setting time" name="record_egg_setting_time" required>
-                                <option value="N/A" selected>N/A</option>
+                            <x-dropdown label="Record egg setting time" name="record_egg_setting_time" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>
@@ -332,9 +331,9 @@
                         </div>
                         
                         <!-- SCHEDULED ITEM -->
-                        <div>
-                            <x-dropdown label="Assist in Random Candling" name="assist_in_random_candling" required>
-                                <option value="N/A" selected>N/A</option>
+                        <div data-field="assist_in_random_candling">
+                            <x-dropdown label="Assist in Random Candling" name="assist_in_random_candling" placeholder="Select condition" required>
+                                <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
                             </x-dropdown>

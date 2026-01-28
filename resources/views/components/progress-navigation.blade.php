@@ -91,8 +91,18 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                 // Watch for shift selection
                 const shiftDropdown = document.querySelector('select[name="shift"]');
                 if (shiftDropdown) {
+                    let isFirstLoad = true;
+                    
                     shiftDropdown.addEventListener('change', (e) => {
-                        this.selectedShift = e.target.value;
+                        const newShift = e.target.value;
+                        
+                        // If changing from one shift to another, reset the form
+                        if (!isFirstLoad && this.selectedShift && newShift && this.selectedShift !== newShift) {
+                            this.resetForm();
+                        }
+                        
+                        this.selectedShift = newShift;
+                        isFirstLoad = false;
                         
                         if (this.selectedShift) {
                             // Filter fields based on schedule
@@ -123,47 +133,39 @@ function stepForm(currentStep, totalSteps, schedule = null) {
             const scheduleKey = `${this.currentDay}-${this.selectedShift}`;
             const allowedFields = this.schedule[scheduleKey] || [];
 
-            console.log('Current Day:', this.currentDay);
-            console.log('Selected Shift:', this.selectedShift);
-            console.log('Schedule Key:', scheduleKey);
-            console.log('Allowed Fields:', allowedFields);
-
             // Get daily fields from schedule config if provided
             const dailyFields = this.schedule._daily || [];
-            console.log('Daily Fields:', dailyFields);
 
             // Get all step divs (not the form)
             for (let i = 2; i <= 5; i++) {
                 const step = document.getElementById(`step-${i}`);
                 if (!step) continue;
                 
-                // Find all direct child divs that contain fields (but not the title)
-                const allChildren = Array.from(step.children);
-                const fieldContainers = allChildren.filter(child => {
-                    // Skip if it's not a div or if it's the space-y-4 wrapper
-                    if (child.tagName !== 'DIV') return false;
-                    if (child.classList.contains('space-y-4')) return false;
-                    
-                    // Check if it has a field inside
-                    const hasField = child.querySelector('select[name], input[name], textarea[name]');
-                    return hasField !== null;
+                // Find all direct child divs that contain fields
+                const fieldContainers = Array.from(step.children).filter(child => {
+                    return child.tagName === 'DIV' && !child.classList.contains('space-y-4');
                 });
-                
-                console.log(`Step ${step.id} containers:`, fieldContainers.length);
-                
+                                
                 let hasVisibleFields = false;
                 
                 fieldContainers.forEach(container => {
-                    // Get the main field (dropdown) in this container
-                    const mainField = container.querySelector('select[name], input[name], textarea[name]');
+                    // Check if container has data-field attribute
+                    let fieldName = container.getAttribute('data-field');
                     
-                    if (!mainField) return;
+                    // If no data-field, try to get from the first select/input/textarea
+                    if (!fieldName) {
+                        const mainField = container.querySelector('select[name], input[name], textarea[name]');
+                        if (mainField) {
+                            fieldName = mainField.getAttribute('name');
+                            // Remove _photos suffix if present
+                            if (fieldName) {
+                                fieldName = fieldName.replace(/_photos$/, '');
+                            }
+                        }
+                    }
                     
-                    const fieldName = mainField.getAttribute('name');
                     if (!fieldName || fieldName === '_token') return;
-                    
-                    console.log(`Checking field: ${fieldName}, Daily: ${dailyFields.includes(fieldName)}, Allowed: ${allowedFields.includes(fieldName)}`);
-                    
+                                        
                     // Check if this field should be visible
                     const shouldShow = dailyFields.includes(fieldName) || allowedFields.includes(fieldName);
                     
@@ -181,9 +183,7 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                         });
                     }
                 });
-                
-                console.log(`Step ${step.id} has visible fields:`, hasVisibleFields);
-                
+                                
                 // Mark step as empty if no visible fields
                 if (!hasVisibleFields) {
                     step.setAttribute('data-empty', 'true');
@@ -206,9 +206,6 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                 // Just ensure it's hidden
                 if (step.hasAttribute('data-empty')) {
                     step.style.display = 'none';
-                    console.log(`Step ${step.id} is empty and hidden`);
-                } else {
-                    console.log(`Step ${step.id} is visible`);
                 }
             }
         },
@@ -243,7 +240,6 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                 }
             }
             
-            console.log('Visible step IDs:', visibleIds); // Debug log
             return visibleIds;
         },
 
@@ -353,6 +349,42 @@ function stepForm(currentStep, totalSteps, schedule = null) {
             }
 
             document.getElementById('step-form').submit();
+        },
+
+        resetForm() {
+            const form = document.getElementById('step-form');
+            if (!form) return;
+
+            // Get all form fields
+            const fields = form.querySelectorAll('input, select, textarea');
+            
+            fields.forEach(field => {
+                const fieldName = field.getAttribute('name');
+                
+                // Skip the shift field and CSRF token
+                if (fieldName === 'shift' || fieldName === '_token') return;
+                
+                // Reset based on field type
+                if (field.tagName === 'SELECT') {
+                    // Try to find and select the hidden option (placeholder)
+                    const hiddenOption = field.querySelector('option[hidden]');
+                    if (hiddenOption) {
+                        field.value = hiddenOption.value;
+                    } else {
+                        // Fallback to first option
+                        field.selectedIndex = 0;
+                    }
+                } else if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.checked = false;
+                } else if (field.type === 'file') {
+                    field.value = '';
+                    // Also clear any file preview if exists
+                    const preview = field.closest('div').querySelector('img[id$="-preview"]');
+                    if (preview) preview.style.display = 'none';
+                } else {
+                    field.value = '';
+                }
+            });
         },
     };
 }
