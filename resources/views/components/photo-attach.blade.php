@@ -414,7 +414,7 @@
     @endif
 
     <template x-if="attachedPhotos.length === 0">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 mb-6">
             <button 
                 @click="openAttachAction(); $event.preventDefault()"
                 type="button"
@@ -438,7 +438,7 @@
     </template>
 
     <template x-if="attachedPhotos.length > 0">
-        <div class="flex flex-col sm:flex-row gap-2">
+        <div class="flex flex-col sm:flex-row gap-2 mb-6">
             <button 
                 @click="openCarousel(0)"
                 type="button"

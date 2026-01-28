@@ -15,47 +15,54 @@
                     </x-button>
                 </form>
             </div>
-            
-            <!-- Title Component -->
-            <x-title>
-                INCUBATOR ROUTINE CHECKLIST PER SHIFT
-            </x-title>
 
-            <!-- Success/Error Messages -->
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            <!-- Form Content -->
-            <form class="space-y-4">
-                @csrf
-                <x-dropdown label="Shift" name="shift" placeholder="Select shift" required>
-                    <option value="1st Shift">1st Shift</option>
-                    <option value="2nd Shift">2nd Shift</option>
-                    <option value="3rd Shift">3rd Shift</option>
-                </x-dropdown>
-                <x-dropdown label="Check for Alarm system condition" name="alarm_system_condition" required>
-                    <option value="N/A" selected>N/A</option>
-                    <option value="Operational">Operational</option>
-                    <option value="Unoperational">Unoperational</option>
-                </x-dropdown>
-                <x-text-area label="Corrective Action" name="corrective_action" placeholder="Enter your answer..." required/>
-                <x-photo-attach label="Attach Photos" name="photos"/>
+            <!-- Progress and Navigation Component -->
+            <x-progress-navigation :current-step="1" :total-steps="3">
+                <!-- Title Component -->
+                <x-title>
+                    INCUBATOR ROUTINE CHECKLIST PER SHIFT
+                </x-title>
                 
-                <div class="flex justify-end mt-4">
-                    <x-button variant="primary" type="button" fullWidth>
-                        Submit Checklist
-                    </x-button>
-                </div>
-            </form>
+                <!-- Form Content -->
+                <form id="step-form" class="space-y-4">
+                    @csrf
+                    
+                    <!-- Step 1 -->
+                    <div id="step-1" class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Step 1: Basic Information</h3>
+                        <x-dropdown label="Shift" name="shift" placeholder="Select shift" required>
+                            <option value="1st Shift">1st Shift</option>
+                            <option value="2nd Shift">2nd Shift</option>
+                            <option value="3rd Shift">3rd Shift</option>
+                        </x-dropdown>
+                        <x-dropdown label="Check for Alarm system condition" name="alarm_system_condition" required>
+                            <option value="N/A" selected>N/A</option>
+                            <option value="Operational">Operational</option>
+                            <option value="Unoperational">Unoperational</option>
+                        </x-dropdown>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div id="step-2" class="space-y-4" style="display: none;">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Step 2: Temperature & Humidity</h3>
+                        <x-text-input label="Temperature (°C)" name="temperature" placeholder="Enter temperature" required/>
+                        <x-text-input label="Humidity (%)" name="humidity" placeholder="Enter humidity" required/>
+                        <x-dropdown label="Temperature Status" name="temp_status" required>
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Low">Low</option>
+                        </x-dropdown>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div id="step-3" class="space-y-4" style="display: none;">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Step 3: Additional Notes</h3>
+                        <x-text-area label="Corrective Action" name="corrective_action" placeholder="Enter your answer..." required/>
+                        <x-photo-attach label="Attach Photos" name="photos"/>
+                        <x-text-area label="Additional Notes" name="notes" placeholder="Any additional observations..."/>
+                    </div>
+                </form>
+            </x-progress-navigation>
         </div>
     </div>
 </x-layout>
