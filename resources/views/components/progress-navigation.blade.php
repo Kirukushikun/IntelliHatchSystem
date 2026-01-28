@@ -117,6 +117,37 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                         }
                     });
                 }
+
+                // Check for day change every minute
+                setInterval(() => {
+                    const newDay = this.getCurrentDay();
+                    if (newDay !== this.currentDay) {
+                        this.currentDay = newDay;
+                        
+                        // Reset everything when day changes
+                        this.resetForm();
+                        this.selectedShift = '';
+                        
+                        // Reset shift dropdown
+                        const shiftDropdown = document.querySelector('select[name="shift"]');
+                        if (shiftDropdown) {
+                            const hiddenOption = shiftDropdown.querySelector('option[hidden]');
+                            if (hiddenOption) {
+                                shiftDropdown.value = hiddenOption.value;
+                            } else {
+                                shiftDropdown.selectedIndex = 0;
+                            }
+                        }
+                        
+                        // Reset to initial state
+                        this.totalSteps = 1;
+                        this.currentStep = 1;
+                        this.updateSteps();
+                        
+                        // Show notification
+                        alert('The day has changed. The form has been reset to match the new schedule.');
+                    }
+                }, 60000); // Check every minute
             }
         },
 
@@ -145,7 +176,7 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                 const fieldContainers = Array.from(step.children).filter(child => {
                     return child.tagName === 'DIV' && !child.classList.contains('space-y-4');
                 });
-                                
+                
                 let hasVisibleFields = false;
                 
                 fieldContainers.forEach(container => {
@@ -165,7 +196,7 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                     }
                     
                     if (!fieldName || fieldName === '_token') return;
-                                        
+                    
                     // Check if this field should be visible
                     const shouldShow = dailyFields.includes(fieldName) || allowedFields.includes(fieldName);
                     
@@ -183,7 +214,7 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                         });
                     }
                 });
-                                
+                
                 // Mark step as empty if no visible fields
                 if (!hasVisibleFields) {
                     step.setAttribute('data-empty', 'true');
