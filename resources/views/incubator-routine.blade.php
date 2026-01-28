@@ -3,6 +3,19 @@
         <!-- Form/Card Container -->
         <div class="w-full max-w-lg bg-white rounded-xl shadow-lg px-8 pt-6">
             
+            <!-- User Info & Logout -->
+            <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Welcome, <span class="font-medium text-gray-900">{{ auth()->user()->full_name }}</span>
+                </div>
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                    @csrf
+                    <x-button variant="outline-secondary" size="sm" type="submit">
+                        Logout
+                    </x-button>
+                </form>
+            </div>
+            
             <!-- Title Component -->
             <x-title>
                 INCUBATOR ROUTINE CHECKLIST PER SHIFT
@@ -22,9 +35,8 @@
             @endif
 
             <!-- Form Content -->
-            <form action="{{ route('incubator-routine.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form class="space-y-4">
                 @csrf
-                <x-text-input label="Employee Name" name="employee_name" placeholder="Enter your full name" required/>
                 <x-dropdown label="Shift" name="shift" placeholder="Select shift" required>
                     <option value="1st Shift">1st Shift</option>
                     <option value="2nd Shift">2nd Shift</option>
@@ -39,9 +51,9 @@
                 <x-photo-attach label="Attach Photos" name="photos"/>
                 
                 <div class="flex justify-end mt-4">
-                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
-                        Submit
-                    </button>
+                    <x-button variant="primary" type="button" fullWidth>
+                        Submit Checklist
+                    </x-button>
                 </div>
             </form>
         </div>
