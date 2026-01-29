@@ -10,7 +10,7 @@
             </x-button>
         </x-slot:navbarActions>
         
-        <div class="bg-gray-100 p-4">
+        <div class="p-4">
             <!-- Form/Card Container -->
             <div class="w-full max-w-lg bg-white rounded-xl shadow-lg px-8 pt-6 pb-2 mx-auto">
                 <!-- Progress and Navigation Component -->
@@ -20,7 +20,8 @@
                         'shift', 'alarm_system_condition', 'corrective_action',
                         'check_incubator_doors_for_air_leakage',
                         'drain_water_out_from_air_compressor_tank',
-                        'check_water_level_of_blue_tank'
+                        'check_water_level_of_blue_tank',
+                        'incubator_machine_inspected'
                     ],
                     'Monday-1st Shift' => [
                         'cleaning_of_incubator_floor_area',
@@ -103,6 +104,20 @@
                         'check_incubator_fans_for_vibration'
                     ],
                 ];
+
+                $incubatorMachineInspectedOptions = [
+                    1, 
+                    2, 
+                    3, 
+                    4, 
+                    5, 
+                    6, 
+                    7, 
+                    8, 
+                    9, 
+                    10
+                ];
+
                 @endphp
                 
                 <x-progress-navigation :current-step="1" :total-steps="5" :schedule="$incubatorSchedule">
@@ -335,6 +350,17 @@
                                     <option value="Done">Done</option>
                                 </x-dropdown>
                                 <x-photo-attach label="Attach Photos" name="assist_in_random_candling_photos"/>
+                            </div>
+                            
+                            <!-- DAILY ITEM -->
+                            <div data-field="incubator_machine_inspected">
+                                <x-checkbox 
+                                    label="Incubator Machine Inspected" 
+                                    name="incubator_machine_inspected"
+                                    :options="$incubatorMachineInspectedOptions"
+                                    :required="true"
+                                    :columns="2"
+                                />
                             </div>
                         </div>
 
