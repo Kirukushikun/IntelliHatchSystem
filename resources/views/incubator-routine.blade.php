@@ -312,7 +312,7 @@
                         
                         <!-- SCHEDULED ITEM -->
                         <div>
-                            <x-dropdown label="Record egg setting on board" name="record_egg_setting_on_board" required>
+                            <x-dropdown label="Record egg setting on board" name="record_egg_setting_on_board" placeholder="Select condition" required>
                                 <option value="" hidden>Select condition</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Done">Done</option>
