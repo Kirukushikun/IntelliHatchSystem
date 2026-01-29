@@ -23,19 +23,12 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
+            'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        // For simple authentication, we'll check by first_name + last_name + password
-        // In a real app, you might want to add a unique identifier like email or username
-        
-        $user = \App\Models\User::where('first_name', $credentials['first_name'])
-                                ->where('last_name', $credentials['last_name'])
-                                ->first();
-
-        if (!$user || !Auth::attempt(['id' => $user->id, 'password' => $credentials['password']])) {
+        // Authenticate using username and password
+        if (!Auth::attempt($credentials)) {
             throw ValidationException::withMessages([
                 'login' => ['The provided credentials do not match our records.'],
             ]);

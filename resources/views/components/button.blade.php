@@ -39,7 +39,7 @@
         'xl' => 'w-6 h-6',
     ];
 
-    $baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    $baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
     
     $currentVariantClass = $variantClasses[$variant] ?? $variantClasses['primary'];
     $currentSizeClass = $sizeClasses[$size] ?? $sizeClasses['md'];
