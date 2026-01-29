@@ -116,7 +116,7 @@
                     <!-- Step 1: DAILY ITEMS (Always visible) -->
                     <div id="step-1" class="space-y-4">
                         <x-title>
-                            INCUBATOR ROUTINE CHECKLIST PER SHIFT
+                            INCUBATOR ROUTINE CHECKLIST
                         </x-title>
                         <x-dropdown label="Shift" name="shift" placeholder="Select shift" required>
                             <option value="" hidden>Select shift</option>

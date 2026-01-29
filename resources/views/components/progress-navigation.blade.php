@@ -5,13 +5,13 @@
     x-init="initialize()"
 >
     <!-- Progress Bar -->
-    <div class="flex items-center justify-center mb-4">
-        <template x-for="i in totalSteps" :key="i">
+    <div class="flex items-center justify-center mb-4" x-show="selectedShift && schedule && Object.keys(schedule).length > 0">
+        <template x-for="(stepId, index) in getVisibleStepIds()" :key="stepId">
             <div class="flex items-center">
                 <div class="w-3 h-3 rounded-full" 
-                     :class="currentStep >= i ? 'bg-orange-500' : (currentStep + 1 == i ? 'bg-gray-300' : 'bg-white border-2 border-gray-300')"></div>
-                <div x-show="i < totalSteps" class="w-4 h-0.5" 
-                     :class="currentStep > i ? 'bg-orange-500' : 'bg-gray-300'"></div>
+                     :class="getVisibleStepIds().indexOf(currentStep) >= index ? 'bg-orange-500' : (getVisibleStepIds().indexOf(currentStep) + 1 == index + 1 ? 'bg-gray-300' : 'bg-white border-2 border-gray-300')"></div>
+                <div x-show="index < getVisibleStepIds().length - 1" class="w-4 h-0.5" 
+                     :class="getVisibleStepIds().indexOf(currentStep) > index ? 'bg-orange-500' : 'bg-gray-300'"></div>
             </div>
         </template>
     </div>
@@ -264,10 +264,13 @@ function stepForm(currentStep, totalSteps, schedule = null) {
         getVisibleStepIds() {
             const visibleIds = [1]; // Step 1 is always visible
             
-            for (let i = 2; i <= 5; i++) {
-                const step = document.getElementById(`step-${i}`);
-                if (step && !step.hasAttribute('data-empty')) {
-                    visibleIds.push(i);
+            // Only show other steps if a shift is selected
+            if (this.selectedShift && this.schedule && Object.keys(this.schedule).length > 0) {
+                for (let i = 2; i <= 5; i++) {
+                    const step = document.getElementById(`step-${i}`);
+                    if (step && !step.hasAttribute('data-empty')) {
+                        visibleIds.push(i);
+                    }
                 }
             }
             
@@ -319,6 +322,11 @@ function stepForm(currentStep, totalSteps, schedule = null) {
         },
 
         isLastVisibleStep() {
+            // Only show Submit button when shift is selected and we're on the last visible step
+            if (!this.selectedShift || !this.schedule || Object.keys(this.schedule).length === 0) {
+                return false;
+            }
+            
             const visibleIds = this.getVisibleStepIds();
             return this.currentStep === visibleIds[visibleIds.length - 1];
         },

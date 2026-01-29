@@ -2,7 +2,7 @@
     <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-white via-orange-150 to-orange-300 p-4">
         <div class="w-full max-w-md bg-white rounded-xl shadow-lg px-8 pt-6 pb-8">
             
-            <x-title subtitle="Login to your account">
+            <x-title subtitle="{{ request()->get('admin') ? 'Log in to your admin account' : 'Log in to your user account' }}">
                 IntelliHatch System
             </x-title>
 
@@ -17,6 +17,7 @@
                     required 
                     value="{{ old('username') }}"
                     class="-mt-2"
+                    icon="user"
                 />
 
                 <x-text-input 
@@ -25,6 +26,7 @@
                     type="password" 
                     placeholder="Enter your password" 
                     required 
+                    icon="lock"
                 />
                 
                 <div class="flex justify-end mt-6">
