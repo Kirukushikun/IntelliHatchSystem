@@ -3,10 +3,12 @@
     'name' => '', 
     'value' => '', 
     'placeholder' => 'Enter text here', 
-    'required' => false
+    'required' => false,
+    'type' => 'text',
+    'class' => ''
 ])
 
-<div class="mb-6">
+<div class="mb-6 {{ $class }}">
     @if($label)
         <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 mb-1">
             {{ $label }}
@@ -17,7 +19,7 @@
     @endif
 
     <input 
-        type="text" 
+        type="{{ $type }}" 
         id="{{ $name }}" 
         name="{{ $name }}" 
         value="{{ old($name, $value) }}" 
