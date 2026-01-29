@@ -67,7 +67,7 @@
     }
 @endphp
 
-@if ($variant === 'link')
+@if ($variant === 'link' || $attributes->has('href'))
     <a 
         href="{{ $attributes->get('href', '#') }}"
         {{ $attributes->merge(['class' => $classes]) }}

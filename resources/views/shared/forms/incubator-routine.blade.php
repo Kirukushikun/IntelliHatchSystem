@@ -1,21 +1,18 @@
 <x-layout>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <x-navbar :hideDate="true">
+        <div>
+            <x-button 
+                href="{{ ((int) Auth::user()->user_type) === 0 ? '/admin/forms' : '/user/forms' }}"
+                variant="outline-secondary" 
+                size="sm"
+            >
+                Back to Forms
+            </x-button>
+        </div>
+    </x-navbar>
+    <div class="bg-gray-100 p-4">
         <!-- Form/Card Container -->
-        <div class="w-full max-w-lg bg-white rounded-xl shadow-lg px-8 pt-6">
-            
-            <!-- User Info & Logout -->
-            <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
-                <div class="text-sm text-gray-600">
-                    Welcome, <span class="font-medium text-gray-900">{{ auth()->user()->full_name }}</span>
-                </div>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf
-                    <x-button variant="outline-secondary" size="sm" type="submit">
-                        Logout
-                    </x-button>
-                </form>
-            </div>
-
+        <div class="w-full max-w-lg bg-white rounded-xl shadow-lg px-8 pt-6 pb-2 mx-auto">
             <!-- Progress and Navigation Component -->
             @php
             $incubatorSchedule = [

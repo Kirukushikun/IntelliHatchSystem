@@ -1,5 +1,7 @@
+@props(['hideDate' => false])
+
 @auth
-    <nav class="shadow-lg border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
+    <nav class="shadow-lg border-b border-gray-200 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Left side - Logo/Brand with Icon -->
@@ -9,16 +11,18 @@
                         <h1 class="text-xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                             {{ $slot ?? 'Dashboard' }}
                         </h1>
-                        <p class="text-xs text-gray-500" 
-                        x-data="{ 
-                            date: new Date(),
-                            updateTime() {
-                                this.date = new Date();
-                            }
-                        }" 
-                        x-init="setInterval(() => updateTime(), 1000)"
-                        x-text="date.toLocaleDateString() + ' ' + date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })">
-                        </p>
+                        @if(!$hideDate)
+                            <p class="text-xs text-gray-500" 
+                            x-data="{ 
+                                date: new Date(),
+                                updateTime() {
+                                    this.date = new Date();
+                                }
+                            }" 
+                            x-init="setInterval(() => updateTime(), 1000)"
+                            x-text="date.toLocaleDateString() + ' ' + date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })">
+                            </p>
+                        @endif
                     </div>
                 </div>
 

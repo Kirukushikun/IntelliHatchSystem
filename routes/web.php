@@ -20,18 +20,22 @@ Route::middleware('guest')->group(function () {
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
-    Route::get('/user/form-collection', function () {
-        return view('shared.form-collection');
-    })->name('user.form-collection');
+    Route::get('/user/forms', function () {
+        return view('shared.forms');
+    })->name('user.forms');
 
-    Route::get('/admin/form-collection', function () {
-        return view('shared.form-collection');
-    })->name('admin.form-collection');
+    Route::get('/admin/forms', function () {
+        return view('shared.forms');
+    })->name('admin.forms');
 
-    Route::get('/incubator-routine', function () {
-        return view('forms.incubator-routine');
-    })->name('incubator-routine');
-    
+    // Form routes with new structure
+    Route::get('/user/forms/incubator-routine', function () {
+        return view('shared.forms.incubator-routine');
+    })->name('user.forms.incubator-routine');
+
+    Route::get('/admin/forms/incubator-routine', function () {
+        return view('shared.forms.incubator-routine');
+    })->name('admin.forms.incubator-routine');
     
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
