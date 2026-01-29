@@ -15,6 +15,7 @@
         <div class="flex items-center">
             <x-button 
                 x-show="currentStep > 1"
+                x-cloak
                 @click="previousStep()"
                 variant="outline-secondary"
                 type="button"
@@ -23,11 +24,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </x-button>
-            <div x-show="currentStep <= 1" class="w-8"></div>
+            <div x-show="currentStep <= 1" x-cloak class="w-8"></div>
         </div>
 
         <!-- Progress circles in the center -->
-        <div class="flex items-center" x-show="selectedShift && schedule && Object.keys(schedule).length > 0">
+        <div class="flex items-center" x-show="selectedShift && schedule && Object.keys(schedule).length > 0" x-cloak>
             <template x-for="(stepId, index) in getVisibleStepIds()" :key="stepId">
                 <div class="flex items-center">
                     <div class="w-3 h-3 rounded-full" 
@@ -41,6 +42,7 @@
         <div class="flex items-center">
             <x-button 
                 x-show="!isLastVisibleStep()"
+                x-cloak
                 @click="nextStep()"
                 variant="primary"
                 type="button"
@@ -54,6 +56,7 @@
 
             <x-button 
                 x-show="isLastVisibleStep()"
+                x-cloak
                 variant="success"
                 type="button"
                 @click="validateAndSubmit()"
