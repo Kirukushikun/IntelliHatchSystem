@@ -41,7 +41,7 @@
             @if($required) required @endif
             class="mt-1 block w-full rounded-lg border shadow-sm 
             {{ $icon ? 'pl-10' : 'px-4' }} py-2
-            {{ $errors->has($name) 
+            {{ $errors->first($name) 
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
                 : 'border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}"
         >
@@ -62,7 +62,7 @@
     </div>
 
     @error($name)
-        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
     @enderror
 </div>
 
