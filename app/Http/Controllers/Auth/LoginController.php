@@ -9,6 +9,19 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
+    private function landingPathForAuthenticatedUser(): string
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return '/login';
+        }
+
+        return ((int) $user->user_type) === 0
+            ? '/admin/form-collection'
+            : '/user/form-collection';
+    }
+
     /**
      * Show the login form.
      */
@@ -36,7 +49,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended('/incubator-routine');
+        return redirect()->intended($this->landingPathForAuthenticatedUser());
     }
 
     /**
