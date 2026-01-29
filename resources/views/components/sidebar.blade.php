@@ -1,7 +1,46 @@
 @props([
-    'items' => [],
-    'user' => null
+    'user' => null,
+    'currentPage' => null
 ])
+
+@php
+    $isAdmin = $user && ((int) $user->user_type) === 0;
+    
+    // Define sidebar items based on user type
+    $sidebarItems = $isAdmin ? [
+        [
+            'label' => 'Dashboard',
+            'href' => '/admin/dashboard',
+            'icon' => 'dashboard',
+            'active' => 'admin/dashboard'
+        ],
+        [
+            'label' => 'Forms',
+            'href' => '/admin/forms',
+            'icon' => 'forms',
+            'active' => 'admin/forms*'
+        ],
+        [
+            'label' => 'Users',
+            'href' => '/admin/users',
+            'icon' => 'users',
+            'active' => 'admin/users*'
+        ]
+    ] : [
+        [
+            'label' => 'Dashboard',
+            'href' => '/user/dashboard',
+            'icon' => 'dashboard',
+            'active' => 'user/dashboard'
+        ],
+        [
+            'label' => 'Forms',
+            'href' => '/user/forms',
+            'icon' => 'forms',
+            'active' => 'user/forms*'
+        ]
+    ];
+@endphp
 
 <div x-data="{ 
     isOpen: false,
@@ -76,7 +115,7 @@ x-cloak>
 
         <!-- Navigation -->
         <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            @foreach($items as $item)
+            @foreach($sidebarItems as $item)
                 <a href="{{ $item['href'] }}" 
                    x-data="{ 
                        showTooltip: false,

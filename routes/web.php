@@ -49,6 +49,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/dashboard', function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
+
+        Route::get('/admin/users', function () {
+            return view('admin.users');
+        })->name('admin.users');
     });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
