@@ -1,5 +1,7 @@
 <x-layout>
-    <x-sidebar :user="Auth::user()" />
+    <div class="flex h-screen bg-gray-100">
+        <x-sidebar :user="Auth::user()" />
+        
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Navbar with Sidebar Toggle -->
@@ -15,4 +17,5 @@
                 </div>
             </main>
         </div>
+    </div>
 </x-layout>

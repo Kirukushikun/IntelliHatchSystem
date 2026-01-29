@@ -6,8 +6,13 @@
 @php
     $isAdmin = $user && ((int) $user->user_type) === 0;
     
-    // Define sidebar items based on user type
-    $sidebarItems = $isAdmin ? [
+    // Only show sidebar for admin users
+    if (!$isAdmin) {
+        return;
+    }
+    
+    // Define admin sidebar items
+    $sidebarItems = [
         [
             'label' => 'Dashboard',
             'href' => '/admin/dashboard',
@@ -15,29 +20,16 @@
             'active' => 'admin/dashboard'
         ],
         [
-            'label' => 'Forms',
-            'href' => '/admin/forms',
-            'icon' => 'forms',
-            'active' => 'admin/forms*'
-        ],
-        [
             'label' => 'Users',
             'href' => '/admin/users',
             'icon' => 'users',
             'active' => 'admin/users*'
-        ]
-    ] : [
-        [
-            'label' => 'Dashboard',
-            'href' => '/user/dashboard',
-            'icon' => 'dashboard',
-            'active' => 'user/dashboard'
         ],
         [
             'label' => 'Forms',
-            'href' => '/user/forms',
+            'href' => '/admin/forms',
             'icon' => 'forms',
-            'active' => 'user/forms*'
+            'active' => 'admin/forms*'
         ]
     ];
 @endphp
