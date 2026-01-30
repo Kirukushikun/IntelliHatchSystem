@@ -21,8 +21,18 @@
                 [x-cloak] { display: none !important; }
             </style>
         @endif
+        
+        <!-- Livewire Styles -->
+        @livewireStyles
+        
+        <style>
+            [x-cloak] { display: none !important; }
+        </style>
     </head>
-    <body class="h-full bg-gray-100 x-cloak">
+    <body class="h-full bg-gray-100">
         {{ $slot }}
+        
+        <!-- Livewire Scripts -->
+        @livewireScripts
     </body>
 </html>

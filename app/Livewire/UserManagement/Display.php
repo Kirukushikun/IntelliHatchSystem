@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
 
-class UserManagement extends Component
+class Display extends Component
 {
     public $search = '';
     public $perPage = 10;
@@ -133,6 +133,6 @@ class UserManagement extends Component
 
     public function render()
     {
-        return view('livewire.user-management', $this->getPaginationData());
+        return view('livewire.user-management.display-user-management', $this->getPaginationData());
     }
 }

@@ -6,11 +6,6 @@
 @php
     $isAdmin = $user && ((int) $user->user_type) === 0;
     
-    // Only show sidebar for admin users
-    if (!$isAdmin) {
-        return;
-    }
-    
     // Define admin sidebar items
     $sidebarItems = [
         [
@@ -34,6 +29,7 @@
     ];
 @endphp
 
+@if($isAdmin)
 <div x-data="{ 
     isOpen: false,
     isCollapsed: false,
@@ -231,3 +227,4 @@ x-cloak>
         }
     </style>
 </div>
+@endif
