@@ -42,6 +42,9 @@
     },
     toggleMobile() {
         this.isOpen = !this.isOpen;
+    },
+    closeMobile() {
+        this.isOpen = false;
     }
 }" 
 x-init="$watch('isCollapsed', () => { 
@@ -59,8 +62,8 @@ x-cloak>
          x-transition:leave="transition-opacity ease-linear duration-300"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"
-         @click="toggleMobile()">
+         class="fixed inset-0 bg-gray-600/75 z-40 lg:hidden"
+         @click="closeMobile()">
     </div>
 
     <!-- Sidebar -->
@@ -69,12 +72,14 @@ x-cloak>
         isOpen ? 'translate-x-0' : '-translate-x-full',
         isCollapsed ? 'lg:w-16' : 'lg:w-64',
         'w-64'
-    ]" class="h-screen overflow-hidden">
+    ]" 
+    class="h-screen overflow-hidden"
+    @click.stop>
         
         <!-- Header -->
         <div class="flex items-center h-16 px-4 border-b border-gray-200 shrink-0">
             <!-- Logo/Brand - Show when NOT collapsed -->
-            <div x-show="!isCollapsed" class="flex items-center">
+            <div x-show="!isCollapsed" class="flex items-center flex-1">
                 <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -85,11 +90,19 @@ x-cloak>
                       x-transition:enter-end="opacity-100 transform scale-100"
                       class="ml-3 text-xl font-bold text-gray-900">IntelliHatch</span>
             </div>
+
+            <!-- Mobile close button -->
+            <button @click="closeMobile()" 
+                    class="lg:hidden ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                </svg>
+            </button>
             
             <!-- Toggle button - Show when collapsed, positioned where logo was -->
             <div x-show="isCollapsed" class="hidden lg:flex items-center justify-center w-full">
                 <button @click="toggleSidebar()" 
-                        class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        class="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
                     </svg>
@@ -98,7 +111,7 @@ x-cloak>
 
             <!-- Toggle button - Normal position when NOT collapsed (desktop only) -->
             <button x-show="!isCollapsed" @click="toggleSidebar()" 
-                    class="hidden lg:block ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    class="hidden lg:block ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
                 </svg>
@@ -122,6 +135,7 @@ x-cloak>
                    }"
                    @mouseenter="if(isCollapsed) { showTooltip = true; updatePosition(); }"
                    @mouseleave="showTooltip = false"
+                   @click="closeMobile()"
                    class="group relative flex items-center px-2 py-2 text-sm font-medium rounded-lg transition-colors
                           {{ request()->is($item['active'] ?? $item['href']) 
                               ? 'bg-orange-100 text-orange-700' 
@@ -174,7 +188,14 @@ x-cloak>
 
     <!-- Mobile menu button -->
     <button @click="toggleMobile()" 
-            class="lg:hidden fixed bottom-4 right-4 z-50 p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition-colors">
+            x-show="!isOpen"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-90"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-90"
+            class="lg:hidden fixed bottom-4 right-4 z-50 p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
@@ -202,6 +223,11 @@ x-cloak>
         
         .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb:hover {
             background-color: #9ca3af;
+        }
+
+        /* Prevent body scroll when mobile menu is open */
+        body:has([x-data] [x-show="isOpen"]) {
+            overflow: hidden;
         }
     </style>
 </div>
