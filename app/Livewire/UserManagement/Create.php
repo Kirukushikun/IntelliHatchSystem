@@ -60,6 +60,10 @@ class Create extends Component
             $this->closeModal();
             $this->dispatch('userCreated');
             $this->dispatch('showToast', message: 'User created successfully!', type: 'success');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Validation errors will be displayed automatically
+            // Just re-throw to let Livewire handle validation display
+            throw $e;
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to create user. Please try again.', type: 'error');
         }
