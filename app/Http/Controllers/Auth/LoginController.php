@@ -5,10 +5,22 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
+    private function landingPathForAuthenticatedUser(): string
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return '/login';
+        }
+
+        return ((int) $user->user_type) === 0
+            ? '/admin/dashboard'
+            : '/user/forms';
+    }
+
     /**
      * Show the login form.
      */
@@ -23,27 +35,37 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
+            'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        // For simple authentication, we'll check by first_name + last_name + password
-        // In a real app, you might want to add a unique identifier like email or username
-        
-        $user = \App\Models\User::where('first_name', $credentials['first_name'])
-                                ->where('last_name', $credentials['last_name'])
-                                ->first();
+        // Authenticate using username and password
+        if (!Auth::attempt($credentials)) {
+            return back()->with('error', 'The provided credentials do not match our records.');
+        }
 
-        if (!$user || !Auth::attempt(['id' => $user->id, 'password' => $credentials['password']])) {
-            throw ValidationException::withMessages([
-                'login' => ['The provided credentials do not match our records.'],
-            ]);
+        $user = Auth::user();
+        $isAdmin = ((int) $user->user_type) === 0;
+        
+        // Check if the login route matches the user type
+        $isAdminRoute = $request->path() === 'admin/login' || $request->get('admin') === 'true';
+        
+        if ($isAdminRoute && !$isAdmin) {
+            // User trying to login through admin route
+            Auth::logout();
+            return back()->with('error', 'Access denied. This is the admin login portal. Please use the user login.');
+        }
+        
+        if (!$isAdminRoute && $isAdmin) {
+            // Admin trying to login through user route
+            Auth::logout();
+            return back()->with('error', 'Access denied. This is the user login portal. Please use the admin login.');
         }
 
         $request->session()->regenerate();
 
-        return redirect()->intended('/incubator-routine');
+        return redirect()->intended($this->landingPathForAuthenticatedUser())
+            ->with('success', 'Welcome back!');
     }
 
     /**
@@ -56,6 +78,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect('/login')->with('success', 'You have been logged out successfully.');
     }
 }

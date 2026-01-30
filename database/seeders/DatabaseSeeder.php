@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'first_name' => 'John',
             'last_name' => 'Doe',
+            'username' => 'JDoe',
+            'user_type' => 0,
+            'password' => bcrypt('password'),
         ]);
     }
 }

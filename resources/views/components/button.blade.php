@@ -20,7 +20,7 @@
         'outline-secondary' => 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300',
         'outline-danger' => 'bg-white hover:bg-red-50 text-red-600 border-red-600',
         'ghost' => 'bg-transparent hover:bg-gray-100 text-gray-700 border-transparent',
-        'link' => 'bg-transparent hover:underline text-orange-600 border-transparent p-0',
+        'link' => 'bg-transparent hover:underline text-blue-600 border-transparent p-0',
     ];
 
     $sizeClasses = [
@@ -39,7 +39,7 @@
         'xl' => 'w-6 h-6',
     ];
 
-    $baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    $baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
     
     $currentVariantClass = $variantClasses[$variant] ?? $variantClasses['primary'];
     $currentSizeClass = $sizeClasses[$size] ?? $sizeClasses['md'];
@@ -63,18 +63,17 @@
     }
     
     if ($variant === 'link') {
-        $classes = 'hover:underline text-orange-600 font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed';
+        $classes = 'underline text-blue-600 font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-xs';
     }
 @endphp
 
-@if ($variant === 'link')
-    <button 
-        type="{{ $type }}"
+@if ($variant === 'link' || $attributes->has('href'))
+    <a 
+        href="{{ $attributes->get('href', '#') }}"
         {{ $attributes->merge(['class' => $classes]) }}
-        {{ $disabled ? 'disabled' : '' }}
     >
         {{ $slot }}
-    </button>
+    </a>
 @else
     <button 
         type="{{ $type }}"

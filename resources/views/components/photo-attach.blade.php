@@ -405,10 +405,11 @@
             </label>
             <button type="button"
                     @click="attachMode = (attachMode === 'camera' ? 'upload' : 'camera')"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"></path>
                 </svg>
+                <span x-text="attachMode === 'camera' ? 'Camera' : 'Gallery'"></span>
             </button>
         </div>
     @endif

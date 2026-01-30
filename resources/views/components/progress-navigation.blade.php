@@ -4,60 +4,66 @@
     x-data="stepForm({{ json_encode($currentStep) }}, {{ json_encode($totalSteps) }}, {{ json_encode($schedule) }})"
     x-init="initialize()"
 >
-    <!-- Progress Bar -->
-    <div class="flex items-center justify-center mb-4">
-        <template x-for="(stepId, index) in getVisibleStepIds()" :key="stepId">
-            <div class="flex items-center">
-                <div class="w-3 h-3 rounded-full" 
-                     :class="getVisibleStepIds().indexOf(currentStep) >= index ? 'bg-orange-500' : (getVisibleStepIds().indexOf(currentStep) + 1 == index + 1 ? 'bg-gray-300' : 'bg-white border-2 border-gray-300')"></div>
-                <div x-show="index < getVisibleStepIds().length - 1" class="w-4 h-0.5" 
-                     :class="getVisibleStepIds().indexOf(currentStep) > index ? 'bg-orange-500' : 'bg-gray-300'"></div>
-            </div>
-        </template>
-    </div>
-
     <!-- Slot content (steps) -->
     <div class="space-y-4">
         {{ $slot }}
     </div>
 
-    <!-- Navigation -->
+    <!-- Navigation with inline progress -->
     <div class="flex justify-between items-center my-6 w-full max-w-lg">
 
-        <x-button 
-            x-show="currentStep > 1"
-            @click="previousStep()"
-            variant="outline-secondary"
-            type="button"
-        >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-        </x-button>
+        <div class="flex items-center">
+            <x-button 
+                x-show="currentStep > 1"
+                x-cloak
+                @click="previousStep()"
+                variant="outline-secondary"
+                type="button"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </x-button>
+            <div x-show="currentStep <= 1" x-cloak class="w-8"></div>
+        </div>
 
-        <div x-show="currentStep <= 1" class="w-8"></div>
+        <!-- Progress circles in the center -->
+        <div class="flex items-center" x-show="selectedShift && schedule && Object.keys(schedule).length > 0" x-cloak>
+            <template x-for="(stepId, index) in getVisibleStepIds()" :key="stepId">
+                <div class="flex items-center">
+                    <div class="w-3 h-3 rounded-full" 
+                         :class="getVisibleStepIds().indexOf(currentStep) >= index ? 'bg-orange-500' : (getVisibleStepIds().indexOf(currentStep) + 1 == index + 1 ? 'bg-gray-300' : 'bg-white border-2 border-gray-300')"></div>
+                    <div x-show="index < getVisibleStepIds().length - 1" class="w-4 h-0.5" 
+                         :class="getVisibleStepIds().indexOf(currentStep) > index ? 'bg-orange-500' : 'bg-gray-300'"></div>
+                </div>
+            </template>
+        </div>
 
-        <x-button 
-            x-show="!isLastVisibleStep()"
-            @click="nextStep()"
-            variant="primary"
-            type="button"
-            ::disabled="!canProceed()"
-        >
-            Next
-            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-        </x-button>
+        <div class="flex items-center">
+            <x-button 
+                x-show="!isLastVisibleStep()"
+                x-cloak
+                @click="nextStep()"
+                variant="primary"
+                type="button"
+                ::disabled="!canProceed()"
+            >
+                Next
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </x-button>
 
-        <x-button 
-            x-show="isLastVisibleStep()"
-            variant="success"
-            type="button"
-            @click="validateAndSubmit()"
-        >
-            Submit
-        </x-button>
+            <x-button 
+                x-show="isLastVisibleStep()"
+                x-cloak
+                variant="success"
+                type="button"
+                @click="validateAndSubmit()"
+            >
+                Submit
+            </x-button>
+        </div>
 
     </div>
 </div>
@@ -322,6 +328,11 @@ function stepForm(currentStep, totalSteps, schedule = null) {
         },
 
         isLastVisibleStep() {
+            // Only show Submit button when shift is selected and we're on the last visible step
+            if (!this.selectedShift || !this.schedule || Object.keys(this.schedule).length === 0) {
+                return false;
+            }
+            
             const visibleIds = this.getVisibleStepIds();
             return this.currentStep === visibleIds[visibleIds.length - 1];
         },
