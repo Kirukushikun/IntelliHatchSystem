@@ -1,8 +1,7 @@
 <x-layout>
     <x-navbar title="Users Management" :includeSidebar="true" :user="Auth::user()">
-        <div class="p-6">
-            <h1 class="text-2xl font-bold text-gray-900">Users Management</h1>
-            <p class="text-gray-600">Welcome to the users management.</p>
+        <div class="p-4 md:p-6">
+            <livewire:user-management.display />
         </div>
     </x-navbar>
 </x-layout>

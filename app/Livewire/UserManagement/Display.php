@@ -1,0 +1,138 @@
+<?php
+
+namespace App\Livewire\UserManagement;
+
+use Livewire\Component;
+use App\Models\User;
+
+class Display extends Component
+{
+    public $search = '';
+    public $perPage = 10;
+    public $sortField = 'first_name';
+    public $sortDirection = 'asc';
+    public $page = 1;
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'page' => ['except' => 1],
+    ];
+
+    protected $listeners = ['refreshUsers' => '$refresh'];
+
+    public function mount()
+    {
+        $this->search = request()->get('search', '');
+        $this->page = request()->get('page', 1);
+    }
+
+    public function updatingSearch()
+    {
+        $this->page = 1;
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+        $this->page = 1;
+    }
+
+    public function deleteUser($userId)
+    {
+        $user = User::find($userId);
+        if ($user) {
+            $user->delete();
+            session()->flash('message', 'User deleted successfully.');
+        }
+    }
+
+    public function editUser($userId)
+    {
+        return redirect()->to('/users/' . $userId . '/edit');
+    }
+
+    public function addUser()
+    {
+        return redirect()->to('/users/create');
+    }
+
+    public function getPaginationData()
+    {
+        $users = User::query()
+            ->where('user_type', 1)
+            ->where(function($query) {
+                $query->where('first_name', 'like', '%' . $this->search . '%')
+                      ->orWhere('last_name', 'like', '%' . $this->search . '%')
+                      ->orWhere('username', 'like', '%' . $this->search . '%');
+            })
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
+            
+        $currentPage = $users->currentPage(); // Get from paginator
+        $lastPage = $users->lastPage();
+        
+        // Sync the page property with the actual current page
+        $this->page = $currentPage;
+        
+        // Calculate the range of pages to show (max 3)
+        if ($lastPage <= 3) {
+            $startPage = 1;
+            $endPage = $lastPage;
+        } elseif ($currentPage == 1) {
+            $startPage = 1;
+            $endPage = min(3, $lastPage);
+        } elseif ($currentPage == $lastPage) {
+            $startPage = max(1, $lastPage - 2);
+            $endPage = $lastPage;
+        } else {
+            $startPage = max(1, $currentPage - 1);
+            $endPage = min($lastPage, $currentPage + 1);
+        }
+        
+        $pages = [];
+        for ($i = $startPage; $i <= $endPage; $i++) {
+            $pages[] = $i;
+        }
+        
+        return [
+            'users' => $users,
+            'pages' => $pages,
+            'currentPage' => $currentPage,
+            'lastPage' => $lastPage,
+        ];
+    }
+
+    public function gotoPage($page)
+    {
+        $page = (int) $page;
+        
+        // Validate page number
+        $totalPages = User::query()
+            ->where('user_type', 1)
+            ->where(function($query) {
+                $query->where('first_name', 'like', '%' . $this->search . '%')
+                      ->orWhere('last_name', 'like', '%' . $this->search . '%')
+                      ->orWhere('username', 'like', '%' . $this->search . '%');
+            })
+            ->paginate($this->perPage)
+            ->lastPage();
+        
+        if ($page < 1) {
+            $page = 1;
+        } elseif ($page > $totalPages) {
+            $page = $totalPages;
+        }
+        
+        $this->page = $page;
+    }
+
+    public function render()
+    {
+        return view('livewire.user-management.display-user-management', $this->getPaginationData());
+    }
+}
