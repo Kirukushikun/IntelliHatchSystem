@@ -53,31 +53,28 @@ function validateCheckboxGroup(fieldName, errorId) {
     }
 }
 
-// Add form submission validation if not already added
-@if(!isset($__checkboxValidationAdded))
-    @php($__checkboxValidationAdded = true)@endphp
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('step-form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const requiredGroups = document.querySelectorAll('[onchange*="validateCheckboxGroup"]');
-                let isValid = true;
-                
-                requiredGroups.forEach(checkbox => {
-                    const fieldName = checkbox.name.replace('[]', '');
-                    const errorId = checkbox.id.replace(/_\d+$/, '_error');
-                    if (!validateCheckboxGroup(fieldName, errorId)) {
-                        isValid = false;
-                        document.getElementById(errorId).scrollIntoView({ behavior: 'smooth' });
-                    }
-                });
-                
-                if (!isValid) {
-                    e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('step-form');
+    if (form && !form.dataset.checkboxValidationAdded) {
+        form.dataset.checkboxValidationAdded = 'true';
+        form.addEventListener('submit', function(e) {
+            const requiredGroups = document.querySelectorAll('[onchange*="validateCheckboxGroup"]');
+            let isValid = true;
+            
+            requiredGroups.forEach(checkbox => {
+                const fieldName = checkbox.name.replace('[]', '');
+                const errorId = checkbox.id.replace(/_\d+$/, '_error');
+                if (!validateCheckboxGroup(fieldName, errorId)) {
+                    isValid = false;
+                    document.getElementById(errorId).scrollIntoView({ behavior: 'smooth' });
                 }
             });
-        }
-    });
-@endif
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    }
+});
 </script>
 @endif

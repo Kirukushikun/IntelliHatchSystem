@@ -137,12 +137,7 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                         // Reset shift dropdown
                         const shiftDropdown = document.querySelector('select[name="shift"]');
                         if (shiftDropdown) {
-                            const hiddenOption = shiftDropdown.querySelector('option[hidden]');
-                            if (hiddenOption) {
-                                shiftDropdown.value = hiddenOption.value;
-                            } else {
-                                shiftDropdown.selectedIndex = 0;
-                            }
+                            shiftDropdown.selectedIndex = 0;
                         }
                         
                         // Reset to initial state
@@ -209,11 +204,17 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                     if (shouldShow) {
                         hasVisibleFields = true;
                         container.style.display = '';
-                        // Enable all fields in this container
-                        container.querySelectorAll('[name]').forEach(f => f.removeAttribute('disabled'));
+                        // Enable all fields and restore required
+                        container.querySelectorAll('[name]').forEach(f => {
+                            f.removeAttribute('disabled');
+                            // Restore required on select and textarea, but not on photo inputs
+                            if (f.tagName === 'SELECT' || f.tagName === 'TEXTAREA') {
+                                f.setAttribute('required', 'required');
+                            }
+                        });
                     } else {
                         container.style.display = 'none';
-                        // Disable all fields in this container
+                        // Disable all fields and remove required
                         container.querySelectorAll('[name]').forEach(f => {
                             f.setAttribute('disabled', 'disabled');
                             f.removeAttribute('required');
@@ -400,7 +401,6 @@ function stepForm(currentStep, totalSteps, schedule = null) {
             const form = document.getElementById('step-form');
             if (!form) return;
 
-            // Get all form fields
             const fields = form.querySelectorAll('input, select, textarea');
             
             fields.forEach(field => {
@@ -411,19 +411,11 @@ function stepForm(currentStep, totalSteps, schedule = null) {
                 
                 // Reset based on field type
                 if (field.tagName === 'SELECT') {
-                    // Try to find and select the hidden option (placeholder)
-                    const hiddenOption = field.querySelector('option[hidden]');
-                    if (hiddenOption) {
-                        field.value = hiddenOption.value;
-                    } else {
-                        // Fallback to first option
-                        field.selectedIndex = 0;
-                    }
+                    field.selectedIndex = 0;
                 } else if (field.type === 'checkbox' || field.type === 'radio') {
                     field.checked = false;
                 } else if (field.type === 'file') {
                     field.value = '';
-                    // Also clear any file preview if exists
                     const preview = field.closest('div').querySelector('img[id$="-preview"]');
                     if (preview) preview.style.display = 'none';
                 } else {

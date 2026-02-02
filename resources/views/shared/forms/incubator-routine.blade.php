@@ -137,7 +137,7 @@
                                 <option value="3rd Shift">3rd Shift</option>
                             </x-dropdown>
                             <x-dropdown label="Check for Alarm system condition" name="alarm_system_condition" placeholder="Select condition" required>
-                                <option value="" hidden>Select condition</option>
+                                
                                 <option value="Operational">Operational</option>
                                 <option value="Unoperational">Unoperational</option>
                             </x-dropdown>
@@ -154,7 +154,7 @@
                             <!-- DAILY ITEM -->
                             <div>
                                 <x-dropdown label="Check incubator doors for air leakage" name="check_incubator_doors_for_air_leakage" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -164,7 +164,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Checking of baggy against the gaskets" name="checking_of_baggy_against_the_gaskets" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -174,7 +174,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Check curtain position and condition" name="check_curtain_position_and_condition" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -184,7 +184,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Check wick for replacement / washing" name="check_wick_for_replacement_washing" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -194,7 +194,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Check spray nozzle and water pan" name="check_spray_nozzle_and_water_pan" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -204,7 +204,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Check incubator fans for vibration" name="check_incubator_fans_for_vibration" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -214,7 +214,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Check rack baffle condition" name="check_rack_baffle_condition" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -224,7 +224,7 @@
                             <!-- DAILY ITEM -->
                             <div>
                                 <x-dropdown label="Drain water out from air compressor tank" name="drain_water_out_from_air_compressor_tank" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -241,7 +241,7 @@
                             <!-- SCHEDULED ITEM - Wednesday 3rd & Sunday 3rd -->
                             <div>
                                 <x-dropdown label="Cleaning of incubator roof and plenum" name="cleaning_incubator_roof_and_plenum" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -258,7 +258,7 @@
                             <!-- DAILY ITEM -->
                             <div>
                                 <x-dropdown label="Check water level of blue tank" name="check_water_level_of_blue_tank" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -268,7 +268,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Cleaning of incubator floor area" name="cleaning_of_incubator_floor_area" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -278,7 +278,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Cleaning of entrance and exit area flooring" name="cleaning_of_entrance_and_exit_area_flooring" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -288,7 +288,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Clean and refill water reservoir" name="clean_and_refill_water_reservoir" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -305,7 +305,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Egg setting preparation" name="egg_setting_preparation" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -315,7 +315,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Egg setting" name="egg_setting" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -325,7 +325,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Record egg setting on board" name="record_egg_setting_on_board" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -335,7 +335,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div>
                                 <x-dropdown label="Record egg setting time" name="record_egg_setting_time" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
@@ -345,7 +345,7 @@
                             <!-- SCHEDULED ITEM -->
                             <div data-field="assist_in_random_candling">
                                 <x-dropdown label="Assist in Random Candling" name="assist_in_random_candling" placeholder="Select condition" required>
-                                    <option value="" hidden>Select condition</option>
+                                    
                                     <option value="Pending">Pending</option>
                                     <option value="Done">Done</option>
                                 </x-dropdown>
