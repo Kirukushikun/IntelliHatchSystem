@@ -9,6 +9,7 @@
     showCancelConfirmation: false,
     showCarouselModal: false,
     attachMode: 'camera',
+    photoKey: '{{ $name }}',
     stream: null,
     photos: [],
     attachedPhotos: [],
@@ -18,6 +19,47 @@
     cameraActive: false,
     uploading: false,
     processingGallery: false,
+    toast(type, message) {
+        window.dispatchEvent(new CustomEvent('showToast', {
+            detail: { type, message }
+        }));
+    },
+    init() {
+        window.addEventListener('formSubmitted', () => {
+            this.photos = [];
+            this.attachedPhotos = [];
+            this.attachedFiles = [];
+            this.currentPhotoIndex = 0;
+            this.showCarouselModal = false;
+            this.showCameraModal = false;
+            this.showCancelConfirmation = false;
+
+            if (this.$refs && this.$refs.originalInput) {
+                this.suppressInputChange = true;
+                this.$refs.originalInput.value = '';
+                this.suppressInputChange = false;
+            }
+
+            this.stopCamera();
+        });
+    },
+    async uploadFilesToServer(files) {
+        if (!files || files.length === 0) {
+            return;
+        }
+
+        if (!this.$wire) {
+            console.warn('[photo-attach] Livewire ($wire) is not available; cannot upload to server');
+            return;
+        }
+
+        await new Promise((resolve, reject) => {
+            this.$wire.uploadMultiple('photoUploads.' + this.photoKey, files,
+                () => resolve(true),
+                (err) => reject(err)
+            );
+        });
+    },
     openAttachAction() {
         if (this.attachMode === 'upload') {
             this.triggerUpload();
@@ -64,6 +106,13 @@
 
             this.attachedFiles = allFiles;
             this.attachedPhotos = [...this.attachedPhotos, ...newPhotos];
+
+            this.uploading = true;
+            try {
+                await this.uploadFilesToServer(newFiles);
+            } finally {
+                this.uploading = false;
+            }
         } finally {
             this.processingGallery = false;
         }
@@ -119,7 +168,7 @@
     },
     async startCamera() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert('Camera not supported! You need HTTPS or localhost.');
+            this.toast('error', 'Camera not supported! You need HTTPS or localhost.');
             return;
         }
         
@@ -131,7 +180,7 @@
             this.$refs.video.srcObject = this.stream;
             this.cameraActive = true;
         } catch(err) {
-            alert('Camera error: ' + err.message);
+            this.toast('error', 'Camera error: ' + err.message);
         }
     },
     capturePhoto() {
@@ -260,7 +309,7 @@
                     
                     // Check if still too large
                     if (sizeInBytes > 15 * 1024 * 1024) {
-                        alert('Photo \'' + file.name + '\' is too large even after resizing');
+                        this.toast('error', 'Photo \'' + file.name + '\' is too large even after resizing');
                         resolve();
                         return;
                     }
@@ -270,7 +319,7 @@
                 };
                 
                 img.onerror = () => {
-                    alert('Failed to load image: ' + file.name);
+                    this.toast('error', 'Failed to load image: ' + file.name);
                     resolve();
                 };
                 
@@ -278,7 +327,7 @@
             };
             
             reader.onerror = () => {
-                alert('Failed to read file: ' + file.name);
+                this.toast('error', 'Failed to read file: ' + file.name);
                 resolve();
             };
             
@@ -347,7 +396,7 @@
     async uploadPhotos() {
         if (this.photos.length === 0) {
             console.warn('[photo-attach] No photos to upload');
-            alert('No photos to upload!');
+            this.toast('warning', 'No photos to upload!');
             return;
         }
         
@@ -365,6 +414,8 @@
             
             console.log('[photo-attach] Files ready', files.map(file => ({ name: file.name, size: file.size, type: file.type })));
             
+            await this.uploadFilesToServer(files);
+
             // Create a DataTransfer object to set files to the original input
             const dataTransfer = new DataTransfer();
             const allFiles = [...this.attachedFiles, ...files];
@@ -379,8 +430,7 @@
             this.suppressInputChange = true;
             this.suppressInputChange = false;
             
-            // Show success message
-            alert(files.length + ' photo(s) uploaded successfully!');
+            this.toast('success', files.length + ' photo(s) uploaded successfully!');
             
             this.attachedFiles = allFiles;
             this.attachedPhotos = [...this.attachedPhotos, ...this.photos];
@@ -389,11 +439,11 @@
             this.showCameraModal = false;
         } catch(err) {
             console.error('[photo-attach] Upload error:', err);
-            alert('Upload failed: ' + err.message);
+            this.toast('error', 'Upload failed: ' + err.message);
         } finally {
             this.uploading = false;
         }
-    }
+    },
 }">
     @if($label)
         <div class="flex items-center justify-between gap-3 mb-1">
