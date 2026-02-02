@@ -1,6 +1,6 @@
-<div class="space-y-8" wire:poll="refreshStats">
+<div wire:poll="refreshStats">
     <!-- Header with Search -->
-    <div class="flex items-center justify-between gap-6">
+    <div class="flex items-center justify-between gap-6 mb-6">
         <div>
             <h1 class="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
             <p class="text-gray-600">Welcome to the admin dashboard.</p>
@@ -19,27 +19,34 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($cards as $card)
-            <div class="bg-white rounded-lg border-l-4 border-amber-500 p-6 hover:shadow-sm transition-shadow overflow-hidden group">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3 mr-2">
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-900 mb-4">{{ $card['type_name'] }}</h3>
-                            <div class="grid grid-cols-3 gap-6">
-                                <div>
-                                    <div class="text-xs text-gray-500 mb-1">Week</div>
-                                    <div class="text-2xl font-semibold text-gray-900">{{ $card['week'] }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-xs text-gray-500 mb-1">Month</div>
-                                    <div class="text-2xl font-semibold text-gray-900">{{ $card['month'] }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-xs text-gray-500 mb-1">Year</div>
-                                    <div class="text-2xl font-semibold text-gray-900">{{ $card['year'] }}</div>
-                                </div>
+            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group border-l-4 border-amber-500">
+                <!-- Card Header -->
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3 mr-2">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900">{{ $card['type_name'] }}</h3>
+                                <p class="text-xs text-gray-500 mt-1">Submission statistics</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card Content -->
+                <div class="px-6 pb-4">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500">Week</div>
+                            <div class="text-xl font-semibold text-gray-900">{{ $card['week'] }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500">Month</div>
+                            <div class="text-xl font-semibold text-gray-900">{{ $card['month'] }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500">Year</div>
+                            <div class="text-xl font-semibold text-gray-900">{{ $card['year'] }}</div>
                         </div>
                     </div>
                 </div>
