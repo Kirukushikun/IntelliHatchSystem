@@ -4,32 +4,34 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Form;
-use App\Models\User;
-use Carbon\Carbon;
+use App\Models\FormType;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
 
 class FormStatsController extends Controller
 {
-    public function stats(Request $request): JsonResponse
+    /**
+     * Get form statistics with dynamic filtering
+     */
+    public function index(Request $request): JsonResponse
     {
         $request->validate([
             'form_type_id' => 'nullable|integer|exists:form_types,id',
             'date_filter' => 'nullable|in:current_month,last_month,current_quarter,last_quarter,last_three_months,current_year,previous_year,custom',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'include_data' => 'nullable|boolean',
         ]);
 
-        $query = Form::with(['formType', 'uploadedBy']);
+        $query = Form::with(['formType']);
 
-        // Filter by form type if specified
+        // Apply form type filter
         if ($request->filled('form_type_id')) {
             $query->where('form_type_id', $request->form_type_id);
         }
 
-        // Apply date filter
-        $dateFilter = $request->input('date_filter', 'current_month');
+        // Apply date filtering
+        $dateFilter = $request->get('date_filter', 'current_month');
         $startDate = null;
         $endDate = null;
 
@@ -68,7 +70,7 @@ class FormStatsController extends Controller
                     $endDate = Carbon::parse($request->end_date)->endOfDay();
                 } else {
                     return response()->json([
-                        'error' => 'Custom date filter requires start_date and end_date parameters'
+                        'error' => 'Custom date filter requires both start_date and end_date parameters'
                     ], 422);
                 }
                 break;
@@ -78,92 +80,73 @@ class FormStatsController extends Controller
             $query->whereBetween('date_submitted', [$startDate, $endDate]);
         }
 
-        // Get the stats
-        $totalForms = $query->count();
+        // Get all forms without limit
+        $forms = $query->orderBy('date_submitted', 'desc')->get();
 
-        // Get forms by type (if not filtered by specific type)
-        $formsByType = [];
-        if (!$request->filled('form_type_id')) {
-            $formsByType = Form::selectRaw('form_types.form_name as name, COUNT(*) as count')
-                ->join('form_types', 'forms.form_type_id', '=', 'form_types.id')
-                ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                    return $q->whereBetween('forms.date_submitted', [$startDate, $endDate]);
-                })
-                ->groupBy('form_types.id', 'form_types.form_name')
-                ->orderBy('count', 'desc')
-                ->get();
-        }
-
-        // Get daily submissions for the period
-        $dailySubmissions = Form::selectRaw('DATE(date_submitted) as date, COUNT(*) as count')
-            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                return $q->whereBetween('date_submitted', [$startDate, $endDate]);
-            })
-            ->when($request->filled('form_type_id'), function ($q) use ($request) {
-                return $q->where('form_type_id', $request->form_type_id);
-            })
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-
-        // Get actual form data if requested
-        $formData = [];
-        if ($request->boolean('include_data')) {
-            $formData = $query->orderBy('date_submitted', 'desc')
-                ->get()
-                ->map(function ($form) {
-                    return [
-                        'id' => $form->id,
-                        'form_type_id' => $form->form_type_id,
-                        'form_type_name' => $form->formType?->form_name,
-                        'form_data' => $form->form_inputs,
-                        'date_submitted' => $form->date_submitted->toISOString(),
-                        'uploaded_by' => $form->uploadedBy?->only(['id', 'first_name', 'last_name', 'username']),
-                    ];
-                });
-        }
+        // Calculate statistics
+        $stats = [
+            'total_forms' => $forms->count(),
+            'date_filter' => $dateFilter,
+            'date_range' => [
+                'start_date' => $startDate?->format('Y-m-d H:i:s'),
+                'end_date' => $endDate?->format('Y-m-d H:i:s'),
+            ],
+            'forms_by_type' => $forms->groupBy('form_type_id')->map(function ($group) {
+                $formType = $group->first()->formType;
+                return [
+                    'form_type_id' => $formType->id,
+                    'form_type_name' => $formType->name,
+                    'count' => $group->count(),
+                    'forms' => $group->map(function ($form) {
+                        return [
+                            'id' => $form->id,
+                            'form_inputs' => $form->form_inputs,
+                            'date_submitted' => $form->date_submitted->format('Y-m-d H:i:s'),
+                            'uploaded_by' => $form->uploaded_by,
+                        ];
+                    })->toArray(),
+                ];
+            })->values(),
+            'all_forms' => $forms->map(function ($form) {
+                return [
+                    'id' => $form->id,
+                    'form_type_id' => $form->form_type_id,
+                    'form_type_name' => $form->formType->name,
+                    'form_inputs' => $form->form_inputs,
+                    'date_submitted' => $form->date_submitted->format('Y-m-d H:i:s'),
+                    'uploaded_by' => $form->uploaded_by,
+                ];
+            })->toArray(),
+        ];
 
         return response()->json([
-            'filters' => [
-                'form_type_id' => $request->input('form_type_id'),
+            'success' => true,
+            'data' => $stats,
+            'filters_applied' => [
+                'form_type_id' => $request->get('form_type_id'),
                 'date_filter' => $dateFilter,
-                'start_date' => $startDate?->toDateString(),
-                'end_date' => $endDate?->toDateString(),
-                'include_data' => $request->boolean('include_data'),
-            ],
-            'stats' => [
-                'total_forms' => $totalForms,
-                'period_start' => $startDate?->toDateString(),
-                'period_end' => $endDate?->toDateString(),
-            ],
-            'forms_by_type' => $formsByType,
-            'daily_submissions' => $dailySubmissions,
-            'forms_data' => $formData,
+                'start_date' => $request->get('start_date'),
+                'end_date' => $request->get('end_date'),
+            ]
         ]);
     }
 
-    public function quickStats(): JsonResponse
+    /**
+     * Get available form types
+     */
+    public function formTypes(): JsonResponse
     {
-        $now = Carbon::now();
-        
+        $formTypes = FormType::all()->map(function ($formType) {
+            return [
+                'id' => $formType->id,
+                'name' => $formType->name,
+                'description' => $formType->description ?? null,
+            ];
+        });
+
         return response()->json([
-            'current_month' => Form::whereMonth('date_submitted', $now->month)
-                ->whereYear('date_submitted', $now->year)
-                ->count(),
-            'last_month' => Form::whereMonth('date_submitted', $now->subMonth()->month)
-                ->whereYear('date_submitted', $now->subMonth()->year)
-                ->count(),
-            'current_quarter' => Form::whereBetween('date_submitted', [
-                    $now->startOfQuarter(),
-                    $now->endOfQuarter()
-                ])->count(),
-            'last_three_months' => Form::whereBetween('date_submitted', [
-                    $now->subMonths(2)->startOfMonth(),
-                    $now->endOfMonth()
-                ])->count(),
-            'current_year' => Form::whereYear('date_submitted', $now->year)->count(),
-            'total_users' => User::count(),
-            'active_users' => User::where('user_type', 1)->count(),
+            'success' => true,
+            'data' => $formTypes
         ]);
     }
 }

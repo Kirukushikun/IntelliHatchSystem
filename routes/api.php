@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\FormStatsController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\FormStatsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,8 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->group(function () {
-    // Form Statistics
-    Route::get('/form-stats', [FormStatsController::class, 'stats']);
-    Route::get('/form-stats/quick', [FormStatsController::class, 'quickStats']);
+Route::middleware('api.key')->group(function () {
+    // Get form statistics with dynamic filtering
+    Route::get('/form-stats', [FormStatsController::class, 'index']);
+    
+    // Get available form types
+    Route::get('/form-types', [FormStatsController::class, 'formTypes']);
 });
