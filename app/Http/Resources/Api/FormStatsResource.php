@@ -9,16 +9,16 @@ class FormStatsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'form_type_id' => $this->form_type_id,
-            'form_type_name' => $this->formType?->name,
-            'date_submitted' => $this->date_submitted,
-            'total' => $this->total,
-            'date' => $this->date,
+            'filters' => $this->resource['filters'],
+            'stats' => $this->resource['stats'],
+            'forms_by_type' => $this->resource['forms_by_type'],
+            'daily_submissions' => $this->resource['daily_submissions'],
         ];
     }
 }

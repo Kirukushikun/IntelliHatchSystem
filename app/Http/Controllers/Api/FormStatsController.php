@@ -4,23 +4,20 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Form;
-use App\Models\FormType;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Carbon\Carbon;
 
 class FormStatsController extends Controller
 {
-    /**
-     * Get form statistics with dynamic date filtering.
-     */
-    public function index(Request $request): JsonResponse
+    public function stats(Request $request): JsonResponse
     {
         $request->validate([
-            'form_type_id' => 'nullable|exists:form_types,id',
-            'date_filter' => 'required|in:current_month,last_month,current_quarter,last_quarter,last_three_months,current_year,previous_year,custom',
-            'start_date' => 'required_if:date_filter,custom|date',
-            'end_date' => 'required_if:date_filter,custom|date|after_or_equal:start_date',
+            'form_type_id' => 'nullable|integer|exists:form_types,id',
+            'date_filter' => 'nullable|in:current_month,last_month,current_quarter,last_quarter,last_three_months,current_year,previous_year,custom',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $query = Form::query();
@@ -31,165 +28,122 @@ class FormStatsController extends Controller
         }
 
         // Apply date filter
-        $dateRange = $this->getDateRange($request->date_filter, $request);
-        $query->whereBetween('date_submitted', [$dateRange['start'], $dateRange['end']]);
+        $dateFilter = $request->input('date_filter', 'current_month');
+        $startDate = null;
+        $endDate = null;
 
-        // Get statistics
-        $stats = $query->selectRaw('
-                COUNT(*) as total,
-                DATE(date_submitted) as date,
-                form_type_id
-            ')
-            ->groupBy('date', 'form_type_id')
+        switch ($dateFilter) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+            case 'last_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+            case 'current_quarter':
+                $startDate = Carbon::now()->startOfQuarter();
+                $endDate = Carbon::now()->endOfQuarter();
+                break;
+            case 'last_quarter':
+                $startDate = Carbon::now()->subQuarter()->startOfQuarter();
+                $endDate = Carbon::now()->subQuarter()->endOfQuarter();
+                break;
+            case 'last_three_months':
+                $startDate = Carbon::now()->subMonths(2)->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                break;
+            case 'previous_year':
+                $startDate = Carbon::now()->subYear()->startOfYear();
+                $endDate = Carbon::now()->subYear()->endOfYear();
+                break;
+            case 'custom':
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+                    $startDate = Carbon::parse($request->start_date)->startOfDay();
+                    $endDate = Carbon::parse($request->end_date)->endOfDay();
+                } else {
+                    return response()->json([
+                        'error' => 'Custom date filter requires start_date and end_date parameters'
+                    ], 422);
+                }
+                break;
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('date_submitted', [$startDate, $endDate]);
+        }
+
+        // Get the stats
+        $totalForms = $query->count();
+
+        // Get forms by type (if not filtered by specific type)
+        $formsByType = [];
+        if (!$request->filled('form_type_id')) {
+            $formsByType = Form::selectRaw('form_types.name, COUNT(*) as count')
+                ->join('form_types', 'forms.form_type_id', '=', 'form_types.id')
+                ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                    return $q->whereBetween('forms.date_submitted', [$startDate, $endDate]);
+                })
+                ->groupBy('form_types.id', 'form_types.name')
+                ->orderBy('count', 'desc')
+                ->get();
+        }
+
+        // Get daily submissions for the period
+        $dailySubmissions = Form::selectRaw('DATE(date_submitted) as date, COUNT(*) as count')
+            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                return $q->whereBetween('date_submitted', [$startDate, $endDate]);
+            })
+            ->when($request->filled('form_type_id'), function ($q) use ($request) {
+                return $q->where('form_type_id', $request->form_type_id);
+            })
+            ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        // Get form type information
-        $formTypes = FormType::when($request->filled('form_type_id'), function ($q) use ($request) {
-                return $q->where('id', $request->form_type_id);
-            })
-            ->get()
-            ->keyBy('id');
-
-        // Format response
-        $response = [
-            'date_filter' => $request->date_filter,
-            'date_range' => [
-                'start' => $dateRange['start']->toDateString(),
-                'end' => $dateRange['end']->toDateString(),
+        return response()->json([
+            'filters' => [
+                'form_type_id' => $request->input('form_type_id'),
+                'date_filter' => $dateFilter,
+                'start_date' => $startDate?->toDateString(),
+                'end_date' => $endDate?->toDateString(),
             ],
-            'form_types' => $formTypes->toArray(),
-            'stats' => $this->formatStats($stats, $formTypes),
-            'summary' => [
-                'total_submissions' => $stats->sum('total'),
-                'unique_dates' => $stats->count(),
-                'form_types_count' => $formTypes->count(),
+            'stats' => [
+                'total_forms' => $totalForms,
+                'period_start' => $startDate?->toDateString(),
+                'period_end' => $endDate?->toDateString(),
             ],
-        ];
-
-        return response()->json($response);
+            'forms_by_type' => $formsByType,
+            'daily_submissions' => $dailySubmissions,
+        ]);
     }
 
-    /**
-     * Get date range based on filter type.
-     */
-    private function getDateRange(string $filter, Request $request): array
+    public function quickStats(): JsonResponse
     {
         $now = Carbon::now();
-
-        return match ($filter) {
-            'current_month' => [
-                'start' => $now->copy()->startOfMonth(),
-                'end' => $now->copy()->endOfMonth(),
-            ],
-            'last_month' => [
-                'start' => $now->copy()->subMonth()->startOfMonth(),
-                'end' => $now->copy()->subMonth()->endOfMonth(),
-            ],
-            'current_quarter' => [
-                'start' => $now->copy()->startOfQuarter(),
-                'end' => $now->copy()->endOfQuarter(),
-            ],
-            'last_quarter' => [
-                'start' => $now->copy()->subQuarter()->startOfQuarter(),
-                'end' => $now->copy()->subQuarter()->endOfQuarter(),
-            ],
-            'last_three_months' => [
-                'start' => $now->copy()->subMonths(2)->startOfMonth(),
-                'end' => $now->copy()->endOfMonth(),
-            ],
-            'current_year' => [
-                'start' => $now->copy()->startOfYear(),
-                'end' => $now->copy()->endOfYear(),
-            ],
-            'previous_year' => [
-                'start' => $now->copy()->subYear()->startOfYear(),
-                'end' => $now->copy()->subYear()->endOfYear(),
-            ],
-            'custom' => [
-                'start' => Carbon::parse($request->start_date)->startOfDay(),
-                'end' => Carbon::parse($request->end_date)->endOfDay(),
-            ],
-            default => throw new \InvalidArgumentException("Invalid date filter: {$filter}"),
-        };
-    }
-
-    /**
-     * Format statistics for response.
-     */
-    private function formatStats($stats, $formTypes): array
-    {
-        $formatted = [];
-        
-        foreach ($stats as $stat) {
-            $date = $stat->date;
-            
-            if (!isset($formatted[$date])) {
-                $formatted[$date] = [
-                    'date' => $date,
-                    'total' => 0,
-                    'form_types' => [],
-                ];
-            }
-            
-            $formatted[$date]['total'] += $stat->total;
-            
-            if (isset($formTypes[$stat->form_type_id])) {
-                $formatted[$date]['form_types'][] = [
-                    'id' => $stat->form_type_id,
-                    'name' => $formTypes[$stat->form_type_id]->name,
-                    'count' => $stat->total,
-                ];
-            }
-        }
-
-        return array_values($formatted);
-    }
-
-    /**
-     * Get available form types.
-     */
-    public function formTypes(): JsonResponse
-    {
-        $formTypes = FormType::select('id', 'name')->orderBy('name')->get();
         
         return response()->json([
-            'form_types' => $formTypes,
+            'current_month' => Form::whereMonth('date_submitted', $now->month)
+                ->whereYear('date_submitted', $now->year)
+                ->count(),
+            'last_month' => Form::whereMonth('date_submitted', $now->subMonth()->month)
+                ->whereYear('date_submitted', $now->subMonth()->year)
+                ->count(),
+            'current_quarter' => Form::whereBetween('date_submitted', [
+                    $now->startOfQuarter(),
+                    $now->endOfQuarter()
+                ])->count(),
+            'last_three_months' => Form::whereBetween('date_submitted', [
+                    $now->subMonths(2)->startOfMonth(),
+                    $now->endOfMonth()
+                ])->count(),
+            'current_year' => Form::whereYear('date_submitted', $now->year)->count(),
+            'total_users' => User::count(),
+            'active_users' => User::where('user_type', 1)->count(),
         ]);
-    }
-
-    /**
-     * Get quick stats for dashboard.
-     */
-    public function quickStats(Request $request): JsonResponse
-    {
-        $request->validate([
-            'form_type_id' => 'nullable|exists:form_types,id',
-        ]);
-
-        $query = Form::query();
-
-        if ($request->filled('form_type_id')) {
-            $query->where('form_type_id', $request->form_type_id);
-        }
-
-        $now = Carbon::now();
-
-        $stats = [
-            'week' => $query->whereBetween('date_submitted', [
-                $now->copy()->startOfWeek(),
-                $now->copy()->endOfWeek(),
-            ])->count(),
-            'month' => $query->whereBetween('date_submitted', [
-                $now->copy()->startOfMonth(),
-                $now->copy()->endOfMonth(),
-            ])->count(),
-            'year' => $query->whereBetween('date_submitted', [
-                $now->copy()->startOfYear(),
-                $now->copy()->endOfYear(),
-            ])->count(),
-        ];
-
-        return response()->json($stats);
     }
 }

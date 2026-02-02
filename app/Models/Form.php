@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Form extends Model
 {
@@ -22,18 +21,12 @@ class Form extends Model
         'date_submitted' => 'datetime',
     ];
 
-    /**
-     * Get the form type that owns the form.
-     */
-    public function formType(): BelongsTo
+    public function formType()
     {
-        return $this->belongsTo(FormType::class);
+        return $this->belongsTo(\App\Models\FormType::class);
     }
 
-    /**
-     * Get the user who uploaded the form.
-     */
-    public function uploader(): BelongsTo
+    public function uploadedBy()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }

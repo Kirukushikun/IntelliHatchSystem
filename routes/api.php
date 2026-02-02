@@ -14,9 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     // Form Statistics
-    Route::get('/form-stats', [FormStatsController::class, 'index'])->name('api.form-stats.index');
-    Route::get('/form-stats/quick', [FormStatsController::class, 'quickStats'])->name('api.form-stats.quick');
-    Route::get('/form-types', [FormStatsController::class, 'formTypes'])->name('api.form-types.index');
+    Route::get('/form-stats', [FormStatsController::class, 'stats']);
+    Route::get('/form-stats/quick', [FormStatsController::class, 'quickStats']);
 });
