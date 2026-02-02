@@ -71,7 +71,7 @@ class FormStatsController extends Controller
                 } else {
                     return response()->json([
                         'error' => 'Custom date filter requires both start_date and end_date parameters'
-                    ], 422);
+                    ], 422, [], JSON_PRETTY_PRINT);
                 }
                 break;
         }
@@ -128,7 +128,7 @@ class FormStatsController extends Controller
                 'start_date' => $request->get('start_date'),
                 'end_date' => $request->get('end_date'),
             ]
-        ]);
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     /**
@@ -147,6 +147,6 @@ class FormStatsController extends Controller
         return response()->json([
             'success' => true,
             'data' => $formTypes
-        ]);
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 }
