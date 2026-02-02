@@ -19,16 +19,33 @@
     cameraActive: false,
     uploading: false,
     processingGallery: false,
+    serverPhotoQueue: [],
     toast(type, message) {
         window.dispatchEvent(new CustomEvent('showToast', {
             detail: { type, message }
         }));
     },
     init() {
+        window.addEventListener('photoStored', (event) => {
+            if (!event || !event.detail) {
+                return;
+            }
+
+            if (event.detail.photoKey !== this.photoKey) {
+                return;
+            }
+
+            this.serverPhotoQueue.push({
+                photoId: event.detail.photoId,
+                url: event.detail.url,
+            });
+        });
+
         window.addEventListener('formSubmitted', () => {
             this.photos = [];
             this.attachedPhotos = [];
             this.attachedFiles = [];
+            this.serverPhotoQueue = [];
             this.currentPhotoIndex = 0;
             this.showCarouselModal = false;
             this.showCameraModal = false;
@@ -42,6 +59,46 @@
 
             this.stopCamera();
         });
+
+        window.addEventListener('formReset', () => {
+            this.photos = [];
+            this.attachedPhotos = [];
+            this.attachedFiles = [];
+            this.serverPhotoQueue = [];
+            this.currentPhotoIndex = 0;
+            this.showCarouselModal = false;
+            this.showCameraModal = false;
+            this.showCancelConfirmation = false;
+
+            if (this.$refs && this.$refs.originalInput) {
+                this.suppressInputChange = true;
+                this.$refs.originalInput.value = '';
+                this.suppressInputChange = false;
+            }
+
+            this.stopCamera();
+        });
+    },
+    assignServerPhotosToLastAttached(count) {
+        if (!count || count <= 0) {
+            return;
+        }
+
+        const startIndex = this.attachedPhotos.length - count;
+        for (let i = 0; i < count; i++) {
+            const queueItem = this.serverPhotoQueue.shift();
+            if (!queueItem) {
+                continue;
+            }
+
+            const index = startIndex + i;
+            if (!this.attachedPhotos[index]) {
+                continue;
+            }
+
+            this.attachedPhotos[index].serverPhotoId = queueItem.photoId;
+            this.attachedPhotos[index].serverUrl = queueItem.url;
+        }
     },
     async uploadFilesToServer(files) {
         if (!files || files.length === 0) {
@@ -110,6 +167,7 @@
             this.uploading = true;
             try {
                 await this.uploadFilesToServer(newFiles);
+                this.assignServerPhotosToLastAttached(newPhotos.length);
             } finally {
                 this.uploading = false;
             }
@@ -377,6 +435,47 @@
         }
         this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.attachedPhotos.length) % this.attachedPhotos.length;
     },
+    async removeCurrentAttachedPhoto() {
+        if (this.attachedPhotos.length === 0) {
+            return;
+        }
+
+        const index = this.currentPhotoIndex;
+        const photo = this.attachedPhotos[index];
+        const serverPhotoId = photo && photo.serverPhotoId ? photo.serverPhotoId : null;
+
+        const file = this.attachedFiles[index] || null;
+
+        if (this.$wire && serverPhotoId) {
+            try {
+                await this.$wire.call('deleteUploadedPhoto', this.photoKey, serverPhotoId);
+            } catch (err) {
+                this.toast('error', 'Failed to remove photo: ' + (err && err.message ? err.message : 'Unknown error'));
+                return;
+            }
+        }
+
+        this.attachedPhotos.splice(index, 1);
+        if (file) {
+            this.attachedFiles.splice(index, 1);
+        }
+
+        const dataTransfer = new DataTransfer();
+        this.attachedFiles.forEach(f => dataTransfer.items.add(f));
+        this.suppressInputChange = true;
+        this.$refs.originalInput.files = dataTransfer.files;
+        this.suppressInputChange = false;
+
+        if (this.attachedPhotos.length === 0) {
+            this.showCarouselModal = false;
+            this.currentPhotoIndex = 0;
+            this.toast('success', 'Photo removed');
+            return;
+        }
+
+        this.currentPhotoIndex = Math.min(this.currentPhotoIndex, this.attachedPhotos.length - 1);
+        this.toast('success', 'Photo removed');
+    },
     deletePhoto(id) {
         this.photos = this.photos.filter(p => p.id !== id);
     },
@@ -434,6 +533,7 @@
             
             this.attachedFiles = allFiles;
             this.attachedPhotos = [...this.attachedPhotos, ...this.photos];
+            this.assignServerPhotosToLastAttached(this.photos.length);
             this.photos = [];
             this.stopCamera();
             this.showCameraModal = false;
@@ -696,6 +796,14 @@
 
                 <div class="mt-3 text-center text-sm text-gray-600">
                     <span x-text="currentPhotoIndex + 1"></span> / <span x-text="attachedPhotos.length"></span>
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <button type="button"
+                            @click="removeCurrentAttachedPhoto()"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                        Remove
+                    </button>
                 </div>
             </div>
         </div>

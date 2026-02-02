@@ -98,6 +98,8 @@ class IncubatorRoutineForm extends FormNavigation
 
             $this->uploadedPhotoUrls[$photoKey][] = $url;
             $this->uploadedPhotoIds[$photoKey][] = $photoId;
+
+            $this->dispatch('photoStored', photoKey: $photoKey, photoId: $photoId, url: $url);
         }
 
         $this->photoUploads[$photoKey] = [];
@@ -248,6 +250,40 @@ class IncubatorRoutineForm extends FormNavigation
         $this->photoUploads = [];
     }
 
+    public function deleteUploadedPhoto(string $photoKey, int $photoId): void
+    {
+        $ids = $this->uploadedPhotoIds[$photoKey] ?? [];
+        if (!in_array($photoId, $ids, true)) {
+            return;
+        }
+
+        $photo = DB::table('photos')->where('id', $photoId)->first();
+        if ($photo && isset($photo->public_path)) {
+            $relativePath = $this->diskPathFromPublicUrl((string) $photo->public_path);
+            if ($relativePath !== '') {
+                Storage::disk('public')->delete($relativePath);
+            }
+        }
+
+        DB::table('photos')->where('id', $photoId)->delete();
+
+        $this->uploadedPhotoIds[$photoKey] = array_values(array_filter(
+            $this->uploadedPhotoIds[$photoKey] ?? [],
+            fn ($id) => (int) $id !== $photoId
+        ));
+
+        $this->uploadedPhotoUrls[$photoKey] = array_values(array_filter(
+            $this->uploadedPhotoUrls[$photoKey] ?? [],
+            function ($url) use ($photo, $photoId) {
+                if ($photo && isset($photo->public_path)) {
+                    return (string) $url !== (string) $photo->public_path;
+                }
+
+                return true;
+            }
+        ));
+    }
+
     protected function formTypeKey(): string
     {
         return 'incubator_routine';
@@ -311,6 +347,7 @@ class IncubatorRoutineForm extends FormNavigation
 
         if ($cleanupPhotos) {
             $this->cleanupAllUploadedPhotos();
+            $this->dispatch('formReset');
         }
 
         if ($clearShift) {
