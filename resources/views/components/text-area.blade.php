@@ -1,10 +1,15 @@
 @props([
     'label' => '', 
     'name' => '', 
+    'errorKey' => null,
     'value' => '', 
     'placeholder' => 'Enter text here', 
     'required' => false
 ])
+
+@php
+    $errorKey = $errorKey ?: $name;
+@endphp
 
 <div class="mb-6">
     @if($label)
@@ -22,12 +27,13 @@
         rows="4"
         placeholder="{{ $placeholder }}"
         @if($required) required @endif
-        class="mt-1 block w-full rounded-lg border px-4 py-2 shadow-sm
-            {{ $errors->has($name) 
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
-                : 'border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}">{{ old($name, $value) }}</textarea>
+        {{ $attributes->merge(['class' => "mt-1 block w-full rounded-lg border px-4 py-2 shadow-sm " . (
+            $errors->has($errorKey)
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
+                : 'border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+        )]) }}>{{ old($name, $value) }}</textarea>
 
-    @error($name)
+    @error($errorKey)
         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
     @enderror
 </div>

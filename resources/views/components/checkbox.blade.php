@@ -1,6 +1,7 @@
 @props([
     'label',
     'name',
+    'errorKey' => null,
     'options' => [],
     'required' => false,
     'columns' => 5,
@@ -10,9 +11,16 @@
 @php
     $fieldId = str_replace(['[', ']'], ['_', ''], $name);
     $errorId = $fieldId . '_error';
+    $errorKey = $errorKey ?: $name;
+
+    $wireModelAttrs = $attributes->whereStartsWith('wire:model');
+    $wireModelKeys = array_keys($wireModelAttrs->getAttributes());
+    $containerAttrs = $attributes->except($wireModelKeys);
+
+    $useClientSideRequiredValidation = $required && count($wireModelKeys) === 0;
 @endphp
 
-<div class="mb-4" {{ $attributes }}>
+<div class="mb-4" {{ $containerAttrs }}>
     <label class="block text-sm font-medium text-gray-700 mb-2">
         {{ $label }}
         @if($required) <span class="text-red-500">*</span> @endif
@@ -26,18 +34,23 @@
                     name="{{ $name }}[]" 
                     value="{{ $value }}" 
                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    @if($required) onchange="validateCheckboxGroup('{{ $name }}', '{{ $errorId }}')" @endif
+                    {{ $wireModelAttrs }}
+                    @if($useClientSideRequiredValidation) onchange="validateCheckboxGroup('{{ $name }}', '{{ $errorId }}')" @endif
                 >
                 <label for="{{ $fieldId }}_{{ $value }}" class="ml-2 text-sm text-gray-700">{{ $display }}</label>
             </div>
         @endforeach
     </div>
-    @if($required)
+    @if($useClientSideRequiredValidation)
         <div id="{{ $errorId }}" class="mt-1 text-sm text-red-600 hidden">Please select at least one option</div>
     @endif
+
+    @error($errorKey)
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
 </div>
 
-@if($required)
+@if($useClientSideRequiredValidation)
 <script>
 function validateCheckboxGroup(fieldName, errorId) {
     const checkboxes = document.querySelectorAll(`input[name="${fieldName}[]"]`);
@@ -75,6 +88,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
+}
 </script>
 @endif
