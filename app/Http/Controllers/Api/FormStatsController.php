@@ -18,9 +18,10 @@ class FormStatsController extends Controller
             'date_filter' => 'nullable|in:current_month,last_month,current_quarter,last_quarter,last_three_months,current_year,previous_year,custom',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
+            'include_data' => 'nullable|boolean',
         ]);
 
-        $query = Form::query();
+        $query = Form::with(['formType', 'uploadedBy']);
 
         // Filter by form type if specified
         if ($request->filled('form_type_id')) {
@@ -83,12 +84,12 @@ class FormStatsController extends Controller
         // Get forms by type (if not filtered by specific type)
         $formsByType = [];
         if (!$request->filled('form_type_id')) {
-            $formsByType = Form::selectRaw('form_types.name, COUNT(*) as count')
+            $formsByType = Form::selectRaw('form_types.form_name as name, COUNT(*) as count')
                 ->join('form_types', 'forms.form_type_id', '=', 'form_types.id')
                 ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
                     return $q->whereBetween('forms.date_submitted', [$startDate, $endDate]);
                 })
-                ->groupBy('form_types.id', 'form_types.name')
+                ->groupBy('form_types.id', 'form_types.form_name')
                 ->orderBy('count', 'desc')
                 ->get();
         }
@@ -105,12 +106,30 @@ class FormStatsController extends Controller
             ->orderBy('date')
             ->get();
 
+        // Get actual form data if requested
+        $formData = [];
+        if ($request->boolean('include_data')) {
+            $formData = $query->orderBy('date_submitted', 'desc')
+                ->get()
+                ->map(function ($form) {
+                    return [
+                        'id' => $form->id,
+                        'form_type_id' => $form->form_type_id,
+                        'form_type_name' => $form->formType?->form_name,
+                        'form_data' => $form->form_inputs,
+                        'date_submitted' => $form->date_submitted->toISOString(),
+                        'uploaded_by' => $form->uploadedBy?->only(['id', 'first_name', 'last_name', 'username']),
+                    ];
+                });
+        }
+
         return response()->json([
             'filters' => [
                 'form_type_id' => $request->input('form_type_id'),
                 'date_filter' => $dateFilter,
                 'start_date' => $startDate?->toDateString(),
                 'end_date' => $endDate?->toDateString(),
+                'include_data' => $request->boolean('include_data'),
             ],
             'stats' => [
                 'total_forms' => $totalForms,
@@ -119,6 +138,7 @@ class FormStatsController extends Controller
             ],
             'forms_by_type' => $formsByType,
             'daily_submissions' => $dailySubmissions,
+            'forms_data' => $formData,
         ]);
     }
 
