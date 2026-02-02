@@ -3,8 +3,10 @@
 namespace App\Livewire;
 
 use Carbon\Carbon;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
-abstract class FormWizard extends FormSubmit
+abstract class FormNavigation extends Component
 {
     public array $schedule = [];
 
@@ -29,12 +31,9 @@ abstract class FormWizard extends FormSubmit
      */
     abstract protected function stepFieldMap(): array;
 
-    public function mount($formType = 'incubator_routine'): void
+    public function mount($formType = null): void
     {
-        parent::mount($formType);
-
-        $this->schedule = $this->scheduleConfig();
-        $this->recalculateVisibleSteps();
+        // Base mount logic; can be extended by child components.
     }
 
     public function updatedFormShift($value): void
@@ -99,6 +98,32 @@ abstract class FormWizard extends FormSubmit
         return (string) ($this->form[$this->shiftKey] ?? '') !== '' && count($this->visibleStepIds) > 1;
     }
 
+    public function goToStepWithField(string $field): void
+    {
+        $map = $this->stepFieldMap();
+        foreach ($map as $step => $fields) {
+            if (in_array($field, $fields, true)) {
+                $this->currentStep = $step;
+                return;
+            }
+        }
+    }
+
+    public function getVisibleFieldNames(): array
+    {
+        $visible = [];
+
+        foreach (($this->schedule['_daily'] ?? []) as $field) {
+            $visible[] = $field;
+        }
+
+        foreach ($this->getAllowedFieldsForCurrentShift() as $field) {
+            $visible[] = $field;
+        }
+
+        return array_values(array_unique($visible));
+    }
+
     public function isFieldVisible(string $field): bool
     {
         $daily = $this->schedule['_daily'] ?? [];
@@ -108,18 +133,6 @@ abstract class FormWizard extends FormSubmit
 
         $allowed = $this->getAllowedFieldsForCurrentShift();
         return in_array($field, $allowed, true);
-    }
-
-    protected function goToStepWithField(string $field): void
-    {
-        foreach ($this->stepFieldMap() as $step => $fields) {
-            if (in_array($field, $fields, true)) {
-                if (in_array((int) $step, $this->visibleStepIds, true)) {
-                    $this->currentStep = (int) $step;
-                }
-                break;
-            }
-        }
     }
 
     protected function recalculateVisibleSteps(): void
@@ -171,20 +184,5 @@ abstract class FormWizard extends FormSubmit
         $key = "{$day}-{$shift}";
 
         return $this->schedule[$key] ?? [];
-    }
-
-    protected function getVisibleFieldNames(): array
-    {
-        $visible = [];
-
-        foreach (($this->schedule['_daily'] ?? []) as $field) {
-            $visible[] = $field;
-        }
-
-        foreach ($this->getAllowedFieldsForCurrentShift() as $field) {
-            $visible[] = $field;
-        }
-
-        return array_values(array_unique($visible));
     }
 }

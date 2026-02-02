@@ -207,29 +207,5 @@
         </x-progress-navigation>
     </form>
 
-    <div wire:ignore x-data="{ toasts: [] }" x-init="window.addEventListener('showToast', (event) => {
-        const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-        toasts.push({ message: event.detail.message, type: event.detail.type, id });
-        setTimeout(() => { toasts = toasts.filter(t => t.id !== id); }, 3000);
-    })" class="fixed top-4 right-4 z-50 space-y-2">
-        <template x-for="toast in toasts" :key="toast.id">
-            <div
-                x-show="toast"
-                x-transition:enter="transform ease-out duration-300 transition"
-                x-transition:enter-start="translate-x-full opacity-0"
-                x-transition:enter-end="translate-x-0 opacity-100"
-                x-transition:leave="transform ease-in duration-200 transition"
-                x-transition:leave-start="translate-x-0 opacity-100"
-                x-transition:leave-end="translate-x-full opacity-0"
-                :class="{
-                    'bg-green-500 text-white': toast.type === 'success',
-                    'bg-red-500 text-white': toast.type === 'error',
-                    'bg-yellow-500 text-white': toast.type === 'warning'
-                }"
-                class="px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2"
-            >
-                <span x-text="toast.message"></span>
-            </div>
-        </template>
-    </div>
+    <x-toast />
 </div>
