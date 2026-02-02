@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\FormStatsController;
 |
 */
 
+/*
 Route::middleware('api.key')->group(function () {
     // Get form statistics with dynamic filtering
     Route::get('/form-stats', [FormStatsController::class, 'index']);
@@ -22,3 +23,10 @@ Route::middleware('api.key')->group(function () {
     // Get available form types
     Route::get('/form-types', [FormStatsController::class, 'formTypes']);
 });
+*/
+
+// Get form statistics with dynamic filtering
+Route::get('/form-stats', [FormStatsController::class, 'index']);
+
+// Get available form types
+Route::get('/form-types', [FormStatsController::class, 'formTypes']);
