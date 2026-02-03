@@ -106,6 +106,7 @@
                                     </div>
 
                                     <div class="border-t border-gray-200">
+                                        <x-change-password />
                                         <form method="POST" action="{{ route('logout') }}">
                                             @csrf
                                             <button 
@@ -223,6 +224,7 @@
                             </div>
 
                             <div class="border-t border-gray-200">
+                                <x-change-password />
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button 
