@@ -81,6 +81,11 @@
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 text-center">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
+                                Status
+                            </p>
+                        </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 text-center">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
                                 Actions
                             </p>
                         </th>
@@ -98,6 +103,17 @@
                             <td class="p-3 md:p-4 py-4 md:py-5">
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $user->username }}</p>
                             </td>
+                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
+                                @if($user->is_disabled)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        Disabled
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Active
+                                    </span>
+                                @endif
+                            </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
                                 <div class="flex gap-1 md:gap-2 justify-center">
                                     <button type="button" wire:click="$dispatch('openEditModal', '{{ $user->id }}')" class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-transparent border border-transparent rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-150">
@@ -105,6 +121,33 @@
                                             <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
                                             <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
                                         </svg>
+                                    </button>
+                                    <button type="button" wire:click="$dispatch('openResetPasswordModal', '{{ $user->id }}')" class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-transparent border border-transparent rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-150">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-600">
+                                            <g transform="translate(0 -1028.4)">
+                                                <g transform="matrix(.70711 .70711 -.70711 .70711 740.06 298.16)">
+                                                    <path d="m10.541 1028.9c-3.3134 0-5.9997 2.6-5.9997 6 0 3.3 2.6863 6 5.9997 6 3.314 0 6-2.7 6-6 0-3.4-2.686-6-6-6zm0 2c1.105 0 2 0.9 2 2s-0.895 2-2 2c-1.1042 0-1.9997-0.9-1.9997-2s0.8955-2 1.9997-2z" fill="#f39c12"/>
+                                                    <g fill="#f1c40f">
+                                                        <path d="m10 0c-3.3137 0-6 2.6863-6 6s2.6863 6 6 6c3.314 0 6-2.6863 6-6s-2.686-6-6-6zm0 2c1.105 0 2 0.8954 2 2s-0.895 2-2 2c-1.1046 0-2-0.8954-2-2s0.8954-2 2-2z" transform="translate(0 1028.4)"/>
+                                                        <rect height="2" width="6" y="1039.4" x="7"/>
+                                                        <path d="m8 13v9l2 2 2-2v-1l-2-1 2-1v-1l-1-1 1-1v-3z" transform="translate(0 1028.4)"/>
+                                                    </g>
+                                                    <path d="m11 1041.4v4l1-1v-3h-1zm0 4v2.5l1-0.5v-1l-1-1zm0 3.5v2.5l1-1v-1l-1-0.5z" fill="#f39c12"/>
+                                                    <path d="m9 1041.4v10l1 1v-4-7h-1z" fill="#f39c12"/>
+                                                </g>
+                                            </g>
+                                        </svg>
+                                    </button>
+                                    <button type="button" wire:click="$dispatch('openDisableModal', '{{ $user->id }}')" class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-transparent border border-transparent rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-150">
+                                        @if($user->is_disabled)
+                                            <svg width="24" height="24" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-green-600">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.4669 3.72684C11.7558 3.91574 11.8369 4.30308 11.648 4.59198L7.39799 11.092C7.29783 11.2452 7.13556 11.3467 6.95402 11.3699C6.77247 11.3931 6.58989 11.3355 6.45446 11.2124L3.70446 8.71241C3.44905 8.48022 3.43023 8.08494 3.66242 7.82953C3.89461 7.57412 4.28989 7.55529 4.5453 7.78749L6.75292 9.79441L10.6018 3.90792C10.7907 3.61902 11.178 3.53795 11.4669 3.72684Z" fill="#16A34A"/>
+                                            </svg>
+                                        @else
+                                            <svg width="24" height="24" viewBox="0 0 48 48" version="1" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-600">
+                                                <path fill="#D50000" d="M24,6C14.1,6,6,14.1,6,24s8.1,18,18,18s18-8.1,18-18S33.9,6,24,6z M24,10c3.1,0,6,1.1,8.4,2.8L12.8,32.4 C11.1,30,10,27.1,10,24C10,16.3,16.3,10,24,10z M24,38c-3.1,0-6-1.1-8.4-2.8l19.6-19.6C36.9,18,38,20.9,38,24C38,31.7,31.7,38,24,38 z"/>
+                                            </svg>
+                                        @endif
                                     </button>
                                     <button type="button" wire:click="$dispatch('openDeleteModal', '{{ $user->id }}')" class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-transparent border border-transparent rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-150">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-red-600">
@@ -116,7 +159,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-4 text-center text-slate-500">
+                            <td colspan="5" class="p-4 text-center text-slate-500">
                                 No users found.
                             </td>
                         </tr>
@@ -149,6 +192,12 @@
     
     <!-- Include Delete User Modal -->
     <livewire:user-management.delete on:userDeleted="$refresh" />
+    
+    <!-- Include Reset Password Modal -->
+    <livewire:user-management.reset-password on:passwordReset="$refresh" />
+    
+    <!-- Include Disable/Enable Modal -->
+    <livewire:user-management.disable on:statusToggled="$refresh" />
     
     <!-- Toast Container -->
     <div x-data="{ toasts: [] }" x-init="window.addEventListener('showToast', (event) => {
