@@ -3,7 +3,7 @@
 namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
-use App\Models\User;
+use App\Models\HatcheryUser;
 
 class Display extends Component
 {
@@ -91,7 +91,7 @@ class Display extends Component
 
     public function deleteUser($userId)
     {
-        $user = User::find($userId);
+        $user = HatcheryUser::find($userId);
         if ($user) {
             $user->delete();
             session()->flash('message', 'User deleted successfully.');
@@ -110,11 +110,10 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $users = User::query()
+        $users = HatcheryUser::query()
             ->where(function($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('last_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('username', 'like', '%' . $this->search . '%');
+                      ->orWhere('last_name', 'like', '%' . $this->search . '%');
             });
 
         // Apply status filter
@@ -125,11 +124,11 @@ class Display extends Component
         // Apply date filter
         if ($this->dateFrom || $this->dateTo) {
             if ($this->dateFrom && $this->dateTo) {
-                $users->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+                $users->whereBetween('created_date', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
             } elseif ($this->dateFrom) {
-                $users->whereDate('created_at', '>=', $this->dateFrom);
+                $users->whereDate('created_date', '>=', $this->dateFrom);
             } elseif ($this->dateTo) {
-                $users->whereDate('created_at', '<=', $this->dateTo);
+                $users->whereDate('created_date', '<=', $this->dateTo);
             }
         }
 
@@ -175,11 +174,10 @@ class Display extends Component
         $page = (int) $page;
         
         // Validate page number
-        $totalPages = User::query()
+        $totalPages = HatcheryUser::query()
             ->where(function($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('last_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('username', 'like', '%' . $this->search . '%');
+                      ->orWhere('last_name', 'like', '%' . $this->search . '%');
             })
             ->paginate($this->perPage)
             ->lastPage();

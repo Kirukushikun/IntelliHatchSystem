@@ -40,6 +40,10 @@ Route::middleware('auth')->group(function () {
             return view('admin.users');
         })->name('admin.users');
 
+        Route::get('/admin/incubators', function () {
+            return view('admin.incubators');
+        })->name('admin.incubators');
+
         Route::get('/admin/change-password', function () {
             return view('auth.change-password-page');
         })->name('admin.change-password');

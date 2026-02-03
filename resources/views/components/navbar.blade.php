@@ -52,12 +52,12 @@
                                 >
                                     <div class="relative">
                                         <div class="w-10 h-10 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                                            {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->username, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                            {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                         </div>
                                         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                                     </div>
                                     
-                                    <div class="hidden sm:block text-left">
+                                    <div class="text-left">
                                         <div class="font-semibold text-gray-900 text-sm">
                                             {{ auth()->user()->full_name }}
                                         </div>
@@ -84,22 +84,15 @@
                                     x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
                                     @click.away="open = false"
                                     class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
-                                    style="display: none;"
                                 >
                                     <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-12 h-12 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                                                {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->username, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                                {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                             </div>
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-semibold text-gray-900 truncate">
                                                     {{ auth()->user()->full_name }}
-                                                </p>
-                                                <p class="text-xs text-gray-600 truncate">
-                                                    {{ auth()->user()->email }}
-                                                </p>
-                                                <p class="text-xs text-gray-500 truncate">
-                                                    {{ auth()->user()->username }}
                                                 </p>
                                             </div>
                                         </div>
@@ -175,7 +168,7 @@
                         >
                             <div class="relative">
                                 <div class="w-10 h-10 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                                    {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->username, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                    {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                 </div>
                                 <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                             </div>
@@ -212,17 +205,11 @@
                             <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-12 h-12 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                                        {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->username, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                        {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-semibold text-gray-900 truncate">
                                             {{ auth()->user()->full_name }}
-                                        </p>
-                                        <p class="text-xs text-gray-600 truncate">
-                                            {{ auth()->user()->email }}
-                                        </p>
-                                        <p class="text-xs text-gray-500 truncate">
-                                            {{ auth()->user()->username }}
                                         </p>
                                     </div>
                                 </div>

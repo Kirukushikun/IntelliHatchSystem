@@ -3,7 +3,7 @@
 namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
-use App\Models\User;
+use App\Models\HatcheryUser;
 
 class Create extends Component
 {
@@ -46,53 +46,22 @@ class Create extends Component
         $this->validate();
 
         try {
-            // Generate username automatically
-            $username = $this->generateUsername();
-
-            User::create([
+            HatcheryUser::create([
                 'first_name' => $this->firstName,
                 'last_name' => $this->lastName,
-                'username' => $username,
-                'password' => bcrypt('brookside25'),
+                'is_disabled' => false,
+                'created_date' => now(),
             ]);
 
             $this->closeModal();
-            $this->dispatch('userCreated');
-            $this->dispatch('showToast', message: "{$this->firstName} {$this->lastName} has been successfully added!", type: 'success');
+            $this->dispatch('showToast', message: "User created successfully!", type: 'success');
+            $this->reset(['firstName', 'lastName']);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Validation errors will be displayed automatically
             // Just re-throw to let Livewire handle validation display
             throw $e;
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to create user. Please try again.', type: 'error');
-        }
-    }
-
-    private function generateUsername()
-    {
-        // Split last name into parts and take max 2
-        $lastNameParts = explode(' ', $this->lastName);
-        $lastNameParts = array_slice($lastNameParts, 0, 2); // Take only first 2 parts
-        
-        // Rejoin with no spaces and capitalize first letter
-        $cleanLastName = str_replace(' ', '', implode(' ', $lastNameParts));
-        $baseUsername = strtoupper(substr($cleanLastName, 0, 1)) . ucfirst($cleanLastName);
-        
-        // Check if base username exists
-        $existingUser = User::where('username', $baseUsername)->first();
-        
-        if (!$existingUser) {
-            return $baseUsername;
-        } else {
-            // Find the next available number
-            $counter = 1;
-            do {
-                $newUsername = $baseUsername . $counter;
-                $existingUser = User::where('username', $newUsername)->first();
-                $counter++;
-            } while ($existingUser);
-            
-            return $newUsername;
         }
     }
 

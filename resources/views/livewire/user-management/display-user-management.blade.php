@@ -137,10 +137,10 @@
                                 @endif
                             </p>
                         </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('username')">
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('created_date')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
-                                Username
-                                @if ($sortField === 'username')
+                                Created Date
+                                @if ($sortField === 'created_date')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -187,10 +187,7 @@
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $user->last_name }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
-                                <p class="block text-xs md:text-sm text-slate-800">{{ $user->username }}</p>
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5">
-                                <p class="block text-xs md:text-sm text-slate-800">{{ $user->created_at->format('M d, Y') }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800">{{ $user->created_date->format('M d, Y') }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
                                 @if($user->is_disabled)
@@ -247,8 +244,13 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-4 text-center text-slate-500">
-                                No users found.
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center">
+                                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                    <h3 class="text-lg font-medium text-gray-900">No users found</h3>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
