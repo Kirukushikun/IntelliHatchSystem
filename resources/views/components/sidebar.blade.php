@@ -35,7 +35,7 @@
 
 <div x-data="{ 
     isOpen: false,
-    isCollapsed: false,
+    isCollapsed: localStorage.getItem('sidebar-collapsed') !== 'false',
     toggleSidebar() {
         this.isCollapsed = !this.isCollapsed;
     },
@@ -46,9 +46,6 @@
         this.isOpen = false;
     }
 }" 
-x-init="$watch('isCollapsed', () => { 
-    localStorage.setItem('sidebar-collapsed', isCollapsed); 
-}); isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true'"
 @toggle-sidebar.window="toggleSidebar()"
 class="relative h-screen"
 x-cloak>
@@ -118,7 +115,7 @@ x-cloak>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent" x-cloak>
             @foreach($sidebarItems as $item)
                 <a href="{{ $item['href'] }}" 
                    x-data="{ 

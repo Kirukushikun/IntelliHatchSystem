@@ -43,7 +43,7 @@
                             </div>
 
                             <!-- Right side - User Profile Dropdown -->
-                            <div class="relative" x-data="{ open: false }">
+                            <div class="relative" x-data="{ open: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
                                 <button 
                                     @click="open = !open"
                                     class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
@@ -84,6 +84,7 @@
                                     x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
                                     @click.away="open = false"
                                     class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
+                                    x-cloak
                                 >
                                     <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                                         <div class="flex items-center space-x-3">
@@ -159,7 +160,7 @@
                     </div>
 
                     <!-- Right side - User Profile Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
+                    <div class="relative" x-data="{ open: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
                         <button 
                             @click="open = !open"
                             class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
@@ -200,7 +201,7 @@
                             x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
                             @click.away="open = false"
                             class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
-                            style="display: none;"
+                            x-cloak
                         >
                             <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                                 <div class="flex items-center space-x-3">
