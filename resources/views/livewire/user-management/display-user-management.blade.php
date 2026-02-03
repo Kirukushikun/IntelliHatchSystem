@@ -25,7 +25,7 @@
                 @if ($showFilterDropdown)
                     <div class="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                         <div class="p-4">
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-2 gap-1">
                                 <!-- Status Filter Column -->
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-900 mb-3">Status</h3>
