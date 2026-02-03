@@ -23,7 +23,7 @@ class FormStatsController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        $query = Form::with(['formType']);
+        $query = Form::with(['formType', 'user']);
 
         // Apply form type filter
         if ($request->filled('form_type_id')) {
@@ -94,15 +94,18 @@ class FormStatsController extends Controller
             'forms_by_type' => $forms->groupBy('form_type_id')->map(function ($group) {
                 $formType = $group->first()->formType;
                 return [
-                    'form_type_id' => $formType->id,
-                    'form_type_name' => $formType->name,
+                    'form_type_id' => $group->first()->form_type_id,
+                    'form_type_name' => $formType ? $formType->name : 'Unknown Form Type',
                     'count' => $group->count(),
                     'forms' => $group->map(function ($form) {
                         return [
                             'id' => $form->id,
                             'form_inputs' => $form->form_inputs,
                             'date_submitted' => $form->date_submitted->format('Y-m-d H:i:s'),
-                            'uploaded_by' => $form->uploaded_by,
+                            'uploaded_by' => [
+                                'id' => $form->uploaded_by,
+                                'name' => $form->user ? $form->user->first_name . ' ' . $form->user->last_name : 'Unknown User'
+                            ],
                         ];
                     })->toArray(),
                 ];
@@ -111,10 +114,13 @@ class FormStatsController extends Controller
                 return [
                     'id' => $form->id,
                     'form_type_id' => $form->form_type_id,
-                    'form_type_name' => $form->formType->name,
+                    'form_type_name' => $form->formType ? $form->formType->name : 'Unknown Form Type',
                     'form_inputs' => $form->form_inputs,
                     'date_submitted' => $form->date_submitted->format('Y-m-d H:i:s'),
-                    'uploaded_by' => $form->uploaded_by,
+                    'uploaded_by' => [
+                        'id' => $form->uploaded_by,
+                        'name' => $form->user ? $form->user->first_name . ' ' . $form->user->last_name : 'Unknown User'
+                    ],
                 ];
             })->toArray(),
         ];

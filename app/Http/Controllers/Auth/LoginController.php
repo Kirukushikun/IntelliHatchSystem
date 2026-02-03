@@ -39,10 +39,35 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
+        // Check if user is locked out
+        $lockoutKey = 'login_lockout_' . $credentials['username'];
+        $attemptsKey = 'login_attempts_' . $credentials['username'];
+        
+        if ($request->session()->has($lockoutKey) && $request->session()->get($lockoutKey) > now()->timestamp) {
+            $remainingTime = ceil(($request->session()->get($lockoutKey) - now()->timestamp) / 60);
+            return back()->with('error', "Too many login attempts. Please try again in {$remainingTime} minutes.");
+        }
+
         // Authenticate using username and password
         if (!Auth::attempt($credentials)) {
-            return back()->with('error', 'The provided credentials do not match our records.');
+            // Increment login attempts
+            $attempts = $request->session()->get($attemptsKey, 0) + 1;
+            $request->session()->put($attemptsKey, $attempts);
+            
+            // Lock out after 5 attempts for 10 minutes
+            if ($attempts >= 5) {
+                $lockoutUntil = now()->addMinutes(10)->timestamp;
+                $request->session()->put($lockoutKey, $lockoutUntil);
+                return back()->with('error', 'Too many failed login attempts. Account locked for 10 minutes.');
+            }
+            
+            $remainingAttempts = 5 - $attempts;
+            return back()->with('error', "The provided credentials do not match our records. {$remainingAttempts} attempts remaining.");
         }
+
+        // Reset login attempts on successful authentication
+        $request->session()->forget($attemptsKey);
+        $request->session()->forget($lockoutKey);
 
         $user = Auth::user();
         $isAdmin = ((int) $user->user_type) === 0;
