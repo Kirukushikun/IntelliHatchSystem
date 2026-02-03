@@ -13,6 +13,7 @@ class ChangePassword extends Component
     public $newPassword = '';
     public $newPasswordConfirmation = '';
     public $showModal = false;
+    public $processing = false;
 
     protected function rules()
     {
@@ -31,7 +32,7 @@ class ChangePassword extends Component
         'currentPassword.required' => 'Current password is required',
         'newPassword.required' => 'New password is required',
         'newPassword.confirmed' => 'Password confirmation does not match',
-        'newPassword.min' => 'Password must be at least 8 characters long (NIST guidelines)',
+        'newPassword.min' => 'Password must be at least 8 characters long',
     ];
 
     public function openModal()
@@ -49,26 +50,34 @@ class ChangePassword extends Component
 
     public function changePassword()
     {
-        $this->validate();
+        $this->processing = true;
 
-        $user = Auth::user();
+        try {
+            $this->validate();
 
-        // Verify current password
-        if (!Hash::check($this->currentPassword, $user->password)) {
-            $this->addError('currentPassword', 'Current password is incorrect');
-            return;
+            $user = Auth::user();
+
+            // Verify current password
+            if (!Hash::check($this->currentPassword, $user->password)) {
+                $this->addError('currentPassword', 'Current password is incorrect');
+                return;
+            }
+
+            // Update password
+            $user->update([
+                'password' => Hash::make($this->newPassword)
+            ]);
+
+            $this->closeModal();
+            
+            // Dispatch success event for toast notification
+            $user = Auth::user();
+            $this->dispatch('password-changed', message: "Your password has been changed successfully!");
+        } catch (\Exception $e) {
+            // Handle any exceptions
+        } finally {
+            $this->processing = false;
         }
-
-        // Update password
-        $user->update([
-            'password' => Hash::make($this->newPassword)
-        ]);
-
-        $this->closeModal();
-        
-        // Dispatch success event for toast notification
-        $user = Auth::user();
-        $this->dispatch('password-changed', message: "Your password has been changed successfully!");
     }
 
     public function render()

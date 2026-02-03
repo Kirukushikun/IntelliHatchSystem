@@ -12,10 +12,17 @@ class Display extends Component
     public $sortField = 'first_name';
     public $sortDirection = 'asc';
     public $page = 1;
+    public $statusFilter = 'all'; // all, enabled, disabled
+    public $dateFrom = ''; // Custom date range from
+    public $dateTo = ''; // Custom date range to
+    public $showFilterDropdown = false;
 
     protected $queryString = [
         'search' => ['except' => ''],
         'page' => ['except' => 1],
+        'statusFilter' => ['except' => 'all'],
+        'dateFrom' => ['except' => ''],
+        'dateTo' => ['except' => ''],
     ];
 
     protected $listeners = ['refreshUsers' => '$refresh'];
@@ -24,11 +31,51 @@ class Display extends Component
     {
         $this->search = request()->get('search', '');
         $this->page = request()->get('page', 1);
+        $this->statusFilter = request()->get('statusFilter', 'all');
+        $this->dateFrom = request()->get('dateFrom', '');
+        $this->dateTo = request()->get('dateTo', '');
     }
 
     public function updatingSearch()
     {
         $this->page = 1;
+    }
+
+    public function updatingStatusFilter()
+    {
+        $this->page = 1;
+    }
+
+    public function updatedDateFrom()
+    {
+        // Ensure dateFrom is not after dateTo
+        if ($this->dateFrom && $this->dateTo && $this->dateFrom > $this->dateTo) {
+            $this->dateTo = ''; // Clear dateTo if it's before the new dateFrom
+        }
+        $this->page = 1;
+    }
+
+    public function updatedDateTo()
+    {
+        // Ensure dateTo is not before dateFrom
+        if ($this->dateTo && $this->dateFrom && $this->dateTo < $this->dateFrom) {
+            $this->dateTo = ''; // Clear dateTo if it's before dateFrom
+        }
+        $this->page = 1;
+    }
+
+    public function toggleFilterDropdown()
+    {
+        $this->showFilterDropdown = !$this->showFilterDropdown;
+    }
+
+    public function resetFilters()
+    {
+        $this->statusFilter = 'all';
+        $this->dateFrom = '';
+        $this->dateTo = '';
+        $this->page = 1;
+        $this->showFilterDropdown = false;
     }
 
     public function sortBy($field)
@@ -69,8 +116,25 @@ class Display extends Component
                 $query->where('first_name', 'like', '%' . $this->search . '%')
                       ->orWhere('last_name', 'like', '%' . $this->search . '%')
                       ->orWhere('username', 'like', '%' . $this->search . '%');
-            })
-            ->orderBy($this->sortField, $this->sortDirection)
+            });
+
+        // Apply status filter
+        if ($this->statusFilter !== 'all') {
+            $users->where('is_disabled', $this->statusFilter === 'disabled');
+        }
+
+        // Apply date filter
+        if ($this->dateFrom || $this->dateTo) {
+            if ($this->dateFrom && $this->dateTo) {
+                $users->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+            } elseif ($this->dateFrom) {
+                $users->whereDate('created_at', '>=', $this->dateFrom);
+            } elseif ($this->dateTo) {
+                $users->whereDate('created_at', '<=', $this->dateTo);
+            }
+        }
+
+        $users = $users->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage, ['*'], 'page', $this->page);
             
         $currentPage = $users->currentPage(); // Get from paginator

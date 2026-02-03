@@ -34,6 +34,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/forms/incubator-routine', function () {
             return view('shared.forms.incubator-routine');
         })->name('user.forms.incubator-routine');
+
+        Route::get('/user/change-password', function () {
+            return view('auth.change-password-page');
+        })->name('user.change-password');
     });
 
     // Admin routes
@@ -53,6 +57,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/users', function () {
             return view('admin.users');
         })->name('admin.users');
+
+        Route::get('/admin/change-password', function () {
+            return view('auth.change-password-page');
+        })->name('admin.change-password');
     });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
