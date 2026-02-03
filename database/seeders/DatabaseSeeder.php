@@ -16,20 +16,39 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
+        User::factory()->create([
+            'first_name' => 'Jeff',
+            'last_name' => 'Montiano',
+            'username' => 'JMontiano',
+            'user_type' => '0',
+        ]);
 
         User::factory()->create([
-            'first_name' => 'User',
-            'last_name' => 'Name',
-            'username' => 'UName',
-            'user_type' => 1,
-            'password' => bcrypt('brookside25'),
+            'first_name' => 'Adam',
+            'last_name' => 'Trinidad',
+            'username' => 'ATrinidad',
+            'user_type' => '0',
         ]);
+
         User::factory()->create([
-            'first_name' => 'User',
-            'last_name' => 'Admin',
-            'username' => 'UAdmin',
-            'user_type' => 0,
-            'password' => bcrypt('brookside25'),
+            'first_name' => 'Iverson',
+            'last_name' => 'Guno',
+            'username' => 'IGuno',
+            'user_type' => '0',
+        ]);
+
+        User::factory()->create([
+            'first_name' => 'Raniel',
+            'last_name' => 'Roque',
+            'username' => 'RRoque',
+            'user_type' => '0',
+        ]);
+        
+        User::factory()->create([
+            'first_name' => 'Jenny',
+            'last_name' => 'Santos',
+            'username' => 'JSantos',
+            'user_type' => '0',
         ]);
     }
 }
