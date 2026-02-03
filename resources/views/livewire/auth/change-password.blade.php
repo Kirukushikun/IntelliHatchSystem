@@ -51,7 +51,7 @@
 
         <!-- Actions -->
         <div class="flex justify-end space-x-3">
-            <a href="{{ route(((int) Auth::user()->user_type) === 0 ? 'admin.dashboard' : 'user.forms') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-150">
+            <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-150">
                 Cancel
             </a>
             <x-button 
@@ -81,7 +81,7 @@
             
             // Redirect after successful password change
             setTimeout(() => {
-                window.location.href = '{{ route(((int) Auth::user()->user_type) === 0 ? "admin.dashboard" : "user.forms") }}';
+                window.location.href = '{{ route("admin.dashboard") }}';
             }, 1500);
         });
     });

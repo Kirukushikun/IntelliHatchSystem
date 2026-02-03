@@ -54,7 +54,6 @@ class Create extends Component
                 'last_name' => $this->lastName,
                 'username' => $username,
                 'password' => bcrypt('brookside25'),
-                'user_type' => 1, // Regular user
             ]);
 
             $this->closeModal();

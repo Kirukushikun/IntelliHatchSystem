@@ -111,7 +111,6 @@ class Display extends Component
     public function getPaginationData()
     {
         $users = User::query()
-            ->where('user_type', 1)
             ->where(function($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
                       ->orWhere('last_name', 'like', '%' . $this->search . '%')
@@ -177,7 +176,6 @@ class Display extends Component
         
         // Validate page number
         $totalPages = User::query()
-            ->where('user_type', 1)
             ->where(function($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
                       ->orWhere('last_name', 'like', '%' . $this->search . '%')

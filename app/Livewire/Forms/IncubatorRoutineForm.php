@@ -91,7 +91,7 @@ class IncubatorRoutineForm extends FormNavigation
             $photoId = (int) DB::table('photos')->insertGetId([
                 'public_path' => $url,
                 'disk' => 'public',
-                'uploaded_by' => Auth::id(),
+                'uploaded_by' => Auth::id() ?: null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -122,7 +122,7 @@ class IncubatorRoutineForm extends FormNavigation
                 'form_type_id' => $formTypeId,
                 'form_inputs' => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by' => Auth::id(),
+                'uploaded_by' => Auth::id() ?: null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -151,7 +151,7 @@ class IncubatorRoutineForm extends FormNavigation
                 'form_type_id' => $formTypeId,
                 'form_inputs' => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by' => Auth::id(),
+                'uploaded_by' => Auth::id() ?: null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
