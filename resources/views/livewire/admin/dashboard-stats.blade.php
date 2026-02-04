@@ -21,7 +21,8 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($cards as $card)
-            <div x-show="!query || '{{ strtolower($card['type_name'] ?? '') }}'.includes(query.toLowerCase())" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group border-l-4 border-amber-500">
+            <div x-show="!query || '{{ strtolower($card['type_name'] ?? '') }}'.includes(query.toLowerCase())" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group border-l-4 border-amber-500 cursor-pointer">
+                <a href="{{ route('admin.incubator-routine-dashboard') }}" class="block h-full">
                 <!-- Card Header -->
                 <div class="px-6 py-4">
                     <div class="flex items-center justify-between">
@@ -50,6 +51,7 @@
                         </div>
                     </div>
                 </div>
+                </a>
             </div>
         @endforeach
     </div>

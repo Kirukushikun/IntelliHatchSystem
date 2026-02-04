@@ -36,6 +36,10 @@ Route::middleware('auth')->group(function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
 
+        Route::get('/admin/incubator-routine-dashboard', function () {
+            return view('admin.incubator-routine-dashboard');
+        })->name('admin.incubator-routine-dashboard');
+
         Route::get('/admin/users', function () {
             return view('admin.users');
         })->name('admin.users');

@@ -38,6 +38,7 @@
     isCollapsed: localStorage.getItem('sidebar-collapsed') !== 'false',
     toggleSidebar() {
         this.isCollapsed = !this.isCollapsed;
+        localStorage.setItem('sidebar-collapsed', this.isCollapsed);
     },
     toggleMobile() {
         this.isOpen = !this.isOpen;
@@ -47,6 +48,7 @@
     }
 }" 
 @toggle-sidebar.window="toggleSidebar()"
+@toggle-mobile.window="toggleMobile()"
 class="relative h-screen"
 x-cloak>
 
@@ -73,7 +75,7 @@ x-cloak>
     @click.stop>
         
         <!-- Header -->
-        <div class="flex items-center h-16 px-4 border-b border-gray-200 shrink-0">
+        <div class="flex items-center h-16 px-4 border-b border-gray-200 shrink-0 bg-white">
             <!-- Logo/Brand - Show when NOT collapsed -->
             <div x-show="!isCollapsed" class="flex items-center flex-1">
                 <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
@@ -91,7 +93,7 @@ x-cloak>
             <button @click="closeMobile()" 
                     class="lg:hidden ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
             
@@ -115,7 +117,7 @@ x-cloak>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent" x-cloak>
+        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto bg-white" x-cloak>
             @foreach($sidebarItems as $item)
                 <a href="{{ $item['href'] }}" 
                    x-data="{ 
@@ -132,9 +134,9 @@ x-cloak>
                    @mouseenter="if(isCollapsed) { showTooltip = true; updatePosition(); }"
                    @mouseleave="showTooltip = false"
                    @click="closeMobile()"
-                   class="group relative flex items-center px-2 py-2 text-sm font-medium rounded-lg transition-colors
+                   class="group relative flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->is($item['active'] ?? $item['href']) 
-                              ? 'bg-orange-100 text-orange-700' 
+                              ? 'bg-orange-100 text-orange-700 shadow-sm' 
                               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                    :class="isCollapsed ? 'justify-center' : ''">
                     
@@ -164,7 +166,7 @@ x-cloak>
                           x-transition:enter="transition ease-in-out duration-200"
                           x-transition:enter-start="opacity-0 transform scale-95"
                           x-transition:enter-end="opacity-100 transform scale-100"
-                          class="ml-3">{{ $item['label'] }}</span>
+                          class="ml-3 whitespace-nowrap">{{ $item['label'] }}</span>
                     
                     <!-- Tooltip for collapsed state - teleported to body -->
                     <template x-teleport="body">
@@ -176,7 +178,7 @@ x-cloak>
                              x-transition:leave-start="opacity-100 scale-100"
                              x-transition:leave-end="opacity-0 scale-90"
                              :style="`position: fixed; left: ${tooltipPosition.x}px; top: ${tooltipPosition.y}px; transform: translateY(-50%);`"
-                             class="px-2 py-1 bg-gray-900 text-white text-sm rounded-md whitespace-nowrap pointer-events-none z-100">
+                             class="px-2 py-1 bg-gray-900 text-white text-sm rounded-md whitespace-nowrap pointer-events-none z-50">
                             {{ $item['label'] }}
                             <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 rotate-45 w-2 h-2 bg-gray-900"></div>
                         </div>
