@@ -82,7 +82,7 @@ class Display extends Component
         $this->page = 1;
     }
 
-    public function getIncubatorsProperty()
+    public function getPaginationData()
     {
         $incubators = Incubator::query()
             ->where(function($query) {
@@ -104,14 +104,47 @@ class Display extends Component
             $incubators->whereDate('creationDate', '<=', $this->dateTo);
         }
 
-        // Apply sorting
-        $incubators->orderBy($this->sortField, $this->sortDirection);
-
-        return $incubators->paginate($this->perPage);
+        $incubators = $incubators->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
+            
+        $currentPage = $incubators->currentPage(); // Get from paginator
+        $lastPage = $incubators->lastPage();
+        
+        // Sync the page property with the actual current page
+        $this->page = $currentPage;
+        
+        // Calculate the range of pages to show (max 3)
+        if ($lastPage <= 3) {
+            $startPage = 1;
+            $endPage = $lastPage;
+        } elseif ($currentPage == 1) {
+            $startPage = 1;
+            $endPage = min(3, $lastPage);
+        } elseif ($currentPage == $lastPage) {
+            $startPage = max(1, $lastPage - 2);
+            $endPage = $lastPage;
+        } else {
+            $startPage = max(1, $currentPage - 1);
+            $endPage = min($lastPage, $currentPage + 1);
+        }
+        
+        $pages = [];
+        for ($i = $startPage; $i <= $endPage; $i++) {
+            $pages[] = $i;
+        }
+        
+        return [
+            'incubators' => $incubators,
+            'pages' => $pages,
+            'currentPage' => $currentPage,
+            'lastPage' => $lastPage,
+        ];
     }
 
-    public function getTotalPagesProperty()
+    public function gotoPage($page)
     {
+        $page = (int) $page;
+        
         // Validate page number
         $totalPages = Incubator::query()
             ->where(function($query) {
@@ -131,20 +164,18 @@ class Display extends Component
             })
             ->paginate($this->perPage)
             ->lastPage();
-
-        // Ensure current page is not greater than total pages
-        if ($this->page > $totalPages) {
-            $this->page = $totalPages > 0 ? $totalPages : 1;
+        
+        if ($page < 1) {
+            $page = 1;
+        } elseif ($page > $totalPages) {
+            $page = $totalPages;
         }
-
-        return $totalPages;
+        
+        $this->page = $page;
     }
 
     public function render()
     {
-        return view('livewire.incubator-management.display-incubator-management', [
-            'incubators' => $this->incubators,
-            'totalPages' => $this->totalPages,
-        ]);
+        return view('livewire.incubator-management.display-incubator-management', $this->getPaginationData());
     }
 }

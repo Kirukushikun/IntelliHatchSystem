@@ -6,27 +6,33 @@ use App\Models\Form;
 use App\Models\FormType;
 use App\Models\HatcheryUser;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class IncubatorRoutineDashboard extends Component
 {
-    use WithPagination;
-
     public int $typeId;
     public string $search = '';
     public string $sortField = 'date_submitted';
     public string $sortDirection = 'desc';
+    public int $page = 1;
+    public int $perPage = 15;
+    public array $expandedHeaders = [];
+    public string $dateFrom = '';
+    public string $dateTo = '';
+    public string $shiftFilter = 'all';
+    public bool $showFilterDropdown = false;
 
     public ?FormType $formType = null;
-    public $currentPage = 1;
-    public $lastPage = 1;
-    public $pages = [];
 
     protected $queryString = [
         'search' => ['except' => ''],
         'sortField' => ['except' => 'date_submitted'],
         'sortDirection' => ['except' => 'desc'],
+        'page' => ['except' => 1],
+        'dateFrom' => ['except' => ''],
+        'dateTo' => ['except' => ''],
+        'shiftFilter' => ['except' => 'all'],
     ];
 
     public function mount(): void
@@ -34,6 +40,10 @@ class IncubatorRoutineDashboard extends Component
         // Hardcode the incubator routine form type ID (assuming it's ID 1)
         $this->typeId = 1;
         $this->loadFormType();
+        $this->page = (int) request()->query('page', 1);
+        
+        // Debug: Log that component is mounting
+        Log::info('IncubatorRoutineDashboard component mounted with typeId: ' . $this->typeId);
     }
 
     protected function loadFormType(): void
@@ -53,14 +63,50 @@ class IncubatorRoutineDashboard extends Component
             $this->sortField = $field;
             $this->sortDirection = 'desc';
         }
+        $this->page = 1;
     }
 
     public function updatingSearch(): void
     {
-        $this->resetPage();
+        $this->page = 1;
     }
 
-    public function render()
+    public function updatingDateFrom(): void
+    {
+        if ($this->dateFrom && $this->dateTo && $this->dateFrom > $this->dateTo) {
+            $this->dateTo = '';
+        }
+        $this->page = 1;
+    }
+
+    public function updatingDateTo(): void
+    {
+        if ($this->dateTo && $this->dateFrom && $this->dateTo < $this->dateFrom) {
+            $this->dateTo = '';
+        }
+        $this->page = 1;
+    }
+
+    public function updatingShiftFilter(): void
+    {
+        $this->page = 1;
+    }
+
+    public function toggleFilterDropdown(): void
+    {
+        $this->showFilterDropdown = !$this->showFilterDropdown;
+    }
+
+    public function resetFilters(): void
+    {
+        $this->dateFrom = '';
+        $this->dateTo = '';
+        $this->shiftFilter = 'all';
+        $this->page = 1;
+        $this->showFilterDropdown = false;
+    }
+
+    public function getPaginationData()
     {
         $query = Form::with(['user', 'formType', 'incubator'])
             ->where('form_type_id', $this->typeId);
@@ -76,36 +122,60 @@ class IncubatorRoutineDashboard extends Component
             });
         }
 
-        $forms = $query->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
+        // Apply date filter
+        if ($this->dateFrom || $this->dateTo) {
+            if ($this->dateFrom && $this->dateTo) {
+                $query->whereBetween('date_submitted', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+            } elseif ($this->dateFrom) {
+                $query->whereDate('date_submitted', '>=', $this->dateFrom);
+            } elseif ($this->dateTo) {
+                $query->whereDate('date_submitted', '<=', $this->dateTo);
+            }
+        }
 
-        // Calculate pagination data
-        $this->currentPage = $forms->currentPage();
-        $this->lastPage = $forms->lastPage();
+        // Apply shift filter
+        if ($this->shiftFilter !== 'all') {
+            $query->where(function ($q) {
+                $q->where('form_inputs', 'like', '%"' . $this->shiftFilter . '"%')
+                  ->orWhere('form_inputs', 'like', '%' . $this->shiftFilter . '%');
+            });
+        }
+
+        $forms = $query->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
+            
+        $currentPage = $forms->currentPage();
+        $lastPage = $forms->lastPage();
+        
+        // Sync the page property with the actual current page
+        $this->page = $currentPage;
         
         // Calculate the range of pages to show (max 3)
-        if ($this->lastPage <= 3) {
+        if ($lastPage <= 3) {
             $startPage = 1;
-            $endPage = $this->lastPage;
-        } elseif ($this->currentPage == 1) {
+            $endPage = $lastPage;
+        } elseif ($currentPage == 1) {
             $startPage = 1;
-            $endPage = min(3, $this->lastPage);
-        } elseif ($this->currentPage == $this->lastPage) {
-            $startPage = max(1, $this->lastPage - 2);
-            $endPage = $this->lastPage;
+            $endPage = min(3, $lastPage);
+        } elseif ($currentPage == $lastPage) {
+            $startPage = max(1, $lastPage - 2);
+            $endPage = $lastPage;
         } else {
-            $startPage = max(1, $this->currentPage - 1);
-            $endPage = min($this->lastPage, $this->currentPage + 1);
+            $startPage = max(1, $currentPage - 1);
+            $endPage = min($lastPage, $currentPage + 1);
         }
         
-        $this->pages = [];
+        $pages = [];
         for ($i = $startPage; $i <= $endPage; $i++) {
-            $this->pages[] = $i;
+            $pages[] = $i;
         }
-
-        return view('livewire.forms-dashboard.incubator-routine-dashboard', [
+        
+        return [
             'forms' => $forms,
-        ]);
+            'pages' => $pages,
+            'currentPage' => $currentPage,
+            'lastPage' => $lastPage,
+        ];
     }
 
     public function gotoPage($page): void
@@ -114,7 +184,7 @@ class IncubatorRoutineDashboard extends Component
         
         // Validate page number
         $totalPages = Form::where('form_type_id', $this->typeId)
-            ->paginate(15)
+            ->paginate($this->perPage)
             ->lastPage();
         
         if ($page < 1) {
@@ -123,6 +193,44 @@ class IncubatorRoutineDashboard extends Component
             $page = $totalPages;
         }
         
-        $this->setPage($page);
+        $this->page = $page;
+    }
+
+    public function truncateText($text, $maxLength = 10, $headerKey = null)
+    {
+        // If header is expanded, show full text
+        if ($headerKey && isset($this->expandedHeaders[$headerKey]) && $this->expandedHeaders[$headerKey]) {
+            return $text;
+        }
+        
+        // Check if text needs truncation
+        if (strlen($text) <= $maxLength) {
+            return $text;
+        }
+        
+        return substr($text, 0, $maxLength) . '...';
+    }
+
+    public function toggleHeader($headerKey): void
+    {
+        $this->expandedHeaders[$headerKey] = !($this->expandedHeaders[$headerKey] ?? false);
+    }
+
+    public function refresh(): void
+    {
+        // This method is called by wire:poll
+        // The component will automatically re-render
+    }
+
+    public function render()
+    {
+        $paginationData = $this->getPaginationData();
+        
+        return view('livewire.forms-dashboard.incubator-routine-dashboard', [
+            'forms' => $paginationData['forms'],
+            'pages' => $paginationData['pages'],
+            'currentPage' => $paginationData['currentPage'],
+            'lastPage' => $paginationData['lastPage'],
+        ]);
     }
 }

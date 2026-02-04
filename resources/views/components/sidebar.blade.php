@@ -10,7 +10,10 @@
             'label' => 'Dashboard',
             'href' => '/admin/dashboard',
             'icon' => 'dashboard',
-            'active' => 'admin/dashboard'
+            'active' => 'admin/dashboard*',
+            'customActive' => function() {
+                return request()->is('admin/dashboard*') || request()->is('admin/incubator-routine-dashboard*');
+            }
         ],
         [
             'label' => 'Users',
@@ -76,8 +79,8 @@ x-cloak>
         
         <!-- Header -->
         <div class="flex items-center h-16 px-4 border-b border-gray-200 shrink-0 bg-white">
-            <!-- Logo/Brand - Show when NOT collapsed -->
-            <div x-show="!isCollapsed" class="flex items-center flex-1">
+            <!-- Logo/Brand - Show when NOT collapsed OR in mobile view -->
+            <div x-show="!isCollapsed || window.innerWidth < 1024" class="flex items-center flex-1">
                 <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -135,10 +138,12 @@ x-cloak>
                    @mouseleave="showTooltip = false"
                    @click="closeMobile()"
                    class="group relative flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->is($item['active'] ?? $item['href']) 
+                          {{ isset($item['customActive']) && $item['customActive']() 
                               ? 'bg-orange-100 text-orange-700 shadow-sm' 
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                   :class="isCollapsed ? 'justify-center' : ''">
+                              : (request()->is($item['active'] ?? $item['href']) 
+                                  ? 'bg-orange-100 text-orange-700 shadow-sm' 
+                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900') }}"
+                   :class="isCollapsed && window.innerWidth >= 1024 ? 'justify-center' : ''">
                     
                     <!-- Icon -->
                     <div class="shrink-0 w-6 h-6 flex items-center justify-center">
@@ -162,7 +167,7 @@ x-cloak>
                     </div>
                     
                     <!-- Text -->
-                    <span x-show="!isCollapsed" 
+                    <span x-show="!isCollapsed || window.innerWidth < 1024" 
                           x-transition:enter="transition ease-in-out duration-200"
                           x-transition:enter-start="opacity-0 transform scale-95"
                           x-transition:enter-end="opacity-100 transform scale-100"
@@ -170,7 +175,7 @@ x-cloak>
                     
                     <!-- Tooltip for collapsed state - teleported to body -->
                     <template x-teleport="body">
-                        <div x-show="isCollapsed && showTooltip" 
+                        <div x-show="isCollapsed && showTooltip && window.innerWidth >= 1024" 
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-90"
                              x-transition:enter-end="opacity-100 scale-100"

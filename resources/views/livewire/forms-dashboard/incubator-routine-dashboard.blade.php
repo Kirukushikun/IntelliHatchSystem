@@ -27,37 +27,7 @@
                 return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #f3f4f6; color: #374151;" title="Original: \'' . $value . '\'">' . ($value ?: 'Empty') . '</span>';
         }
     }
-
-    function truncateHeader($text, $maxLength = 15) {
-        if (strlen($text) <= $maxLength) {
-            return $text;
-        }
-        return substr($text, 0, $maxLength) . '...';
-    }
 @endphp
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.truncatable-header').forEach(function(header) {
-        const fullText = header.getAttribute('data-full-text');
-        const shortText = header.getAttribute('data-short-text');
-        let isTruncated = true;
-        
-        header.style.cursor = 'pointer';
-        header.title = 'Click to expand/collapse';
-        
-        header.addEventListener('click', function() {
-            if (isTruncated) {
-                header.textContent = fullText;
-                isTruncated = false;
-            } else {
-                header.textContent = shortText;
-                isTruncated = true;
-            }
-        });
-    });
-});
-</script>
 
 <div wire:poll.2s>
     <!-- Header with Title and Search -->
@@ -73,8 +43,82 @@ document.addEventListener('DOMContentLoaded', function() {
             <input
                 wire:model.live="search"
                 placeholder="Search forms..."
-                class="w-80 pl-11 pr-4 py-3 text-sm bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 shadow-sm"
+                class="w-80 pl-11 pr-12 py-3 text-sm bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 shadow-sm"
             />
+            <button type="button" wire:click="toggleFilterDropdown" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#9CA3AF" class="w-5 h-5">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M15 2v1.67l-5 4.759V14H6V8.429l-5-4.76V2h14zM7 8v5h2V8l5-4.76V3H2v.24L7 8z"/>
+                </svg>
+            </button>
+            
+            <!-- Filter Dropdown -->
+            @if ($showFilterDropdown)
+                <div class="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div class="p-4">
+                        <div class="grid grid-cols-2 gap-1">
+                            <!-- Shift Filter Column -->
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900 mb-3">Shift</h3>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" wire:model="shiftFilter" value="all" class="mr-2">
+                                        <span class="text-sm text-gray-700">All Shifts</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" wire:model="shiftFilter" value="1st Shift" class="mr-2">
+                                        <span class="text-sm text-gray-700">1st Shift</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" wire:model="shiftFilter" value="2nd Shift" class="mr-2">
+                                        <span class="text-sm text-gray-700">2nd Shift</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" wire:model="shiftFilter" value="3rd Shift" class="mr-2">
+                                        <span class="text-sm text-gray-700">3rd Shift</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Date Filter Column -->
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900 mb-3">Date Range</h3>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">From</label>
+                                        <input 
+                                            type="date" 
+                                            wire:model="dateFrom"
+                                            class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="YYYY-MM-DD"
+                                            max="{{ $dateTo ?: now()->format('Y-m-d') }}"
+                                            wire:target="dateFrom"
+                                            wire:loading.attr="disabled"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">To</label>
+                                        <input 
+                                            type="date" 
+                                            wire:model="dateTo"
+                                            class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="YYYY-MM-DD"
+                                            max="{{ now()->format('Y-m-d') }}"
+                                            min="{{ $dateFrom ?: '' }}"
+                                            wire:target="dateTo"
+                                            wire:loading.attr="disabled"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between mt-4 pt-3 border-t border-gray-200">
+                            <button type="button" wire:click="resetFilters" class="text-sm text-gray-600 hover:text-gray-800">Reset</button>
+                            <button type="button" wire:click="toggleFilterDropdown" class="text-sm text-blue-600 hover:text-blue-800">Done</button>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -138,89 +182,140 @@ document.addEventListener('DOMContentLoaded', function() {
                             </p>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Egg Setting Preparation" data-short-text="{{ truncateHeader('Egg Setting Preparation') }}">
-                                {{ truncateHeader('Egg Setting Preparation') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('egg_setting_preparation')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Egg Setting Preparation (click to expand/collapse)">
+                                {{ $this->truncateText('Egg Setting Preparation', 10, 'egg_setting_preparation') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Record Egg Setting Time" data-short-text="{{ truncateHeader('Record Egg Setting Time') }}">
-                                {{ truncateHeader('Record Egg Setting Time') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('record_egg_setting_time')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Record Egg Setting Time (click to expand/collapse)">
+                                {{ $this->truncateText('Record Egg Setting Time', 10, 'record_egg_setting_time') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Assist in Random Candling" data-short-text="{{ truncateHeader('Assist in Random Candling') }}">
-                                {{ truncateHeader('Assist in Random Candling') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('assist_in_random_candling')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Assist in Random Candling (click to expand/collapse)">
+                                {{ $this->truncateText('Assist in Random Candling', 10, 'assist_in_random_candling') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Check Rack Baffle Condition" data-short-text="{{ truncateHeader('Check Rack Baffle Condition') }}">
-                                {{ truncateHeader('Check Rack Baffle Condition') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('check_rack_baffle_condition')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Check Rack Baffle Condition (click to expand/collapse)">
+                                {{ $this->truncateText('Check Rack Baffle Condition', 10, 'check_rack_baffle_condition') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Record Egg Setting on Board" data-short-text="{{ truncateHeader('Record Egg Setting on Board') }}">
-                                {{ truncateHeader('Record Egg Setting on Board') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('record_egg_setting_on_board')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Record Egg Setting on Board (click to expand/collapse)">
+                                {{ $this->truncateText('Record Egg Setting on Board', 10, 'record_egg_setting_on_board') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Check Water Level of Blue Tank" data-short-text="{{ truncateHeader('Check Water Level of Blue Tank') }}">
-                                {{ truncateHeader('Check Water Level of Blue Tank') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('check_water_level_of_blue_tank')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Check Water Level of Blue Tank (click to expand/collapse)">
+                                {{ $this->truncateText('Check Water Level of Blue Tank', 10, 'check_water_level_of_blue_tank') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Check Spray Nozzle and Water Pan" data-short-text="{{ truncateHeader('Check Spray Nozzle and Water Pan') }}">
-                                {{ truncateHeader('Check Spray Nozzle and Water Pan') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('check_spray_nozzle_and_water_pan')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Check Spray Nozzle and Water Pan (click to expand/collapse)">
+                                {{ $this->truncateText('Check Spray Nozzle and Water Pan', 10, 'check_spray_nozzle_and_water_pan') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Clean and Refill Water Reservoir" data-short-text="{{ truncateHeader('Clean and Refill Water Reservoir') }}">
-                                {{ truncateHeader('Clean and Refill Water Reservoir') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('clean_and_refill_water_reservoir')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Clean and Refill Water Reservoir (click to expand/collapse)">
+                                {{ $this->truncateText('Clean and Refill Water Reservoir', 10, 'clean_and_refill_water_reservoir') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Cleaning of Incubator Floor Area" data-short-text="{{ truncateHeader('Cleaning of Incubator Floor Area') }}">
-                                {{ truncateHeader('Cleaning of Incubator Floor Area') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('cleaning_of_incubator_floor_area')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Cleaning of Incubator Floor Area (click to expand/collapse)">
+                                {{ $this->truncateText('Cleaning of Incubator Floor Area', 10, 'cleaning_of_incubator_floor_area') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Check Incubator Fans for Vibration" data-short-text="{{ truncateHeader('Check Incubator Fans for Vibration') }}">
-                                {{ truncateHeader('Check Incubator Fans for Vibration') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('check_incubator_fans_for_vibration')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Check Incubator Fans for Vibration (click to expand/collapse)">
+                                {{ $this->truncateText('Check Incubator Fans for Vibration', 10, 'check_incubator_fans_for_vibration') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Check Wick for Replacement Washing" data-short-text="{{ truncateHeader('Check Wick for Replacement Washing') }}">
-                                {{ truncateHeader('Check Wick for Replacement Washing') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('check_wick_for_replacement_washing')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Check Wick for Replacement Washing (click to expand/collapse)">
+                                {{ $this->truncateText('Check Wick for Replacement Washing', 10, 'check_wick_for_replacement_washing') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Cleaning Incubator Roof and Plenum" data-short-text="{{ truncateHeader('Cleaning Incubator Roof and Plenum') }}">
-                                {{ truncateHeader('Cleaning Incubator Roof and Plenum') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('cleaning_incubator_roof_and_plenum')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Cleaning Incubator Roof and Plenum (click to expand/collapse)">
+                                {{ $this->truncateText('Cleaning Incubator Roof and Plenum', 10, 'cleaning_incubator_roof_and_plenum') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Check Curtain Position and Condition" data-short-text="{{ truncateHeader('Check Curtain Position and Condition') }}">
-                                {{ truncateHeader('Check Curtain Position and Condition') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('check_curtain_position_and_condition')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Check Curtain Position and Condition (click to expand/collapse)">
+                                {{ $this->truncateText('Check Curtain Position and Condition', 10, 'check_curtain_position_and_condition') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Check Incubator Doors for Air Leakage" data-short-text="{{ truncateHeader('Check Incubator Doors for Air Leakage') }}">
-                                {{ truncateHeader('Check Incubator Doors for Air Leakage') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('check_incubator_doors_for_air_leakage')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Check Incubator Doors for Air Leakage (click to expand/collapse)">
+                                {{ $this->truncateText('Check Incubator Doors for Air Leakage', 10, 'check_incubator_doors_for_air_leakage') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Checking of Baggy Against the Gaskets" data-short-text="{{ truncateHeader('Checking of Baggy Against the Gaskets') }}">
-                                {{ truncateHeader('Checking of Baggy Against the Gaskets') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('checking_of_baggy_against_the_gaskets')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Checking of Baggy Against the Gaskets (click to expand/collapse)">
+                                {{ $this->truncateText('Checking of Baggy Against the Gaskets', 10, 'checking_of_baggy_against_the_gaskets') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Drain Water Out from Air Compressor Tank" data-short-text="{{ truncateHeader('Drain Water Out from Air Compressor Tank') }}">
-                                {{ truncateHeader('Drain Water Out from Air Compressor Tank') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('drain_water_out_from_air_compressor_tank')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Drain Water Out from Air Compressor Tank (click to expand/collapse)">
+                                {{ $this->truncateText('Drain Water Out from Air Compressor Tank', 10, 'drain_water_out_from_air_compressor_tank') }}
+                            </button>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 truncatable-header" data-full-text="Cleaning of Entrance and Exit Area Flooring" data-short-text="{{ truncateHeader('Cleaning of Entrance and Exit Area Flooring') }}">
-                                {{ truncateHeader('Cleaning of Entrance and Exit Area Flooring') }}
-                            </p>
+                            <button 
+                                wire:click="toggleHeader('cleaning_of_entrance_and_exit_area_flooring')"
+                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
+                                title="Cleaning of Entrance and Exit Area Flooring (click to expand/collapse)">
+                                {{ $this->truncateText('Cleaning of Entrance and Exit Area Flooring', 10, 'cleaning_of_entrance_and_exit_area_flooring') }}
+                            </button>
                         </th>
                     </tr>
                 </thead>

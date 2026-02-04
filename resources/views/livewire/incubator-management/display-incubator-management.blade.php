@@ -217,56 +217,18 @@
             </table>
         </div>
         
-        <!-- Pagination -->
-        @if($incubators->hasPages())
-            <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1 flex justify-between sm:hidden">
-                        <button wire:click="previousPage" wire:disabled="{{ $incubators->onFirstPage() }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Previous
-                        </button>
-                        <button wire:click="nextPage" wire:disabled="{{ $incubators->onLastPage() }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Next
-                        </button>
-                    </div>
-                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-sm text-gray-700">
-                                Showing <span class="font-medium">{{ $incubators->firstItem() }}</span> to 
-                                <span class="font-medium">{{ $incubators->lastItem() }}</span> of 
-                                <span class="font-medium">{{ $incubators->total() }}</span> results
-                            </p>
-                        </div>
-                        <div>
-                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                <button wire:click="previousPage" wire:disabled="{{ $incubators->onFirstPage() }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                    </svg>
-                                </button>
-                                
-                                <!-- Pagination Links -->
-                                @foreach($incubators->links()->elements as $element)
-                                    @if($element['url'])
-                                        <button wire:click="goToPage({{ $element['page'] }})" class="{{ $element['active'] ? 'bg-blue-50 border-blue-500 text-blue-600 relative z-10' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50' }} relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                            {{ $element['label'] }}
-                                        </button>
-                                    @else
-                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-gray-50 text-sm font-medium text-gray-700">
-                                            {{ $element['label'] }}
-                                        </span>
-                                    @endif
-                                @endforeach
-                                
-                                <button wire:click="nextPage" wire:disabled="{{ $incubators->onLastPage() }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </button>
-                            </nav>
-                        </div>
-                    </div>
+        @if ($incubators->hasPages())
+            <!-- Pagination -->
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center px-3 md:px-4 py-3 border-t border-slate-200 gap-3 sm:gap-0">
+                <div class="text-xs md:text-sm text-slate-500 text-center sm:text-left">
+                    Showing <b>{{ $incubators->firstItem() }}-{{ $incubators->lastItem() }}</b> of {{ $incubators->total() }}
                 </div>
+                <x-custom-pagination 
+                    :current-page="$currentPage"
+                    :last-page="$lastPage"
+                    :pages="$pages"
+                    on-page-change="gotoPage"
+                />
             </div>
         @endif
     </div>
