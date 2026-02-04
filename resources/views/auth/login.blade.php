@@ -9,12 +9,12 @@
     <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-white via-orange-150 to-orange-300 p-4">
         <div class="w-full max-w-md bg-white rounded-xl shadow-lg px-8 pt-6 pb-8">
             
-            <x-title subtitle="{{ request()->is('admin/login') ? 'Log in to your admin account' : 'Log in to your user account' }}">
+            <x-title subtitle="Log in to your admin account">
                 IntelliHatch System
             </x-title>
 
             <!-- Login Form -->
-            <form action="{{ request()->is('admin/login') ? route('admin.login.submit') : route('login.submit') }}" method="POST">
+            <form action="{{ route('login.submit') }}" method="POST">
                 @csrf
                 
                 <x-text-input 
@@ -43,13 +43,19 @@
                         Login
                     </x-button>
                 </div>
-                
-                <div class="text-center mt-3">
-                    <x-button variant="link" size="sm" href="{{ request()->is('admin/login') ? '/login' : '/admin/login' }}">
-                        {{ request()->is('admin/login') ? 'Login as User' : 'Login as Admin' }}
-                    </x-button>
-                </div>
             </form>
+            
+            <!-- Back to Home -->
+            <div class="mt-2 text-center">
+                <x-button 
+                    href="/" 
+                    variant="link" 
+                    size="sm"
+                    icon="arrow-left"
+                >
+                    Back to Home
+                </x-button>
+            </div>
         </div>
     </div>
 </x-layout>

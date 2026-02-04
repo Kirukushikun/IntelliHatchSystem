@@ -6,7 +6,8 @@
     'required' => false,
     'type' => 'text',
     'class' => '',
-    'icon' => ''
+    'icon' => '',
+    'wireModel' => null
 ])
 
 <div class="mb-6 {{ $class }}">
@@ -36,7 +37,11 @@
             type="{{ $type }}" 
             id="{{ $name }}" 
             name="{{ $name }}" 
-            value="{{ old($name, $value) }}" 
+            @if($wireModel)
+                wire:model="{{ $wireModel }}"
+            @else
+                value="{{ old($name, $value) }}"
+            @endif
             placeholder="{{ $placeholder }}"
             @if($required) required @endif
             class="mt-1 block w-full rounded-lg border shadow-sm 

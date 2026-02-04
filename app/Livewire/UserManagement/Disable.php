@@ -3,7 +3,7 @@
 namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
-use App\Models\User;
+use App\Models\HatcheryUser;
 use Illuminate\Support\Facades\Auth;
 
 class Disable extends Component
@@ -18,7 +18,7 @@ class Disable extends Component
 
     public function openModal($userId)
     {
-        $user = User::find($userId);
+        $user = HatcheryUser::find($userId);
         if (!$user) {
             return;
         }
@@ -40,29 +40,22 @@ class Disable extends Component
         $this->processing = true;
 
         try {
-            $user = User::find($this->userId);
+            $user = HatcheryUser::find($this->userId);
             if (!$user) {
                 $this->dispatch('showToast', message: 'User not found', type: 'error');
                 return;
             }
 
-            // Prevent disabling the current authenticated user
-            if ($user->id === Auth::user()->id) {
-                $this->dispatch('showToast', message: 'You cannot disable your own account', type: 'error');
-                return;
-            }
-
-            $newStatus = !$this->isCurrentlyDisabled;
             $user->update([
-                'is_disabled' => $newStatus
+                'is_disabled' => !$this->isCurrentlyDisabled,
             ]);
 
-            $action = $newStatus ? 'disabled' : 'enabled';
-            $userName = $this->userName; // Store before closing modal
+            $action = $this->isCurrentlyDisabled ? 'enabled' : 'disabled';
             $this->closeModal();
-            $this->dispatch('showToast', message: "{$userName}'s account has been {$action}", type: 'success');
+            $this->dispatch('statusToggled');
+            $this->dispatch('showToast', message: "{$this->userName} has been successfully {$action}!", type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('showToast', message: 'Error updating account status', type: 'error');
+            $this->dispatch('showToast', message: 'Failed to update user status. Please try again.', type: 'error');
         } finally {
             $this->processing = false;
         }

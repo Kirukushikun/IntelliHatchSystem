@@ -4,7 +4,7 @@
             [
                 'title' => 'Incubator Routine Checklist Per Shift',
                 'description' => 'Lorem Ipsum',
-                'route' => route((((int) Auth::user()->user_type) === 0 ? 'admin' : 'user') . '.forms.incubator-routine'),
+                'route' => Auth::check() ? route('admin.forms.incubator-routine') : '/forms/incubator-routine',
                 'color' => 'amber',
             ]
         ];
@@ -19,8 +19,8 @@
         ];
     @endphp
     
-    <x-navbar title="Forms" :includeSidebar="true" :user="Auth::user()">
-        <div class="container mx-auto px-4 pb-8 pt-4">
+    <x-navbar title="Forms" :includeSidebar="Auth::check()" :user="Auth::user()">
+        <div class="container mx-auto px-4 pb-8 pt-4" x-data="{ query: '' }">
             <div class="flex items-center justify-between gap-6">
                 <div class="mb-6">
                     <h1 class="text-2xl font-semibold text-gray-900">Forms</h1>
