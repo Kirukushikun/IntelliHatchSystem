@@ -1,4 +1,4 @@
-<div wire:poll="refreshStats">
+<div wire:poll="refreshStats" x-data="{ query: '' }">
     <!-- Header with Search -->
     <div class="flex items-center justify-between gap-6 mb-6">
         <div>
@@ -11,7 +11,7 @@
             </svg>
             <input
                 type="text"
-                wire:model.live="search"
+                x-model="query"
                 placeholder="Search form types..."
                 class="w-80 pl-11 pr-4 py-3 text-sm bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 shadow-sm"
             />
@@ -21,7 +21,8 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($cards as $card)
-            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group border-l-4 border-amber-500">
+            <div x-show="!query || '{{ strtolower($card['type_name'] ?? '') }}'.includes(query.toLowerCase())" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group border-l-4 border-amber-500 cursor-pointer">
+                <a href="{{ route('admin.incubator-routine-dashboard') }}" class="block h-full">
                 <!-- Card Header -->
                 <div class="px-6 py-4">
                     <div class="flex items-center justify-between">
@@ -50,6 +51,7 @@
                         </div>
                     </div>
                 </div>
+                </a>
             </div>
         @endforeach
     </div>

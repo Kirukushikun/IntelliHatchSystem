@@ -10,6 +10,8 @@ class IncubatorRoutineConfig
             'shift' => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
             'alarm_system_condition' => 'required|string|in:Operational,Unoperational',
             'corrective_action' => 'required|string|min:3',
+            'hatchery_man' => 'required|integer|exists:hatchery_users,id',
+            'incubator' => 'required|integer|exists:incubators,id',
             'check_incubator_doors_for_air_leakage' => 'required|string|in:Pending,Done',
             'checking_of_baggy_against_the_gaskets' => 'required|string|in:Pending,Done',
             'check_curtain_position_and_condition' => 'required|string|in:Pending,Done',
@@ -28,8 +30,6 @@ class IncubatorRoutineConfig
             'record_egg_setting_on_board' => 'required|string|in:Pending,Done',
             'record_egg_setting_time' => 'required|string|in:Pending,Done',
             'assist_in_random_candling' => 'required|string|in:Pending,Done',
-            'incubator_machine_inspected' => 'required|array|min:1',
-            'incubator_machine_inspected.*' => 'required|integer|min:1|max:10',
         ];
     }
 
@@ -48,11 +48,10 @@ class IncubatorRoutineConfig
             'alarm_system_condition.in' => 'Please select a valid condition.',
             'corrective_action.required' => 'Please fill in this field.',
             'corrective_action.min' => 'Corrective action must be at least 3 characters.',
-            'incubator_machine_inspected.required' => 'Please select at least one machine inspection number.',
-            'incubator_machine_inspected.min' => 'Please select at least one machine inspection number.',
-            'incubator_machine_inspected.*.integer' => 'Machine inspection numbers must be valid.',
-            'incubator_machine_inspected.*.min' => 'Machine inspection numbers must be between 1 and 10.',
-            'incubator_machine_inspected.*.max' => 'Machine inspection numbers must be between 1 and 10.',
+            'hatchery_man.required' => 'Please select a hatchery man.',
+            'hatchery_man.exists' => 'Please select a valid hatchery man.',
+            'incubator.required' => 'Please select an incubator.',
+            'incubator.exists' => 'Please select a valid incubator.',
         ];
     }
 
@@ -67,6 +66,8 @@ class IncubatorRoutineConfig
             'shift' => '',
             'alarm_system_condition' => '',
             'corrective_action' => '',
+            'hatchery_man' => '',
+            'incubator' => '',
 
             'check_incubator_doors_for_air_leakage' => '',
             'checking_of_baggy_against_the_gaskets' => '',
@@ -89,15 +90,13 @@ class IncubatorRoutineConfig
             'record_egg_setting_on_board' => '',
             'record_egg_setting_time' => '',
             'assist_in_random_candling' => '',
-
-            'incubator_machine_inspected' => [],
         ];
     }
 
     public static function stepFieldMap(): array
     {
         return [
-            1 => ['shift', 'alarm_system_condition', 'corrective_action'],
+            1 => ['shift', 'alarm_system_condition', 'corrective_action', 'hatchery_man', 'incubator'],
             2 => [
                 'check_incubator_doors_for_air_leakage',
                 'checking_of_baggy_against_the_gaskets',
@@ -121,7 +120,6 @@ class IncubatorRoutineConfig
                 'record_egg_setting_on_board',
                 'record_egg_setting_time',
                 'assist_in_random_candling',
-                'incubator_machine_inspected',
             ],
         ];
     }
@@ -134,7 +132,8 @@ class IncubatorRoutineConfig
                 'check_incubator_doors_for_air_leakage',
                 'drain_water_out_from_air_compressor_tank',
                 'check_water_level_of_blue_tank',
-                'incubator_machine_inspected'
+                'hatchery_man',
+                'incubator'
             ],
             'Monday-1st Shift' => [
                 'cleaning_of_incubator_floor_area',

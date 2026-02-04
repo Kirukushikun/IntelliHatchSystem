@@ -11,8 +11,7 @@ class FormType extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'description',
+        'form_name',
     ];
 
     protected $casts = [

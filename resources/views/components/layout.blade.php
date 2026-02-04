@@ -24,7 +24,7 @@
         @endif
         
         <!-- Livewire Styles -->
-        @livewireStyles
+        <livewire:styles />
         
         <style>
             [x-cloak] { display: none !important; }
@@ -34,6 +34,6 @@
         {{ $slot }}
         
         <!-- Livewire Scripts -->
-        @livewireScripts
+        <livewire:scripts />
     </body>
 </html>

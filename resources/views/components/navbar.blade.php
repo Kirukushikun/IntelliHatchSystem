@@ -1,7 +1,7 @@
 @props(['hideDate' => false, 'includeSidebar' => false, 'user' => null, 'title' => null])
 
 @auth
-    @if($includeSidebar && $user && ((int) $user->user_type) === 0)
+    @if($includeSidebar && $user)
         <div class="flex h-screen bg-gray-100">
             <!-- Sidebar -->
             <x-sidebar :user="$user" />
@@ -13,7 +13,7 @@
                     <div class="mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between items-center h-16">
                             <!-- Left side - Logo/Brand -->
-                            <div class="flex items-center space-x-3 flex-1">
+                            <div class="flex items-center space-x-3 flex-1">                                
                                 @if($title)
                                     <div>
                                         <h1 class="text-xl font-bold text-gray-900">
@@ -43,7 +43,7 @@
                             </div>
 
                             <!-- Right side - User Profile Dropdown -->
-                            <div class="relative" x-data="{ open: false }">
+                            <div class="relative" x-data="{ open: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
                                 <button 
                                     @click="open = !open"
                                     class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
@@ -52,12 +52,12 @@
                                 >
                                     <div class="relative">
                                         <div class="w-10 h-10 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                                            {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->username, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                            {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                         </div>
                                         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                                     </div>
                                     
-                                    <div class="hidden sm:block text-left">
+                                    <div class="text-left">
                                         <div class="font-semibold text-gray-900 text-sm">
                                             {{ auth()->user()->full_name }}
                                         </div>
@@ -84,29 +84,23 @@
                                     x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
                                     @click.away="open = false"
                                     class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
-                                    style="display: none;"
+                                    x-cloak
                                 >
                                     <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-12 h-12 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                                                {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->username, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                                {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                             </div>
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-semibold text-gray-900 truncate">
                                                     {{ auth()->user()->full_name }}
-                                                </p>
-                                                <p class="text-xs text-gray-600 truncate">
-                                                    {{ auth()->user()->email }}
-                                                </p>
-                                                <p class="text-xs text-gray-500 truncate">
-                                                    {{ auth()->user()->username }}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="border-t border-gray-200">
-                                        <a href="{{ route((((int) Auth::user()->user_type) === 0 ? 'admin' : 'user') . '.change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
+                                        <a href="{{ route('admin.change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
                                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                             </svg>
@@ -166,7 +160,7 @@
                     </div>
 
                     <!-- Right side - User Profile Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
+                    <div class="relative" x-data="{ open: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
                         <button 
                             @click="open = !open"
                             class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
@@ -175,7 +169,7 @@
                         >
                             <div class="relative">
                                 <div class="w-10 h-10 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                                    {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->username, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                    {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                 </div>
                                 <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                             </div>
@@ -207,29 +201,23 @@
                             x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
                             @click.away="open = false"
                             class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
-                            style="display: none;"
+                            x-cloak
                         >
                             <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-12 h-12 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                                        {{ strtoupper(substr(auth()->user()->first_name ?? auth()->user()->username, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                        {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-semibold text-gray-900 truncate">
                                             {{ auth()->user()->full_name }}
-                                        </p>
-                                        <p class="text-xs text-gray-600 truncate">
-                                            {{ auth()->user()->email }}
-                                        </p>
-                                        <p class="text-xs text-gray-500 truncate">
-                                            {{ auth()->user()->username }}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="border-t border-gray-200">
-                                <a href="{{ route((((int) Auth::user()->user_type) === 0 ? 'admin' : 'user') . '.change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
+                                <a href="{{ route('admin.change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
                                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                     </svg>

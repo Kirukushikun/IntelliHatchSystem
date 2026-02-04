@@ -4,21 +4,28 @@
 ])
 
 @php
-    $isAdmin = $user && ((int) $user->user_type) === 0;
-    
     // Define admin sidebar items
     $sidebarItems = [
         [
             'label' => 'Dashboard',
             'href' => '/admin/dashboard',
             'icon' => 'dashboard',
-            'active' => 'admin/dashboard'
+            'active' => 'admin/dashboard*',
+            'customActive' => function() {
+                return request()->is('admin/dashboard*') || request()->is('admin/incubator-routine-dashboard*');
+            }
         ],
         [
             'label' => 'Users',
             'href' => '/admin/users',
             'icon' => 'users',
             'active' => 'admin/users*'
+        ],
+        [
+            'label' => 'Incubators',
+            'href' => '/admin/incubators',
+            'icon' => 'incubator',
+            'active' => 'admin/incubators*'
         ],
         [
             'label' => 'Forms',
@@ -29,12 +36,12 @@
     ];
 @endphp
 
-@if($isAdmin)
 <div x-data="{ 
     isOpen: false,
-    isCollapsed: false,
+    isCollapsed: localStorage.getItem('sidebar-collapsed') !== 'false',
     toggleSidebar() {
         this.isCollapsed = !this.isCollapsed;
+        localStorage.setItem('sidebar-collapsed', this.isCollapsed);
     },
     toggleMobile() {
         this.isOpen = !this.isOpen;
@@ -43,10 +50,8 @@
         this.isOpen = false;
     }
 }" 
-x-init="$watch('isCollapsed', () => { 
-    localStorage.setItem('sidebar-collapsed', isCollapsed); 
-}); isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true'"
 @toggle-sidebar.window="toggleSidebar()"
+@toggle-mobile.window="toggleMobile()"
 class="relative h-screen"
 x-cloak>
 
@@ -73,9 +78,9 @@ x-cloak>
     @click.stop>
         
         <!-- Header -->
-        <div class="flex items-center h-16 px-4 border-b border-gray-200 shrink-0">
-            <!-- Logo/Brand - Show when NOT collapsed -->
-            <div x-show="!isCollapsed" class="flex items-center flex-1">
+        <div class="flex items-center h-16 px-4 border-b border-gray-200 shrink-0 bg-white">
+            <!-- Logo/Brand - Show when NOT collapsed OR in mobile view -->
+            <div x-show="!isCollapsed || window.innerWidth < 1024" class="flex items-center flex-1">
                 <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -91,7 +96,7 @@ x-cloak>
             <button @click="closeMobile()" 
                     class="lg:hidden ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
             
@@ -115,7 +120,7 @@ x-cloak>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto bg-white" x-cloak>
             @foreach($sidebarItems as $item)
                 <a href="{{ $item['href'] }}" 
                    x-data="{ 
@@ -132,17 +137,23 @@ x-cloak>
                    @mouseenter="if(isCollapsed) { showTooltip = true; updatePosition(); }"
                    @mouseleave="showTooltip = false"
                    @click="closeMobile()"
-                   class="group relative flex items-center px-2 py-2 text-sm font-medium rounded-lg transition-colors
-                          {{ request()->is($item['active'] ?? $item['href']) 
-                              ? 'bg-orange-100 text-orange-700' 
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                   :class="isCollapsed ? 'justify-center' : ''">
+                   class="group relative flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ isset($item['customActive']) && $item['customActive']() 
+                              ? 'bg-orange-100 text-orange-700 shadow-sm' 
+                              : (request()->is($item['active'] ?? $item['href']) 
+                                  ? 'bg-orange-100 text-orange-700 shadow-sm' 
+                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900') }}"
+                   :class="isCollapsed && window.innerWidth >= 1024 ? 'justify-center' : ''">
                     
                     <!-- Icon -->
                     <div class="shrink-0 w-6 h-6 flex items-center justify-center">
                         @if($item['icon'] === 'dashboard')
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                        @elseif($item['icon'] === 'incubator')
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="-2 -3.5 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d='M11.843 12.37A4 4 0 0 0 18 9c0-1.238-.623-3.136-1.58-4.698C15.513 2.822 14.524 2 14 2s-1.513.822-2.42 2.302a12.214 12.214 0 0 0-.935 1.884 12.584 12.584 0 0 0-1.277-2.024C10.522 1.91 12.26 0 14 0c3 0 6 5.686 6 9a6 6 0 0 1-8.943 5.23c.36-.563.63-1.19.786-1.86zM6 17a6 6 0 0 1-6-6c0-3.314 3-9 6-9s6 5.686 6 9a6 6 0 0 1-6 6zm0-2a4 4 0 0 0 4-4c0-1.238-.623-3.136-1.58-4.698C7.513 4.822 6.524 4 6 4s-1.513.822-2.42 2.302C2.623 7.864 2 9.762 2 11a4 4 0 0 0 4 4z'/>
                             </svg>
                         @elseif($item['icon'] === 'forms')
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,15 +167,15 @@ x-cloak>
                     </div>
                     
                     <!-- Text -->
-                    <span x-show="!isCollapsed" 
+                    <span x-show="!isCollapsed || window.innerWidth < 1024" 
                           x-transition:enter="transition ease-in-out duration-200"
                           x-transition:enter-start="opacity-0 transform scale-95"
                           x-transition:enter-end="opacity-100 transform scale-100"
-                          class="ml-3">{{ $item['label'] }}</span>
+                          class="ml-3 whitespace-nowrap">{{ $item['label'] }}</span>
                     
                     <!-- Tooltip for collapsed state - teleported to body -->
                     <template x-teleport="body">
-                        <div x-show="isCollapsed && showTooltip" 
+                        <div x-show="isCollapsed && showTooltip && window.innerWidth >= 1024" 
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-90"
                              x-transition:enter-end="opacity-100 scale-100"
@@ -172,7 +183,7 @@ x-cloak>
                              x-transition:leave-start="opacity-100 scale-100"
                              x-transition:leave-end="opacity-0 scale-90"
                              :style="`position: fixed; left: ${tooltipPosition.x}px; top: ${tooltipPosition.y}px; transform: translateY(-50%);`"
-                             class="px-2 py-1 bg-gray-900 text-white text-sm rounded-md whitespace-nowrap pointer-events-none z-100">
+                             class="px-2 py-1 bg-gray-900 text-white text-sm rounded-md whitespace-nowrap pointer-events-none z-50">
                             {{ $item['label'] }}
                             <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 rotate-45 w-2 h-2 bg-gray-900"></div>
                         </div>
@@ -227,4 +238,3 @@ x-cloak>
         }
     </style>
 </div>
-@endif
