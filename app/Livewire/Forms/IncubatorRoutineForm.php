@@ -4,6 +4,8 @@ namespace App\Livewire\Forms;
 
 use App\Livewire\Configs\IncubatorRoutineConfig;
 use App\Livewire\FormNavigation;
+use App\Models\HatcheryUser;
+use App\Models\Incubator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -21,8 +23,11 @@ class IncubatorRoutineForm extends FormNavigation
 
     public array $uploadedPhotoIds = [];
 
-    /** @var int[] */
-    public array $incubatorMachineInspectedOptions = [1,2,3,4,5,6,7,8,9,10];
+    /** @var array */
+    public $hatcheryMen = [];
+
+    /** @var array */
+    public $incubators = [];
 
     /** @var array<string, string[]> Track uploaded photo URLs per field */
     public array $uploadedPhotoUrls = [];
@@ -34,6 +39,24 @@ class IncubatorRoutineForm extends FormNavigation
 
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
+        
+        // Load hatchery men and incubators
+        $this->hatcheryMen = HatcheryUser::where('is_disabled', false)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get()
+            ->mapWithKeys(function ($user) {
+                return [$user->id => $user->first_name . ' ' . $user->last_name];
+            })
+            ->toArray();
+
+        $this->incubators = Incubator::where('isDisabled', false)
+            ->orderBy('incubatorName')
+            ->get()
+            ->mapWithKeys(function ($incubator) {
+                return [$incubator->id => $incubator->incubatorName];
+            })
+            ->toArray();
     }
 
     public function updatedForm($value, $key): void
@@ -118,11 +141,16 @@ class IncubatorRoutineForm extends FormNavigation
                 throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
+            // Get the original form values before they're removed from JSON
+            $hatcheryMan = $this->form['hatchery_man'] ?? null;
+            $incubator = $this->form['incubator'] ?? null;
+
             DB::table('forms')->insert([
                 'form_type_id' => $formTypeId,
                 'form_inputs' => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by' => Auth::id() ?: null,
+                'uploaded_by' => $hatcheryMan,
+                'incubator_id' => $incubator,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -147,11 +175,16 @@ class IncubatorRoutineForm extends FormNavigation
                 throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
+            // Get the original form values before they're removed from JSON
+            $hatcheryMan = $this->form['hatchery_man'] ?? null;
+            $incubator = $this->form['incubator'] ?? null;
+
             $formId = (int) DB::table('forms')->insertGetId([
                 'form_type_id' => $formTypeId,
                 'form_inputs' => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by' => Auth::id() ?: null,
+                'uploaded_by' => $hatcheryMan,
+                'incubator_id' => $incubator,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -336,9 +369,11 @@ class IncubatorRoutineForm extends FormNavigation
     protected function resetFormExceptShift(bool $keepShift = true, bool $clearShift = false, bool $cleanupPhotos = true): void
     {
         $shift = (string) ($this->form['shift'] ?? '');
+        $hatcheryMan = $this->form['hatchery_man'] ?? '';
+        $incubator = $this->form['incubator'] ?? '';
 
         foreach (array_keys($this->form) as $key) {
-            if ($key === 'shift') {
+            if ($key === 'shift' || $key === 'hatchery_man' || $key === 'incubator') {
                 continue;
             }
 
@@ -352,10 +387,14 @@ class IncubatorRoutineForm extends FormNavigation
 
         if ($clearShift) {
             $this->form['shift'] = '';
+            $this->form['hatchery_man'] = '';
+            $this->form['incubator'] = '';
             return;
         }
 
         $this->form['shift'] = $keepShift ? $shift : '';
+        $this->form['hatchery_man'] = $hatcheryMan;
+        $this->form['incubator'] = $incubator;
     }
 
     public function submitForm(): void
@@ -404,6 +443,9 @@ class IncubatorRoutineForm extends FormNavigation
     protected function formInputsForStorageWithoutPhotos(): array
     {
         $inputs = $this->form;
+
+        // Remove hatchery_man and incubator from JSON as they're stored in dedicated columns
+        unset($inputs['hatchery_man'], $inputs['incubator']);
 
         // Set N/A for fields that are not scheduled/visible for the selected shift
         $visibleFields = $this->getVisibleFieldNames();

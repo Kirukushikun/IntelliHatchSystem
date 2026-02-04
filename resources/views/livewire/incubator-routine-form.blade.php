@@ -12,6 +12,22 @@
             <div data-step="1" class="space-y-4" @style(["display:none" => $currentStep !== 1])>
                 <x-title>INCUBATOR ROUTINE CHECKLIST</x-title>
 
+                <div data-field="hatchery_man" @style(["display:none" => !$this->isFieldVisible('hatchery_man')])>
+                    <x-dropdown label="Hatchery Man" name="hatchery_man" error-key="form.hatchery_man" placeholder="Select hatchery man" wire:model.live="form.hatchery_man" required>
+                        @foreach($hatcheryMen as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </x-dropdown>
+                </div>
+
+                <div data-field="incubator" @style(["display:none" => !$this->isFieldVisible('incubator')])>
+                    <x-dropdown label="Incubator" name="incubator" error-key="form.incubator" placeholder="Select incubator" wire:model.live="form.incubator" required>
+                        @foreach($incubators as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </x-dropdown>
+                </div>
+
                 <div data-field="shift">
                     <x-dropdown label="Shift" name="shift" error-key="form.shift" placeholder="Select shift" wire:model.live="form.shift" required>
                         <option value="1st Shift">1st Shift</option>
@@ -190,18 +206,6 @@
                         <option value="Done">Done</option>
                     </x-dropdown>
                     <x-photo-attach label="Attach Photos" name="assist_in_random_candling_photos"/>
-                </div>
-
-                <div data-field="incubator_machine_inspected" @style(["display:none" => !$this->isFieldVisible('incubator_machine_inspected')])>
-                    <x-checkbox
-                        label="Incubator Machine Inspected"
-                        name="incubator_machine_inspected"
-                        error-key="form.incubator_machine_inspected"
-                        :options="array_combine($incubatorMachineInspectedOptions, $incubatorMachineInspectedOptions)"
-                        :required="true"
-                        :columns="2"
-                        wire:model.live="form.incubator_machine_inspected"
-                    />
                 </div>
             </div>
         </x-progress-navigation>
