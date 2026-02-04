@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\FormStatsController;
+use App\Http\Controllers\Api\WebhookController;
 use App\Http\Middleware\ApiKeyMiddleware;
 
 /*
@@ -22,5 +23,11 @@ Route::middleware([ApiKeyMiddleware::class, 'throttle:60,1'])->group(function ()
     
     // Get available form types
     Route::get('/form-types', [FormStatsController::class, 'formTypes']);
+    
+    // Send form data to webhook
+    Route::post('/webhook/send-form', [WebhookController::class, 'sendForm']);
+    
+    // Send multiple forms to webhook
+    Route::post('/webhook/send-multiple', [WebhookController::class, 'sendMultipleForms']);
 });
 
