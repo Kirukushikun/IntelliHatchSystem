@@ -16,7 +16,7 @@ use App\Http\Middleware\ApiKeyMiddleware;
 |
 */
 
-Route::middleware(ApiKeyMiddleware::class)->group(function () {
+Route::middleware([ApiKeyMiddleware::class, 'throttle:60,1'])->group(function () {
     // Get form statistics with dynamic filtering
     Route::get('/form-stats', [FormStatsController::class, 'index']);
     

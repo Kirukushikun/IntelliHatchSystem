@@ -387,16 +387,12 @@ class IncubatorRoutineForm extends FormNavigation
             $this->dispatch('showToast', message: 'Form submitted successfully!', type: 'success');
             $this->dispatch('formSubmitted');
 
-            // Do NOT cleanup photos on successful submit; they are now stored in DB
-            $this->resetFormExceptShift(false, true, false);
-            $this->uploadedPhotoUrls = [];
-            $this->uploadedPhotoIds = [];
-            $this->photoUploads = [];
-            $this->currentStep = 1;
-            $this->recalculateVisibleSteps();
+            // Keep form data intact for potential re-submission
+            // Data will be cleared when redirected to forms page
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to submit form. Please try again.', type: 'error');
-            // Cleanup photos on submit failure
+            // Keep all form data intact on failure so user can retry
+            // Only cleanup photos to prevent orphaned files
             $this->cleanupAllUploadedPhotos();
             throw $e;
         }

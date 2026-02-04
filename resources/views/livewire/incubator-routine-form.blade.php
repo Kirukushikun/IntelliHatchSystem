@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ formSubmitted: false }" x-init="window.addEventListener('formSubmitted', () => { formSubmitted = true; window.location.href = '{{ route(((int) Auth::user()->user_type) === 0 ? 'admin' : 'user') . '.forms' }}'; })">
     <form wire:submit.prevent="submitForm" id="step-form" class="space-y-4" novalidate>
         @csrf
 
