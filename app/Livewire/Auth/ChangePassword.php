@@ -31,19 +31,8 @@ class ChangePassword extends Component
                 'required',
                 'string',
                 'min:8',
-                'max:128',
                 'confirmed',
-                'different:currentPassword',
-                Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
-                'regex:/^(?!.*password|.*12345678|.*qwerty|.*asdfgh|.*zxcvbn)/i',
-                'regex:/[A-Z]/',
-                'regex:/[a-z]/',
-                'regex:/[0-9]/',
-                'regex:/[!@#$%^&*()_+\-=\[\]{};:\'",.<>?]/'
+                'different:currentPassword'
             ],
             'newPasswordConfirmation' => [
                 'required',
@@ -58,14 +47,8 @@ class ChangePassword extends Component
         'newPassword.required' => 'New password is required',
         'newPassword.string' => 'New password must be a string',
         'newPassword.min' => 'Password must be at least 8 characters long',
-        'newPassword.max' => 'Password cannot exceed 128 characters',
         'newPassword.confirmed' => 'Password confirmation does not match',
         'newPassword.different' => 'New password must be different from current password',
-        'newPassword.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-        'newPassword.mixed' => 'Password must contain both uppercase and lowercase letters',
-        'newPassword.numbers' => 'Password must contain at least one number',
-        'newPassword.symbols' => 'Password must contain at least one special character',
-        'newPassword.uncompromised' => 'This password has been exposed in data breaches. Please choose a different password.',
         'newPasswordConfirmation.required' => 'Password confirmation is required',
         'newPasswordConfirmation.string' => 'Password confirmation must be a string',
     ];
@@ -103,13 +86,17 @@ class ChangePassword extends Component
                 'password' => Hash::make($this->newPassword)
             ]);
 
-            $this->closeModal();
+            // Reset form fields
+            $this->reset(['currentPassword', 'newPassword', 'newPasswordConfirmation']);
             
             // Dispatch success event for toast notification
-            $user = Auth::user();
             $this->dispatch('password-changed', message: "Your password has been changed successfully!");
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Let Livewire handle validation errors automatically
+            $this->validate();
         } catch (\Exception $e) {
-            // Handle any exceptions
+            $this->addError('newPassword', 'An error occurred while changing your password. Please try again.');
         } finally {
             $this->processing = false;
         }
