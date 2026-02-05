@@ -270,7 +270,7 @@
     <livewire:user-management.delete on:userDeleted="$refresh" />
     
     <!-- Include Disable/Enable Modal -->
-    <livewire:user-management.disable on:statusToggled="$refresh" />
+    <livewire:user-management.disable on:refreshUsers="$refresh" />
     
     <!-- Toast Container -->
     <div x-data="{ toasts: [] }" x-init="window.addEventListener('showToast', (event) => {

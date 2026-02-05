@@ -134,7 +134,7 @@ x-cloak>
                            };
                        }
                    }"
-                   @mouseenter="if(isCollapsed) { showTooltip = true; updatePosition(); }"
+                   @mouseenter="if(isCollapsed && window.innerWidth >= 1024) { showTooltip = true; updatePosition(); }"
                    @mouseleave="showTooltip = false"
                    @click="closeMobile()"
                    class="group relative flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200

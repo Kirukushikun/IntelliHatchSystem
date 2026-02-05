@@ -51,9 +51,10 @@ class Disable extends Component
             ]);
 
             $action = $this->isCurrentlyDisabled ? 'enabled' : 'disabled';
+            $userName = $this->userName; // Store name before closing modal
             $this->closeModal();
-            $this->dispatch('statusToggled');
-            $this->dispatch('showToast', message: "{$this->userName} has been successfully {$action}!", type: 'success');
+            $this->dispatch('refreshUsers');
+            $this->dispatch('showToast', message: "{$userName} has been successfully {$action}!", type: 'success');
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to update user status. Please try again.', type: 'error');
         } finally {

@@ -58,9 +58,10 @@ class Edit extends Component
                 'incubatorName' => $this->incubatorName,
             ]);
 
+            $incubatorName = $this->incubatorName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshIncubators');
-            $this->dispatch('showToast', message: "Incubator has been successfully updated!", type: 'success');
+            $this->dispatch('showToast', message: "{$incubatorName} has been successfully updated!", type: 'success');
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {

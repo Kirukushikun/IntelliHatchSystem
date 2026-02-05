@@ -11,6 +11,7 @@ class Disable extends Component
     public $incubatorName = '';
     public $isDisabled = false;
     public $showModal = false;
+    public $processing = false;
 
     protected $listeners = ['openDisableModal' => 'openModal'];
 
@@ -28,6 +29,8 @@ class Disable extends Component
 
     public function toggleStatus()
     {
+        $this->processing = true;
+        
         try {
             $incubator = Incubator::findOrFail($this->incubatorId);
             
@@ -35,18 +38,22 @@ class Disable extends Component
                 'isDisabled' => !$this->isDisabled,
             ]);
 
-            $action = $this->isDisabled ? 'disabled' : 'enabled';
+            $action = $this->isDisabled ? 'enabled' : 'disabled';
+            $incubatorName = $this->incubatorName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshIncubators');
-            $this->dispatch('showToast', message: "{$this->incubatorName} has been successfully {$action}!", type: 'success');
+            $this->dispatch('showToast', message: "{$incubatorName} has been successfully {$action}!", type: 'success');
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to update incubator status. Please try again.', type: 'error');
+        } finally {
+            $this->processing = false;
         }
     }
 
     public function closeModal()
     {
         $this->showModal = false;
+        $this->processing = false;
         $this->reset(['incubatorId', 'incubatorName', 'isDisabled']);
     }
 

@@ -61,8 +61,9 @@ class Edit extends Component
                     'last_name' => $this->lastName,
                 ]);
 
+                $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
                 $this->closeModal();
-                $this->dispatch('showToast', message: "User updated successfully!", type: 'success');
+                $this->dispatch('showToast', message: "{$fullName} has been updated successfully!", type: 'success');
             }
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
