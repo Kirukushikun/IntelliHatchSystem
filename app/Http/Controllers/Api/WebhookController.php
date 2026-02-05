@@ -16,13 +16,34 @@ class WebhookController extends Controller
      */
     public function sendForm(Request $request): JsonResponse
     {
+        Log::info('Webhook sendForm request received', [
+            'form_id' => $request->form_id,
+            'webhook_url' => $request->webhook_url,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         $request->validate([
             'form_id' => 'required|integer|exists:forms,id',
-            'webhook_url' => 'required|url',
+            'webhook_url' => 'nullable|url',
+        ]);
+
+        $webhookUrl = $request->webhook_url ?? env('WEBHOOK_URL');
+
+        Log::info('Validation passed, preparing to send form to webhook', [
+            'form_id' => $request->form_id,
+            'final_webhook_url' => $webhookUrl,
         ]);
 
         try {
             $form = Form::with(['formType', 'user', 'incubator'])->findOrFail($request->form_id);
+            
+            Log::info('Form data retrieved successfully', [
+                'form_id' => $form->id,
+                'form_type' => $form->formType ? $form->formType->name : 'Unknown Form Type',
+                'has_user' => !is_null($form->user),
+                'has_incubator' => !is_null($form->incubator),
+            ]);
             
             $payload = [
                 'form_id' => $form->id,
@@ -40,13 +61,20 @@ class WebhookController extends Controller
                 'timestamp' => now()->toISOString(),
             ];
 
-            $response = Http::post($request->webhook_url, $payload);
+            Log::info('Payload prepared for webhook', [
+                'form_id' => $form->id,
+                'payload_size' => strlen(json_encode($payload)),
+                'webhook_url' => $webhookUrl,
+            ]);
+
+            $response = Http::post($webhookUrl, $payload);
 
             if ($response->successful()) {
-                Log::info('Form data sent successfully to webhook', [
+                Log::info('Webhook response successful', [
                     'form_id' => $form->id,
-                    'webhook_url' => $request->webhook_url,
-                    'response_status' => $response->status()
+                    'webhook_url' => $webhookUrl,
+                    'response_status' => $response->status(),
+                    'response_body' => $response->body(),
                 ]);
 
                 return response()->json([
@@ -58,11 +86,12 @@ class WebhookController extends Controller
                     ]
                 ], 200, [], JSON_PRETTY_PRINT);
             } else {
-                Log::error('Failed to send form data to webhook', [
+                Log::error('Webhook response failed', [
                     'form_id' => $form->id,
-                    'webhook_url' => $request->webhook_url,
+                    'webhook_url' => $webhookUrl,
                     'response_status' => $response->status(),
                     'response_body' => $response->body(),
+                    'payload_sent' => $payload,
                 ]);
 
                 return response()->json([
@@ -76,10 +105,12 @@ class WebhookController extends Controller
             }
 
         } catch (\Exception $e) {
-            Log::error('Error sending form data to webhook', [
+            Log::error('Exception occurred in sendForm', [
                 'form_id' => $request->form_id,
-                'webhook_url' => $request->webhook_url,
-                'error' => $e->getMessage(),
+                'webhook_url' => $webhookUrl,
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(),
+                'exception_class' => get_class($e),
             ]);
 
             return response()->json([
@@ -95,16 +126,37 @@ class WebhookController extends Controller
      */
     public function sendMultipleForms(Request $request): JsonResponse
     {
+        Log::info('Webhook sendMultipleForms request received', [
+            'form_ids' => $request->form_ids,
+            'form_count' => count($request->form_ids ?? []),
+            'webhook_url' => $request->webhook_url,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         $request->validate([
             'form_ids' => 'required|array',
             'form_ids.*' => 'integer|exists:forms,id',
-            'webhook_url' => 'required|url',
+            'webhook_url' => 'nullable|url',
+        ]);
+
+        $webhookUrl = $request->webhook_url ?? env('WEBHOOK_URL');
+
+        Log::info('Validation passed for multiple forms', [
+            'form_ids' => $request->form_ids,
+            'final_webhook_url' => $webhookUrl,
         ]);
 
         try {
             $forms = Form::with(['formType', 'user', 'incubator'])
                 ->whereIn('id', $request->form_ids)
                 ->get();
+
+            Log::info('Multiple forms retrieved successfully', [
+                'requested_form_ids' => $request->form_ids,
+                'found_form_count' => $forms->count(),
+                'forms_found' => $forms->pluck('id')->toArray(),
+            ]);
 
             $payload = [
                 'forms' => $forms->map(function ($form) {
@@ -127,13 +179,20 @@ class WebhookController extends Controller
                 'timestamp' => now()->toISOString(),
             ];
 
-            $response = Http::post($request->webhook_url, $payload);
+            Log::info('Multiple forms payload prepared', [
+                'total_forms' => $forms->count(),
+                'payload_size' => strlen(json_encode($payload)),
+                'webhook_url' => $webhookUrl,
+            ]);
+
+            $response = Http::post($webhookUrl, $payload);
 
             if ($response->successful()) {
-                Log::info('Multiple forms sent successfully to webhook', [
+                Log::info('Multiple forms webhook response successful', [
                     'form_count' => $forms->count(),
-                    'webhook_url' => $request->webhook_url,
-                    'response_status' => $response->status()
+                    'webhook_url' => $webhookUrl,
+                    'response_status' => $response->status(),
+                    'response_body' => $response->body(),
                 ]);
 
                 return response()->json([
@@ -146,11 +205,12 @@ class WebhookController extends Controller
                     ]
                 ], 200, [], JSON_PRETTY_PRINT);
             } else {
-                Log::error('Failed to send multiple forms to webhook', [
+                Log::error('Multiple forms webhook response failed', [
                     'form_count' => $forms->count(),
-                    'webhook_url' => $request->webhook_url,
+                    'webhook_url' => $webhookUrl,
                     'response_status' => $response->status(),
                     'response_body' => $response->body(),
+                    'payload_sent' => $payload,
                 ]);
 
                 return response()->json([
@@ -164,10 +224,12 @@ class WebhookController extends Controller
             }
 
         } catch (\Exception $e) {
-            Log::error('Error sending multiple forms to webhook', [
+            Log::error('Exception occurred in sendMultipleForms', [
                 'form_ids' => $request->form_ids,
-                'webhook_url' => $request->webhook_url,
-                'error' => $e->getMessage(),
+                'webhook_url' => $webhookUrl,
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(),
+                'exception_class' => get_class($e),
             ]);
 
             return response()->json([

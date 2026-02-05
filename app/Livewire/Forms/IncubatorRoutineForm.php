@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class IncubatorRoutineForm extends FormNavigation
 {
@@ -423,6 +425,10 @@ class IncubatorRoutineForm extends FormNavigation
                 'form_inputs' => json_encode($this->formInputsForStorageWithPhotoUrls()),
                 'updated_at' => now(),
             ]);
+            
+            // Send form data to webhook
+            $this->sendFormToWebhook($formId);
+            
             $this->dispatch('showToast', message: 'Form submitted successfully!', type: 'success');
             $this->dispatch('formSubmitted');
 
@@ -503,6 +509,75 @@ class IncubatorRoutineForm extends FormNavigation
     protected function scheduleConfig(): array
     {
         return IncubatorRoutineConfig::schedule();
+    }
+
+    /**
+     * Send form data to webhook after successful submission
+     */
+    protected function sendFormToWebhook(int $formId): void
+    {
+        try {
+            $webhookUrl = env('WEBHOOK_URL');
+            
+            // Get form data with relationships
+            $form = DB::table('forms')
+                ->select('forms.*', 'form_types.form_name as form_type_name', 'hatchery_users.first_name', 'hatchery_users.last_name', 'incubators.incubatorName')
+                ->leftJoin('form_types', 'forms.form_type_id', '=', 'form_types.id')
+                ->leftJoin('hatchery_users', 'forms.uploaded_by', '=', 'hatchery_users.id')
+                ->leftJoin('incubators', 'forms.incubator_id', '=', 'incubators.id')
+                ->where('forms.id', $formId)
+                ->first();
+
+            if (!$form) {
+                Log::error('Form not found for webhook', ['form_id' => $formId]);
+                return;
+            }
+
+            $payload = [
+                'form_id' => $form->id,
+                'form_type' => $form->form_type_name ?: 'Unknown Form Type',
+                'form_inputs' => json_decode($form->form_inputs, true),
+                'date_submitted' => $form->date_submitted,
+                'uploaded_by' => $form->uploaded_by ? [
+                    'id' => $form->uploaded_by,
+                    'name' => trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) ?: 'Unknown User',
+                ] : null,
+                'incubator' => $form->incubator_id ? [
+                    'id' => $form->incubator_id,
+                    'name' => $form->incubatorName ?: 'Unknown Incubator',
+                ] : null,
+                'timestamp' => now()->toISOString(),
+            ];
+
+            Log::info('Sending form to webhook', [
+                'form_id' => $formId,
+                'webhook_url' => $webhookUrl,
+                'payload_size' => strlen(json_encode($payload)),
+            ]);
+
+            $response = Http::post($webhookUrl, $payload);
+
+            if ($response->successful()) {
+                Log::info('Form sent to webhook successfully', [
+                    'form_id' => $formId,
+                    'response_status' => $response->status(),
+                    'response_body' => $response->body(),
+                ]);
+            } else {
+                Log::error('Failed to send form to webhook', [
+                    'form_id' => $formId,
+                    'response_status' => $response->status(),
+                    'response_body' => $response->body(),
+                    'payload_sent' => $payload,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Exception sending form to webhook', [
+                'form_id' => $formId,
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     public function render()
