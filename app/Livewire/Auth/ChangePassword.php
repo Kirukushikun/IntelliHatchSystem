@@ -6,14 +6,16 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class ChangePassword extends Component
 {
     public $currentPassword = '';
     public $newPassword = '';
-    public $newPasswordConfirmation = '';
+    public $newPassword_confirmation = '';
     public $showModal = false;
     public $processing = false;
+    public $showSuccess = false;
 
     protected function rules()
     {
@@ -34,10 +36,6 @@ class ChangePassword extends Component
                 'confirmed',
                 'different:currentPassword'
             ],
-            'newPasswordConfirmation' => [
-                'required',
-                'string'
-            ],
         ];
     }
 
@@ -49,57 +47,68 @@ class ChangePassword extends Component
         'newPassword.min' => 'Password must be at least 8 characters long',
         'newPassword.confirmed' => 'Password confirmation does not match',
         'newPassword.different' => 'New password must be different from current password',
-        'newPasswordConfirmation.required' => 'Password confirmation is required',
-        'newPasswordConfirmation.string' => 'Password confirmation must be a string',
     ];
 
     public function openModal()
     {
-        $this->reset(['currentPassword', 'newPassword', 'newPasswordConfirmation', 'showModal']);
+        $this->reset(['currentPassword', 'newPassword', 'newPassword_confirmation', 'showModal']);
         $this->showModal = true;
     }
 
     public function closeModal()
     {
         $this->showModal = false;
-        $this->reset(['currentPassword', 'newPassword', 'newPasswordConfirmation']);
+        $this->reset(['currentPassword', 'newPassword', 'newPassword_confirmation']);
         $this->resetErrorBag();
     }
 
     public function changePassword()
     {
-        $this->processing = true;
+        // Validate required fields first
+        $this->validate([
+            'currentPassword' => ['required'],
+            'newPassword' => ['required'],
+            'newPassword_confirmation' => ['required'],
+        ]);
 
-        try {
-            $this->validate();
+        $user = Auth::user();
 
-            $user = Auth::user();
-
-            // Verify current password
-            if (!Hash::check($this->currentPassword, $user->password)) {
-                $this->addError('currentPassword', 'Current password is incorrect');
-                return;
-            }
-
-            // Update password
-            $user->update([
-                'password' => Hash::make($this->newPassword)
+        // Check current password manually before validation
+        if (!Hash::check($this->currentPassword, $user->password)) {
+            // Password is wrong - throw validation error
+            throw ValidationException::withMessages([
+                'currentPassword' => 'The current password is incorrect.',
             ]);
-
-            // Reset form fields
-            $this->reset(['currentPassword', 'newPassword', 'newPasswordConfirmation']);
-            
-            // Dispatch success event for toast notification
-            $this->dispatch('password-changed', message: "Your password has been changed successfully!");
-            
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Let Livewire handle validation errors automatically
-            $this->validate();
-        } catch (\Exception $e) {
-            $this->addError('newPassword', 'An error occurred while changing your password. Please try again.');
-        } finally {
-            $this->processing = false;
         }
+
+        // Current password is correct - proceed with new password validation
+        $this->validate([
+            'newPassword' => [
+                'required',
+                'min:8',
+                'different:currentPassword'
+            ],
+            'newPassword_confirmation' => ['required'],
+        ]);
+
+        // Manually check password confirmation
+        if ($this->newPassword !== $this->newPassword_confirmation) {
+            $this->addError('newPassword_confirmation', 'The password confirmation does not match.');
+            return;
+        }
+
+        // Update password
+        $user->password = Hash::make($this->newPassword);
+        $user->save();
+
+        // Reset form
+        $this->reset(['currentPassword', 'newPassword', 'newPassword_confirmation']);
+        
+        // Show success message
+        $this->showSuccess = true;
+        
+        // Dispatch success event for toast notification
+        $this->dispatch('showToast', message: "Your password has been changed successfully!", type: 'success');
     }
 
     public function render()

@@ -21,17 +21,13 @@
                     required
                 >
                 <button type="button" onclick="togglePassword('currentPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    {!!
-                    '<svg id="currentPassword-eye" class="h-5 w-5 text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="currentPassword-eye" class="h-5 w-5 text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>'
-                    !!}
-                    {!!
-                    '<svg id="currentPassword-eye-off" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg id="currentPassword-eye-off" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>'
-                    !!}
+                    </svg>
                 </button>
             </div>
             @error('currentPassword')
@@ -60,17 +56,13 @@
                     required
                 >
                 <button type="button" onclick="togglePassword('newPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    {!!
-                    '<svg id="newPassword-eye" class="h-5 w-5 text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="newPassword-eye" class="h-5 w-5 text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>'
-                    !!}
-                    {!!
-                    '<svg id="newPassword-eye-off" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg id="newPassword-eye-off" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>'
-                    !!}
+                    </svg>
                 </button>
             </div>
             @error('newPassword')
@@ -94,26 +86,22 @@
                 <input 
                     type="password" 
                     id="newPasswordConfirmation"
-                    wire:model="newPasswordConfirmation"
+                    wire:model="newPassword_confirmation"
                     class="mt-1 block w-full rounded-lg border shadow-sm pl-10 px-4 py-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     placeholder="Confirm new password"
                     required
                 >
                 <button type="button" onclick="togglePassword('newPasswordConfirmation')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    {!!
-                    '<svg id="newPasswordConfirmation-eye" class="h-5 w-5 text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="newPasswordConfirmation-eye" class="h-5 w-5 text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>'
-                    !!}
-                    {!!
-                    '<svg id="newPasswordConfirmation-eye-off" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg id="newPasswordConfirmation-eye-off" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>'
-                    !!}
+                    </svg>
                 </button>
             </div>
-            @error('newPasswordConfirmation')
+            @error('newPassword_confirmation')
                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>
@@ -135,8 +123,48 @@
         </div>
     </form>
 
-    <!-- Toast Component -->
-    <x-toast />
+    <!-- Toast Container -->
+    <div x-data="{ toasts: [] }" x-init="window.addEventListener('showToast', (event) => {
+        toasts.push({ message: event.detail.message, type: event.detail.type, id: Date.now() });
+        setTimeout(() => {
+            toasts.shift();
+        }, 3000);
+    })" class="fixed top-4 right-4 z-50 space-y-2">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div 
+                x-show="toast"
+                x-transition:enter="transform ease-out duration-300 transition"
+                x-transition:enter-start="translate-x-full opacity-0"
+                x-transition:enter-end="translate-x-0 opacity-100"
+                x-transition:leave="transform ease-in duration-200 transition"
+                x-transition:leave-start="translate-x-0 opacity-100"
+                x-transition:leave-end="translate-x-full opacity-0"
+                :class="{
+                    'bg-green-500 text-white': toast.type === 'success',
+                    'bg-red-500 text-white': toast.type === 'error',
+                    'bg-yellow-500 text-white': toast.type === 'warning'
+                }"
+                class="px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2"
+            >
+                <div x-show="toast.type === 'success'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div x-show="toast.type === 'error'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+                <div x-show="toast.type === 'warning'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <span x-text="toast.message"></span>
+            </div>
+        </template>
+    </div>
 
     <!-- Password Toggle Script -->
     <script>
