@@ -18,21 +18,56 @@ class ChangePassword extends Component
     protected function rules()
     {
         return [
-            'currentPassword' => ['required'],
+            'currentPassword' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (!Hash::check($value, Auth::user()->password)) {
+                        $fail('Current password is incorrect');
+                    }
+                }
+            ],
             'newPassword' => [
                 'required',
+                'string',
+                'min:8',
+                'max:128',
                 'confirmed',
+                'different:currentPassword',
                 Password::min(8)
-                    ->rules('regex:/^(?!.*password|.*12345678|.*qwerty)/i')
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+                'regex:/^(?!.*password|.*12345678|.*qwerty|.*asdfgh|.*zxcvbn)/i',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[!@#$%^&*()_+\-=\[\]{};:\'",.<>?]/'
+            ],
+            'newPasswordConfirmation' => [
+                'required',
+                'string'
             ],
         ];
     }
 
     protected $messages = [
         'currentPassword.required' => 'Current password is required',
+        'currentPassword.string' => 'Current password must be a string',
         'newPassword.required' => 'New password is required',
-        'newPassword.confirmed' => 'Password confirmation does not match',
+        'newPassword.string' => 'New password must be a string',
         'newPassword.min' => 'Password must be at least 8 characters long',
+        'newPassword.max' => 'Password cannot exceed 128 characters',
+        'newPassword.confirmed' => 'Password confirmation does not match',
+        'newPassword.different' => 'New password must be different from current password',
+        'newPassword.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+        'newPassword.mixed' => 'Password must contain both uppercase and lowercase letters',
+        'newPassword.numbers' => 'Password must contain at least one number',
+        'newPassword.symbols' => 'Password must contain at least one special character',
+        'newPassword.uncompromised' => 'This password has been exposed in data breaches. Please choose a different password.',
+        'newPasswordConfirmation.required' => 'Password confirmation is required',
+        'newPasswordConfirmation.string' => 'Password confirmation must be a string',
     ];
 
     public function openModal()
