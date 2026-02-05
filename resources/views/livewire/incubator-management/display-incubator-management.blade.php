@@ -16,7 +16,7 @@
                     placeholder="Search incubators..."
                     class="w-80 pl-11 pr-12 py-3 text-sm bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 shadow-sm"
                 />
-                <button type="button" wire:click="toggleFilterDropdown" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+                <button type="button" wire:click="toggleFilterDropdown" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors">
                     <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#9CA3AF" class="w-5 h-5">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M15 2v1.67l-5 4.759V14H6V8.429l-5-4.76V2h14zM7 8v5h2V8l5-4.76V3H2v.24L7 8z"/>
                     </svg>
@@ -24,29 +24,22 @@
                 
                 <!-- Filter Dropdown -->
                 @if ($showFilterDropdown)
-                    <div class="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-9999"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 transform scale-95"
-                         x-transition:enter-end="opacity-100 transform scale-100"
-                         x-transition:leave="transition ease-in duration-200"
-                         x-transition:leave-start="opacity-100 transform scale-100"
-                         x-transition:leave-end="opacity-0 transform scale-95"
-                         @click.away="wire('closeFilterDropdown')">
+                    <div class="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                         <div class="p-4">
                             <div class="grid grid-cols-2 gap-1">
                                 <!-- Status Filter Column -->
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-900 mb-3">Status</h3>
                                     <div class="space-y-2">
-                                        <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded -mx-1">
+                                        <label class="flex items-center">
                                             <input type="radio" wire:model="statusFilter" value="all" class="mr-2">
-                                            <span class="text-sm text-gray-700">All</span>
+                                            <span class="text-sm text-gray-700">All Users</span>
                                         </label>
-                                        <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded -mx-1">
+                                        <label class="flex items-center">
                                             <input type="radio" wire:model="statusFilter" value="enabled" class="mr-2">
                                             <span class="text-sm text-gray-700">Enabled</span>
                                         </label>
-                                        <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded -mx-1">
+                                        <label class="flex items-center">
                                             <input type="radio" wire:model="statusFilter" value="disabled" class="mr-2">
                                             <span class="text-sm text-gray-700">Disabled</span>
                                         </label>
@@ -81,18 +74,16 @@
                                                 min="{{ $dateFrom ?: '' }}"
                                                 wire:target="dateTo"
                                                 wire:loading.attr="disabled"
-                                                x-on:change="$el.value < $wire.get('dateFrom') ? $wire.set('dateFrom', '') : null"
+                                                x-on:change="$el.value < $wire.get('dateFrom') ? $wire.set('dateTo', '') : null"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Clear Filters Button -->
-                            <div class="pt-3 border-t border-gray-200">
-                                <x-button variant="outline-secondary" size="sm" wire:click="clearFilters" class="w-full">
-                                    Clear Filters
-                                </x-button>
+                            <div class="flex justify-between mt-4 pt-3 border-t border-gray-200">
+                                <button type="button" wire:click="resetFilters" class="text-sm text-gray-600 hover:text-gray-800">Reset</button>
+                                <button type="button" wire:click="toggleFilterDropdown" class="text-sm text-blue-600 hover:text-blue-800">Done</button>
                             </div>
                         </div>
                     </div>
@@ -101,8 +92,8 @@
             
             <!-- Add Incubator Button -->
             <button type="button" wire:click="$dispatch('openCreateModal')" class="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-white bg-orange-600 border border-orange-600 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-150 whitespace-nowrap">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-2">
+                    <path d="M5.25 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM2.25 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM18.75 7.5a.75.75 0 0 0-1.5 0v2.25H15a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H21a.75.75 0 0 0 0-1.5h-2.25V7.5Z" />
                 </svg>
                 Add Incubator
             </button>
@@ -110,54 +101,72 @@
     </div>
 
     <!-- Incubators Table -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
         <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
+            <table class="w-full text-left table-auto min-w-max">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 text-left">
-                            <button wire:click="sortBy('incubatorName')" class="flex items-center text-xs font-medium text-gray-500 uppercase tracking-wide hover:text-gray-700">
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('incubatorName')">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
                                 Incubator Name
-                                @if($sortField === 'incubatorName')
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path>
+                                @if ($sortField === 'incubatorName')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if ($sortDirection === 'asc')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        @endif
                                     </svg>
                                 @endif
-                            </button>
+                            </p>
                         </th>
-                        <th class="px-6 py-3 text-left">
-                            <button wire:click="sortBy('creationDate')" class="flex items-center text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('creationDate')">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
                                 Creation Date
-                                @if($sortField === 'creationDate')
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path>
+                                @if ($sortField === 'creationDate')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if ($sortDirection === 'asc')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        @endif
                                     </svg>
                                 @endif
-                            </button>
+                            </p>
                         </th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 text-center">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
+                                Status
+                            </p>
                         </th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 text-center">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
+                                Actions
+                            </p>
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($incubators as $incubator)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $incubator->incubatorName }}</div>
+                <tbody>
+                    @forelse ($incubators as $incubator)
+                        <tr class="even:bg-slate-50 hover:bg-slate-100">
+                            <td class="p-3 md:p-4 py-4 md:py-5">
+                                <p class="block text-xs md:text-sm text-slate-800">{{ $incubator->incubatorName }}</p>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-500">{{ $incubator->creationDate->format('M d, Y') }}</div>
+                            <td class="p-3 md:p-4 py-4 md:py-5">
+                                <p class="block text-xs md:text-sm text-slate-800">{{ $incubator->creationDate->format('M d, Y') }}</p>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $incubator->isDisabled ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
-                                    {{ $incubator->isDisabled ? 'Disabled' : 'Enabled' }}
-                                </span>
+                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
+                                @if($incubator->isDisabled)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        Disabled
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Active
+                                    </span>
+                                @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="p-3 md:p-4 py-4 md:py-5">
                                 <div class="flex gap-1 md:gap-2 justify-center">
                                     <x-button 
                                         variant="ghost" 
@@ -203,10 +212,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                     </svg>
                                     <h3 class="text-lg font-medium text-gray-900">No incubators found</h3>
                                 </div>
@@ -253,28 +262,36 @@
         }, 3000);
     })" class="fixed top-4 right-4 z-50 space-y-2">
         <template x-for="toast in toasts" :key="toast.id">
-            <div x-show="true" 
-                 x-transition:enter="transform ease-out duration-300 transition"
-                 x-transition:enter-start="translate-x-full opacity-0"
-                 x-transition:enter-end="translate-x-0 opacity-100"
-                 x-transition:leave="transform ease-in duration-300 transition"
-                 x-transition:leave-start="translate-x-0 opacity-100"
-                 x-transition:leave-end="translate-x-full opacity-0"
-                 :class="{
-                     'bg-green-500': toast.type === 'success',
-                     'bg-red-500': toast.type === 'error',
-                     'bg-yellow-500': toast.type === 'warning'
-                 }"
-                 class="text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
-                <svg x-show="toast.type === 'success'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <svg x-show="toast.type === 'error'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <svg x-show="toast.type === 'warning'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                </svg>
+            <div 
+                x-show="toast"
+                x-transition:enter="transform ease-out duration-300 transition"
+                x-transition:enter-start="translate-x-full opacity-0"
+                x-transition:enter-end="translate-x-0 opacity-100"
+                x-transition:leave="transform ease-in duration-200 transition"
+                x-transition:leave-start="translate-x-0 opacity-100"
+                x-transition:leave-end="translate-x-full opacity-0"
+                :class="{
+                    'bg-green-500 text-white': toast.type === 'success',
+                    'bg-red-500 text-white': toast.type === 'error',
+                    'bg-yellow-500 text-white': toast.type === 'warning'
+                }"
+                class="px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2"
+            >
+                <div x-show="toast.type === 'success'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div x-show="toast.type === 'error'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+                <div x-show="toast.type === 'warning'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
                 <span x-text="toast.message"></span>
             </div>
         </template>

@@ -104,7 +104,7 @@
     @endif
 
     <!-- Table Section -->
-    <div wire:poll class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
+    <div class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
         <div class="overflow-x-auto">
             <table class="w-full text-left table-auto min-w-max">
                 <thead>

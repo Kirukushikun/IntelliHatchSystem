@@ -167,11 +167,12 @@ x-cloak>
                     </div>
                     
                     <!-- Text -->
-                    <span x-show="!isCollapsed || window.innerWidth < 1024" 
+                    <span class="ml-3 whitespace-nowrap lg:hidden">{{ $item['label'] }}</span>
+                    <span x-show="!isCollapsed" 
                           x-transition:enter="transition ease-in-out duration-200"
                           x-transition:enter-start="opacity-0 transform scale-95"
                           x-transition:enter-end="opacity-100 transform scale-100"
-                          class="ml-3 whitespace-nowrap">{{ $item['label'] }}</span>
+                          class="ml-3 whitespace-nowrap hidden lg:block">{{ $item['label'] }}</span>
                     
                     <!-- Tooltip for collapsed state - teleported to body -->
                     <template x-teleport="body">
