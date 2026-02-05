@@ -80,10 +80,10 @@ class FormStatsController extends Controller
             $query->whereBetween('date_submitted', [$startDate, $endDate]);
         }
 
-        // Get all forms without limit
+        // Get filtered forms only
         $forms = $query->orderBy('date_submitted', 'desc')->get();
 
-        // Calculate statistics
+        // Calculate statistics based on filtered results
         $stats = [
             'total_forms' => $forms->count(),
             'date_filter' => $dateFilter,
@@ -95,7 +95,7 @@ class FormStatsController extends Controller
                 $formType = $group->first()->formType;
                 return [
                     'form_type_id' => $group->first()->form_type_id,
-                    'form_type_name' => $formType ? $formType->name : 'Unknown Form Type',
+                    'form_type_name' => $formType ? $formType->form_name : 'Unknown Form Type',
                     'count' => $group->count(),
                     'forms' => $group->map(function ($form) {
                         return [
@@ -110,19 +110,6 @@ class FormStatsController extends Controller
                     })->toArray(),
                 ];
             })->values(),
-            'all_forms' => $forms->map(function ($form) {
-                return [
-                    'id' => $form->id,
-                    'form_type_id' => $form->form_type_id,
-                    'form_type_name' => $form->formType ? $form->formType->name : 'Unknown Form Type',
-                    'form_inputs' => $form->form_inputs,
-                    'date_submitted' => $form->date_submitted->format('Y-m-d H:i:s'),
-                    'uploaded_by' => [
-                        'id' => $form->uploaded_by,
-                        'name' => $form->user ? $form->user->first_name . ' ' . $form->user->last_name : 'Unknown User'
-                    ],
-                ];
-            })->toArray(),
         ];
 
         return response()->json([
