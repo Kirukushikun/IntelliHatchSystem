@@ -33,7 +33,7 @@
                                     <div class="space-y-2">
                                         <label class="flex items-center">
                                             <input type="radio" wire:model="statusFilter" value="all" class="mr-2">
-                                            <span class="text-sm text-gray-700">All Users</span>
+                                            <span class="text-sm text-gray-700">All Hatchers</span>
                                         </label>
                                         <label class="flex items-center">
                                             <input type="radio" wire:model="statusFilter" value="active" class="mr-2">
