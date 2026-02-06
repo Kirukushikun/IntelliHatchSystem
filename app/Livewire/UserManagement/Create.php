@@ -70,6 +70,7 @@ class Create extends Component
             $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
             $this->closeModal();
             $this->dispatch('showToast', message: "{$fullName} has been created successfully!", type: 'success');
+            $this->dispatch('refreshUsers'); // Refresh the user list
             $this->reset(['firstName', 'lastName']);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Validation errors will be displayed automatically

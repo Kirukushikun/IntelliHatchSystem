@@ -33,6 +33,9 @@
     <body class="h-full bg-gray-100">
         {{ $slot }}
         
+        <!-- Global Toast Component -->
+        <x-toast />
+        
         <!-- Livewire Scripts -->
         <livewire:scripts />
     </body>
