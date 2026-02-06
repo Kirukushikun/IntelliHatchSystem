@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hatchery-machines', function (Blueprint $table) {
+        Schema::create('hatcher-machines', function (Blueprint $table) {
             $table->id();
-            $table->string('hatcheryName');
+            $table->string('hatcherName');
             $table->boolean('isDisabled')->default(false);
             $table->timestamp('creationDate')->useCurrent();
             $table->timestamps();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('incubator-machines');
+        Schema::dropIfExists('hatcher-machines');
     }
 };
