@@ -22,10 +22,26 @@
             'active' => 'admin/users*'
         ],
         [
-            'label' => 'Incubators',
-            'href' => '/admin/incubators',
-            'icon' => 'incubator',
-            'active' => 'admin/incubators*'
+            'label' => 'Machine Management',
+            'icon' => 'folder',
+            'dropdown' => true,
+            'children' => [
+                [
+                    'label' => 'Incubator Machines',
+                    'href' => '/admin/incubator-machines',
+                    'active' => 'admin/incubator-machines*'
+                ],
+                [
+                    'label' => 'Hatcher Machines',
+                    'href' => '/admin/hatcher-machines',
+                    'active' => 'admin/hatcher-machines*'
+                ],
+                [
+                    'label' => 'Plenum Machines',
+                    'href' => '/admin/plenum-machines',
+                    'active' => 'admin/plenum-machines*'
+                ]
+            ]
         ],
         [
             'label' => 'Forms',
@@ -34,11 +50,32 @@
             'active' => 'admin/forms*'
         ]
     ];
+    
+    // Helper function to check if any child is active
+    function hasActiveChild($item) {
+        if (!isset($item['children'])) return false;
+        foreach ($item['children'] as $child) {
+            if (request()->is($child['active'] ?? $child['href'])) {
+                return true;
+            }
+        }
+        return false;
+    }
 @endphp
 
 <div x-data="{ 
     isOpen: false,
     isCollapsed: localStorage.getItem('sidebar-collapsed') !== 'false',
+    openDropdowns: (() => {
+        let stored = JSON.parse(localStorage.getItem('sidebar-dropdowns') || '{}');
+        // Auto-open dropdowns with active children
+        @foreach($sidebarItems as $item)
+            @if(isset($item['dropdown']) && $item['dropdown'] && hasActiveChild($item))
+                stored['{{ $item['label'] }}'] = true;
+            @endif
+        @endforeach
+        return stored;
+    })(),
     toggleSidebar() {
         this.isCollapsed = !this.isCollapsed;
         localStorage.setItem('sidebar-collapsed', this.isCollapsed);
@@ -48,6 +85,13 @@
     },
     closeMobile() {
         this.isOpen = false;
+    },
+    toggleDropdown(label) {
+        this.openDropdowns[label] = !this.openDropdowns[label];
+        localStorage.setItem('sidebar-dropdowns', JSON.stringify(this.openDropdowns));
+    },
+    isDropdownOpen(label) {
+        return this.openDropdowns[label] === true;
     }
 }" 
 @toggle-sidebar.window="toggleSidebar()"
@@ -79,17 +123,28 @@ x-cloak>
         
         <!-- Header -->
         <div class="flex items-center h-16 px-4 border-b border-gray-200 shrink-0 bg-white">
-            <!-- Logo/Brand - Show when NOT collapsed OR in mobile view -->
-            <div x-show="!isCollapsed || window.innerWidth < 1024" class="flex items-center flex-1">
+            <!-- Logo/Brand - Always visible on mobile, conditional on desktop -->
+            <div class="flex items-center flex-1 lg:hidden">
                 <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                 </div>
-                <span x-transition:enter="transition ease-in-out duration-200"
-                      x-transition:enter-start="opacity-0 transform scale-95"
-                      x-transition:enter-end="opacity-100 transform scale-100"
-                      class="ml-3 text-xl font-bold text-gray-900">IntelliHatch</span>
+                <span class="ml-3 text-xl font-bold text-gray-900">IntelliHatch</span>
+            </div>
+
+            <!-- Desktop logo - shown when not collapsed -->
+            <div x-show="!isCollapsed" 
+                 x-transition:enter="transition ease-in-out duration-200"
+                 x-transition:enter-start="opacity-0 transform scale-95"
+                 x-transition:enter-end="opacity-100 transform scale-100"
+                 class="hidden lg:flex items-center flex-1">
+                <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <span class="ml-3 text-xl font-bold text-gray-900">IntelliHatch</span>
             </div>
 
             <!-- Mobile close button -->
@@ -100,7 +155,7 @@ x-cloak>
                 </svg>
             </button>
             
-            <!-- Toggle button - Show when collapsed, positioned where logo was -->
+            <!-- Desktop toggle button - shown when collapsed (centered) -->
             <div x-show="isCollapsed" class="hidden lg:flex items-center justify-center w-full">
                 <button @click="toggleSidebar()" 
                         class="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
@@ -110,7 +165,7 @@ x-cloak>
                 </button>
             </div>
 
-            <!-- Toggle button - Normal position when NOT collapsed (desktop only) -->
+            <!-- Desktop toggle button - shown when not collapsed (right side) -->
             <button x-show="!isCollapsed" @click="toggleSidebar()" 
                     class="hidden lg:block ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,74 +177,202 @@ x-cloak>
         <!-- Navigation -->
         <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto bg-white" x-cloak>
             @foreach($sidebarItems as $item)
-                <a href="{{ $item['href'] }}" 
-                   x-data="{ 
-                       showTooltip: false,
-                       tooltipPosition: { x: 0, y: 0 },
-                       updatePosition() {
-                           const rect = this.$el.getBoundingClientRect();
-                           this.tooltipPosition = {
-                               x: rect.right + 8,
-                               y: rect.top + (rect.height / 2)
-                           };
-                       }
-                   }"
-                   @mouseenter="if(isCollapsed && window.innerWidth >= 1024) { showTooltip = true; updatePosition(); }"
-                   @mouseleave="showTooltip = false"
-                   @click="closeMobile()"
-                   class="group relative flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ isset($item['customActive']) && $item['customActive']() 
-                              ? 'bg-orange-100 text-orange-700 shadow-sm' 
-                              : (request()->is($item['active'] ?? $item['href']) 
-                                  ? 'bg-orange-100 text-orange-700 shadow-sm' 
-                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900') }}"
-                   :class="isCollapsed && window.innerWidth >= 1024 ? 'justify-center' : ''">
-                    
-                    <!-- Icon -->
-                    <div class="shrink-0 w-6 h-6 flex items-center justify-center">
-                        @if($item['icon'] === 'dashboard')
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                @if(isset($item['dropdown']) && $item['dropdown'])
+                    <!-- Dropdown Parent -->
+                    <div x-data="{ 
+                        showDropdownMenu: false,
+                        dropdownPosition: { x: 0, y: 0 },
+                        hasActiveChild: {{ hasActiveChild($item) ? 'true' : 'false' }},
+                        updateDropdownPosition(buttonEl) {
+                            const rect = buttonEl.getBoundingClientRect();
+                            this.dropdownPosition = {
+                                x: rect.right + 8,
+                                y: rect.top + (rect.height / 2)
+                            };
+                        }
+                    }">
+                        <button x-ref="dropdownButton"
+                               @click="toggleDropdown('{{ $item['label'] }}')"
+                               @mouseenter="if(isCollapsed) { showDropdownMenu = true; updateDropdownPosition($refs.dropdownButton); }"
+                               @mouseleave="if(isCollapsed) { setTimeout(() => { if(!$refs.dropdownMenu?.matches(':hover')) showDropdownMenu = false; }, 100); }"
+                               class="group relative flex items-center w-full px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200"
+                               :class="{
+                                   'bg-orange-100 text-orange-700 shadow-sm': hasActiveChild && isCollapsed,
+                                   'text-gray-600 hover:bg-gray-50 hover:text-gray-900': !(hasActiveChild && isCollapsed)
+                               }">
+                            
+                            <!-- Icon -->
+                            <div class="shrink-0 w-6 h-6 flex items-center justify-center"
+                                 :class="isCollapsed ? 'lg:mx-auto' : ''">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M33.18,26.11,20.35,13.28A9.28,9.28,0,0,0,7.54,2.79l-1.34.59,5.38,5.38L8.76,11.59,3.38,6.21,2.79,7.54A9.27,9.27,0,0,0,13.28,20.35L26.11,33.18a2,2,0,0,0,2.83,0l4.24-4.24A2,2,0,0,0,33.18,26.11Zm-5.66,5.66L13.88,18.12l-.57.16a7.27,7.27,0,0,1-9.31-7,7.2,7.2,0,0,1,.15-1.48l4.61,4.61l5.66-5.66L9.81,4.15a7.27,7.27,0,0,1,8.47,9.16l-.16.57L31.77,27.53Z"></path>
+                                    <circle cx="27.13" cy="27.09" r="1.3" transform="translate(-11.21 27.12) rotate(-45)"></circle>
+                                </svg>
+                            </div>
+                            
+                            <!-- Text - Always visible on mobile, conditional on desktop -->
+                            <span class="ml-3 whitespace-nowrap flex-1 text-left lg:hidden">{{ $item['label'] }}</span>
+                            <span x-show="!isCollapsed" 
+                                  x-transition:enter="transition ease-in-out duration-200"
+                                  x-transition:enter-start="opacity-0 transform scale-95"
+                                  x-transition:enter-end="opacity-100 transform scale-100"
+                                  class="ml-3 whitespace-nowrap flex-1 text-left hidden lg:block">{{ $item['label'] }}</span>
+                            
+                            <!-- Chevron - Always visible on mobile, conditional on desktop -->
+                            <svg :class="isDropdownOpen('{{ $item['label'] }}') ? 'rotate-180' : ''"
+                                 class="w-4 h-4 transition-transform duration-200 lg:hidden"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
-                        @elseif($item['icon'] === 'incubator')
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="-2 -3.5 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d='M11.843 12.37A4 4 0 0 0 18 9c0-1.238-.623-3.136-1.58-4.698C15.513 2.822 14.524 2 14 2s-1.513.822-2.42 2.302a12.214 12.214 0 0 0-.935 1.884 12.584 12.584 0 0 0-1.277-2.024C10.522 1.91 12.26 0 14 0c3 0 6 5.686 6 9a6 6 0 0 1-8.943 5.23c.36-.563.63-1.19.786-1.86zM6 17a6 6 0 0 1-6-6c0-3.314 3-9 6-9s6 5.686 6 9a6 6 0 0 1-6 6zm0-2a4 4 0 0 0 4-4c0-1.238-.623-3.136-1.58-4.698C7.513 4.822 6.524 4 6 4s-1.513.822-2.42 2.302C2.623 7.864 2 9.762 2 11a4 4 0 0 0 4 4z'/>
+                            <svg x-show="!isCollapsed"
+                                 :class="isDropdownOpen('{{ $item['label'] }}') ? 'rotate-180' : ''"
+                                 class="w-4 h-4 transition-transform duration-200 hidden lg:block"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
-                        @elseif($item['icon'] === 'forms')
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        @elseif($item['icon'] === 'users')
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            </svg>
-                        @endif
-                    </div>
-                    
-                    <!-- Text -->
-                    <span class="ml-3 whitespace-nowrap lg:hidden">{{ $item['label'] }}</span>
-                    <span x-show="!isCollapsed" 
-                          x-transition:enter="transition ease-in-out duration-200"
-                          x-transition:enter-start="opacity-0 transform scale-95"
-                          x-transition:enter-end="opacity-100 transform scale-100"
-                          class="ml-3 whitespace-nowrap hidden lg:block">{{ $item['label'] }}</span>
-                    
-                    <!-- Tooltip for collapsed state - teleported to body -->
-                    <template x-teleport="body">
-                        <div x-show="isCollapsed && showTooltip && window.innerWidth >= 1024" 
+                        </button>
+                        
+                        <!-- Dropdown Menu for collapsed desktop state (appears on hover) -->
+                        <template x-teleport="body">
+                            <div x-ref="dropdownMenu"
+                                 x-show="isCollapsed && showDropdownMenu" 
+                                 @mouseenter="showDropdownMenu = true"
+                                 @mouseleave="showDropdownMenu = false"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-90"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-90"
+                                 :style="`position: fixed; left: ${dropdownPosition.x}px; top: ${dropdownPosition.y}px; transform: translateY(-50%);`"
+                                 class="hidden lg:block bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-50 z-50">
+                                <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                    {{ $item['label'] }}
+                                </div>
+                                @foreach($item['children'] as $child)
+                                    <a href="{{ $child['href'] }}" 
+                                       class="flex items-center px-3 py-2 text-sm font-medium transition-colors
+                                              {{ request()->is($child['active'] ?? $child['href']) 
+                                                  ? 'bg-orange-100 text-orange-700' 
+                                                  : 'text-gray-700 hover:bg-gray-50' }}">
+                                        <span class="whitespace-nowrap">{{ $child['label'] }}</span>
+                                    </a>
+                                @endforeach
+                                <!-- Arrow pointer -->
+                                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 rotate-45 w-2 h-2 bg-white border-l border-t border-gray-200"></div>
+                            </div>
+                        </template>
+                        
+                        <!-- Dropdown Children (for mobile always, desktop when expanded) -->
+                        <div x-show="isDropdownOpen('{{ $item['label'] }}')"
                              x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-90"
-                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
                              x-transition:leave="transition ease-in duration-150"
-                             x-transition:leave-start="opacity-100 scale-100"
-                             x-transition:leave-end="opacity-0 scale-90"
-                             :style="`position: fixed; left: ${tooltipPosition.x}px; top: ${tooltipPosition.y}px; transform: translateY(-50%);`"
-                             class="px-2 py-1 bg-gray-900 text-white text-sm rounded-md whitespace-nowrap pointer-events-none z-50">
-                            {{ $item['label'] }}
-                            <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 rotate-45 w-2 h-2 bg-gray-900"></div>
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 -translate-y-2"
+                             class="mt-1 space-y-1 lg:hidden">
+                            @foreach($item['children'] as $child)
+                                <a href="{{ $child['href'] }}" 
+                                   @click="closeMobile()"
+                                   class="group relative flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                          {{ request()->is($child['active'] ?? $child['href']) 
+                                              ? 'bg-orange-100 text-orange-700 shadow-sm' 
+                                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                    
+                                    <span class="whitespace-nowrap pl-8">{{ $child['label'] }}</span>
+                                </a>
+                            @endforeach
                         </div>
-                    </template>
-                </a>
+                        
+                        <!-- Dropdown Children for desktop expanded -->
+                        <div x-show="!isCollapsed && isDropdownOpen('{{ $item['label'] }}')"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 -translate-y-2"
+                             class="mt-1 space-y-1 hidden lg:block">
+                            @foreach($item['children'] as $child)
+                                <a href="{{ $child['href'] }}" 
+                                   class="group relative flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                          {{ request()->is($child['active'] ?? $child['href']) 
+                                              ? 'bg-orange-100 text-orange-700 shadow-sm' 
+                                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                    
+                                    <span class="whitespace-nowrap pl-8">{{ $child['label'] }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @else
+                    <!-- Regular Menu Item -->
+                    <a href="{{ $item['href'] }}" 
+                       x-data="{ 
+                           showTooltip: false,
+                           tooltipPosition: { x: 0, y: 0 },
+                           updatePosition() {
+                               const rect = this.$el.getBoundingClientRect();
+                               this.tooltipPosition = {
+                                   x: rect.right + 8,
+                                   y: rect.top + (rect.height / 2)
+                               };
+                           }
+                       }"
+                       @mouseenter="if(isCollapsed) { showTooltip = true; updatePosition(); }"
+                       @mouseleave="showTooltip = false"
+                       @click="closeMobile()"
+                       class="group relative flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200
+                              {{ isset($item['customActive']) && $item['customActive']() 
+                                  ? 'bg-orange-100 text-orange-700 shadow-sm' 
+                                  : (request()->is($item['active'] ?? $item['href']) 
+                                      ? 'bg-orange-100 text-orange-700 shadow-sm' 
+                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900') }}">
+                        
+                        <!-- Icon -->
+                        <div class="shrink-0 w-6 h-6 flex items-center justify-center"
+                             :class="isCollapsed ? 'lg:mx-auto' : ''">
+                            @if($item['icon'] === 'dashboard')
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                            @elseif($item['icon'] === 'forms')
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            @elseif($item['icon'] === 'users')
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                            @endif
+                        </div>
+                        
+                        <!-- Text - Always visible on mobile, conditional on desktop -->
+                        <span class="ml-3 whitespace-nowrap lg:hidden">{{ $item['label'] }}</span>
+                        <span x-show="!isCollapsed" 
+                              x-transition:enter="transition ease-in-out duration-200"
+                              x-transition:enter-start="opacity-0 transform scale-95"
+                              x-transition:enter-end="opacity-100 transform scale-100"
+                              class="ml-3 whitespace-nowrap hidden lg:block">{{ $item['label'] }}</span>
+                        
+                        <!-- Tooltip for collapsed desktop state - teleported to body -->
+                        <template x-teleport="body">
+                            <div x-show="isCollapsed && showTooltip" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-90"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-90"
+                                 :style="`position: fixed; left: ${tooltipPosition.x}px; top: ${tooltipPosition.y}px; transform: translateY(-50%);`"
+                                 class="hidden lg:block px-2 py-1 bg-gray-900 text-white text-sm rounded-md whitespace-nowrap pointer-events-none z-50">
+                                {{ $item['label'] }}
+                                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 rotate-45 w-2 h-2 bg-gray-900"></div>
+                            </div>
+                        </template>
+                    </a>
+                @endif
             @endforeach
         </nav>
     </aside>
