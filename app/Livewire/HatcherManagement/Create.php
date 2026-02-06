@@ -36,12 +36,13 @@ class Create extends Component
         try {
             Hatcher::create([
                 'hatcherName' => $this->hatcherName,
-                'isDisabled' => false, // Default to enabled
+                'isActive' => false, // Default to inactive
             ]);
 
+            $hatcherName = $this->hatcherName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshHatchers');
-            $this->dispatch('showToast', message: "{$this->hatcherName} has been successfully added!", type: 'success');
+            $this->dispatch('showToast', message: "{$hatcherName} has been successfully created!", type: 'success');
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Validation errors will be displayed automatically
             // Just re-throw to let Livewire handle validation display

@@ -9,10 +9,10 @@
             <div class="relative w-full max-w-md p-6 bg-white shadow-xl rounded-lg">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-medium text-gray-900">
-                        @if($isDisabled)
-                            Enable Plenum
+                        @if(!$isActive)
+                            Activate Plenum
                         @else
-                            Disable Plenum
+                            Deactivate Plenum
                         @endif
                     </h3>
                     <button type="button" wire:click="closeModal" class="text-gray-400 hover:text-gray-500">
@@ -24,10 +24,10 @@
 
                 <div class="mb-6">
                     <p class="text-sm text-gray-600">
-                        @if($isDisabled)
-                            Are you sure you want to enable <strong>{{ $plenumName }}</strong>?
+                        @if(!$isActive)
+                            Are you sure you want to activate <strong>{{ $plenumName }}</strong>?
                         @else
-                            Are you sure you want to disable <strong>{{ $plenumName }}</strong>? This will prevent it from being used in operations.
+                            Are you sure you want to deactivate <strong>{{ $plenumName }}</strong>? This will prevent it from being used in operations.
                         @endif
                     </p>
                 </div>
@@ -37,17 +37,17 @@
                         Cancel
                     </x-button>
                     <x-button 
-                        variant="{{ $isDisabled ? 'success' : 'danger' }}" 
+                        variant="{{ !$isActive ? 'success' : 'danger' }}" 
                         type="button" 
                         wire:click="toggleStatus" 
                         wire:loading.attr="disabled"
                         class="cursor-pointer"
                     >
                         <span wire:loading.remove wire:target="toggleStatus">
-                            @if($isDisabled)
-                                Enable Plenum
+                            @if(!$isActive)
+                                Activate Plenum
                             @else
-                                Disable Plenum
+                                Deactivate Plenum
                             @endif
                         </span>
                         <span wire:loading wire:target="toggleStatus">

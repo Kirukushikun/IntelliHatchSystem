@@ -36,7 +36,7 @@ class Create extends Component
         try {
             Plenum::create([
                 'plenumName' => $this->plenumName,
-                'isDisabled' => false,
+                'isActive' => false, // Default to inactive
                 'creationDate' => now(),
             ]);
 

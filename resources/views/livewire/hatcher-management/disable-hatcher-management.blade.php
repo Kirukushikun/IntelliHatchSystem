@@ -9,7 +9,7 @@
             <div class="relative w-full max-w-md p-6 bg-white shadow-xl rounded-lg">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-medium text-gray-900">
-                        {{ $isDisabled ? 'Enable Hatchery' : 'Disable Hatchery' }}
+                        {{ !$isActive ? 'Activate Hatcher' : 'Deactivate Hatcher' }}
                     </h3>
                     <button type="button" wire:click="closeModal" class="text-gray-400 hover:text-gray-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,13 +33,13 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-900">
-                            {{ $isDisabled ? 'Enable hatchery' : 'Disable hatchery' }} <span class="font-semibold">{{ $hatcheryName }}</span>?
+                            {{ !$isActive ? 'Activate hatcher' : 'Deactivate hatcher' }} <span class="font-semibold">{{ $hatcheryName }}</span>?
                         </p>
                         <p class="text-sm text-gray-500">
-                            @if($isDisabled)
-                                This will make the hatchery available for use again.
+                            @if(!$isActive)
+                                This will make the hatcher available for use again.
                             @else
-                                This will make the hatchery unavailable for use. All data will be preserved.
+                                This will make the hatcher unavailable for use. All data will be preserved.
                             @endif
                         </p>
                     </div>
@@ -57,7 +57,7 @@
                         <span wire:target="closeModal">Cancel</span>
                     </x-button>
                     <x-button 
-                        variant="{{ $isDisabled ? 'success' : 'danger' }}" 
+                        variant="{{ !$isActive ? 'success' : 'danger' }}" 
                         size="sm" 
                         wire:click="toggleStatus"
                         wire:loading.attr="disabled"
@@ -65,10 +65,10 @@
                         :loading="$processing"
                     >
                         <span wire:loading.remove wire:target="toggleStatus">
-                            {{ $isDisabled ? 'Enable Hatchery' : 'Disable Hatchery' }}
+                            {{ !$isActive ? 'Activate Hatcher' : 'Deactivate Hatcher' }}
                         </span>
                         <span wire:loading wire:target="toggleStatus">
-                            {{ $isDisabled ? 'Enabling...' : 'Disabling...' }}
+                            {{ !$isActive ? 'Activating...' : 'Deactivating...' }}
                         </span>
                     </x-button>
                 </div>

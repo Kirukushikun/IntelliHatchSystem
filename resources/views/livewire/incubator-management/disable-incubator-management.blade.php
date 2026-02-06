@@ -9,7 +9,7 @@
             <div class="relative w-full max-w-md p-6 bg-white shadow-xl rounded-lg">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-medium text-gray-900">
-                        {{ $isDisabled ? 'Enable Incubator' : 'Disable Incubator' }}
+                        {{ !$isActive ? 'Activate Incubator' : 'Deactivate Incubator' }}
                     </h3>
                     <button type="button" wire:click="closeModal" class="text-gray-400 hover:text-gray-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,10 +33,10 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-900">
-                            {{ $isDisabled ? 'Enable incubator' : 'Disable incubator' }} <span class="font-semibold">{{ $incubatorName }}</span>?
+                            {{ !$isActive ? 'Activate incubator' : 'Deactivate incubator' }} <span class="font-semibold">{{ $incubatorName }}</span>?
                         </p>
                         <p class="text-sm text-gray-500">
-                            @if($isDisabled)
+                            @if(!$isActive)
                                 This will make the incubator available for use again.
                             @else
                                 This will make the incubator unavailable for use. All data will be preserved.
@@ -57,7 +57,7 @@
                         <span wire:target="closeModal">Cancel</span>
                     </x-button>
                     <x-button 
-                        variant="{{ $isDisabled ? 'success' : 'danger' }}" 
+                        variant="{{ !$isActive ? 'success' : 'danger' }}" 
                         size="sm" 
                         wire:click="toggleStatus"
                         wire:loading.attr="disabled"
@@ -65,10 +65,10 @@
                         :loading="$processing"
                     >
                         <span wire:loading.remove wire:target="toggleStatus">
-                            {{ $isDisabled ? 'Enable Incubator' : 'Disable Incubator' }}
+                            {{ !$isActive ? 'Activate Incubator' : 'Deactivate Incubator' }}
                         </span>
                         <span wire:loading wire:target="toggleStatus">
-                            {{ $isDisabled ? 'Enabling...' : 'Disabling...' }}
+                            {{ !$isActive ? 'Activating...' : 'Deactivating...' }}
                         </span>
                     </x-button>
                 </div>

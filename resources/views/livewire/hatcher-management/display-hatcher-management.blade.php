@@ -37,11 +37,11 @@
                                         </label>
                                         <label class="flex items-center">
                                             <input type="radio" wire:model="statusFilter" value="enabled" class="mr-2">
-                                            <span class="text-sm text-gray-700">Enabled</span>
+                                            <span class="text-sm text-gray-700">Active</span>
                                         </label>
                                         <label class="flex items-center">
                                             <input type="radio" wire:model="statusFilter" value="disabled" class="mr-2">
-                                            <span class="text-sm text-gray-700">Disabled</span>
+                                            <span class="text-sm text-gray-700">Inactive</span>
                                         </label>
                                     </div>
                                 </div>
@@ -156,9 +156,9 @@
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $hatcher->creationDate->format('M d, Y') }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                @if($hatcher->isDisabled)
+                                @if(!$hatcher->isActive)
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        Disabled
+                                        Inactive
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -186,7 +186,7 @@
                                         wire:click="$dispatch('openDisableModal', '{{ $hatcher->id }}')"
                                         class="p-2"
                                     >
-                                        @if($hatcher->isDisabled)
+                                        @if(!$hatcher->isActive)
                                             <svg width="24" height="24" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600">
                                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M11.4669 3.72684C11.7558 3.91574 11.8369 4.30308 11.648 4.59198L7.39799 11.092C7.29783 11.2452 7.13556 11.3467 6.95402 11.3699C6.77247 11.3931 6.58989 11.3355 6.45446 11.2124L3.70446 8.71241C3.44905 8.48022 3.43023 8.08494 3.66242 7.82953C3.89461 7.57412 4.28989 7.55529 4.5453 7.78749L6.75292 9.79441L10.6018 3.90792C10.7907 3.61902 11.178 3.53795 11.4669 3.72684Z" fill="#16A34A"/>
                                             </svg>

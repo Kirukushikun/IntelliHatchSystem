@@ -10,6 +10,7 @@ class Disable extends Component
     public $incubatorId = '';
     public $incubatorName = '';
     public $isDisabled = false;
+    public $isActive = false;
     public $showModal = false;
     public $processing = false;
 
@@ -22,7 +23,7 @@ class Disable extends Component
         
         if ($incubator) {
             $this->incubatorName = $incubator->incubatorName;
-            $this->isDisabled = $incubator->isDisabled;
+            $this->isActive = $incubator->isActive;
             $this->showModal = true;
         }
     }
@@ -35,10 +36,10 @@ class Disable extends Component
             $incubator = Incubator::findOrFail($this->incubatorId);
             
             $incubator->update([
-                'isDisabled' => !$this->isDisabled,
+                'isActive' => !$this->isActive,
             ]);
 
-            $action = $this->isDisabled ? 'enabled' : 'disabled';
+            $action = $this->isActive ? 'deactivated' : 'activated';
             $incubatorName = $this->incubatorName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshIncubators');
@@ -54,7 +55,7 @@ class Disable extends Component
     {
         $this->showModal = false;
         $this->processing = false;
-        $this->reset(['incubatorId', 'incubatorName', 'isDisabled']);
+        $this->reset(['incubatorId', 'incubatorName', 'isActive']);
     }
 
     public function render()
