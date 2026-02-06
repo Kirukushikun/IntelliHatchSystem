@@ -4,9 +4,12 @@ namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
+use App\Traits\SanitizesInput;
 
 class Create extends Component
 {
+    use SanitizesInput;
+    
     public $firstName = '';
     public $lastName = '';
     public $showModal = false;
@@ -43,6 +46,10 @@ class Create extends Component
 
     public function createUser()
     {
+        // Sanitize inputs before validation
+        $this->firstName = $this->sanitizeName($this->firstName);
+        $this->lastName = $this->sanitizeName($this->lastName);
+        
         $this->validate();
 
         try {

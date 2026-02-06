@@ -4,9 +4,12 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use App\Traits\SanitizesInput;
 
 class Edit extends Component
 {
+    use SanitizesInput;
+    
     public $incubatorId = '';
     public $incubatorName = '';
     public $showModal = false;
@@ -48,6 +51,9 @@ class Edit extends Component
 
     public function updateIncubator()
     {
+        // Sanitize input before validation
+        $this->incubatorName = $this->sanitizeInput($this->incubatorName);
+        
         $this->updatedIncubatorName(); // Update validation rules
         $this->validate();
 

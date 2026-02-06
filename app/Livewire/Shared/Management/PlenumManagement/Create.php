@@ -4,9 +4,12 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use App\Traits\SanitizesInput;
 
 class Create extends Component
 {
+    use SanitizesInput;
+    
     public $plenumName = '';
     public $showModal = false;
 
@@ -31,6 +34,9 @@ class Create extends Component
 
     public function createPlenum()
     {
+        // Sanitize input before validation
+        $this->plenumName = $this->sanitizeInput($this->plenumName);
+        
         $this->validate();
 
         try {
