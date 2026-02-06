@@ -28,13 +28,13 @@
                     <h1 class="text-xl font-bold text-gray-900">IntelliHatch System</h1>
                 </div>
                 
-                <!-- Admin Login -->
+                <!-- Login -->
                 <div class="flex items-center space-x-4">
-                    <a href="/admin/login" class="inline-flex items-center px-4 py-2 text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors">
+                    <a href="/login" class="inline-flex items-center px-4 py-2 text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
-                        Admin Login
+                        Login
                     </a>
                 </div>
             </div>

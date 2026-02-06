@@ -9,7 +9,6 @@ class Disable extends Component
 {
     public $plenumId = '';
     public $plenumName = '';
-    public $isDisabled = false;
     public $isActive = false;
     public $showModal = false;
     public $processing = false;

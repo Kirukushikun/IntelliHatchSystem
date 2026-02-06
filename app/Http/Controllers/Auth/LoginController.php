@@ -10,7 +10,12 @@ class LoginController extends Controller
 {
     private function landingPathForAuthenticatedUser(): string
     {
-        return '/admin/dashboard';
+        $user = Auth::user();
+        if (((int) $user->user_type) === 0) {
+            return '/admin/dashboard';
+        } else {
+            return '/user/forms';
+        }
     }
 
     /**
@@ -29,6 +34,7 @@ class LoginController extends Controller
         $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
+            'user_type' => 'required|in:admin,user',
         ]);
 
         // Trim whitespace from username
@@ -44,7 +50,7 @@ class LoginController extends Controller
         }
 
         // Authenticate using username and password
-        if (!Auth::attempt($credentials)) {
+        if (!Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
             // Increment login attempts
             $attempts = $request->session()->get($attemptsKey, 0) + 1;
             $request->session()->put($attemptsKey, $attempts);
@@ -66,10 +72,12 @@ class LoginController extends Controller
 
         $user = Auth::user();
         
-        // Verify user is admin
-        if (((int) $user->user_type) !== 0) {
+        // Verify user type matches selected login type
+        $isAdmin = ((int) $user->user_type) === 0;
+        if (($credentials['user_type'] === 'admin' && !$isAdmin) || ($credentials['user_type'] === 'user' && $isAdmin)) {
             Auth::logout();
-            return back()->with('error', 'Access denied. Admin access required.');
+            $loginType = $credentials['user_type'] === 'admin' ? 'admin' : 'user';
+            return back()->with('error', "The account does not belong to an {$loginType}.");
         }
 
         $request->session()->regenerate();
@@ -88,6 +96,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/admin/login')->with('success', 'You have been logged out successfully.');
+        return redirect('/login')->with('success', 'You have been logged out successfully.');
     }
 }

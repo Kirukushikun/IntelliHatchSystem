@@ -13,12 +13,12 @@ class Plenum extends Model
 
     protected $fillable = [
         'plenumName',
-        'isDisabled',
+        'isActive',
         'creationDate',
     ];
 
     protected $casts = [
-        'isDisabled' => 'boolean',
+        'isActive' => 'boolean',
         'creationDate' => 'datetime',
     ];
 

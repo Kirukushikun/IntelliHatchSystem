@@ -13,12 +13,12 @@ class Hatcher extends Model
 
     protected $fillable = [
         'hatcherName',
-        'isDisabled',
+        'isActive',
         'creationDate',
     ];
 
     protected $casts = [
-        'isDisabled' => 'boolean',
+        'isActive' => 'boolean',
         'creationDate' => 'datetime',
     ];
 
