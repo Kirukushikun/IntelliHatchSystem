@@ -36,18 +36,18 @@ class Create extends Component
         try {
             Plenum::create([
                 'plenumName' => $this->plenumName,
-                'isDisabled' => false,
+                'isActive' => false, // Default to inactive
                 'creationDate' => now(),
             ]);
 
             $plenumName = $this->plenumName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshPlenums');
-            $this->dispatch('showToast', message: "{$plenumName} has been successfully created!", type: 'success');
+            $this->dispatch('showToast', message: "{$plenumName} has been successfully added!", type: 'success');
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            $this->dispatch('showToast', message: 'Failed to create plenum. Please try again.', type: 'error');
+            $this->dispatch('showToast', message: 'Failed to add plenum. Please try again.', type: 'error');
         }
     }
 

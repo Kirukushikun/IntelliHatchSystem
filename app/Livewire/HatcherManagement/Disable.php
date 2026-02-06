@@ -10,6 +10,7 @@ class Disable extends Component
     public $hatcherId = '';
     public $hatcherName = '';
     public $isDisabled = false;
+    public $isActive = false;
     public $showModal = false;
     public $processing = false;
 
@@ -22,7 +23,7 @@ class Disable extends Component
         
         if ($hatcher) {
             $this->hatcherName = $hatcher->hatcherName;
-            $this->isDisabled = $hatcher->isDisabled;
+            $this->isActive = $hatcher->isActive;
             $this->showModal = true;
         }
     }
@@ -35,10 +36,10 @@ class Disable extends Component
             $hatcher = Hatcher::findOrFail($this->hatcherId);
             
             $hatcher->update([
-                'isDisabled' => !$this->isDisabled,
+                'isActive' => !$this->isActive,
             ]);
 
-            $action = $this->isDisabled ? 'enabled' : 'disabled';
+            $action = $this->isActive ? 'deactivated' : 'activated';
             $hatcherName = $this->hatcherName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshHatchers');
@@ -54,7 +55,7 @@ class Disable extends Component
     {
         $this->showModal = false;
         $this->processing = false;
-        $this->reset(['hatcherId', 'hatcherName', 'isDisabled']);
+        $this->reset(['hatcherId', 'hatcherName', 'isActive']);
     }
 
     public function render()

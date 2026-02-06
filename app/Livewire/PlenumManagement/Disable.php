@@ -10,6 +10,7 @@ class Disable extends Component
     public $plenumId = '';
     public $plenumName = '';
     public $isDisabled = false;
+    public $isActive = false;
     public $showModal = false;
     public $processing = false;
 
@@ -22,7 +23,7 @@ class Disable extends Component
         
         if ($plenum) {
             $this->plenumName = $plenum->plenumName;
-            $this->isDisabled = $plenum->isDisabled;
+            $this->isActive = $plenum->isActive;
             $this->showModal = true;
         }
     }
@@ -35,10 +36,10 @@ class Disable extends Component
             $plenum = Plenum::findOrFail($this->plenumId);
             
             $plenum->update([
-                'isDisabled' => !$this->isDisabled,
+                'isActive' => !$this->isActive,
             ]);
 
-            $action = $this->isDisabled ? 'enabled' : 'disabled';
+            $action = $this->isActive ? 'deactivated' : 'activated';
             $plenumName = $this->plenumName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshPlenums');
@@ -54,7 +55,7 @@ class Disable extends Component
     {
         $this->showModal = false;
         $this->processing = false;
-        $this->reset(['plenumId', 'plenumName', 'isDisabled']);
+        $this->reset(['plenumId', 'plenumName', 'isActive']);
     }
 
     public function render()

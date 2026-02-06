@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('incubator-machines', function (Blueprint $table) {
             $table->id();
             $table->string('incubatorName');
-            $table->boolean('isDisabled')->default(false);
+            $table->boolean('isActive')->default(false);
             $table->timestamp('creationDate')->useCurrent();
             $table->timestamps();
         });

@@ -36,18 +36,19 @@ class Create extends Component
         try {
             Incubator::create([
                 'incubatorName' => $this->incubatorName,
-                'isDisabled' => false, // Default to enabled
+                'isActive' => false, // Default to inactive
             ]);
 
+            $incubatorName = $this->incubatorName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshIncubators');
-            $this->dispatch('showToast', message: "{$this->incubatorName} has been successfully added!", type: 'success');
+            $this->dispatch('showToast', message: "{$incubatorName} has been successfully added", type: 'success');
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Validation errors will be displayed automatically
             // Just re-throw to let Livewire handle validation display
             throw $e;
         } catch (\Exception $e) {
-            $this->dispatch('showToast', message: 'Failed to create incubator. Please try again.', type: 'error');
+            $this->dispatch('showToast', message: 'Failed to add incubator. Please try again.', type: 'error');
         }
     }
 

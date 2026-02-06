@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('plenum-machines', function (Blueprint $table) {
             $table->id();
             $table->string('plenumName');
-            $table->boolean('isDisabled')->default(false);
+            $table->boolean('isActive')->default(false);
             $table->timestamp('creationDate')->useCurrent();
             $table->timestamps();
         });
