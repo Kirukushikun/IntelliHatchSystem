@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Livewire\IncubatorManagement;
+namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
-use App\Models\Incubator;
+use App\Models\Hatcher;
 
 class Display extends Component
 {
     public $search = '';
     public $perPage = 10;
-    public $sortField = 'incubatorName';
+    public $sortField = 'hatcherName';
     public $sortDirection = 'asc';
     public $page = 1;
-    public $statusFilter = 'all'; // all, enabled, disabled
+    public $statusFilter = 'all'; // all, active, inactive
     public $dateFrom = ''; // Custom date range from
     public $dateTo = ''; // Custom date range to
     public $showFilterDropdown = false;
@@ -25,7 +25,7 @@ class Display extends Component
         'dateTo' => ['except' => ''],
     ];
 
-    protected $listeners = ['refreshIncubators' => '$refresh'];
+    protected $listeners = ['refreshHatchers' => '$refresh'];
 
     public function mount()
     {
@@ -84,31 +84,31 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $incubators = Incubator::query()
+        $hatchers = Hatcher::query()
             ->where(function($query) {
-                $query->where('incubatorName', 'like', '%' . $this->search . '%');
+                $query->where('hatcherName', 'like', '%' . $this->search . '%');
             });
 
         // Apply status filter
-        if ($this->statusFilter === 'enabled') {
-            $incubators->where('isDisabled', false);
-        } elseif ($this->statusFilter === 'disabled') {
-            $incubators->where('isDisabled', true);
+        if ($this->statusFilter === 'active') {
+            $hatchers->where('isActive', true);
+        } elseif ($this->statusFilter === 'inactive') {
+            $hatchers->where('isActive', false);
         }
 
         // Apply date range filter
         if ($this->dateFrom) {
-            $incubators->whereDate('creationDate', '>=', $this->dateFrom);
+            $hatchers->whereDate('creationDate', '>=', $this->dateFrom);
         }
         if ($this->dateTo) {
-            $incubators->whereDate('creationDate', '<=', $this->dateTo);
+            $hatchers->whereDate('creationDate', '<=', $this->dateTo);
         }
 
-        $incubators = $incubators->orderBy($this->sortField, $this->sortDirection)
+        $hatchers = $hatchers->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage, ['*'], 'page', $this->page);
             
-        $currentPage = $incubators->currentPage(); // Get from paginator
-        $lastPage = $incubators->lastPage();
+        $currentPage = $hatchers->currentPage(); // Get from paginator
+        $lastPage = $hatchers->lastPage();
         
         // Sync the page property with the actual current page
         $this->page = $currentPage;
@@ -134,7 +134,7 @@ class Display extends Component
         }
         
         return [
-            'incubators' => $incubators,
+            'hatchers' => $hatchers,
             'pages' => $pages,
             'currentPage' => $currentPage,
             'lastPage' => $lastPage,
@@ -146,15 +146,15 @@ class Display extends Component
         $page = (int) $page;
         
         // Validate page number
-        $totalPages = Incubator::query()
+        $totalPages = Hatcher::query()
             ->where(function($query) {
-                $query->where('incubatorName', 'like', '%' . $this->search . '%');
+                $query->where('hatcherName', 'like', '%' . $this->search . '%');
             })
-            ->when($this->statusFilter === 'enabled', function($query) {
-                $query->where('isDisabled', false);
+            ->when($this->statusFilter === 'active', function($query) {
+                $query->where('isActive', true);
             })
-            ->when($this->statusFilter === 'disabled', function($query) {
-                $query->where('isDisabled', true);
+            ->when($this->statusFilter === 'inactive', function($query) {
+                $query->where('isActive', false);
             })
             ->when($this->dateFrom, function($query) {
                 $query->whereDate('creationDate', '>=', $this->dateFrom);
@@ -176,6 +176,6 @@ class Display extends Component
 
     public function render()
     {
-        return view('livewire.incubator-management.display-incubator-management', $this->getPaginationData());
+        return view('livewire.shared.management.hatcher-management.display-hatcher-management', $this->getPaginationData());
     }
 }

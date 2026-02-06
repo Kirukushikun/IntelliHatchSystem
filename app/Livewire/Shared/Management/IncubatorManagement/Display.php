@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Livewire\PlenumManagement;
+namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
-use App\Models\Plenum;
+use App\Models\Incubator;
 
 class Display extends Component
 {
     public $search = '';
     public $perPage = 10;
-    public $sortField = 'plenumName';
+    public $sortField = 'incubatorName';
     public $sortDirection = 'asc';
     public $page = 1;
-    public $statusFilter = 'all'; // all, enabled, disabled
+    public $statusFilter = 'all'; // all, active, inactive
     public $dateFrom = ''; // Custom date range from
     public $dateTo = ''; // Custom date range to
     public $showFilterDropdown = false;
@@ -20,15 +20,12 @@ class Display extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'page' => ['except' => 1],
-        'perPage' => ['except' => 10],
-        'sortField' => ['except' => 'plenumName'],
-        'sortDirection' => ['except' => 'asc'],
         'statusFilter' => ['except' => 'all'],
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
     ];
 
-    protected $listeners = ['refreshPlenums' => '$refresh'];
+    protected $listeners = ['refreshIncubators' => '$refresh'];
 
     public function mount()
     {
@@ -39,6 +36,26 @@ class Display extends Component
         $this->dateTo = request()->get('dateTo', '');
     }
 
+    public function updatingSearch()
+    {
+        $this->page = 1;
+    }
+
+    public function updatingStatusFilter()
+    {
+        $this->page = 1;
+    }
+
+    public function updatingDateFrom()
+    {
+        $this->page = 1;
+    }
+
+    public function updatingDateTo()
+    {
+        $this->page = 1;
+    }
+
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
@@ -47,12 +64,16 @@ class Display extends Component
             $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
-        $this->page = 1;
     }
 
     public function toggleFilterDropdown()
     {
         $this->showFilterDropdown = !$this->showFilterDropdown;
+    }
+
+    public function closeFilterDropdown()
+    {
+        $this->showFilterDropdown = false;
     }
 
     public function clearFilters()
@@ -63,31 +84,31 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $plenums = Plenum::query()
+        $incubators = Incubator::query()
             ->where(function($query) {
-                $query->where('plenumName', 'like', '%' . $this->search . '%');
+                $query->where('incubatorName', 'like', '%' . $this->search . '%');
             });
 
         // Apply status filter
-        if ($this->statusFilter === 'enabled') {
-            $plenums->where('isDisabled', false);
-        } elseif ($this->statusFilter === 'disabled') {
-            $plenums->where('isDisabled', true);
+        if ($this->statusFilter === 'active') {
+            $incubators->where('isActive', true);
+        } elseif ($this->statusFilter === 'inactive') {
+            $incubators->where('isActive', false);
         }
 
         // Apply date range filter
         if ($this->dateFrom) {
-            $plenums->whereDate('creationDate', '>=', $this->dateFrom);
+            $incubators->whereDate('creationDate', '>=', $this->dateFrom);
         }
         if ($this->dateTo) {
-            $plenums->whereDate('creationDate', '<=', $this->dateTo);
+            $incubators->whereDate('creationDate', '<=', $this->dateTo);
         }
 
-        $plenums = $plenums->orderBy($this->sortField, $this->sortDirection)
+        $incubators = $incubators->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage, ['*'], 'page', $this->page);
             
-        $currentPage = $plenums->currentPage(); // Get from paginator
-        $lastPage = $plenums->lastPage();
+        $currentPage = $incubators->currentPage(); // Get from paginator
+        $lastPage = $incubators->lastPage();
         
         // Sync the page property with the actual current page
         $this->page = $currentPage;
@@ -113,7 +134,7 @@ class Display extends Component
         }
         
         return [
-            'plenums' => $plenums,
+            'incubators' => $incubators,
             'pages' => $pages,
             'currentPage' => $currentPage,
             'lastPage' => $lastPage,
@@ -125,15 +146,15 @@ class Display extends Component
         $page = (int) $page;
         
         // Validate page number
-        $totalPages = Plenum::query()
+        $totalPages = Incubator::query()
             ->where(function($query) {
-                $query->where('plenumName', 'like', '%' . $this->search . '%');
+                $query->where('incubatorName', 'like', '%' . $this->search . '%');
             })
-            ->when($this->statusFilter === 'enabled', function($query) {
-                $query->where('isDisabled', false);
+            ->when($this->statusFilter === 'active', function($query) {
+                $query->where('isActive', true);
             })
-            ->when($this->statusFilter === 'disabled', function($query) {
-                $query->where('isDisabled', true);
+            ->when($this->statusFilter === 'inactive', function($query) {
+                $query->where('isActive', false);
             })
             ->when($this->dateFrom, function($query) {
                 $query->whereDate('creationDate', '>=', $this->dateFrom);
@@ -141,9 +162,8 @@ class Display extends Component
             ->when($this->dateTo, function($query) {
                 $query->whereDate('creationDate', '<=', $this->dateTo);
             })
-            ->count();
-            
-        $totalPages = ceil($totalPages / $this->perPage);
+            ->paginate($this->perPage)
+            ->lastPage();
         
         if ($page < 1) {
             $page = 1;
@@ -156,6 +176,6 @@ class Display extends Component
 
     public function render()
     {
-        return view('livewire.plenum-management.display-plenum-management', $this->getPaginationData());
+        return view('livewire.shared.management.incubator-management.display-incubator-management', $this->getPaginationData());
     }
 }

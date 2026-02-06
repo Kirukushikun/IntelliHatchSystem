@@ -118,18 +118,20 @@ class Display extends Component
             });
 
         // Apply status filter
-        if ($this->statusFilter !== 'all') {
-            $users->where('is_disabled', $this->statusFilter === 'disabled');
+        if ($this->statusFilter === 'disabled') {
+            $users->where('is_disabled', true);
+        } elseif ($this->statusFilter === 'enabled') {
+            $users->where('is_disabled', false);
         }
 
         // Apply date filter
         if ($this->dateFrom || $this->dateTo) {
             if ($this->dateFrom && $this->dateTo) {
-                $users->whereBetween('created_date', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+                $users->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
             } elseif ($this->dateFrom) {
-                $users->whereDate('created_date', '>=', $this->dateFrom);
+                $users->whereDate('created_at', '>=', $this->dateFrom);
             } elseif ($this->dateTo) {
-                $users->whereDate('created_date', '<=', $this->dateTo);
+                $users->whereDate('created_at', '<=', $this->dateTo);
             }
         }
 

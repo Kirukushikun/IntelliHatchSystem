@@ -244,14 +244,14 @@
     </div>
 
     <!-- Include Create Modal -->
-    <livewire:incubator-management.create on:incubatorCreated="$refresh" />
+    <livewire:shared.management.incubator-management.create on:incubatorCreated="$refresh" />
     
     <!-- Include Edit Modal -->
-    <livewire:incubator-management.edit on:incubatorUpdated="$refresh" />
+    <livewire:shared.management.incubator-management.edit on:incubatorUpdated="$refresh" />
     
     <!-- Include Delete Modal -->
-    <livewire:incubator-management.delete on:incubatorDeleted="$refresh" />
+    <livewire:shared.management.incubator-management.delete on:incubatorDeleted="$refresh" />
     
     <!-- Include Disable/Enable Modal -->
-    <livewire:incubator-management.disable on:statusToggled="$refresh" />
+    <livewire:shared.management.incubator-management.disable on:statusToggled="$refresh" />
 </div>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\PlenumManagement;
+namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
@@ -60,6 +60,6 @@ class Disable extends Component
 
     public function render()
     {
-        return view('livewire.plenum-management.disable-plenum-management');
+        return view('livewire.shared.management.plenum-management.disable-plenum-management');
     }
 }

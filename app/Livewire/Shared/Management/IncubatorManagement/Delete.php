@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\IncubatorManagement;
+namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
@@ -48,6 +48,6 @@ class Delete extends Component
 
     public function render()
     {
-        return view('livewire.incubator-management.delete-incubator-management');
+        return view('livewire.shared.management.incubator-management.delete-incubator-management');
     }
 }

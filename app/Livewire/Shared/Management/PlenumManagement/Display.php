@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Livewire\HatcherManagement;
+namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
-use App\Models\Hatcher;
+use App\Models\Plenum;
 
 class Display extends Component
 {
     public $search = '';
     public $perPage = 10;
-    public $sortField = 'hatcherName';
+    public $sortField = 'plenumName';
     public $sortDirection = 'asc';
     public $page = 1;
-    public $statusFilter = 'all'; // all, enabled, disabled
+    public $statusFilter = 'all'; // all, active, inactive
     public $dateFrom = ''; // Custom date range from
     public $dateTo = ''; // Custom date range to
     public $showFilterDropdown = false;
@@ -20,12 +20,15 @@ class Display extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'page' => ['except' => 1],
+        'perPage' => ['except' => 10],
+        'sortField' => ['except' => 'plenumName'],
+        'sortDirection' => ['except' => 'asc'],
         'statusFilter' => ['except' => 'all'],
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
     ];
 
-    protected $listeners = ['refreshHatchers' => '$refresh'];
+    protected $listeners = ['refreshPlenums' => '$refresh'];
 
     public function mount()
     {
@@ -36,26 +39,6 @@ class Display extends Component
         $this->dateTo = request()->get('dateTo', '');
     }
 
-    public function updatingSearch()
-    {
-        $this->page = 1;
-    }
-
-    public function updatingStatusFilter()
-    {
-        $this->page = 1;
-    }
-
-    public function updatingDateFrom()
-    {
-        $this->page = 1;
-    }
-
-    public function updatingDateTo()
-    {
-        $this->page = 1;
-    }
-
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
@@ -64,16 +47,12 @@ class Display extends Component
             $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
+        $this->page = 1;
     }
 
     public function toggleFilterDropdown()
     {
         $this->showFilterDropdown = !$this->showFilterDropdown;
-    }
-
-    public function closeFilterDropdown()
-    {
-        $this->showFilterDropdown = false;
     }
 
     public function clearFilters()
@@ -84,31 +63,31 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $hatchers = Hatcher::query()
+        $plenums = Plenum::query()
             ->where(function($query) {
-                $query->where('hatcherName', 'like', '%' . $this->search . '%');
+                $query->where('plenumName', 'like', '%' . $this->search . '%');
             });
 
         // Apply status filter
-        if ($this->statusFilter === 'enabled') {
-            $hatchers->where('isDisabled', false);
-        } elseif ($this->statusFilter === 'disabled') {
-            $hatchers->where('isDisabled', true);
+        if ($this->statusFilter === 'active') {
+            $plenums->where('isActive', true);
+        } elseif ($this->statusFilter === 'inactive') {
+            $plenums->where('isActive', false);
         }
 
         // Apply date range filter
         if ($this->dateFrom) {
-            $hatchers->whereDate('creationDate', '>=', $this->dateFrom);
+            $plenums->whereDate('creationDate', '>=', $this->dateFrom);
         }
         if ($this->dateTo) {
-            $hatchers->whereDate('creationDate', '<=', $this->dateTo);
+            $plenums->whereDate('creationDate', '<=', $this->dateTo);
         }
 
-        $hatchers = $hatchers->orderBy($this->sortField, $this->sortDirection)
+        $plenums = $plenums->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage, ['*'], 'page', $this->page);
             
-        $currentPage = $hatchers->currentPage(); // Get from paginator
-        $lastPage = $hatchers->lastPage();
+        $currentPage = $plenums->currentPage(); // Get from paginator
+        $lastPage = $plenums->lastPage();
         
         // Sync the page property with the actual current page
         $this->page = $currentPage;
@@ -134,7 +113,7 @@ class Display extends Component
         }
         
         return [
-            'hatchers' => $hatchers,
+            'plenums' => $plenums,
             'pages' => $pages,
             'currentPage' => $currentPage,
             'lastPage' => $lastPage,
@@ -146,15 +125,15 @@ class Display extends Component
         $page = (int) $page;
         
         // Validate page number
-        $totalPages = Hatcher::query()
+        $totalPages = Plenum::query()
             ->where(function($query) {
-                $query->where('hatcherName', 'like', '%' . $this->search . '%');
+                $query->where('plenumName', 'like', '%' . $this->search . '%');
             })
-            ->when($this->statusFilter === 'enabled', function($query) {
-                $query->where('isDisabled', false);
+            ->when($this->statusFilter === 'active', function($query) {
+                $query->where('isActive', true);
             })
-            ->when($this->statusFilter === 'disabled', function($query) {
-                $query->where('isDisabled', true);
+            ->when($this->statusFilter === 'inactive', function($query) {
+                $query->where('isActive', false);
             })
             ->when($this->dateFrom, function($query) {
                 $query->whereDate('creationDate', '>=', $this->dateFrom);
@@ -162,8 +141,9 @@ class Display extends Component
             ->when($this->dateTo, function($query) {
                 $query->whereDate('creationDate', '<=', $this->dateTo);
             })
-            ->paginate($this->perPage)
-            ->lastPage();
+            ->count();
+            
+        $totalPages = ceil($totalPages / $this->perPage);
         
         if ($page < 1) {
             $page = 1;
@@ -176,6 +156,6 @@ class Display extends Component
 
     public function render()
     {
-        return view('livewire.hatcher-management.display-hatcher-management', $this->getPaginationData());
+        return view('livewire.shared.management.plenum-management.display-plenum-management', $this->getPaginationData());
     }
 }

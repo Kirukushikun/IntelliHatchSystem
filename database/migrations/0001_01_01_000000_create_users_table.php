@@ -19,7 +19,6 @@ return new class extends Migration
             $table->boolean('is_disabled')->default(false);
             $table->string('username')->unique();
             $table->string('password');
-            $table->dateTime('created_date')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

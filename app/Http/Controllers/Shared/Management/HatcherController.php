@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Shared\Management;
 
 use App\Http\Controllers\Controller;
 use App\Models\Hatcher;
@@ -15,7 +15,7 @@ class HatcherController extends Controller
     {
         // Get hatchers data for the view if needed
         $hatchers = Hatcher::orderBy('creationDate', 'desc')->paginate(10);
-        return view('admin.hatcher-machines', compact('hatchers'));
+        return view('shared.management.hatcher-machines', compact('hatchers'));
     }
 
     /**
@@ -29,7 +29,7 @@ class HatcherController extends Controller
 
         Hatcher::create([
             'hatcherName' => $validated['hatcherName'],
-            'isDisabled' => false,
+            'isActive' => true,
         ]);
 
         return redirect()->route('admin.hatcher-machines')
@@ -57,10 +57,10 @@ class HatcherController extends Controller
     public function toggleStatus(Hatcher $hatcher)
     {
         $hatcher->update([
-            'isDisabled' => !$hatcher->isDisabled,
+            'isActive' => !$hatcher->isActive,
         ]);
 
-        $status = $hatcher->isDisabled ? 'disabled' : 'enabled';
+        $status = $hatcher->isActive ? 'deactivated' : 'activated';
         
         return redirect()->route('admin.hatcher-machines')
             ->with('success', "Hatcher {$status} successfully.");

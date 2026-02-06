@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\IncubatorManagement;
+namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
@@ -61,6 +61,6 @@ class Create extends Component
 
     public function render()
     {
-        return view('livewire.incubator-management.create-incubator-management');
+        return view('livewire.shared.management.incubator-management.create-incubator-management');
     }
 }

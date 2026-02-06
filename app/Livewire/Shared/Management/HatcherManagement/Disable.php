@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\HatcherManagement;
+namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
@@ -9,7 +9,6 @@ class Disable extends Component
 {
     public $hatcherId = '';
     public $hatcherName = '';
-    public $isDisabled = false;
     public $isActive = false;
     public $showModal = false;
     public $processing = false;
@@ -39,7 +38,7 @@ class Disable extends Component
                 'isActive' => !$this->isActive,
             ]);
 
-            $action = $this->isActive ? 'deactivated' : 'activated';
+            $action = !$this->isActive ? 'activated' : 'deactivated';
             $hatcherName = $this->hatcherName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshHatchers');
@@ -60,6 +59,6 @@ class Disable extends Component
 
     public function render()
     {
-        return view('livewire.hatcher-management.disable-hatcher-management');
+        return view('livewire.shared.management.hatcher-management.disable-hatcher-management');
     }
 }
