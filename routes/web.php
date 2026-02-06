@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\HatcherController;
 use App\Http\Controllers\Admin\IncubatorController;
+use App\Http\Controllers\Admin\PlenumController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FormController;
@@ -42,6 +43,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/incubator-machines', [IncubatorController::class, 'index'])->name('admin.incubator-machines');
 
         Route::get('/admin/hatcher-machines', [HatcherController::class, 'index'])->name('admin.hatcher-machines');
+
+        Route::get('/admin/plenum-machines', [PlenumController::class, 'index'])->name('admin.plenum-machines');
 
         Route::get('/admin/change-password', [UserController::class, 'changePassword'])->name('admin.change-password');
     });
