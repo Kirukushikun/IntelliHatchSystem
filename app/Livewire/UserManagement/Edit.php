@@ -3,7 +3,7 @@
 namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
-use App\Models\HatcheryUser;
+use App\Models\User;
 
 class Edit extends Component
 {
@@ -31,7 +31,7 @@ class Edit extends Component
     public function openModal($userId)
     {
         $this->userId = $userId;
-        $user = HatcheryUser::find($this->userId);
+        $user = User::find($this->userId);
         
         if ($user) {
             $this->firstName = $user->first_name;
@@ -53,12 +53,24 @@ class Edit extends Component
         $this->validate();
 
         try {
-            $user = HatcheryUser::find($this->userId);
+            $user = User::find($this->userId);
             
             if ($user) {
+                // Generate username based on updated name
+                $baseUsername = strtoupper(substr($this->firstName, 0, 1)) . $this->lastName;
+                $username = $baseUsername;
+                $counter = 1;
+                
+                // Check if username exists and increment if needed (exclude current user)
+                while (User::where('username', $username)->where('id', '!=', $this->userId)->exists()) {
+                    $username = $baseUsername . $counter;
+                    $counter++;
+                }
+                
                 $user->update([
                     'first_name' => $this->firstName,
                     'last_name' => $this->lastName,
+                    'username' => $username,
                 ]);
 
                 $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal

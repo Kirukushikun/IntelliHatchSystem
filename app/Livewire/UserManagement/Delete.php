@@ -3,7 +3,7 @@
 namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
-use App\Models\HatcheryUser;
+use App\Models\User;
 
 class Delete extends Component
 {
@@ -16,7 +16,7 @@ class Delete extends Component
     public function openModal($userId)
     {
         $this->userId = $userId;
-        $user = HatcheryUser::find($userId);
+        $user = User::find($userId);
         
         if ($user) {
             $this->userName = $user->first_name . ' ' . $user->last_name;
@@ -34,7 +34,7 @@ class Delete extends Component
     public function deleteUser()
     {
         try {
-            $user = HatcheryUser::find($this->userId);
+            $user = User::find($this->userId);
             
             if ($user) {
                 $userName = $user->first_name . ' ' . $user->last_name;

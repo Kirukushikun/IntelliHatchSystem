@@ -3,7 +3,7 @@
 namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
-use App\Models\HatcheryUser;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class Disable extends Component
@@ -18,7 +18,7 @@ class Disable extends Component
 
     public function openModal($userId)
     {
-        $user = HatcheryUser::find($userId);
+        $user = User::find($userId);
         if (!$user) {
             return;
         }
@@ -40,7 +40,7 @@ class Disable extends Component
         $this->processing = true;
 
         try {
-            $user = HatcheryUser::find($this->userId);
+            $user = User::find($this->userId);
             if (!$user) {
                 $this->dispatch('showToast', message: 'User not found', type: 'error');
                 return;

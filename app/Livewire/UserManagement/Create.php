@@ -3,7 +3,7 @@
 namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
-use App\Models\HatcheryUser;
+use App\Models\User;
 
 class Create extends Component
 {
@@ -46,16 +46,31 @@ class Create extends Component
         $this->validate();
 
         try {
-            HatcheryUser::create([
+            // Generate unique username: first initial + last name + number if needed
+            $baseUsername = strtoupper(substr($this->firstName, 0, 1)) . $this->lastName;
+            $username = $baseUsername;
+            $counter = 1;
+            
+            // Check if username exists and increment if needed
+            while (User::where('username', $username)->exists()) {
+                $username = $baseUsername . $counter;
+                $counter++;
+            }
+            
+            User::create([
                 'first_name' => $this->firstName,
                 'last_name' => $this->lastName,
+                'user_type' => 1, // hatchery-user
                 'is_disabled' => false,
+                'username' => $username,
+                'password' => bcrypt('brookside25'), // Default password
                 'created_date' => now(),
             ]);
 
             $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
             $this->closeModal();
             $this->dispatch('showToast', message: "{$fullName} has been created successfully!", type: 'success');
+            $this->dispatch('refreshUsers'); // Refresh the user list
             $this->reset(['firstName', 'lastName']);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Validation errors will be displayed automatically

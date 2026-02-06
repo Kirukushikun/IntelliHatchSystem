@@ -1,4 +1,4 @@
-<div>
+<div wire:poll.2s>
     <!-- Header with Title, Search, and Add User -->
     <div class="flex items-center justify-between gap-6 mb-6">
         <div>
@@ -137,6 +137,20 @@
                                 @endif
                             </p>
                         </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('username')">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
+                                Username
+                                @if ($sortField === 'username')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if ($sortDirection === 'asc')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        @endif
+                                    </svg>
+                                @endif
+                            </p>
+                        </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('created_date')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
                                 Created Date
@@ -173,7 +187,10 @@
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $user->last_name }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
-                                <p class="block text-xs md:text-sm text-slate-800">{{ $user->created_date->format('M d, Y') }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800">{{ $user->username }}</p>
+                            </td>
+                            <td class="p-3 md:p-4 py-4 md:py-5">
+                                <p class="block text-xs md:text-sm text-slate-800">{{ $user->created_date ? $user->created_date->format('M d, Y') : 'N/A' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
                                 @if($user->is_disabled)
@@ -271,47 +288,4 @@
     
     <!-- Include Disable/Enable Modal -->
     <livewire:user-management.disable on:refreshUsers="$refresh" />
-    
-    <!-- Toast Container -->
-    <div x-data="{ toasts: [] }" x-init="window.addEventListener('showToast', (event) => {
-        toasts.push({ message: event.detail.message, type: event.detail.type, id: Date.now() });
-        setTimeout(() => {
-            toasts.shift();
-        }, 3000);
-    })" class="fixed top-4 right-4 z-50 space-y-2">
-        <template x-for="toast in toasts" :key="toast.id">
-            <div 
-                x-show="toast"
-                x-transition:enter="transform ease-out duration-300 transition"
-                x-transition:enter-start="translate-x-full opacity-0"
-                x-transition:enter-end="translate-x-0 opacity-100"
-                x-transition:leave="transform ease-in duration-200 transition"
-                x-transition:leave-start="translate-x-0 opacity-100"
-                x-transition:leave-end="translate-x-full opacity-0"
-                :class="{
-                    'bg-green-500 text-white': toast.type === 'success',
-                    'bg-red-500 text-white': toast.type === 'error',
-                    'bg-yellow-500 text-white': toast.type === 'warning'
-                }"
-                class="px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2"
-            >
-                <div x-show="toast.type === 'success'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <div x-show="toast.type === 'error'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </div>
-                <div x-show="toast.type === 'warning'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                </div>
-                <span x-text="toast.message"></span>
-            </div>
-        </template>
-    </div>
 </div>

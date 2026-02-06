@@ -1,4 +1,4 @@
-<div>
+<div wire:poll.2s>
     <!-- Header with Title, Search, and Add Plenum -->
     <div class="flex items-center justify-between gap-6 mb-6">
         <div>
@@ -235,40 +235,4 @@
     
     <!-- Include Disable/Enable Modal -->
     <livewire:plenum-management.disable on:statusToggled="$refresh" />
-    
-    <!-- Toast Container -->
-    <div x-data="{ toasts: [] }" x-init="window.addEventListener('showToast', (event) => {
-        toasts.push({ message: event.detail.message, type: event.detail.type, id: Date.now() });
-        setTimeout(() => {
-            toasts.shift();
-        }, 3000);
-    })" class="fixed top-4 right-4 z-50 space-y-2">
-        <template x-for="toast in toasts" :key="toast.id">
-            <div 
-                :class="{
-                    'bg-green-500 text-white': toast.type === 'success',
-                    'bg-red-500 text-white': toast.type === 'error',
-                    'bg-yellow-500 text-white': toast.type === 'warning'
-                }"
-                class="px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2"
-            >
-                <div x-show="toast.type === 'success'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <div x-show="toast.type === 'error'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </div>
-                <div x-show="toast.type === 'warning'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                </div>
-                <span x-text="toast.message"></span>
-            </div>
-        </template>
-    </div>
 </div>

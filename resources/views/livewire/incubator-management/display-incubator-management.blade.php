@@ -254,47 +254,4 @@
     
     <!-- Include Disable/Enable Modal -->
     <livewire:incubator-management.disable on:statusToggled="$refresh" />
-    
-    <!-- Toast Container -->
-    <div x-data="{ toasts: [] }" x-init="window.addEventListener('showToast', (event) => {
-        toasts.push({ message: event.detail.message, type: event.detail.type, id: Date.now() });
-        setTimeout(() => {
-            toasts.shift();
-        }, 3000);
-    })" class="fixed top-4 right-4 z-50 space-y-2">
-        <template x-for="toast in toasts" :key="toast.id">
-            <div 
-                x-show="toast"
-                x-transition:enter="transform ease-out duration-300 transition"
-                x-transition:enter-start="translate-x-full opacity-0"
-                x-transition:enter-end="translate-x-0 opacity-100"
-                x-transition:leave="transform ease-in duration-200 transition"
-                x-transition:leave-start="translate-x-0 opacity-100"
-                x-transition:leave-end="translate-x-full opacity-0"
-                :class="{
-                    'bg-green-500 text-white': toast.type === 'success',
-                    'bg-red-500 text-white': toast.type === 'error',
-                    'bg-yellow-500 text-white': toast.type === 'warning'
-                }"
-                class="px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2"
-            >
-                <div x-show="toast.type === 'success'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <div x-show="toast.type === 'error'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </div>
-                <div x-show="toast.type === 'warning'">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                </div>
-                <span x-text="toast.message"></span>
-            </div>
-        </template>
-    </div>
 </div>
