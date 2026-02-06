@@ -4,8 +4,8 @@ namespace App\Livewire\Forms;
 
 use App\Livewire\Configs\IncubatorRoutineConfig;
 use App\Livewire\FormNavigation;
-use App\Models\HatcheryUser;
 use App\Models\Incubator;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -43,7 +43,8 @@ class IncubatorRoutineForm extends FormNavigation
         $this->recalculateVisibleSteps();
         
         // Load hatchery men and incubators
-        $this->hatcheryMen = HatcheryUser::where('is_disabled', false)
+        $this->hatcheryMen = User::where('user_type', 1)
+            ->where('is_disabled', false)
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->get()
