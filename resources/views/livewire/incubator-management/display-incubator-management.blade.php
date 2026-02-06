@@ -2,7 +2,7 @@
     <!-- Header with Title, Search, and Add Incubator -->
     <div class="flex items-center justify-between gap-6 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Incubator Management</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">Incubator Machines Management</h1>
             <p class="text-gray-600">Manage incubators.</p>
         </div>
         <div class="flex items-center gap-4 relative">

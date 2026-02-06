@@ -1,9 +1,9 @@
 <div>
-    <!-- Header with Title, Search, and Add Hatchery -->
+    <!-- Header with Title, Search, and Add Hatcher -->
     <div class="flex items-center justify-between gap-6 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Hatchery Management</h1>
-            <p class="text-gray-600">Manage hatcheries.</p>
+            <h1 class="text-2xl font-semibold text-gray-900">Hatcher Machines Management</h1>
+            <p class="text-gray-600">Manage hatchers.</p>
         </div>
         <div class="flex items-center gap-4 relative">
             <!-- Search Bar -->
@@ -13,7 +13,7 @@
                 </svg>
                 <input
                     wire:model.live="search"
-                    placeholder="Search hatcheries..."
+                    placeholder="Search hatchers..."
                     class="w-80 pl-11 pr-12 py-3 text-sm bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 shadow-sm"
                 />
                 <button type="button" wire:click="toggleFilterDropdown" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors">
@@ -90,26 +90,26 @@
                 @endif
             </div>
             
-            <!-- Add Hatchery Button -->
+            <!-- Add Hatcher Button -->
             <button type="button" wire:click="$dispatch('openCreateModal')" class="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-white bg-orange-600 border border-orange-600 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-150 whitespace-nowrap">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-2">
                     <path d="M5.25 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM2.25 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM18.75 7.5a.75.75 0 0 0-1.5 0v2.25H15a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H21a.75.75 0 0 0 0-1.5h-2.25V7.5Z" />
                 </svg>
-                Add Hatchery
+                Add Hatcher
             </button>
         </div>
     </div>
 
-    <!-- Hatcheries Table -->
+    <!-- Hatchers Table -->
     <div class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
         <div class="overflow-x-auto">
             <table class="w-full text-left table-auto min-w-max">
                 <thead>
                     <tr>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('hatcheryName')">
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('hatcherName')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
-                                Hatchery Name
-                                @if ($sortField === 'hatcheryName')
+                                Hatcher Name
+                                @if ($sortField === 'hatcherName')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
