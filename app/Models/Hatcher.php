@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Incubator extends Model
+class Hatcher extends Model
 {
     use HasFactory;
 
-    protected $table = 'incubator-machines';
+    protected $table = 'hatcher-machines';
 
     protected $fillable = [
-        'incubatorName',
+        'hatcherName',
         'isDisabled',
         'creationDate',
     ];

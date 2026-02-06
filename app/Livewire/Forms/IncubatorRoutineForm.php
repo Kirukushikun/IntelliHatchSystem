@@ -521,10 +521,10 @@ class IncubatorRoutineForm extends FormNavigation
             
             // Get form data with relationships
             $form = DB::table('forms')
-                ->select('forms.*', 'form_types.form_name as form_type_name', 'hatchery_users.first_name', 'hatchery_users.last_name', 'incubators.incubatorName')
+                ->select('forms.*', 'form_types.form_name as form_type_name', 'hatchery_users.first_name', 'hatchery_users.last_name', 'incubator-machines.incubatorName')
                 ->leftJoin('form_types', 'forms.form_type_id', '=', 'form_types.id')
                 ->leftJoin('hatchery_users', 'forms.uploaded_by', '=', 'hatchery_users.id')
-                ->leftJoin('incubators', 'forms.incubator_id', '=', 'incubators.id')
+                ->leftJoin('incubator-machines', 'forms.incubator_id', '=', 'incubator-machines.id')
                 ->where('forms.id', $formId)
                 ->first();
 

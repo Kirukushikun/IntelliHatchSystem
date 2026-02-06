@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Incubator extends Model
+class Plenum extends Model
 {
     use HasFactory;
 
-    protected $table = 'incubator-machines';
+    protected $table = 'plenum-machines';
 
     protected $fillable = [
-        'incubatorName',
+        'plenumName',
         'isDisabled',
         'creationDate',
     ];

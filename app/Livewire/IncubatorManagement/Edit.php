@@ -42,7 +42,7 @@ class Edit extends Component
         if ($this->incubatorName === $this->originalIncubatorName) {
             $this->rules['incubatorName'] = 'required|string|max:255';
         } else {
-            $this->rules['incubatorName'] = 'required|string|max:255|unique:incubators,incubatorName';
+            $this->rules['incubatorName'] = 'required|string|max:255|unique:incubator-machines,incubatorName';
         }
     }
 
