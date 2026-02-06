@@ -27,10 +27,19 @@
             'dropdown' => true,
             'children' => [
                 [
-                    'label' => 'Incubator Management',
-                    'href' => '/admin/incubators',
-                    'icon' => 'incubator',
-                    'active' => 'admin/incubators*'
+                    'label' => 'Incubator Machines',
+                    'href' => '/admin/incubator-machines',
+                    'active' => 'admin/incubator-machines*'
+                ],
+                [
+                    'label' => 'Hatcher Machines',
+                    'href' => '/admin/hatcher-machines',
+                    'active' => 'admin/hatcher-machines*'
+                ],
+                [
+                    'label' => 'Plenum Machines',
+                    'href' => '/admin/plenum-machines',
+                    'active' => 'admin/plenum-machines*'
                 ]
             ]
         ],
@@ -246,13 +255,6 @@ x-cloak>
                                               {{ request()->is($child['active'] ?? $child['href']) 
                                                   ? 'bg-orange-100 text-orange-700' 
                                                   : 'text-gray-700 hover:bg-gray-50' }}">
-                                        <div class="shrink-0 w-5 h-5 flex items-center justify-center mr-3">
-                                            @if($child['icon'] === 'incubator')
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="-2 -3.5 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d='M11.843 12.37A4 4 0 0 0 18 9c0-1.238-.623-3.136-1.58-4.698C15.513 2.822 14.524 2 14 2s-1.513.822-2.42 2.302a12.214 12.214 0 0 0-.935 1.884 12.584 12.584 0 0 0-1.277-2.024C10.522 1.91 12.26 0 14 0c3 0 6 5.686 6 9a6 6 0 0 1-8.943 5.23c.36-.563.63-1.19.786-1.86zM6 17a6 6 0 0 1-6-6c0-3.314 3-9 6-9s6 5.686 6 9a6 6 0 0 1-6 6zm0-2a4 4 0 0 0 4-4c0-1.238-.623-3.136-1.58-4.698C7.513 4.822 6.524 4 6 4s-1.513.822-2.42 2.302C2.623 7.864 2 9.762 2 11a4 4 0 0 0 4 4z'/>
-                                                </svg>
-                                            @endif
-                                        </div>
                                         <span class="whitespace-nowrap">{{ $child['label'] }}</span>
                                     </a>
                                 @endforeach
@@ -273,22 +275,12 @@ x-cloak>
                             @foreach($item['children'] as $child)
                                 <a href="{{ $child['href'] }}" 
                                    @click="closeMobile()"
-                                   class="group relative flex items-center pl-11 pr-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                   class="group relative flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
                                           {{ request()->is($child['active'] ?? $child['href']) 
                                               ? 'bg-orange-100 text-orange-700 shadow-sm' 
                                               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                     
-                                    <!-- Icon -->
-                                    <div class="shrink-0 w-5 h-5 flex items-center justify-center mr-3">
-                                        @if($child['icon'] === 'incubator')
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="-2 -3.5 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path d='M11.843 12.37A4 4 0 0 0 18 9c0-1.238-.623-3.136-1.58-4.698C15.513 2.822 14.524 2 14 2s-1.513.822-2.42 2.302a12.214 12.214 0 0 0-.935 1.884 12.584 12.584 0 0 0-1.277-2.024C10.522 1.91 12.26 0 14 0c3 0 6 5.686 6 9a6 6 0 0 1-8.943 5.23c.36-.563.63-1.19.786-1.86zM6 17a6 6 0 0 1-6-6c0-3.314 3-9 6-9s6 5.686 6 9a6 6 0 0 1-6 6zm0-2a4 4 0 0 0 4-4c0-1.238-.623-3.136-1.58-4.698C7.513 4.822 6.524 4 6 4s-1.513.822-2.42 2.302C2.623 7.864 2 9.762 2 11a4 4 0 0 0 4 4z'/>
-                                            </svg>
-                                        @endif
-                                    </div>
-                                    
-                                    <!-- Text -->
-                                    <span class="whitespace-nowrap">{{ $child['label'] }}</span>
+                                    <span class="whitespace-nowrap pl-8">{{ $child['label'] }}</span>
                                 </a>
                             @endforeach
                         </div>
@@ -304,22 +296,12 @@ x-cloak>
                              class="mt-1 space-y-1 hidden lg:block">
                             @foreach($item['children'] as $child)
                                 <a href="{{ $child['href'] }}" 
-                                   class="group relative flex items-center pl-11 pr-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                   class="group relative flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
                                           {{ request()->is($child['active'] ?? $child['href']) 
                                               ? 'bg-orange-100 text-orange-700 shadow-sm' 
                                               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                     
-                                    <!-- Icon -->
-                                    <div class="shrink-0 w-5 h-5 flex items-center justify-center mr-3">
-                                        @if($child['icon'] === 'incubator')
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="-2 -3.5 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path d='M11.843 12.37A4 4 0 0 0 18 9c0-1.238-.623-3.136-1.58-4.698C15.513 2.822 14.524 2 14 2s-1.513.822-2.42 2.302a12.214 12.214 0 0 0-.935 1.884 12.584 12.584 0 0 0-1.277-2.024C10.522 1.91 12.26 0 14 0c3 0 6 5.686 6 9a6 6 0 0 1-8.943 5.23c.36-.563.63-1.19.786-1.86zM6 17a6 6 0 0 1-6-6c0-3.314 3-9 6-9s6 5.686 6 9a6 6 0 0 1-6 6zm0-2a4 4 0 0 0 4-4c0-1.238-.623-3.136-1.58-4.698C7.513 4.822 6.524 4 6 4s-1.513.822-2.42 2.302C2.623 7.864 2 9.762 2 11a4 4 0 0 0 4 4z'/>
-                                            </svg>
-                                        @endif
-                                    </div>
-                                    
-                                    <!-- Text -->
-                                    <span class="whitespace-nowrap">{{ $child['label'] }}</span>
+                                    <span class="whitespace-nowrap pl-8">{{ $child['label'] }}</span>
                                 </a>
                             @endforeach
                         </div>
