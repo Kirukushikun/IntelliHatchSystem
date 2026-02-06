@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\HatcherManagement;
+namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
@@ -61,6 +61,6 @@ class Create extends Component
 
     public function render()
     {
-        return view('livewire.hatcher-management.create-hatcher-management');
+        return view('livewire.shared.management.hatcher-management.create-hatcher-management');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Shared\Management;
 
 use App\Http\Controllers\Controller;
 use App\Models\Plenum;
@@ -9,11 +9,11 @@ use Illuminate\Http\Request;
 class PlenumController extends Controller
 {
     /**
-     * Display the plenum machines management page.
+     * Display plenum machines management page.
      */
     public function index()
     {
-        return view('admin.plenum-machines');
+        return view('shared.management.plenum-machines');
     }
 
     /**
@@ -27,7 +27,7 @@ class PlenumController extends Controller
 
         $plenum = Plenum::create([
             'plenumName' => $validated['plenumName'],
-            'isDisabled' => false,
+            'isActive' => true,
             'creationDate' => now(),
         ]);
 
@@ -39,7 +39,7 @@ class PlenumController extends Controller
     }
 
     /**
-     * Update the specified plenum machine.
+     * Update specified plenum machine.
      */
     public function update(Request $request, Plenum $plenum)
     {
@@ -70,15 +70,15 @@ class PlenumController extends Controller
     }
 
     /**
-     * Toggle the status of the specified plenum machine.
+     * Toggle status of the specified plenum machine.
      */
     public function toggleStatus(Plenum $plenum)
     {
         $plenum->update([
-            'isDisabled' => !$plenum->isDisabled
+            'isActive' => !$plenum->isActive,
         ]);
 
-        $status = $plenum->isDisabled ? 'disabled' : 'enabled';
+        $status = $plenum->isActive ? 'deactivated' : 'activated';
 
         return response()->json([
             'success' => true,

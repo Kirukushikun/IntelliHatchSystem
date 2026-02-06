@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Shared\Management;
 
 use App\Http\Controllers\Controller;
 use App\Models\Incubator;
@@ -15,7 +15,7 @@ class IncubatorController extends Controller
     {
         // Get incubators data for the view if needed
         $incubators = Incubator::orderBy('creationDate', 'desc')->paginate(10);
-        return view('admin.incubator-machines', compact('incubators'));
+        return view('shared.management.incubator-machines', compact('incubators'));
     }
 
     /**
@@ -29,7 +29,7 @@ class IncubatorController extends Controller
 
         Incubator::create([
             'incubatorName' => $validated['incubatorName'],
-            'isDisabled' => false,
+            'isActive' => true,
         ]);
 
         return redirect()->route('admin.incubator-machines')
@@ -57,10 +57,10 @@ class IncubatorController extends Controller
     public function toggleStatus(Incubator $incubator)
     {
         $incubator->update([
-            'isDisabled' => !$incubator->isDisabled,
+            'isActive' => !$incubator->isActive,
         ]);
 
-        $status = $incubator->isDisabled ? 'disabled' : 'enabled';
+        $status = $incubator->isActive ? 'deactivated' : 'activated';
         
         return redirect()->route('admin.incubator-machines')
             ->with('success', "Incubator {$status} successfully.");

@@ -64,7 +64,6 @@ class Create extends Component
                 'is_disabled' => false,
                 'username' => $username,
                 'password' => bcrypt('brookside25'), // Default password
-                'created_date' => now(),
             ]);
 
             $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal

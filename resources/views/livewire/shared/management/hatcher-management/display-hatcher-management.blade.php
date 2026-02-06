@@ -36,11 +36,11 @@
                                             <span class="text-sm text-gray-700">All Users</span>
                                         </label>
                                         <label class="flex items-center">
-                                            <input type="radio" wire:model="statusFilter" value="enabled" class="mr-2">
+                                            <input type="radio" wire:model="statusFilter" value="active" class="mr-2">
                                             <span class="text-sm text-gray-700">Active</span>
                                         </label>
                                         <label class="flex items-center">
-                                            <input type="radio" wire:model="statusFilter" value="disabled" class="mr-2">
+                                            <input type="radio" wire:model="statusFilter" value="inactive" class="mr-2">
                                             <span class="text-sm text-gray-700">Inactive</span>
                                         </label>
                                     </div>

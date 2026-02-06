@@ -35,12 +35,12 @@
                                             <span class="text-sm text-gray-700">All Users</span>
                                         </label>
                                         <label class="flex items-center">
-                                            <input type="radio" wire:model="statusFilter" value="enabled" class="mr-2">
-                                            <span class="text-sm text-gray-700">Enabled</span>
+                                            <input type="radio" wire:model="statusFilter" value="disabled" class="mr-2">
+                                            <span class="text-sm text-gray-700">Disabled
                                         </label>
                                         <label class="flex items-center">
-                                            <input type="radio" wire:model="statusFilter" value="disabled" class="mr-2">
-                                            <span class="text-sm text-gray-700">Disabled</span>
+                                            <input type="radio" wire:model="statusFilter" value="enabled" class="mr-2">
+                                            <span class="text-sm text-gray-700">Enabled</span>
                                         </label>
                                     </div>
                                 </div>
@@ -151,10 +151,10 @@
                                 @endif
                             </p>
                         </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('created_date')">
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('created_at')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
                                 Created Date
-                                @if ($sortField === 'created_date')
+                                @if ($sortField === 'created_at')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -190,7 +190,7 @@
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $user->username }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
-                                <p class="block text-xs md:text-sm text-slate-800">{{ $user->created_date ? $user->created_date->format('M d, Y') : 'N/A' }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800">{{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
                                 @if($user->is_disabled)
@@ -199,7 +199,7 @@
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Active
+                                        Enabled
                                     </span>
                                 @endif
                             </td>

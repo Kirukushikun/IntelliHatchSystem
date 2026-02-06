@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\HatcherController;
-use App\Http\Controllers\Admin\IncubatorController;
-use App\Http\Controllers\Admin\PlenumController;
+use App\Http\Controllers\Shared\Management\HatcherController;
+use App\Http\Controllers\Shared\Management\IncubatorController;
+use App\Http\Controllers\Shared\Management\PlenumController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FormController;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\HatcherManagement;
+namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
@@ -48,6 +48,6 @@ class Delete extends Component
 
     public function render()
     {
-        return view('livewire.hatcher-management.delete-hatcher-management');
+        return view('livewire.shared.management.hatcher-management.delete-hatcher-management');
     }
 }
