@@ -225,14 +225,14 @@
     </div>
 
     <!-- Include Create Modal -->
-    <livewire:plenum-management.create on:plenumCreated="$refresh" />
+    <livewire:shared.management.plenum-management.create on:plenumCreated="$refresh" />
     
     <!-- Include Edit Modal -->
-    <livewire:plenum-management.edit on:plenumUpdated="$refresh" />
+    <livewire:shared.management.plenum-management.edit on:plenumUpdated="$refresh" />
     
     <!-- Include Delete Modal -->
-    <livewire:plenum-management.delete on:plenumDeleted="$refresh" />
+    <livewire:shared.management.plenum-management.delete on:plenumDeleted="$refresh" />
     
     <!-- Include Disable/Enable Modal -->
-    <livewire:plenum-management.disable on:statusToggled="$refresh" />
+    <livewire:shared.management.plenum-management.disable on:statusToggled="$refresh" />
 </div>
