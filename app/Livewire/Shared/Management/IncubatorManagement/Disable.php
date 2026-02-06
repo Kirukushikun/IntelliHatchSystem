@@ -4,7 +4,6 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
-use Illuminate\Support\Facades\Log;
 
 class Disable extends Component
 {
@@ -35,14 +34,6 @@ class Disable extends Component
         try {
             $incubator = Incubator::findOrFail($this->incubatorId);
             
-            // Debug logging
-            \Log::info('Attempting to update incubator', [
-                'incubatorId' => $this->incubatorId,
-                'current_isActive' => $incubator->isActive,
-                'new_isActive' => !$this->isActive,
-                'incubatorName' => $incubator->incubatorName
-            ]);
-            
             $incubator->update([
                 'isActive' => !$this->isActive,
             ]);
@@ -53,11 +44,6 @@ class Disable extends Component
             $this->dispatch('refreshIncubators');
             $this->dispatch('showToast', message: "{$incubatorName} has been successfully {$action}!", type: 'success');
         } catch (\Exception $e) {
-            \Log::error('Failed to update incubator status', [
-                'incubatorId' => $this->incubatorId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
             $this->dispatch('showToast', message: 'Failed to update incubator status. Please try again.', type: 'error');
         } finally {
             $this->processing = false;
