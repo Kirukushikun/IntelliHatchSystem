@@ -244,14 +244,14 @@
     </div>
 
     <!-- Include Create Modal -->
-    <livewire:hatcher-management.create on:hatcherCreated="$refresh" />
+    <livewire:shared.management.hatcher-management.create on:hatcherCreated="$refresh" />
     
     <!-- Include Edit Modal -->
-    <livewire:hatcher-management.edit on:hatcherUpdated="$refresh" />
+    <livewire:shared.management.hatcher-management.edit on:hatcherUpdated="$refresh" />
     
     <!-- Include Delete Modal -->
-    <livewire:hatcher-management.delete on:hatcherDeleted="$refresh" />
+    <livewire:shared.management.hatcher-management.delete on:hatcherDeleted="$refresh" />
     
     <!-- Include Disable/Enable Modal -->
-    <livewire:hatcher-management.disable on:statusToggled="$refresh" />
+    <livewire:shared.management.hatcher-management.disable on:statusToggled="$refresh" />
 </div>
