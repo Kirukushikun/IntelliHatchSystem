@@ -11,7 +11,7 @@ class Create extends Component
     public $showModal = false;
 
     protected $rules = [
-        'incubatorName' => 'required|string|max:255|unique:incubators,incubatorName',
+        'incubatorName' => 'required|string|max:255|unique:incubator-machines,incubatorName',
     ];
 
     protected $messages = [

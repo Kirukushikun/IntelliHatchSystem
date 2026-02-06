@@ -11,7 +11,7 @@ class IncubatorRoutineConfig
             'alarm_system_condition' => 'required|string|in:Operational,Unoperational',
             'corrective_action' => 'required|string|min:3',
             'hatchery_man' => 'required|integer|exists:hatchery_users,id',
-            'incubator' => 'required|integer|exists:incubators,id',
+            'incubator' => 'required|integer|exists:incubator-machines,id',
             'check_incubator_doors_for_air_leakage' => 'required|string|in:Pending,Done',
             'checking_of_baggy_against_the_gaskets' => 'required|string|in:Pending,Done',
             'check_curtain_position_and_condition' => 'required|string|in:Pending,Done',

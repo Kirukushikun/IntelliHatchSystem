@@ -9,6 +9,8 @@ class Incubator extends Model
 {
     use HasFactory;
 
+    protected $table = 'incubator-machines';
+
     protected $fillable = [
         'incubatorName',
         'isDisabled',
