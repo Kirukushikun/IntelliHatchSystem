@@ -4,9 +4,12 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
+use App\Traits\SanitizesInput;
 
 class Create extends Component
 {
+    use SanitizesInput;
+    
     public $hatcherName = '';
     public $showModal = false;
 
@@ -31,6 +34,9 @@ class Create extends Component
 
     public function createHatcher()
     {
+        // Sanitize input before validation
+        $this->hatcherName = $this->sanitizeInput($this->hatcherName);
+        
         $this->validate();
 
         try {

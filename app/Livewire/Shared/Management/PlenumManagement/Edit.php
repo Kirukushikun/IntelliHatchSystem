@@ -4,9 +4,12 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use App\Traits\SanitizesInput;
 
 class Edit extends Component
 {
+    use SanitizesInput;
+    
     public $plenumId = '';
     public $plenumName = '';
     public $showModal = false;
@@ -48,6 +51,9 @@ class Edit extends Component
 
     public function updatePlenum()
     {
+        // Sanitize input before validation
+        $this->plenumName = $this->sanitizeInput($this->plenumName);
+        
         $this->updatedPlenumName(); // Update validation rules
         $this->validate();
 

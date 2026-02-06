@@ -4,9 +4,12 @@ namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
+use App\Traits\SanitizesInput;
 
 class Edit extends Component
 {
+    use SanitizesInput;
+    
     public $userId = '';
     public $firstName = '';
     public $lastName = '';
@@ -50,6 +53,10 @@ class Edit extends Component
 
     public function updateUser()
     {
+        // Sanitize inputs before validation
+        $this->firstName = $this->sanitizeName($this->firstName);
+        $this->lastName = $this->sanitizeName($this->lastName);
+        
         $this->validate();
 
         try {

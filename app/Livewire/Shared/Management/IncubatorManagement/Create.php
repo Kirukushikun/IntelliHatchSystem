@@ -4,9 +4,12 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use App\Traits\SanitizesInput;
 
 class Create extends Component
 {
+    use SanitizesInput;
+    
     public $incubatorName = '';
     public $showModal = false;
 
@@ -31,6 +34,9 @@ class Create extends Component
 
     public function createIncubator()
     {
+        // Sanitize input before validation
+        $this->incubatorName = $this->sanitizeInput($this->incubatorName);
+        
         $this->validate();
 
         try {

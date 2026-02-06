@@ -31,6 +31,9 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
+        // Trim whitespace from username
+        $credentials['username'] = trim($credentials['username']);
+
         // Check if user is locked out
         $lockoutKey = 'login_lockout_' . $credentials['username'];
         $attemptsKey = 'login_attempts_' . $credentials['username'];
