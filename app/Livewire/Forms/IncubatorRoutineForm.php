@@ -52,7 +52,7 @@ class IncubatorRoutineForm extends FormNavigation
             })
             ->toArray();
 
-        $this->incubators = Incubator::where('isDisabled', false)
+        $this->incubators = Incubator::where('isActive', false)
             ->orderBy('incubatorName')
             ->get()
             ->mapWithKeys(function ($incubator) {

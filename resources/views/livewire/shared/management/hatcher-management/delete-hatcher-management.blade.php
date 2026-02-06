@@ -8,7 +8,7 @@
             <!-- Modal panel -->
             <div class="relative w-full max-w-md p-6 bg-white shadow-xl rounded-lg">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Delete Hatchery</h3>
+                    <h3 class="text-lg font-medium text-gray-900">Delete Hatcher</h3>
                     <button type="button" wire:click="closeModal" class="text-gray-400 hover:text-gray-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -24,7 +24,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-900">Are you sure you want to delete {{ $hatcheryName }}?</p>
+                        <p class="text-sm font-medium text-gray-900">Are you sure you want to delete {{ $hatcherName }}?</p>
                         <p class="text-sm text-gray-500">This action cannot be undone.</p>
                     </div>
                 </div>
@@ -43,12 +43,12 @@
                     <x-button 
                         variant="danger" 
                         size="sm" 
-                        wire:click="deleteHatchery"
+                        wire:click="deleteHatcher"
                         wire:loading.attr="disabled"
-                        wire:target="deleteHatchery"
+                        wire:target="deleteHatcher"
                     >
-                        <span wire:loading.remove wire:target="deleteHatchery">Delete Hatchery</span>
-                        <span wire:loading wire:target="deleteHatchery">Deleting...</span>
+                        <span wire:loading.remove wire:target="deleteHatcher">Delete Hatcher</span>
+                        <span wire:loading wire:target="deleteHatcher">Deleting...</span>
                     </x-button>
                 </div>
             </div>

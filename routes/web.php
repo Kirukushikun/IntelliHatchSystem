@@ -21,9 +21,14 @@ Route::get('/forms/incubator-routine', function () {
 
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
-    // Admin login routes
-    Route::get('/admin/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/admin/login', [LoginController::class, 'login'])->name('login.submit');
+    // Unified login route
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
+    
+    // Legacy admin login routes (redirect to unified login)
+    Route::get('/admin/login', function () {
+        return redirect('/login');
+    })->name('admin.login');
 });
 
 // Authenticated routes
@@ -48,6 +53,25 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/change-password', [UserController::class, 'changePassword'])->name('admin.change-password');
     });
+    
+    // User routes
+    Route::middleware('user')->group(function () {
+        Route::get('/user/forms', function () {
+            return view('users.forms');
+        })->name('user.forms');
 
+        Route::get('/user/forms/incubator-routine', function () {
+            return view('shared.forms.incubator-routine');
+        })->name('user.forms.incubator-routine');
+        
+        Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
+
+        Route::get('/user/hatcher-machines', [HatcherController::class, 'index'])->name('user.hatcher-machines');
+
+        Route::get('/user/plenum-machines', [PlenumController::class, 'index'])->name('user.plenum-machines');
+
+        Route::get('/user/change-password', [UserController::class, 'changePassword'])->name('user.change-password');
+    });
+    
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

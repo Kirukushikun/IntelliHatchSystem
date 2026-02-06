@@ -1,5 +1,9 @@
 @props(['hideDate' => false, 'includeSidebar' => false, 'user' => null, 'title' => null])
 
+@php
+    $isAdmin = ($user && ((int) $user->user_type) === 0);
+@endphp
+
 @auth
     @if($includeSidebar && $user)
         <div class="flex h-screen bg-gray-100">
@@ -51,7 +55,7 @@
                                     aria-haspopup="true"
                                 >
                                     <div class="relative">
-                                        <div class="w-10 h-10 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                                        <div class="w-10 h-10 bg-linear-to-br {{ $isAdmin ? 'from-blue-500 via-blue-600 to-indigo-600' : 'from-green-500 via-green-600 to-emerald-600' }} rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
                                             {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                         </div>
                                         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
@@ -86,9 +90,9 @@
                                     class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
                                     x-cloak
                                 >
-                                    <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                                    <div class="px-4 py-3 bg-linear-to-r {{ $isAdmin ? 'from-blue-50 to-indigo-50' : 'from-green-50 to-emerald-50' }} border-b border-gray-200">
                                         <div class="flex items-center space-x-3">
-                                            <div class="w-12 h-12 bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                                            <div class="w-12 h-12 bg-linear-to-br {{ $isAdmin ? 'from-blue-500 via-blue-600 to-indigo-600' : 'from-green-500 via-green-600 to-emerald-600' }} rounded-full flex items-center justify-center text-white font-bold shadow-md">
                                                 {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
                                             </div>
                                             <div class="flex-1 min-w-0">
@@ -100,7 +104,7 @@
                                     </div>
 
                                     <div class="border-t border-gray-200">
-                                        <a href="{{ route('admin.change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
+                                        <a href="{{ $isAdmin ? route('admin.change-password') : route('user.change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
                                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                             </svg>
@@ -217,7 +221,7 @@
                             </div>
 
                             <div class="border-t border-gray-200">
-                                <a href="{{ route('admin.change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
+                                <a href="{{ $isAdmin ? route('admin.change-password') : route('user.change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
                                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                     </svg>

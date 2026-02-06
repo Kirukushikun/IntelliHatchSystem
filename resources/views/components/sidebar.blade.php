@@ -4,52 +4,89 @@
 ])
 
 @php
-    // Define admin sidebar items
-    $sidebarItems = [
-        [
-            'label' => 'Dashboard',
-            'href' => '/admin/dashboard',
-            'icon' => 'dashboard',
-            'active' => 'admin/dashboard*',
-            'customActive' => function() {
-                return request()->is('admin/dashboard*') || request()->is('admin/incubator-routine-dashboard*');
-            }
-        ],
-        [
-            'label' => 'Users',
-            'href' => '/admin/users',
-            'icon' => 'users',
-            'active' => 'admin/users*'
-        ],
-        [
-            'label' => 'Machine Management',
-            'icon' => 'folder',
-            'dropdown' => true,
-            'children' => [
-                [
-                    'label' => 'Incubator Machines',
-                    'href' => '/admin/incubator-machines',
-                    'active' => 'admin/incubator-machines*'
-                ],
-                [
-                    'label' => 'Hatcher Machines',
-                    'href' => '/admin/hatcher-machines',
-                    'active' => 'admin/hatcher-machines*'
-                ],
-                [
-                    'label' => 'Plenum Machines',
-                    'href' => '/admin/plenum-machines',
-                    'active' => 'admin/plenum-machines*'
+    // Define sidebar items based on user type
+    $isAdmin = ($user && ((int) $user->user_type) === 0);
+    
+    if ($isAdmin) {
+        // Admin sidebar items
+        $sidebarItems = [
+            [
+                'label' => 'Dashboard',
+                'href' => '/admin/dashboard',
+                'icon' => 'dashboard',
+                'active' => 'admin/dashboard*',
+                'customActive' => function() {
+                    return request()->is('admin/dashboard*') || request()->is('admin/incubator-routine-dashboard*');
+                }
+            ],
+            [
+                'label' => 'Users',
+                'href' => '/admin/users',
+                'icon' => 'users',
+                'active' => 'admin/users*'
+            ],
+            [
+                'label' => 'Machine Management',
+                'icon' => 'folder',
+                'dropdown' => true,
+                'children' => [
+                    [
+                        'label' => 'Incubator Machines',
+                        'href' => '/admin/incubator-machines',
+                        'active' => 'admin/incubator-machines*'
+                    ],
+                    [
+                        'label' => 'Hatcher Machines',
+                        'href' => '/admin/hatcher-machines',
+                        'active' => 'admin/hatcher-machines*'
+                    ],
+                    [
+                        'label' => 'Plenum Machines',
+                        'href' => '/admin/plenum-machines',
+                        'active' => 'admin/plenum-machines*'
+                    ]
                 ]
+            ],
+            [
+                'label' => 'Forms',
+                'href' => '/admin/forms',
+                'icon' => 'forms',
+                'active' => 'admin/forms*'
             ]
-        ],
-        [
-            'label' => 'Forms',
-            'href' => '/admin/forms',
-            'icon' => 'forms',
-            'active' => 'admin/forms*'
-        ]
-    ];
+        ];
+    } else {
+        // Hatchery user sidebar items (limited access)
+        $sidebarItems = [
+            [
+                'label' => 'Machine Management',
+                'icon' => 'folder',
+                'dropdown' => true,
+                'children' => [
+                    [
+                        'label' => 'Incubator Machines',
+                        'href' => '/user/incubator-machines',
+                        'active' => 'user/incubator-machines*'
+                    ],
+                    [
+                        'label' => 'Hatcher Machines',
+                        'href' => '/user/hatcher-machines',
+                        'active' => 'user/hatcher-machines*'
+                    ],
+                    [
+                        'label' => 'Plenum Machines',
+                        'href' => '/user/plenum-machines',
+                        'active' => 'user/plenum-machines*'
+                    ]
+                ]
+            ],
+            [
+                'label' => 'Forms',
+                'href' => '/user/forms',
+                'icon' => 'forms',
+                'active' => 'user/forms*'
+            ]
+        ];
+    }
     
     // Helper function to check if any child is active
     function hasActiveChild($item) {
@@ -386,7 +423,7 @@ x-cloak>
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-90"
-            class="lg:hidden fixed bottom-4 right-4 z-50 p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
+            class="lg:hidden fixed bottom-4 right-4 z-50 p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg transition-colors cursor-pointer">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>

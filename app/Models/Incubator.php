@@ -13,12 +13,12 @@ class Incubator extends Model
 
     protected $fillable = [
         'incubatorName',
-        'isDisabled',
+        'isActive',
         'creationDate',
     ];
 
     protected $casts = [
-        'isDisabled' => 'boolean',
+        'isActive' => 'boolean',
         'creationDate' => 'datetime',
     ];
 
