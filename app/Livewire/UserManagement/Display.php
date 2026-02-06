@@ -3,7 +3,7 @@
 namespace App\Livewire\UserManagement;
 
 use Livewire\Component;
-use App\Models\HatcheryUser;
+use App\Models\User;
 
 class Display extends Component
 {
@@ -91,7 +91,7 @@ class Display extends Component
 
     public function deleteUser($userId)
     {
-        $user = HatcheryUser::find($userId);
+        $user = User::find($userId);
         if ($user) {
             $user->delete();
             session()->flash('message', 'User deleted successfully.');
@@ -110,7 +110,8 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $users = HatcheryUser::query()
+        $users = User::query()
+            ->where('user_type', 1) // Only show hatchery users (user_type = 1)
             ->where(function($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
                       ->orWhere('last_name', 'like', '%' . $this->search . '%');
@@ -174,7 +175,8 @@ class Display extends Component
         $page = (int) $page;
         
         // Validate page number
-        $totalPages = HatcheryUser::query()
+        $totalPages = User::query()
+            ->where('user_type', 1) // Only show hatchery users (user_type = 1)
             ->where(function($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
                       ->orWhere('last_name', 'like', '%' . $this->search . '%');
