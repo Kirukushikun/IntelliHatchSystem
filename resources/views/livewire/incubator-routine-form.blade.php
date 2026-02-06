@@ -210,6 +210,4 @@
             </div>
         </x-progress-navigation>
     </form>
-
-    <x-toast />
 </div>
