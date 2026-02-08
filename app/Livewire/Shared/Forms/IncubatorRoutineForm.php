@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\Forms;
+namespace App\Livewire\Shared\Forms;
 
 use App\Livewire\Configs\IncubatorRoutineConfig;
-use App\Livewire\FormNavigation;
+use App\Livewire\Components\FormNavigation;
 use App\Models\Incubator;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -583,6 +583,6 @@ class IncubatorRoutineForm extends FormNavigation
 
     public function render()
     {
-        return view('livewire.incubator-routine-form');
+        return view('livewire.shared.forms.incubator-routine-form');
     }
 }

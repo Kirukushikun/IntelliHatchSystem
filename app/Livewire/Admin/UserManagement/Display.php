@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\UserManagement;
+namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
@@ -197,6 +197,6 @@ class Display extends Component
 
     public function render()
     {
-        return view('livewire.user-management.display-user-management', $this->getPaginationData());
+        return view('livewire.admin.user-management.display-user-management', $this->getPaginationData());
     }
 }

@@ -25,7 +25,7 @@
         
         <div class="p-4">
             <div class="w-full max-w-lg bg-white rounded-xl shadow-lg px-8 pt-6 pb-2 mx-auto">
-                <livewire:forms.incubator-routine-form />
+                <livewire:shared.forms.incubator-routine-form />
             </div>
         </div>
     </div>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\UserManagement;
+namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
@@ -89,6 +89,6 @@ class Create extends Component
 
     public function render()
     {
-        return view('livewire.user-management.create-user-management');
+        return view('livewire.admin.user-management.create-user-management');
     }
 }

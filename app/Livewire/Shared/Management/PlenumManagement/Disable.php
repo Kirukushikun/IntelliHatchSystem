@@ -38,7 +38,7 @@ class Disable extends Component
                 'isActive' => !$this->isActive,
             ]);
 
-            $action = $this->isActive ? 'deactivated' : 'activated';
+            $action = !$this->isActive ? 'activated' : 'deactivated';
             $plenumName = $this->plenumName; // Store name before closing modal
             $this->closeModal();
             $this->dispatch('refreshPlenums');
