@@ -4,7 +4,7 @@
             [
                 'title' => 'Incubator Routine Checklist Per Shift',
                 'description' => 'Lorem Ipsum',
-                'route' => Auth::check() ? route('admin.forms.incubator-routine') : '/forms/incubator-routine',
+                'route' => Auth::check() && Auth::user()->user_type === 0 ? route('admin.forms.incubator-routine') : route('user.forms.incubator-routine'),
                 'color' => 'amber',
             ]
         ];

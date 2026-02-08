@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     // User routes
     Route::middleware('user')->group(function () {
         Route::get('/user/forms', function () {
-            return view('users.forms');
+            return view('shared.forms');
         })->name('user.forms');
 
         Route::get('/user/forms/incubator-routine', function () {

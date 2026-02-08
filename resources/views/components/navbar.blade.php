@@ -28,11 +28,11 @@
                                             x-data="{ 
                                                 date: new Date(),
                                                 updateTime() {
-                                                    this.date = new Date();
+                                                    this.date = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
                                                 }
                                             }" 
-                                            x-init="setInterval(() => updateTime(), 1000)"
-                                            x-text="date.toLocaleDateString() + ' ' + date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })">
+                                            x-init="updateTime(); setInterval(() => updateTime(), 1000)"
+                                            x-text="date.toLocaleDateString('en-US', {timeZone: 'Asia/Manila'}) + ' ' + date.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' })">
                                             </p>
                                         @endif
                                     </div>
@@ -153,11 +153,11 @@
                                 x-data="{ 
                                     date: new Date(),
                                     updateTime() {
-                                        this.date = new Date();
+                                        this.date = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
                                     }
                                 }" 
-                                x-init="setInterval(() => updateTime(), 1000)"
-                                x-text="date.toLocaleDateString() + ' ' + date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })">
+                                x-init="updateTime(); setInterval(() => updateTime(), 1000)"
+                                x-text="date.toLocaleDateString('en-US', {timeZone: 'Asia/Manila'}) + ' ' + date.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' })">
                                 </p>
                             @endif
                         </div>
