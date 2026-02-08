@@ -8,7 +8,7 @@
             <!-- Modal panel -->
             <div class="relative w-full max-w-md p-6 bg-white shadow-xl rounded-lg">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Edit Hatchery</h3>
+                    <h3 class="text-lg font-medium text-gray-900">Edit Hatcher</h3>
                     <button type="button" wire:click="closeModal" class="text-gray-400 hover:text-gray-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -16,19 +16,19 @@
                     </button>
                 </div>
 
-                <form wire:submit.prevent="updateHatchery">
+                <form wire:submit.prevent="updateHatcher">
                     <div class="space-y-4">
                         <div>
                             <x-text-input
-                                label="Hatchery Name"
-                                id="hatcheryName"
-                                name="hatcheryName"
+                                label="Hatcher Name"
+                                id="hatcherName"
+                                name="hatcherName"
                                 type="text"
-                                :wireModel="'hatcheryName'"
-                                placeholder="Enter hatchery name"
+                                :wireModel="'hatcherName'"
+                                placeholder="Enter hatcher name"
                                 required
                             />
-                            @error('hatcheryName')
+                            @error('hatcherName')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -39,7 +39,7 @@
                             Cancel
                         </x-button>
                         <x-button variant="primary" type="submit" class="cursor-pointer">
-                            Update Hatchery
+                            Update Hatcher
                         </x-button>
                     </div>
                 </form>
