@@ -20,19 +20,21 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="incubator" @style(["display:none" => !$this->isFieldVisible('incubator')])>
-                    <x-dropdown label="Incubator" name="incubator" error-key="form.incubator" placeholder="Select incubator" wire:model.live="form.incubator" required>
-                        @foreach($incubators as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
-                </div>
-
                 <div data-field="shift">
                     <x-dropdown label="Shift" name="shift" error-key="form.shift" placeholder="Select shift" wire:model.live="form.shift" required>
                         <option value="1st Shift">1st Shift</option>
                         <option value="2nd Shift">2nd Shift</option>
                         <option value="3rd Shift">3rd Shift</option>
+                    </x-dropdown>
+                </div>
+
+                <div data-field="incubator" @style(["display:none" => !$this->isFieldVisible('incubator')])>
+                    <x-dropdown label="Incubator" name="incubator" error-key="form.incubator" placeholder="Select incubator" wire:model.live="form.incubator" required>
+                        @foreach($incubators as $id => $name)
+                            <option value="{{ $id }}" {{ in_array($id, $completedIncubators) ? 'disabled' : '' }}>
+                                {{ $name }}{{ in_array($id, $completedIncubators) ? ' (Done)' : '' }}
+                            </option>
+                        @endforeach
                     </x-dropdown>
                 </div>
 
