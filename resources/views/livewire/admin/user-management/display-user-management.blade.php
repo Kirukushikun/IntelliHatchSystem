@@ -215,6 +215,12 @@
                                         Edit
                                     </button>
                                     <button 
+                                        wire:click="$dispatch('openResetPasswordModal', '{{ $user->id }}')"
+                                        class="px-3 py-1 text-xs font-medium text-yellow-600 bg-yellow-50 rounded-md hover:bg-yellow-100 transition-colors"
+                                        title="Reset Password">
+                                        Reset Password
+                                    </button>
+                                    <button 
                                         wire:click="$dispatch('openDisableModal', '{{ $user->id }}')"
                                         class="px-3 py-1 text-xs font-medium {{ $user->is_disabled ? 'text-green-600 bg-green-50 hover:bg-green-100' : 'text-red-600 bg-red-50 hover:bg-red-100' }} rounded-md transition-colors"
                                         title="{{ $user->is_disabled ? 'Enable User' : 'Disable User' }}">
@@ -276,6 +282,12 @@
                             Edit
                         </button>
                         <button 
+                            wire:click="$dispatch('openResetPasswordModal', '{{ $user->id }}')"
+                            class="px-3 py-1 text-xs font-medium text-yellow-600 bg-yellow-50 rounded-md hover:bg-yellow-100 transition-colors"
+                            title="Reset Password">
+                            Reset Password
+                        </button>
+                        <button 
                             wire:click="$dispatch('openDisableModal', '{{ $user->id }}')"
                             class="px-3 py-1 text-xs font-medium {{ $user->is_disabled ? 'text-green-600 bg-green-50 hover:bg-green-100' : 'text-red-600 bg-red-50 hover:bg-red-100' }} rounded-md transition-colors"
                             title="{{ $user->is_disabled ? 'Enable User' : 'Disable User' }}">
@@ -327,4 +339,7 @@
     
     <!-- Include Disable/Enable Modal -->
     <livewire:admin.user-management.disable on:refreshUsers="$refresh" />
+    
+    <!-- Include Reset Password Modal -->
+    <livewire:admin.user-management.reset-password on:passwordReset="$refresh" />
 </div>
