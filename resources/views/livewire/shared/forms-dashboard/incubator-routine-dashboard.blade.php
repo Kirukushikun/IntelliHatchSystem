@@ -31,19 +31,19 @@
 
 <div wire:poll.2s>
     <!-- Header with Title and Search -->
-    <div class="flex items-center justify-between gap-6 mb-6">
-        <div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
+        <div class="text-center sm:text-left">
             <h1 class="text-2xl font-semibold text-gray-900">{{ $formType->form_name }}</h1>
             <p class="text-gray-600">All submitted forms of this type</p>
         </div>
-        <div class="relative shrink-0">
+        <div class="relative w-full sm:w-auto sm:shrink-0">
             <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
             <input
                 wire:model.live="search"
                 placeholder="Search forms..."
-                class="w-80 pl-11 pr-12 py-3 text-sm bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 shadow-sm"
+                class="w-full pl-11 pr-12 py-3 text-sm bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 shadow-sm"
             />
             <button type="button" wire:click="toggleFilterDropdown" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#9CA3AF" class="w-5 h-5">
@@ -124,10 +124,25 @@
 
     <!-- Table Section -->
     <div class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left table-auto min-w-max">
                 <thead>
                     <tr>
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('id')">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
+                                Form ID
+                                @if ($sortField === 'id')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if ($sortDirection === 'asc')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        @endif
+                                    </svg>
+                                @endif
+                            </p>
+                        </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('date_submitted')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
                                 Date Submitted
@@ -142,10 +157,20 @@
                                 @endif
                             </p>
                         </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('uploaded_by')">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
-                                Submitted By
-                                @if ($sortField === 'uploaded_by')
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
+                                Hatchery Man
+                            </p>
+                        </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
+                                Incubator
+                            </p>
+                        </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 text-center cursor-pointer hover:bg-slate-100" wire:click="sortBy('shift')">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center justify-center gap-1">
+                                Shift
+                                @if ($sortField === 'shift')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -154,16 +179,6 @@
                                         @endif
                                     </svg>
                                 @endif
-                            </p>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
-                                Incubator
-                            </p>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 text-center">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
-                                Shift
                             </p>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 text-center">
@@ -176,6 +191,9 @@
                 <tbody>
                     @forelse ($forms as $form)
                         <tr class="even:bg-slate-50 hover:bg-slate-100">
+                            <td class="p-3 md:p-4 py-4 md:py-5 text-left">
+                                <p class="block text-xs md:text-sm text-slate-800">{{ $form->id }}</p>
+                            </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
                             </td>
@@ -200,12 +218,6 @@
                                         View
                                     </button>
                                     <button 
-                                        wire:click="editForm({{ $form->id }})"
-                                        class="px-3 py-1 text-xs font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100 transition-colors"
-                                        title="Edit Form">
-                                        Edit
-                                    </button>
-                                    <button 
                                         wire:click="deleteForm({{ $form->id }})"
                                         class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
                                         title="Delete Form">
@@ -216,7 +228,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -231,6 +243,60 @@
             </table>
         </div>
 
+        <!-- Mobile Card View -->
+        <div class="md:hidden space-y-4 p-4">
+            @forelse ($forms as $form)
+                @php
+                    $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
+                @endphp
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div class="space-y-1">
+                            <p class="text-sm font-semibold text-gray-900">Form #{{ $form->id }}</p>
+                            <p class="text-xs text-gray-500">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
+                        </div>
+                        <div class="text-center">
+                            {!! getStatusPill($formData['shift'] ?? 'N/A') !!}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-xs font-medium text-gray-500">Hatchery Man:</span>
+                            <span class="text-xs text-gray-900">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-xs font-medium text-gray-500">Incubator:</span>
+                            <span class="text-xs text-gray-900">{{ $form->incubator ? $form->incubator->incubatorName : 'N/A' }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                        <button 
+                            wire:click="viewDetails({{ $form->id }})"
+                            class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                            title="View Details">
+                            View
+                        </button>
+                        <button 
+                            wire:click="deleteForm({{ $form->id }})"
+                            class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                            title="Delete Form">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div class="flex flex-col items-center py-12">
+                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900">No forms found</h3>
+                    <p class="text-sm text-gray-500 mt-1">Try adjusting your search criteria</p>
+                </div>
+            @endforelse
+        </div>
+        
         @if ($forms->hasPages())
             <!-- Pagination -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center px-3 md:px-4 py-3 border-t border-slate-200 gap-3 sm:gap-0">
@@ -246,4 +312,7 @@
             </div>
         @endif
     </div>
+    
+    <!-- Form Details Modal -->
+    @include('livewire.shared.forms-dashboard.modals.incubator-routine-view')
 </div>

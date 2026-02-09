@@ -20,7 +20,7 @@
                             <div class="flex items-center space-x-3 flex-1">                                
                                 @if($title)
                                     <div>
-                                        <h1 class="text-xl font-bold text-gray-900">
+                                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 truncate">
                                             {{ $title }}
                                         </h1>
                                         @if(!$hideDate)
@@ -28,7 +28,7 @@
                                             x-data="{ 
                                                 date: new Date(),
                                                 updateTime() {
-                                                    this.date = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+                                                    this.date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Manila'}));
                                                 }
                                             }" 
                                             x-init="updateTime(); setInterval(() => updateTime(), 1000)"
@@ -62,13 +62,13 @@
                                     </div>
                                     
                                     <div class="text-left">
-                                        <div class="font-semibold text-gray-900 text-sm">
+                                        <div class="font-semibold text-gray-900 text-sm hidden sm:block">
                                             {{ auth()->user()->full_name }}
                                         </div>
                                     </div>
                                     
                                     <svg 
-                                        class="w-4 h-4 text-gray-500 transition-transform duration-200"
+                                        class="w-4 h-4 text-gray-500 transition-transform duration-200 hidden sm:block"
                                         :class="{ 'rotate-180': open }"
                                         fill="none" 
                                         stroke="currentColor" 
@@ -153,7 +153,7 @@
                                 x-data="{ 
                                     date: new Date(),
                                     updateTime() {
-                                        this.date = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+                                        this.date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Manila'}));
                                     }
                                 }" 
                                 x-init="updateTime(); setInterval(() => updateTime(), 1000)"
