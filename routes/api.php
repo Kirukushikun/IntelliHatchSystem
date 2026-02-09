@@ -24,8 +24,8 @@ Route::middleware([ApiKeyMiddleware::class, 'throttle:60,1'])->group(function ()
     // Get available form types
     Route::get('/form-types', [FormStatsController::class, 'formTypes']);
     
-    // Send form data to webhook
-    Route::post('/webhook/send-form', [WebhookController::class, 'sendForm']);
+    // Send incubator routine form data to webhook
+    Route::post('/webhook/send-form', [WebhookController::class, 'sendIncubatorRoutineForm']);
     
     // Send multiple forms to webhook
     Route::post('/webhook/send-multiple', [WebhookController::class, 'sendMultipleForms']);
