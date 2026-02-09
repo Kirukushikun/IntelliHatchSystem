@@ -31,7 +31,7 @@ class Form extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(HatcheryUser::class, 'uploaded_by');
+        return $this->belongsTo(User::class, 'uploaded_by');
     }
 
     public function incubator(): BelongsTo

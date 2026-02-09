@@ -4,7 +4,7 @@ namespace App\Livewire\Shared\FormsDashboard;
 
 use App\Models\Form;
 use App\Models\FormType;
-use App\Models\HatcheryUser;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -13,15 +13,22 @@ class IncubatorRoutineDashboard extends Component
 {
     public int $typeId;
     public string $search = '';
-    public string $sortField = 'date_submitted';
+    public string $sortField = 'id';
     public string $sortDirection = 'desc';
     public int $page = 1;
     public int $perPage = 15;
-    public array $expandedHeaders = [];
     public string $dateFrom = '';
     public string $dateTo = '';
     public string $shiftFilter = 'all';
     public bool $showFilterDropdown = false;
+    public bool $showModal = false;
+    public bool $showPhotoModal = false;
+    public ?Form $selectedForm = null;
+    public array $formData = [];
+    public array $formPhotos = [];
+    public string $selectedPhotoField = '';
+    public array $selectedPhotos = [];
+    public int $currentPhotoIndex = 0;
 
     public ?FormType $formType = null;
 
@@ -141,8 +148,14 @@ class IncubatorRoutineDashboard extends Component
             });
         }
 
-        $forms = $query->orderBy($this->sortField, $this->sortDirection)
-            ->paginate($this->perPage, ['*'], 'page', $this->page);
+        // Apply sorting
+        if ($this->sortField === 'shift') {
+            $query->orderByRaw("JSON_EXTRACT(form_inputs, '$.shift') {$this->sortDirection}");
+        } else {
+            $query->orderBy($this->sortField, $this->sortDirection);
+        }
+
+        $forms = $query->paginate($this->perPage, ['*'], 'page', $this->page);
             
         $currentPage = $forms->currentPage();
         $lastPage = $forms->lastPage();
@@ -196,30 +209,91 @@ class IncubatorRoutineDashboard extends Component
         $this->page = $page;
     }
 
-    public function truncateText($text, $maxLength = 10, $headerKey = null)
-    {
-        // If header is expanded, show full text
-        if ($headerKey && isset($this->expandedHeaders[$headerKey]) && $this->expandedHeaders[$headerKey]) {
-            return $text;
-        }
-        
-        // Check if text needs truncation
-        if (strlen($text) <= $maxLength) {
-            return $text;
-        }
-        
-        return substr($text, 0, $maxLength) . '...';
-    }
-
-    public function toggleHeader($headerKey): void
-    {
-        $this->expandedHeaders[$headerKey] = !($this->expandedHeaders[$headerKey] ?? false);
-    }
-
     public function refresh(): void
     {
         // This method is called by wire:poll
         // The component will automatically re-render
+    }
+
+    public function viewDetails(int $formId): void
+    {
+        $this->selectedForm = Form::with(['user', 'incubator'])->find($formId);
+        
+        if ($this->selectedForm) {
+            $this->formData = is_array($this->selectedForm->form_inputs) ? $this->selectedForm->form_inputs : [];
+            $this->formPhotos = $this->getFormPhotos($formId);
+            $this->currentPhotoIndex = 0;
+            $this->showModal = true;
+        }
+    }
+
+    public function editForm(int $formId): void
+    {
+        // TODO: Implement edit functionality
+        $this->dispatch('showToast', message: 'Edit functionality coming soon!', type: 'info');
+    }
+
+    public function deleteForm(int $formId): void
+    {
+        // TODO: Implement delete functionality
+        $this->dispatch('showToast', message: 'Delete functionality coming soon!', type: 'info');
+    }
+
+    public function viewPhotos(string $field): void
+    {
+        $this->selectedPhotoField = $field;
+        $this->selectedPhotos = $this->getFormPhotos($this->selectedForm->id, $field);
+        $this->showPhotoModal = true;
+    }
+
+    public function getPhotoCount(string $field): int
+    {
+        return count($this->getFormPhotos($this->selectedForm->id, $field));
+    }
+
+    public function closePhotoModal(): void
+    {
+        $this->showPhotoModal = false;
+        $this->selectedPhotoField = '';
+        $this->selectedPhotos = [];
+    }
+
+    private function getFormPhotos(int $formId, string $field = null): array
+    {
+        // Get the form and its photos
+        $form = Form::find($formId);
+        if (!$form) {
+            return [];
+        }
+        
+        // Get photos from the form_inputs JSON data
+        $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
+        $photoFieldKey = $field . '_photos';
+        
+        if (isset($formData[$photoFieldKey]) && !empty($formData[$photoFieldKey])) {
+            // Return actual photo URLs from the form data
+            $photoUrls = is_array($formData[$photoFieldKey]) ? $formData[$photoFieldKey] : [];
+            
+            $photos = [];
+            foreach ($photoUrls as $url) {
+                $photos[] = [
+                    'id' => uniqid(),
+                    'url' => $url,
+                    'caption' => 'Photo'
+                ];
+            }
+            return $photos;
+        }
+        
+        return [];
+    }
+
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->selectedForm = null;
+        $this->formData = [];
+        $this->formPhotos = [];
     }
 
     public function render()

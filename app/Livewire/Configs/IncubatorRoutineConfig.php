@@ -10,7 +10,7 @@ class IncubatorRoutineConfig
             'shift' => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
             'alarm_system_condition' => 'required|string|in:Operational,Unoperational',
             'corrective_action' => 'required|string|min:3',
-            'hatchery_man' => 'required|integer|exists:hatchery_users,id',
+            'hatchery_man' => 'required|integer|exists:users,id',
             'incubator' => 'required|integer|exists:incubator-machines,id',
             'check_incubator_doors_for_air_leakage' => 'required|string|in:Pending,Done',
             'checking_of_baggy_against_the_gaskets' => 'required|string|in:Pending,Done',
