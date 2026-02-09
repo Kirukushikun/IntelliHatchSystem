@@ -55,7 +55,7 @@ class Display extends Component
         $this->showFilterDropdown = !$this->showFilterDropdown;
     }
 
-    public function clearFilters()
+    public function resetFilters()
     {
         $this->reset(['search', 'statusFilter', 'dateFrom', 'dateTo']);
         $this->page = 1;
