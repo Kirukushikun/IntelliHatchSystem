@@ -122,6 +122,34 @@
         </div>
     </div>
 
+    <!-- Quick Filters for Today's Shifts -->
+    <div class="flex flex-wrap gap-3 mb-6">
+        <div class="text-sm font-medium text-gray-700 self-center">Today:</div>
+        @foreach (['1st Shift', '2nd Shift', '3rd Shift'] as $shift)
+            <button 
+                wire:click="quickFilterTodayShift('{{ $shift }}')"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                    @if ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
+                        bg-blue-600 text-white hover:bg-blue-700
+                    @else
+                        bg-gray-100 text-gray-700 hover:bg-gray-200
+                    @endif
+                "
+            >
+                {{ $shift }}
+                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                    @if ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
+                        bg-blue-100 text-blue-800
+                    @else
+                        bg-gray-200 text-gray-600
+                    @endif
+                ">
+                    {{ $todayShiftCounts[$shift] ?? 0 }}
+                </span>
+            </button>
+        @endforeach
+    </div>
+
     <!-- Table Section -->
     <div class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
         <!-- Desktop Table View -->
@@ -315,4 +343,47 @@
     
     <!-- Form Details Modal -->
     @include('livewire.shared.forms-dashboard.modals.incubator-routine-view')
+    
+    <!-- Delete Confirmation Modal -->
+    @if ($showDeleteModal)
+        <div class="fixed inset-0 z-9999 overflow-y-auto" style="display: block;">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <!-- Background overlay -->
+                <div class="fixed inset-0 transition-opacity" wire:click="cancelDelete">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+
+                <!-- Modal panel -->
+                <div class="relative z-10000 inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                    Delete Form
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500">
+                                        Are you sure you want to delete this form? This action cannot be undone and all associated data will be permanently removed.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" wire:click="confirmDelete" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Delete
+                        </button>
+                        <button type="button" wire:click="cancelDelete" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

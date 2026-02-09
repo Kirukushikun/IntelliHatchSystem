@@ -31,6 +31,9 @@ class IncubatorRoutineForm extends FormNavigation
     /** @var array */
     public $incubators = [];
 
+    /** @var array */
+    public $completedIncubators = [];
+
     /** @var array<string, string[]> Track uploaded photo URLs per field */
     public array $uploadedPhotoUrls = [];
 
@@ -60,6 +63,8 @@ class IncubatorRoutineForm extends FormNavigation
                 return [$incubator->id => $incubator->incubatorName];
             })
             ->toArray();
+
+        $this->updateCompletedIncubators();
     }
 
     public function updatedForm($value, $key): void
@@ -364,6 +369,9 @@ class IncubatorRoutineForm extends FormNavigation
 
     public function updatedFormShift($value): void
     {
+        $this->updateCompletedIncubators();
+        // Reset incubator selection when shift changes
+        $this->form['incubator'] = '';
         // When shift changes, reset the form (except shift) and navigation.
         $this->resetFormExceptShift();
         parent::updatedFormShift($value);
@@ -398,6 +406,43 @@ class IncubatorRoutineForm extends FormNavigation
         $this->form['shift'] = $keepShift ? $shift : '';
         $this->form['hatchery_man'] = $hatcheryMan;
         $this->form['incubator'] = $incubator;
+    }
+
+    protected function updateCompletedIncubators(): void
+    {
+        if (empty($this->form['shift'])) {
+            $this->completedIncubators = [];
+            return;
+        }
+
+        $today = now()->format('Y-m-d');
+        $formTypeName = $this->formTypeName();
+        
+        // Get form type ID
+        $formTypeId = DB::table('form_types')
+            ->where('form_name', $formTypeName)
+            ->value('id');
+
+        if (!$formTypeId) {
+            $this->completedIncubators = [];
+            return;
+        }
+
+        // Get incubators that already have forms for today's date and current shift
+        $completedForms = DB::table('forms')
+            ->where('form_type_id', $formTypeId)
+            ->whereDate('date_submitted', $today)
+            ->where('incubator_id', '!=', null)
+            ->get();
+
+        $this->completedIncubators = [];
+        
+        foreach ($completedForms as $form) {
+            $formInputs = json_decode($form->form_inputs, true);
+            if (isset($formInputs['shift']) && $formInputs['shift'] === $this->form['shift']) {
+                $this->completedIncubators[] = $form->incubator_id;
+            }
+        }
     }
 
     public function submitForm(): void
