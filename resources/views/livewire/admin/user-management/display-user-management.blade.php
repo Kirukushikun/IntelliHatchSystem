@@ -278,14 +278,14 @@
     </div>
 
     <!-- Include Create User Modal -->
-    <livewire:user-management.create on:userCreated="$refresh" />
+    <livewire:admin.user-management.create on:userCreated="$refresh" />
     
     <!-- Include Edit User Modal -->
-    <livewire:user-management.edit on:userUpdated="$refresh" />
+    <livewire:admin.user-management.edit on:userUpdated="$refresh" />
     
     <!-- Include Delete User Modal -->
-    <livewire:user-management.delete on:userDeleted="$refresh" />
+    <livewire:admin.user-management.delete on:userDeleted="$refresh" />
     
     <!-- Include Disable/Enable Modal -->
-    <livewire:user-management.disable on:refreshUsers="$refresh" />
+    <livewire:admin.user-management.disable on:refreshUsers="$refresh" />
 </div>

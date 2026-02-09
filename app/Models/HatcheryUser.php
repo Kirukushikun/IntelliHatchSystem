@@ -12,11 +12,9 @@ class HatcheryUser extends Model
         'first_name',
         'last_name',
         'is_disabled',
-        'created_date',
     ];
 
     protected $casts = [
         'is_disabled' => 'boolean',
-        'created_date' => 'datetime',
     ];
 }

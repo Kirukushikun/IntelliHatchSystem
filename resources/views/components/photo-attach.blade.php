@@ -259,13 +259,15 @@
     },
     addTimestampWatermark(ctx, width, height) {
         // Add timestamp overlay at bottom left
-        const now = new Date();
+        const now = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Manila'}));
         const dateStr = now.toLocaleDateString('en-US', { 
+            timeZone: 'Asia/Manila',
             year: 'numeric', 
             month: '2-digit', 
             day: '2-digit' 
         });
         const timeStr = now.toLocaleTimeString('en-US', { 
+            timeZone: 'Asia/Manila',
             hour: '2-digit', 
             minute: '2-digit', 
             second: '2-digit',

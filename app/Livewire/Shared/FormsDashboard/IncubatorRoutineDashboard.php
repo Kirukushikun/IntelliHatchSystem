@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\FormsDashboard;
+namespace App\Livewire\Shared\FormsDashboard;
 
 use App\Models\Form;
 use App\Models\FormType;
@@ -226,7 +226,7 @@ class IncubatorRoutineDashboard extends Component
     {
         $paginationData = $this->getPaginationData();
         
-        return view('livewire.forms-dashboard.incubator-routine-dashboard', [
+        return view('livewire.shared.forms-dashboard.incubator-routine-dashboard', [
             'forms' => $paginationData['forms'],
             'pages' => $paginationData['pages'],
             'currentPage' => $paginationData['currentPage'],

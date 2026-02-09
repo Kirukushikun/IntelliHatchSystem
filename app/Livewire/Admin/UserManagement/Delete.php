@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\UserManagement;
+namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
@@ -51,6 +51,6 @@ class Delete extends Component
 
     public function render()
     {
-        return view('livewire.user-management.delete-user-management');
+        return view('livewire.admin.user-management.delete-user-management');
     }
 }
