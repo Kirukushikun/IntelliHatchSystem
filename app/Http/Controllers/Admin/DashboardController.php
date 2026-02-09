@@ -24,7 +24,7 @@ class DashboardController extends Controller
         $incubatorForms = Form::whereHas('formType', function($query) {
             $query->where('form_name', 'like', '%incubator%');
         })
-        ->with(['formType', 'uploadedBy', 'incubator'])
+        ->with(['formType', 'user', 'incubator'])
         ->orderBy('created_at', 'desc')
         ->paginate(10);
 

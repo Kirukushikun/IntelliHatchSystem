@@ -161,174 +161,28 @@
                                 Incubator
                             </p>
                         </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
+                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 text-center">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
                                 Shift
                             </p>
                         </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
+                        <th class="p-3 md:p-4 border-b border-slate-300 text-center">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
-                                Egg Setting
+                                Actions
                             </p>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
-                                Corrective Action
-                            </p>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700">
-                                Alarm System
-                            </p>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('egg_setting_preparation')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Egg Setting Preparation (click to expand/collapse)">
-                                {{ $this->truncateText('Egg Setting Preparation', 10, 'egg_setting_preparation') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('record_egg_setting_time')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Record Egg Setting Time (click to expand/collapse)">
-                                {{ $this->truncateText('Record Egg Setting Time', 10, 'record_egg_setting_time') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('assist_in_random_candling')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Assist in Random Candling (click to expand/collapse)">
-                                {{ $this->truncateText('Assist in Random Candling', 10, 'assist_in_random_candling') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('check_rack_baffle_condition')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Check Rack Baffle Condition (click to expand/collapse)">
-                                {{ $this->truncateText('Check Rack Baffle Condition', 10, 'check_rack_baffle_condition') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('record_egg_setting_on_board')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Record Egg Setting on Board (click to expand/collapse)">
-                                {{ $this->truncateText('Record Egg Setting on Board', 10, 'record_egg_setting_on_board') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('check_water_level_of_blue_tank')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Check Water Level of Blue Tank (click to expand/collapse)">
-                                {{ $this->truncateText('Check Water Level of Blue Tank', 10, 'check_water_level_of_blue_tank') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('check_spray_nozzle_and_water_pan')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Check Spray Nozzle and Water Pan (click to expand/collapse)">
-                                {{ $this->truncateText('Check Spray Nozzle and Water Pan', 10, 'check_spray_nozzle_and_water_pan') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('clean_and_refill_water_reservoir')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Clean and Refill Water Reservoir (click to expand/collapse)">
-                                {{ $this->truncateText('Clean and Refill Water Reservoir', 10, 'clean_and_refill_water_reservoir') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('cleaning_of_incubator_floor_area')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Cleaning of Incubator Floor Area (click to expand/collapse)">
-                                {{ $this->truncateText('Cleaning of Incubator Floor Area', 10, 'cleaning_of_incubator_floor_area') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('check_incubator_fans_for_vibration')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Check Incubator Fans for Vibration (click to expand/collapse)">
-                                {{ $this->truncateText('Check Incubator Fans for Vibration', 10, 'check_incubator_fans_for_vibration') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('check_wick_for_replacement_washing')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Check Wick for Replacement Washing (click to expand/collapse)">
-                                {{ $this->truncateText('Check Wick for Replacement Washing', 10, 'check_wick_for_replacement_washing') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('cleaning_incubator_roof_and_plenum')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Cleaning Incubator Roof and Plenum (click to expand/collapse)">
-                                {{ $this->truncateText('Cleaning Incubator Roof and Plenum', 10, 'cleaning_incubator_roof_and_plenum') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('check_curtain_position_and_condition')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Check Curtain Position and Condition (click to expand/collapse)">
-                                {{ $this->truncateText('Check Curtain Position and Condition', 10, 'check_curtain_position_and_condition') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('check_incubator_doors_for_air_leakage')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Check Incubator Doors for Air Leakage (click to expand/collapse)">
-                                {{ $this->truncateText('Check Incubator Doors for Air Leakage', 10, 'check_incubator_doors_for_air_leakage') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('checking_of_baggy_against_the_gaskets')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Checking of Baggy Against the Gaskets (click to expand/collapse)">
-                                {{ $this->truncateText('Checking of Baggy Against the Gaskets', 10, 'checking_of_baggy_against_the_gaskets') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('drain_water_out_from_air_compressor_tank')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Drain Water Out from Air Compressor Tank (click to expand/collapse)">
-                                {{ $this->truncateText('Drain Water Out from Air Compressor Tank', 10, 'drain_water_out_from_air_compressor_tank') }}
-                            </button>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
-                            <button 
-                                wire:click="toggleHeader('cleaning_of_entrance_and_exit_area_flooring')"
-                                class="text-xs md:text-sm font-semibold leading-none text-slate-700 hover:text-blue-600 transition-colors cursor-pointer text-left w-full"
-                                title="Cleaning of Entrance and Exit Area Flooring (click to expand/collapse)">
-                                {{ $this->truncateText('Cleaning of Entrance and Exit Area Flooring', 10, 'cleaning_of_entrance_and_exit_area_flooring') }}
-                            </button>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($forms as $form)
                         <tr class="even:bg-slate-50 hover:bg-slate-100">
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
+                            <td class="p-3 md:p-4 py-4 md:py-5 text-left">
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
                             </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
+                            <td class="p-3 md:p-4 py-4 md:py-5 text-left">
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p>
                             </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
+                            <td class="p-3 md:p-4 py-4 md:py-5 text-left">
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $form->incubator ? $form->incubator->incubatorName : 'N/A' }}</p>
                             </td>
                             @php
@@ -338,109 +192,31 @@
                                 {!! getStatusPill($formData['shift'] ?? 'N/A') !!}
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['egg_setting'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5">
-                                <div class="max-w-xs" style="max-width: 200px;">
-                                    @php
-                                        $correctiveAction = $formData['corrective_action'] ?? 'N/A';
-                                        $displayText = htmlspecialchars($correctiveAction);
-                                        $isLong = strlen($correctiveAction) > 60;
-                                    @endphp
-                                    @if($isLong)
-                                        <div class="truncated-text" 
-                                             style="display: -webkit-box; 
-                                                    -webkit-line-clamp: 2; 
-                                                    -webkit-box-orient: vertical; 
-                                                    overflow: hidden; 
-                                                    text-overflow: ellipsis; 
-                                                    font-size: 0.75rem; 
-                                                    line-height: 1.4; 
-                                                    color: #374151; 
-                                                    cursor: pointer; 
-                                                    word-wrap: break-word;
-                                                    word-break: break-word;
-                                                    white-space: normal;"
-                                             title="{{ $displayText }}"
-                                             onclick="this.classList.toggle('expanded')">
-                                            {{ $displayText }}
-                                        </div>
-                                        <style>
-                                        .truncated-text.expanded {
-                                            display: block !important;
-                                            -webkit-line-clamp: unset !important;
-                                        }
-                                        </style>
-                                    @else
-                                        <div style="font-size: 0.75rem; 
-                                                   line-height: 1.4; 
-                                                   color: #374151; 
-                                                   word-wrap: break-word;
-                                                   word-break: break-word;
-                                                   white-space: normal;">
-                                            {{ $displayText }}
-                                        </div>
-                                    @endif
+                                <div class="flex items-center justify-center gap-2">
+                                    <button 
+                                        wire:click="viewDetails({{ $form->id }})"
+                                        class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                                        title="View Details">
+                                        View
+                                    </button>
+                                    <button 
+                                        wire:click="editForm({{ $form->id }})"
+                                        class="px-3 py-1 text-xs font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100 transition-colors"
+                                        title="Edit Form">
+                                        Edit
+                                    </button>
+                                    <button 
+                                        wire:click="deleteForm({{ $form->id }})"
+                                        class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                                        title="Delete Form">
+                                        Delete
+                                    </button>
                                 </div>
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['alarm_system_condition'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['egg_setting_preparation'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['record_egg_setting_time'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['assist_in_random_candling'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['check_rack_baffle_condition'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['record_egg_setting_on_board'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['check_water_level_of_blue_tank'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['check_spray_nozzle_and_water_pan'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['clean_and_refill_water_reservoir'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['cleaning_of_incubator_floor_area'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['check_incubator_fans_for_vibration'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['check_wick_for_replacement_washing'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['cleaning_incubator_roof_and_plenum'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['check_curtain_position_and_condition'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['check_incubator_doors_for_air_leakage'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['checking_of_baggy_against_the_gaskets'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['drain_water_out_from_air_compressor_tank'] ?? 'N/A') !!}
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['cleaning_of_entrance_and_exit_area_flooring'] ?? 'N/A') !!}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="23" class="px-6 py-12 text-center">
+                            <td colspan="5" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>

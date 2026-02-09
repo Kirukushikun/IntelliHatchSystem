@@ -4,7 +4,7 @@ namespace App\Livewire\Shared\FormsDashboard;
 
 use App\Models\Form;
 use App\Models\FormType;
-use App\Models\HatcheryUser;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -17,7 +17,6 @@ class IncubatorRoutineDashboard extends Component
     public string $sortDirection = 'desc';
     public int $page = 1;
     public int $perPage = 15;
-    public array $expandedHeaders = [];
     public string $dateFrom = '';
     public string $dateTo = '';
     public string $shiftFilter = 'all';
@@ -194,26 +193,6 @@ class IncubatorRoutineDashboard extends Component
         }
         
         $this->page = $page;
-    }
-
-    public function truncateText($text, $maxLength = 10, $headerKey = null)
-    {
-        // If header is expanded, show full text
-        if ($headerKey && isset($this->expandedHeaders[$headerKey]) && $this->expandedHeaders[$headerKey]) {
-            return $text;
-        }
-        
-        // Check if text needs truncation
-        if (strlen($text) <= $maxLength) {
-            return $text;
-        }
-        
-        return substr($text, 0, $maxLength) . '...';
-    }
-
-    public function toggleHeader($headerKey): void
-    {
-        $this->expandedHeaders[$headerKey] = !($this->expandedHeaders[$headerKey] ?? false);
     }
 
     public function refresh(): void

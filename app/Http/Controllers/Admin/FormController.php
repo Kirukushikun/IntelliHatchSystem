@@ -14,7 +14,7 @@ class FormController extends Controller
      */
     public function index()
     {
-        $forms = Form::with(['formType', 'uploadedBy', 'incubator'])
+        $forms = Form::with(['formType', 'user', 'incubator'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -39,7 +39,7 @@ class FormController extends Controller
         $validated = $request->validate([
             'form_type_id' => 'required|exists:form_types,id',
             'form_inputs' => 'required|array',
-            'uploaded_by' => 'nullable|exists:hatchery_users,id',
+            'uploaded_by' => 'nullable|exists:users,id',
             'incubator_id' => 'nullable|exists:incubator-machines,id',
         ]);
 
