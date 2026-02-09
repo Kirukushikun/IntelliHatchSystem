@@ -23,12 +23,15 @@ class IncubatorRoutineDashboard extends Component
     public bool $showFilterDropdown = false;
     public bool $showModal = false;
     public bool $showPhotoModal = false;
+    public bool $showDeleteModal = false;
     public ?Form $selectedForm = null;
+    public ?int $formToDelete = null;
     public array $formData = [];
     public array $formPhotos = [];
     public string $selectedPhotoField = '';
     public array $selectedPhotos = [];
     public int $currentPhotoIndex = 0;
+    public array $todayShiftCounts = [];
 
     public ?FormType $formType = null;
 
@@ -48,9 +51,34 @@ class IncubatorRoutineDashboard extends Component
         $this->typeId = 1;
         $this->loadFormType();
         $this->page = (int) request()->query('page', 1);
+        $this->loadTodayShiftCounts();
         
         // Debug: Log that component is mounting
         Log::info('IncubatorRoutineDashboard component mounted with typeId: ' . $this->typeId);
+    }
+
+    protected function loadTodayShiftCounts(): void
+    {
+        $today = now()->format('Y-m-d');
+        
+        $this->todayShiftCounts = [
+            '1st Shift' => $this->getTodayShiftCount('1st Shift'),
+            '2nd Shift' => $this->getTodayShiftCount('2nd Shift'),
+            '3rd Shift' => $this->getTodayShiftCount('3rd Shift'),
+        ];
+    }
+
+    protected function getTodayShiftCount(string $shift): int
+    {
+        $today = now()->format('Y-m-d');
+        
+        return Form::where('form_type_id', $this->typeId)
+            ->whereDate('date_submitted', $today)
+            ->where(function ($query) use ($shift) {
+                $query->where('form_inputs', 'like', '%"' . $shift . '"%')
+                      ->orWhere('form_inputs', 'like', '%' . $shift . '%');
+            })
+            ->count();
     }
 
     protected function loadFormType(): void
@@ -109,6 +137,15 @@ class IncubatorRoutineDashboard extends Component
         $this->dateFrom = '';
         $this->dateTo = '';
         $this->shiftFilter = 'all';
+        $this->page = 1;
+        $this->showFilterDropdown = false;
+    }
+
+    public function quickFilterTodayShift(string $shift): void
+    {
+        $this->dateFrom = now()->format('Y-m-d');
+        $this->dateTo = now()->format('Y-m-d');
+        $this->shiftFilter = $shift;
         $this->page = 1;
         $this->showFilterDropdown = false;
     }
@@ -235,8 +272,44 @@ class IncubatorRoutineDashboard extends Component
 
     public function deleteForm(int $formId): void
     {
-        // TODO: Implement delete functionality
-        $this->dispatch('showToast', message: 'Delete functionality coming soon!', type: 'info');
+        $this->formToDelete = $formId;
+        $this->showDeleteModal = true;
+    }
+
+    public function confirmDelete(): void
+    {
+        if (!$this->formToDelete) {
+            return;
+        }
+
+        try {
+            $form = Form::find($this->formToDelete);
+            
+            if (!$form) {
+                $this->dispatch('showToast', message: 'Form not found.', type: 'error');
+                return;
+            }
+
+            // Delete the form
+            $form->delete();
+            
+            // Close modal and reset
+            $this->showDeleteModal = false;
+            $this->formToDelete = null;
+            
+            // Show success message
+            $this->dispatch('showToast', message: 'Form deleted successfully!', type: 'success');
+            
+        } catch (\Exception $e) {
+            Log::error('Error deleting form: ' . $e->getMessage());
+            $this->dispatch('showToast', message: 'Error deleting form. Please try again.', type: 'error');
+        }
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteModal = false;
+        $this->formToDelete = null;
     }
 
     public function viewPhotos(string $field): void
@@ -298,6 +371,9 @@ class IncubatorRoutineDashboard extends Component
 
     public function render()
     {
+        // Refresh today's shift counts
+        $this->loadTodayShiftCounts();
+        
         $paginationData = $this->getPaginationData();
         
         return view('livewire.shared.forms-dashboard.incubator-routine-dashboard', [
