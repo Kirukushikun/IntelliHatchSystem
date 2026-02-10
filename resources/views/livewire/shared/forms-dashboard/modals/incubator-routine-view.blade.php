@@ -75,17 +75,7 @@
      x-transition:leave-end="opacity-0"
      class="fixed inset-0 z-50 overflow-y-auto bg-gray-500/75"
      style="display: none;"
-     @click.self="showModal = false; $wire.closeModal()">
-     
-    @php
-        \Log::info('Modal Render Start', [
-            'selected_form_id' => $this->selectedForm->id ?? 'NO_FORM',
-            'form_data_shift_at_render' => $this->formData['shift'] ?? 'MISSING',
-            'form_data_keys' => array_keys($this->formData),
-            'form_data_full' => $this->formData,
-        ]);
-    @endphp
-    
+     @click.self="showModal = false; $wire.closeModal()">    
     <div class="flex min-h-full items-center justify-center p-4 text-center">
         <!-- Modal Panel -->
         <div x-show="showModal"
@@ -129,13 +119,6 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['shift'] ?? 'N/A') }}">
                                     {{ $this->formData['shift'] ?? 'N/A' }}
                                 </span>
-                                @php
-                                    \Log::info('Modal Shift Display', [
-                                        'selected_form_id' => $this->selectedForm->id ?? 'NO_FORM',
-                                        'form_data_shift' => $this->formData['shift'] ?? 'MISSING',
-                                        'selected_form_shift' => $this->selectedForm->form_inputs['shift'] ?? 'NO_SHIFT_IN_FORM',
-                                    ]);
-                                @endphp
                             </div>
                             <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-white">
                                 <span class="text-sm font-medium text-gray-600">Hatchery Man:</span>
@@ -161,6 +144,7 @@
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm font-medium text-gray-600">Corrective Action:</span>
                                         <div class="flex items-center gap-2">
+                                            {!! getPhotoButton('corrective_action', $this) !!}
                                         </div>
                                     </div>
                                     <div class="bg-gray-50 p-3 rounded-md">
@@ -437,7 +421,7 @@
                         </template>
 
                         @if(count($selectedPhotos) > 1)
-                            <button type="button" @click="currentPhotoIndex = (currentPhotoIndex - 1 + count($selectedPhotos)) % count($selectedPhotos)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full shadow-lg">
+                            <button type="button" @click="currentPhotoIndex = (currentPhotoIndex - 1 + selectedPhotos.length) % selectedPhotos.length" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full shadow-lg">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
@@ -445,7 +429,7 @@
                         @endif
 
                         @if(count($selectedPhotos) > 1)
-                            <button type="button" @click="currentPhotoIndex = (currentPhotoIndex + 1) % count($selectedPhotos)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full shadow-lg">
+                            <button type="button" @click="currentPhotoIndex = (currentPhotoIndex + 1) % selectedPhotos.length" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full shadow-lg">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
