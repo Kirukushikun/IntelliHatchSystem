@@ -129,11 +129,9 @@ class FormStatsController extends Controller
      */
     public function formTypes(): JsonResponse
     {
-        $formTypes = FormType::all()->map(function ($formType) {
+        $formTypes = FormType::all()->mapWithKeys(function ($formType) {
             return [
-                'id' => $formType->id,
-                'name' => $formType->name,
-                'description' => $formType->description ?? null,
+                $formType->id => $formType->form_name
             ];
         });
 
