@@ -61,82 +61,6 @@
             </span>';
         }
     }
-    
-    function getDynamicFieldConfig() {
-        return [
-            // Basic info fields
-            'shift' => ['label' => 'Shift:', 'type' => 'status', 'section' => 'basic'],
-            'alarm_system_condition' => ['label' => 'Check for Alarm system condition:', 'type' => 'status', 'section' => 'basic'],
-            'corrective_action' => ['label' => 'Corrective Action:', 'type' => 'text', 'section' => 'basic'],
-            
-            // PLENUM Section
-            'cleaning_incubator_roof_and_plenum' => ['label' => 'Cleaning of incubator roof and plenum:', 'type' => 'status', 'section' => 'plenum'],
-            
-            // GENERAL MACHINE Section
-            'check_incubator_doors_for_air_leakage' => ['label' => 'Check incubator doors for air leakage:', 'type' => 'status', 'section' => 'general'],
-            'checking_of_baggy_against_the_gaskets' => ['label' => 'Checking of baggy against the gaskets:', 'type' => 'status', 'section' => 'general'],
-            'check_curtain_position_and_condition' => ['label' => 'Check curtain position and condition:', 'type' => 'status', 'section' => 'general'],
-            'check_wick_for_replacement_washing' => ['label' => 'Check wick for replacement / washing:', 'type' => 'status', 'section' => 'general'],
-            'check_spray_nozzle_and_water_pan' => ['label' => 'Check spray nozzle and water pan:', 'type' => 'status', 'section' => 'general'],
-            'check_incubator_fans_for_vibration' => ['label' => 'Check incubator fans for vibration:', 'type' => 'status', 'section' => 'general'],
-            'check_rack_baffle_condition' => ['label' => 'Check rack baffle condition:', 'type' => 'status', 'section' => 'general'],
-            'drain_water_out_from_air_compressor_tank' => ['label' => 'Drain water out from air compressor tank:', 'type' => 'status', 'section' => 'general'],
-            
-            // CLEANING Section
-            'check_water_level_of_blue_tank' => ['label' => 'Check water level of blue tank:', 'type' => 'status', 'section' => 'cleaning'],
-            'cleaning_of_incubator_floor_area' => ['label' => 'Cleaning of incubator floor area:', 'type' => 'status', 'section' => 'cleaning'],
-            'cleaning_of_entrance_and_exit_area_flooring' => ['label' => 'Cleaning of entrance and exit area flooring:', 'type' => 'status', 'section' => 'cleaning'],
-            'clean_and_refill_water_reservoir' => ['label' => 'Clean and refill water reservoir:', 'type' => 'status', 'section' => 'cleaning'],
-            
-            // OTHERS Section
-            'egg_setting_preparation' => ['label' => 'Egg setting preparation:', 'type' => 'status', 'section' => 'others'],
-            'egg_setting' => ['label' => 'Egg setting:', 'type' => 'status', 'section' => 'others'],
-            'record_egg_setting_on_board' => ['label' => 'Record egg setting on board:', 'type' => 'status', 'section' => 'others'],
-            'record_egg_setting_time' => ['label' => 'Record egg setting time:', 'type' => 'status', 'section' => 'others'],
-            'assist_in_random_candling' => ['label' => 'Assist in Random Candling:', 'type' => 'status', 'section' => 'others'],
-        ];
-    }
-    
-    function getSectionConfig() {
-        return [
-            'basic' => ['title' => 'Basic Information', 'order' => 1],
-            'plenum' => ['title' => 'I - PLENUM', 'order' => 2],
-            'general' => ['title' => 'II - GENERAL MACHINE', 'order' => 3],
-            'cleaning' => ['title' => 'III - CLEANING', 'order' => 4],
-            'others' => ['title' => 'IV - OTHERS', 'order' => 5],
-        ];
-    }
-    
-    function groupFieldsBySection($formData) {
-        $fieldConfig = getDynamicFieldConfig();
-        $sectionConfig = getSectionConfig();
-        $grouped = [];
-        
-        // Initialize sections
-        foreach ($sectionConfig as $key => $config) {
-            $grouped[$key] = [
-                'title' => $config['title'],
-                'order' => $config['order'],
-                'fields' => []
-            ];
-        }
-        
-        // Group fields by section
-        foreach ($formData as $field => $value) {
-            if (isset($fieldConfig[$field])) {
-                $config = $fieldConfig[$field];
-                $section = $config['section'];
-                $grouped[$section]['fields'][$field] = array_merge($config, ['value' => $value]);
-            }
-        }
-        
-        // Sort sections by order
-        uasort($grouped, function($a, $b) {
-            return $a['order'] - $b['order'];
-        });
-        
-        return $grouped;
-    }
 @endphp
 
 <!-- Modal Backdrop -->
@@ -181,10 +105,6 @@
             <!-- Modal Body -->
             <div class="bg-white px-4 py-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto">
                 @if($selectedForm)
-                    @php
-                        $groupedFields = groupFieldsBySection($formData);
-                    @endphp
-                    
                     <!-- Basic Information -->
                     <div class="mb-8">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -208,89 +128,220 @@
                             </div>
                         </div>
                         
-                        @if(isset($groupedFields['basic']['fields']) && !empty($groupedFields['basic']['fields']))
-                            <div class="mt-4 space-y-3">
-                                @php $fieldIndex = 0; @endphp
-                                @foreach($groupedFields['basic']['fields'] as $field => $config)
-                                    @if($field !== 'shift' && $field !== 'hatchery_man' && $field !== 'incubator')
-                                        @if($field === 'alarm_system_condition')
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 {{ $fieldIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
-                                                <span class="text-sm font-medium text-gray-600">{{ $config['label'] }}</span>
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($config['value'] ?? 'N/A') }}">
-                                                    {{ formatDisplayValue($config['value'] ?? 'N/A') }}
-                                                </span>
-                                            </div>
-                                            @if(isset($groupedFields['basic']['fields']['corrective_action']) && !empty($groupedFields['basic']['fields']['corrective_action']['value']))
-                                                <div class="py-2 {{ ($fieldIndex + 1) % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
-                                                    <span class="text-sm font-medium text-gray-600 block mb-2">{{ $groupedFields['basic']['fields']['corrective_action']['label'] }}</span>
-                                                    <div class="bg-gray-50 p-3 rounded-md">
-                                                        <p class="text-sm text-gray-700 mb-2">{{ $groupedFields['basic']['fields']['corrective_action']['value'] }}</p>
-                                                        <div class="mt-2">
-                                                            {!! getPhotoButton('corrective_action', $this) !!}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                @php $fieldIndex += 2; @endphp
-                                            @endif
-                                        @elseif($field === 'corrective_action')
-                                            <!-- Skip corrective action as it's handled above -->
-                                        @elseif($config['type'] === 'status')
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 {{ $fieldIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
-                                                <span class="text-sm font-medium text-gray-600">{{ $config['label'] }}</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($config['value'] ?? 'N/A') }}">
-                                                        {{ formatDisplayValue($config['value'] ?? 'N/A') }}
-                                                    </span>
-                                                    {!! getPhotoButton($field, $this) !!}
-                                                </div>
-                                            </div>
-                                        @elseif($config['type'] === 'text' && !empty($config['value']))
-                                            <div class="py-2 {{ $fieldIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
-                                                <span class="text-sm font-medium text-gray-600 block mb-2">{{ $config['label'] }}</span>
-                                                <div class="bg-gray-50 p-3 rounded-md">
-                                                    <p class="text-sm text-gray-700">{{ $config['value'] }}</p>
-                                                </div>
-                                            </div>
-                                        @endif
-                                        @php $fieldIndex++; @endphp
-                                    @endif
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                    
-                    <!-- Dynamic Sections -->
-                    @foreach($groupedFields as $sectionKey => $section)
-                        @if($sectionKey !== 'basic' && !empty($section['fields']))
-                            <div class="mb-8">
-                                <h4 class="text-base font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">{{ $section['title'] }}</h4>
-                                <div class="space-y-2">
-                                    @php $fieldIndex = 0; @endphp
-                                    @foreach($section['fields'] as $field => $config)
-                                        @if($config['type'] === 'status')
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 {{ $fieldIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
-                                                <span class="text-sm font-medium text-gray-600">{{ $config['label'] }}</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($config['value'] ?? 'N/A') }}">
-                                                        {{ formatDisplayValue($config['value'] ?? 'N/A') }}
-                                                    </span>
-                                                    {!! getPhotoButton($field, $this) !!}
-                                                </div>
-                                            </div>
-                                        @elseif($config['type'] === 'text' && !empty($config['value']))
-                                            <div class="py-2 {{ $fieldIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
-                                                <span class="text-sm font-medium text-gray-600 block mb-2">{{ $config['label'] }}</span>
-                                                <div class="bg-gray-50 p-3 rounded-md">
-                                                    <p class="text-sm text-gray-700">{{ $config['value'] }}</p>
-                                                </div>
-                                            </div>
-                                        @endif
-                                        @php $fieldIndex++; @endphp
-                                    @endforeach
+                        <div class="mt-4 space-y-3">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-white">
+                                <span class="text-sm font-medium text-gray-600">Check for Alarm system condition:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['alarm_system_condition'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['alarm_system_condition'] ?? 'N/A') }}
+                                    </span>
                                 </div>
                             </div>
-                        @endif
-                    @endforeach
+                            @if(isset($formData['corrective_action']) && $formData['corrective_action'])
+                                <div class="py-2 bg-gray-50">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-600">Corrective Action:</span>
+                                        <div class="mt-2">
+                                            {!! getPhotoButton('corrective_action', $this) !!}
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded-md">
+                                        <p class="text-sm text-gray-700">{{ $formData['corrective_action'] }}</p>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <!-- PLENUM Section -->
+                    <div class="mb-8">
+                        <h4 class="text-base font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">I - PLENUM</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Cleaning of incubator roof and plenum:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['cleaning_incubator_roof_and_plenum'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['cleaning_incubator_roof_and_plenum'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('cleaning_incubator_roof_and_plenum', $this) !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- GENERAL MACHINE Section -->
+                    <div class="mb-8">
+                        <h4 class="text-base font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">II - GENERAL MACHINE</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Check incubator doors for air leakage:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_incubator_doors_for_air_leakage'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['check_incubator_doors_for_air_leakage'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('check_incubator_doors_for_air_leakage', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Checking of baggy against the gaskets:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['checking_of_baggy_against_the_gaskets'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['checking_of_baggy_against_the_gaskets'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('checking_of_baggy_against_the_gaskets', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Check curtain position and condition:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_curtain_position_and_condition'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['check_curtain_position_and_condition'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('check_curtain_position_and_condition', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Check wick for replacement / washing:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_wick_for_replacement_washing'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['check_wick_for_replacement_washing'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('check_wick_for_replacement_washing', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Check spray nozzle and water pan:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_spray_nozzle_and_water_pan'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['check_spray_nozzle_and_water_pan'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('check_spray_nozzle_and_water_pan', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Check incubator fans for vibration:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_incubator_fans_for_vibration'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['check_incubator_fans_for_vibration'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('check_incubator_fans_for_vibration', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Check rack baffle condition:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_rack_baffle_condition'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['check_rack_baffle_condition'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('check_rack_baffle_condition', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Drain water out from air compressor tank:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['drain_water_out_from_air_compressor_tank'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['drain_water_out_from_air_compressor_tank'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('drain_water_out_from_air_compressor_tank', $this) !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- CLEANING Section -->
+                    <div class="mb-8">
+                        <h4 class="text-base font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">III - CLEANING</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Check water level of blue tank:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_water_level_of_blue_tank'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['check_water_level_of_blue_tank'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('check_water_level_of_blue_tank', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Cleaning of incubator floor area:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['cleaning_of_incubator_floor_area'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['cleaning_of_incubator_floor_area'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('cleaning_of_incubator_floor_area', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Cleaning of entrance and exit area flooring:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['cleaning_of_entrance_and_exit_area_flooring'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['cleaning_of_entrance_and_exit_area_flooring'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('cleaning_of_entrance_and_exit_area_flooring', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Clean and refill water reservoir:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['clean_and_refill_water_reservoir'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['clean_and_refill_water_reservoir'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('clean_and_refill_water_reservoir', $this) !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- OTHERS Section -->
+                    <div class="mb-8">
+                        <h4 class="text-base font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">IV - OTHERS</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Egg setting preparation:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['egg_setting_preparation'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['egg_setting_preparation'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('egg_setting_preparation', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Egg setting:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['egg_setting'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['egg_setting'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('egg_setting', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Record egg setting on board:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['record_egg_setting_on_board'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['record_egg_setting_on_board'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('record_egg_setting_on_board', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Record egg setting time:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['record_egg_setting_time'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['record_egg_setting_time'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('record_egg_setting_time', $this) !!}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-600">Assist in Random Candling:</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['assist_in_random_candling'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($formData['assist_in_random_candling'] ?? 'N/A') }}
+                                    </span>
+                                    {!! getPhotoButton('assist_in_random_candling', $this) !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @else
                     <div class="text-center py-8">
                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

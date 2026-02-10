@@ -143,9 +143,23 @@ class IncubatorRoutineDashboard extends Component
 
     public function quickFilterTodayShift(string $shift): void
     {
-        $this->dateFrom = now()->format('Y-m-d');
-        $this->dateTo = now()->format('Y-m-d');
-        $this->shiftFilter = $shift;
+        // Check if this shift is already active for today
+        $isCurrentlyActive = $this->shiftFilter === $shift && 
+                           $this->dateFrom === now()->format('Y-m-d') && 
+                           $this->dateTo === now()->format('Y-m-d');
+        
+        if ($isCurrentlyActive) {
+            // Toggle off - reset to all shifts
+            $this->dateFrom = '';
+            $this->dateTo = '';
+            $this->shiftFilter = 'all';
+        } else {
+            // Toggle on - apply today's date and specific shift
+            $this->dateFrom = now()->format('Y-m-d');
+            $this->dateTo = now()->format('Y-m-d');
+            $this->shiftFilter = $shift;
+        }
+        
         $this->page = 1;
         $this->showFilterDropdown = false;
     }
