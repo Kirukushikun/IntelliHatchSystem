@@ -89,12 +89,14 @@
                     </div>
                 @endif
                 </div>
+                @if(auth()->check() && auth()->user()->user_type === 0)
                 <button type="button" wire:click="$dispatch('openCreateModal')" class="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-white bg-orange-600 border border-orange-600 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-150 whitespace-nowrap shrink-0 md:px-4">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 md:mr-2">
                         <path d="M5.25 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM2.25 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM18.75 7.5a.75.75 0 0 0-1.5 0v2.25H15a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H21a.75.75 0 0 0 0-1.5h-2.25V7.5Z" />
                     </svg>
                     <span class="hidden md:inline">Add Hatcher</span>
                 </button>
+@endif
             </div>
         </div>
     </div>
@@ -167,24 +169,26 @@
                                 @endif
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
-                                <div class="flex gap-1 md:gap-2 justify-center">
-                                    <button 
-                                        wire:click="$dispatch('openEditModal', '{{ $hatcher->id }}')"
-                                        class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
-                                        title="Edit Hatcher">
-                                        Edit
-                                    </button>
+                                <div class="flex gap-1 md:gap-2 justify-center items-center">
+                                    @if(auth()->check() && auth()->user()->user_type === 0)
+                                        <button 
+                                            wire:click="$dispatch('openEditModal', '{{ $hatcher->id }}')"
+                                            class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                                            title="Edit Hatcher">
+                                            Edit
+                                        </button>
+                                        <button 
+                                            wire:click="$dispatch('openDeleteModal', '{{ $hatcher->id }}')"
+                                            class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                                            title="Delete Hatcher">
+                                            Delete
+                                        </button>
+                                    @endif
                                     <button 
                                         wire:click="$dispatch('openDisableModal', '{{ $hatcher->id }}')"
                                         class="px-3 py-1 text-xs font-medium {{ $hatcher->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
                                         title="{{ $hatcher->isActive ? 'Disable Hatcher' : 'Enable Hatcher' }}">
                                         {{ $hatcher->isActive ? 'Disable' : 'Enable' }}
-                                    </button>
-                                    <button 
-                                        wire:click="$dispatch('openDeleteModal', '{{ $hatcher->id }}')"
-                                        class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
-                                        title="Delete Hatcher">
-                                        Delete
                                     </button>
                                 </div>
                             </td>
@@ -229,23 +233,25 @@
                     </div>
                     
                     <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
-                        <button 
-                            wire:click="$dispatch('openEditModal', '{{ $hatcher->id }}')"
-                            class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
-                            title="Edit Hatcher">
-                            Edit
-                        </button>
+                        @if(auth()->check() && auth()->user()->user_type === 0)
+                            <button 
+                                wire:click="$dispatch('openEditModal', '{{ $hatcher->id }}')"
+                                class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                                title="Edit Hatcher">
+                                Edit
+                            </button>
+                            <button 
+                                wire:click="$dispatch('openDeleteModal', '{{ $hatcher->id }}')"
+                                class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                                title="Delete Hatcher">
+                                Delete
+                            </button>
+                        @endif
                         <button 
                             wire:click="$dispatch('openDisableModal', '{{ $hatcher->id }}')"
                             class="px-3 py-1 text-xs font-medium {{ $hatcher->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
                             title="{{ $hatcher->isActive ? 'Disable Hatcher' : 'Enable Hatcher' }}">
                             {{ $hatcher->isActive ? 'Disable' : 'Enable' }}
-                        </button>
-                        <button 
-                            wire:click="$dispatch('openDeleteModal', '{{ $hatcher->id }}')"
-                            class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
-                            title="Delete Hatcher">
-                            Delete
                         </button>
                     </div>
                 </div>
@@ -256,7 +262,6 @@
                         <circle cx="27.13" cy="27.09" r="1.3" transform="translate(-11.21 27.12) rotate(-45)"></circle>
                     </svg>
                     <h3 class="text-lg font-medium text-gray-900">No hatchers found</h3>
-                    <p class="text-sm text-gray-500 mt-1">Try adjusting your search criteria</p>
                 </div>
             @endforelse
         </div>

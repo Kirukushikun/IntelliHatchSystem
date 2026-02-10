@@ -579,11 +579,15 @@ class IncubatorRoutineForm extends FormNavigation
                 return;
             }
 
+            $formInputs = json_decode($form->form_inputs, true);
+            
             $payload = [
-                'form_id' => $form->id,
-                'form_type' => $form->form_type_name ?: 'Unknown Form Type',
-                'form_inputs' => json_decode($form->form_inputs, true),
-                'date_submitted' => $form->date_submitted,
+                'form' => [
+                    'form_id' => $form->id,
+                    'form_name' => $form->form_type_name ?: 'Unknown Form Type',
+                ],
+                'records' => $formInputs,
+                'date_submitted' => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
                 'uploaded_by' => $form->uploaded_by ? [
                     'id' => $form->uploaded_by,
                     'name' => trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) ?: 'Unknown User',
@@ -592,6 +596,14 @@ class IncubatorRoutineForm extends FormNavigation
                     'id' => $form->incubator_id,
                     'name' => $form->incubatorName ?: 'Unknown Incubator',
                 ] : null,
+                'message' => [
+                    'form_name' => $form->form_type_name ?: 'Unknown Form Type',
+                    'shift' => $formInputs['shift'] ?? null,
+                    'machine_name' => $form->incubatorName ?: null,
+                    'submitted_by' => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
+                    'date_time' => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
+                    'photos' => $this->extractPhotos($formInputs),
+                ],
                 'timestamp' => now()->toISOString(),
             ];
 

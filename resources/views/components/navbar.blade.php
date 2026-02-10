@@ -16,27 +16,47 @@
                 <nav class="shadow-lg border-b border-gray-200 bg-white sticky top-0 z-30">
                     <div class="mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between items-center h-16">
-                            <!-- Left side - Logo/Brand -->
-                            <div class="flex items-center space-x-3 flex-1">                                
-                                @if($title)
-                                    <div>
-                                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 truncate">
-                                            {{ $title }}
-                                        </h1>
-                                        @if(!$hideDate)
-                                            <p class="text-xs text-gray-500" 
-                                            x-data="{ 
-                                                date: new Date(),
-                                                updateTime() {
-                                                    this.date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Manila'}));
-                                                }
-                                            }" 
-                                            x-init="updateTime(); setInterval(() => updateTime(), 1000)"
-                                            x-text="date.toLocaleDateString('en-US', {timeZone: 'Asia/Manila'}) + ' ' + date.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' })">
-                                            </p>
+                            <!-- Left side - Breadcrumbs -->
+                            <div class="flex items-center space-x-3 flex-1">
+                                <!-- Breadcrumb Navigation -->
+                                <nav class="flex items-center space-x-1 text-sm" aria-label="Breadcrumb">
+                                    <ol class="flex items-center space-x-1">
+                                        <li>
+                                            <a href="{{ $user && ((int) $user->user_type) === 0 ? '/admin/dashboard' : '/user/forms' }}" class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                @if($user && ((int) $user->user_type) === 0)
+                                                    <!-- Admin: Dashboard icon -->
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                                    </svg>
+                                                @else
+                                                    <!-- Regular User: Forms icon -->
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                    </svg>
+                                                @endif
+                                            </a>
+                                        </li>
+                                        
+                                        <!-- Admin Dashboard breadcrumb for admin dashboard pages (except when already on admin dashboard) -->
+                                        @if($user && ((int) $user->user_type) === 0 && request()->is('admin/*dashboard*') && !request()->is('admin/dashboard'))
+                                            <li class="flex items-center">
+                                                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                <a href="/admin/dashboard" class="ml-1 text-gray-500 hover:text-gray-700 transition-colors">Admin Dashboard</a>
+                                            </li>
                                         @endif
-                                    </div>
-                                @endif
+                                        
+                                        @if($title)
+                                            <li class="flex items-center">
+                                                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                <span class="ml-1 text-gray-900 font-medium">{{ $title }}</span>
+                                            </li>
+                                        @endif
+                                    </ol>
+                                </nav>
                                 
                                 <!-- Navbar Actions (only show with sidebar) -->
                                 @if(isset($navbarActions))
@@ -140,27 +160,47 @@
         <nav class="shadow-lg border-b border-gray-200 bg-white sticky top-0 z-30">
             <div class="mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
-                    <!-- Left side - Logo/Brand -->
+                    <!-- Left side - Breadcrumbs -->
                     <div class="flex items-center space-x-3">
-                        <div>
-                            @if($title)
-                                <h1 class="text-xl font-bold text-gray-900">
-                                    {{ $title }}
-                                </h1>
-                            @endif
-                            @if(!$hideDate)
-                                <p class="text-xs text-gray-500" 
-                                x-data="{ 
-                                    date: new Date(),
-                                    updateTime() {
-                                        this.date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Manila'}));
-                                    }
-                                }" 
-                                x-init="updateTime(); setInterval(() => updateTime(), 1000)"
-                                x-text="date.toLocaleDateString('en-US', {timeZone: 'Asia/Manila'}) + ' ' + date.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' })">
-                                </p>
-                            @endif
-                        </div>
+                        <!-- Breadcrumb Navigation -->
+                        <nav class="flex items-center space-x-1 text-sm" aria-label="Breadcrumb">
+                            <ol class="flex items-center space-x-1">
+                                <li>
+                                    <a href="{{ $user && ((int) $user->user_type) === 0 ? '/admin/dashboard' : '/user/forms' }}" class="text-gray-500 hover:text-gray-700 transition-colors">
+                                        @if($user && ((int) $user->user_type) === 0)
+                                            <!-- Admin: Dashboard icon -->
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                            </svg>
+                                        @else
+                                            <!-- Regular User: Forms icon -->
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                        @endif
+                                    </a>
+                                </li>
+                                
+                                <!-- Admin Dashboard breadcrumb for admin dashboard pages (except when already on admin dashboard) -->
+                                @if($user && ((int) $user->user_type) === 0 && request()->is('admin/*dashboard*') && !request()->is('admin/dashboard'))
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <a href="/admin/dashboard" class="ml-1 text-gray-500 hover:text-gray-700 transition-colors">Admin Dashboard</a>
+                                    </li>
+                                @endif
+                                
+                                @if($title)
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span class="ml-1 text-gray-900 font-medium">{{ $title }}</span>
+                                    </li>
+                                @endif
+                            </ol>
+                        </nav>
                     </div>
 
                     <!-- Right side - User Profile Dropdown -->

@@ -13,7 +13,7 @@ class IncubatorRoutineDashboard extends Component
 {
     public int $typeId;
     public string $search = '';
-    public string $sortField = 'id';
+    public string $sortField = 'date_submitted';
     public string $sortDirection = 'desc';
     public int $page = 1;
     public int $perPage = 15;

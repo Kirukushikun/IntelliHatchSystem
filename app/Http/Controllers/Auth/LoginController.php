@@ -23,6 +23,11 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
+        // If user is already authenticated, redirect to their appropriate home page
+        if (Auth::check()) {
+            return redirect()->intended($this->landingPathForAuthenticatedUser());
+        }
+        
         return view('auth.login');
     }
 
