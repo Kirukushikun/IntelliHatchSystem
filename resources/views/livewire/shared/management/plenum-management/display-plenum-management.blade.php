@@ -158,6 +158,14 @@
                                             title="Edit Plenum">
                                             Edit
                                         </button>
+                                    @endif
+                                    <button 
+                                        wire:click="$dispatch('openDisableModal', '{{ $plenum->id }}')"
+                                        class="px-3 py-1 text-xs font-medium {{ $plenum->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
+                                        title="{{ $plenum->isActive ? 'Deactivate Plenum' : 'Activate Plenum' }}">
+                                        {{ $plenum->isActive ? 'Deactivate' : 'Activate' }}
+                                    </button>
+                                    @if(auth()->check() && auth()->user()->user_type === 0)
                                         <button 
                                             wire:click="$dispatch('openDeleteModal', '{{ $plenum->id }}')"
                                             class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
@@ -165,12 +173,6 @@
                                             Delete
                                         </button>
                                     @endif
-                                    <button 
-                                        wire:click="$dispatch('openDisableModal', '{{ $plenum->id }}')"
-                                        class="px-3 py-1 text-xs font-medium {{ $plenum->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
-                                        title="{{ $plenum->isActive ? 'Disable Plenum' : 'Enable Plenum' }}">
-                                        {{ $plenum->isActive ? 'Disable' : 'Enable' }}
-                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -221,6 +223,14 @@
                                 title="Edit Plenum">
                                 Edit
                             </button>
+                        @endif
+                        <button 
+                            wire:click="$dispatch('openDisableModal', '{{ $plenum->id }}')"
+                            class="px-3 py-1 text-xs font-medium {{ $plenum->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
+                            title="{{ $plenum->isActive ? 'Deactivate Plenum' : 'Activate Plenum' }}">
+                            {{ $plenum->isActive ? 'Deactivate' : 'Activate' }}
+                        </button>
+                        @if(auth()->check() && auth()->user()->user_type === 0)
                             <button 
                                 wire:click="$dispatch('openDeleteModal', '{{ $plenum->id }}')"
                                 class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
@@ -228,12 +238,6 @@
                                 Delete
                             </button>
                         @endif
-                        <button 
-                            wire:click="$dispatch('openDisableModal', '{{ $plenum->id }}')"
-                            class="px-3 py-1 text-xs font-medium {{ $plenum->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
-                            title="{{ $plenum->isActive ? 'Disable Plenum' : 'Enable Plenum' }}">
-                            {{ $plenum->isActive ? 'Disable' : 'Enable' }}
-                        </button>
                     </div>
                 </div>
             @empty

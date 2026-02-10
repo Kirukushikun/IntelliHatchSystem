@@ -177,6 +177,14 @@
                                             title="Edit Hatcher">
                                             Edit
                                         </button>
+                                    @endif
+                                    <button 
+                                        wire:click="$dispatch('openDisableModal', '{{ $hatcher->id }}')"
+                                        class="px-3 py-1 text-xs font-medium {{ $hatcher->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
+                                        title="{{ $hatcher->isActive ? 'Deactivate Hatcher' : 'Activate Hatcher' }}">
+                                        {{ $hatcher->isActive ? 'Deactivate' : 'Activate' }}
+                                    </button>
+                                    @if(auth()->check() && auth()->user()->user_type === 0)
                                         <button 
                                             wire:click="$dispatch('openDeleteModal', '{{ $hatcher->id }}')"
                                             class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
@@ -184,12 +192,6 @@
                                             Delete
                                         </button>
                                     @endif
-                                    <button 
-                                        wire:click="$dispatch('openDisableModal', '{{ $hatcher->id }}')"
-                                        class="px-3 py-1 text-xs font-medium {{ $hatcher->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
-                                        title="{{ $hatcher->isActive ? 'Disable Hatcher' : 'Enable Hatcher' }}">
-                                        {{ $hatcher->isActive ? 'Disable' : 'Enable' }}
-                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -240,6 +242,14 @@
                                 title="Edit Hatcher">
                                 Edit
                             </button>
+                        @endif
+                        <button 
+                            wire:click="$dispatch('openDisableModal', '{{ $hatcher->id }}')"
+                            class="px-3 py-1 text-xs font-medium {{ $hatcher->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
+                            title="{{ $hatcher->isActive ? 'Deactivate Hatcher' : 'Activate Hatcher' }}">
+                            {{ $hatcher->isActive ? 'Deactivate' : 'Activate' }}
+                        </button>
+                        @if(auth()->check() && auth()->user()->user_type === 0)
                             <button 
                                 wire:click="$dispatch('openDeleteModal', '{{ $hatcher->id }}')"
                                 class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
@@ -247,12 +257,6 @@
                                 Delete
                             </button>
                         @endif
-                        <button 
-                            wire:click="$dispatch('openDisableModal', '{{ $hatcher->id }}')"
-                            class="px-3 py-1 text-xs font-medium {{ $hatcher->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100' }} rounded-md transition-colors"
-                            title="{{ $hatcher->isActive ? 'Disable Hatcher' : 'Enable Hatcher' }}">
-                            {{ $hatcher->isActive ? 'Disable' : 'Enable' }}
-                        </button>
                     </div>
                 </div>
             @empty
