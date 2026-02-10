@@ -262,7 +262,6 @@
                         <circle cx="27.13" cy="27.09" r="1.3" transform="translate(-11.21 27.12) rotate(-45)"></circle>
                     </svg>
                     <h3 class="text-lg font-medium text-gray-900">No hatchers found</h3>
-                    <p class="text-sm text-gray-500 mt-1">Try adjusting your search criteria</p>
                 </div>
             @endforelse
         </div>

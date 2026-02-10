@@ -157,20 +157,6 @@
             <table class="w-full text-left table-auto min-w-max">
                 <thead>
                     <tr>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('id')">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
-                                Form ID
-                                @if ($sortField === 'id')
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        @if ($sortDirection === 'asc')
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                        @else
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        @endif
-                                    </svg>
-                                @endif
-                            </p>
-                        </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100" wire:click="sortBy('date_submitted')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 flex items-center gap-1">
                                 Date Submitted
@@ -220,9 +206,6 @@
                     @forelse ($forms as $form)
                         <tr class="even:bg-slate-50 hover:bg-slate-100">
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
-                                <p class="block text-xs md:text-sm text-slate-800">{{ $form->id }}</p>
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-left">
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
@@ -256,13 +239,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="5" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                     <h3 class="text-lg font-medium text-gray-900">No forms submitted</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Try adjusting your search criteria</p>
                                 </div>
                             </td>
                         </tr>
@@ -280,7 +262,6 @@
                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-3">
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
-                            <p class="text-sm font-semibold text-gray-900">Form #{{ $form->id }}</p>
                             <p class="text-xs text-gray-500">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
                         </div>
                         <div class="text-center">
@@ -320,7 +301,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     <h3 class="text-lg font-medium text-gray-900">No forms found</h3>
-                    <p class="text-sm text-gray-500 mt-1">Try adjusting your search criteria</p>
                 </div>
             @endforelse
         </div>
