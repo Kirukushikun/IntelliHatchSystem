@@ -565,6 +565,15 @@ class IncubatorRoutineForm extends FormNavigation
         try {
             $webhookUrl = env('WEBHOOK_URL');
             
+            // Check if webhook URL is configured
+            if (!$webhookUrl) {
+                Log::error('Webhook URL not configured', [
+                    'form_id' => $formId,
+                    'env_variable' => 'WEBHOOK_URL'
+                ]);
+                return;
+            }
+            
             // Get form data with relationships
             $form = DB::table('forms')
                 ->select('forms.*', 'form_types.form_name as form_type_name', 'users.first_name', 'users.last_name', 'incubator-machines.incubatorName')
@@ -636,6 +645,30 @@ class IncubatorRoutineForm extends FormNavigation
                 'error_trace' => $e->getTraceAsString(),
             ]);
         }
+    }
+
+    /**
+     * Extract photo URLs from form inputs
+     */
+    protected function extractPhotos(array $formInputs): array
+    {
+        $photos = [];
+        
+        foreach ($formInputs as $key => $value) {
+            // Check if the field ends with '_photos' and contains an array of URLs
+            if (str_ends_with($key, '_photos') && is_array($value)) {
+                foreach ($value as $photoUrl) {
+                    if (is_string($photoUrl) && filter_var($photoUrl, FILTER_VALIDATE_URL)) {
+                        $photos[] = [
+                            'field' => str_replace('_photos', '', $key),
+                            'url' => $photoUrl
+                        ];
+                    }
+                }
+            }
+        }
+        
+        return $photos;
     }
 
     public function render()
