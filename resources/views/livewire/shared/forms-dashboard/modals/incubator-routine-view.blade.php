@@ -31,13 +31,14 @@
         // Handle non-string values (arrays, null, etc.)
         if (!is_string($value)) {
             if (is_array($value)) {
-                return is_string($value[0] ?? '') ? ucfirst($value[0]) : 'N/A';
+                return is_string($value[0] ?? '') ? $value[0] : 'N/A';
             } else {
                 return 'N/A';
             }
         }
         
-        return ucfirst($value);
+        // Return the value as-is (don't change case for shift values)
+        return $value;
     }
     
     function getPhotoButton($field, $livewire) {
@@ -64,7 +65,7 @@
 @endphp
 
 <!-- Modal Backdrop -->
-<div x-data="{ showModal: @entangle('showModal') }" 
+<div x-data="{ showModal: @entangle('showModal').live }" 
      x-show="showModal" 
      x-transition:enter="transition ease-out duration-300"
      x-transition:enter-start="opacity-0"
@@ -73,7 +74,17 @@
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0"
      class="fixed inset-0 z-50 overflow-y-auto bg-gray-500/75"
-     style="display: none;">
+     style="display: none;"
+     @click.self="showModal = false; $wire.closeModal()">
+     
+    @php
+        \Log::info('Modal Render Start', [
+            'selected_form_id' => $this->selectedForm->id ?? 'NO_FORM',
+            'form_data_shift_at_render' => $this->formData['shift'] ?? 'MISSING',
+            'form_data_keys' => array_keys($this->formData),
+            'form_data_full' => $this->formData,
+        ]);
+    @endphp
     
     <div class="flex min-h-full items-center justify-center p-4 text-center">
         <!-- Modal Panel -->
@@ -84,7 +95,8 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-4xl">
+             class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-4xl"
+             @click.stop>
             
             <!-- Modal Header -->
             <div class="bg-white px-4 py-3 border-b border-gray-200 sm:px-6">
@@ -104,27 +116,34 @@
             
             <!-- Modal Body -->
             <div class="bg-white px-4 py-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto">
-                @if($selectedForm)
+                @if($this->selectedForm)
                     <!-- Basic Information -->
                     <div class="mb-8">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-white">
                                 <span class="text-sm font-medium text-gray-600">Date:</span>
-                                <span class="text-sm text-gray-900">{{ $selectedForm->date_submitted ? $selectedForm->date_submitted->format('M d, Y H:i') : 'N/A' }}</span>
+                                <span class="text-sm text-gray-900">{{ $this->selectedForm->date_submitted ? $this->selectedForm->date_submitted->format('M d, Y H:i') : 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-gray-50">
                                 <span class="text-sm font-medium text-gray-600">Shift:</span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['shift'] ?? 'N/A') }}">
-                                    {{ formatDisplayValue($formData['shift'] ?? 'N/A') }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['shift'] ?? 'N/A') }}">
+                                    {{ $this->formData['shift'] ?? 'N/A' }}
                                 </span>
+                                @php
+                                    \Log::info('Modal Shift Display', [
+                                        'selected_form_id' => $this->selectedForm->id ?? 'NO_FORM',
+                                        'form_data_shift' => $this->formData['shift'] ?? 'MISSING',
+                                        'selected_form_shift' => $this->selectedForm->form_inputs['shift'] ?? 'NO_SHIFT_IN_FORM',
+                                    ]);
+                                @endphp
                             </div>
                             <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-white">
                                 <span class="text-sm font-medium text-gray-600">Hatchery Man:</span>
-                                <span class="text-sm text-gray-900">{{ $selectedForm->user ? ($selectedForm->user->first_name . ' ' . $selectedForm->user->last_name) : 'Unknown' }}</span>
+                                <span class="text-sm text-gray-900">{{ $this->selectedForm->user ? ($this->selectedForm->user->first_name . ' ' . $this->selectedForm->user->last_name) : 'Unknown' }}</span>
                             </div>
                             <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-gray-50">
                                 <span class="text-sm font-medium text-gray-600">Incubator:</span>
-                                <span class="text-sm text-gray-900">{{ $selectedForm->incubator ? $selectedForm->incubator->incubatorName : 'N/A' }}</span>
+                                <span class="text-sm text-gray-900">{{ $this->selectedForm->incubator ? $this->selectedForm->incubator->incubatorName : 'N/A' }}</span>
                             </div>
                         </div>
                         
@@ -132,21 +151,20 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-white">
                                 <span class="text-sm font-medium text-gray-600">Check for Alarm system condition:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['alarm_system_condition'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['alarm_system_condition'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['alarm_system_condition'] ?? 'N/A') }}">
+                                        {{ $this->formData['alarm_system_condition'] ?? 'N/A' }}
                                     </span>
                                 </div>
                             </div>
-                            @if(isset($formData['corrective_action']) && $formData['corrective_action'])
+                            @if(isset($this->formData['corrective_action']) && $this->formData['corrective_action'])
                                 <div class="py-2 bg-gray-50">
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm font-medium text-gray-600">Corrective Action:</span>
-                                        <div class="mt-2">
-                                            {!! getPhotoButton('corrective_action', $this) !!}
+                                        <div class="flex items-center gap-2">
                                         </div>
                                     </div>
                                     <div class="bg-gray-50 p-3 rounded-md">
-                                        <p class="text-sm text-gray-700">{{ $formData['corrective_action'] }}</p>
+                                        <p class="text-sm text-gray-700">{{ $this->formData['corrective_action'] }}</p>
                                     </div>
                                 </div>
                             @endif
@@ -160,8 +178,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Cleaning of incubator roof and plenum:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['cleaning_incubator_roof_and_plenum'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['cleaning_incubator_roof_and_plenum'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['cleaning_incubator_roof_and_plenum'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['cleaning_incubator_roof_and_plenum'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('cleaning_incubator_roof_and_plenum', $this) !!}
                                 </div>
@@ -176,8 +194,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Check incubator doors for air leakage:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_incubator_doors_for_air_leakage'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['check_incubator_doors_for_air_leakage'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['check_incubator_doors_for_air_leakage'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['check_incubator_doors_for_air_leakage'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('check_incubator_doors_for_air_leakage', $this) !!}
                                 </div>
@@ -185,8 +203,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Checking of baggy against the gaskets:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['checking_of_baggy_against_the_gaskets'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['checking_of_baggy_against_the_gaskets'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['checking_of_baggy_against_the_gaskets'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['checking_of_baggy_against_the_gaskets'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('checking_of_baggy_against_the_gaskets', $this) !!}
                                 </div>
@@ -194,8 +212,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Check curtain position and condition:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_curtain_position_and_condition'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['check_curtain_position_and_condition'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['check_curtain_position_and_condition'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['check_curtain_position_and_condition'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('check_curtain_position_and_condition', $this) !!}
                                 </div>
@@ -203,8 +221,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Check wick for replacement / washing:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_wick_for_replacement_washing'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['check_wick_for_replacement_washing'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['check_wick_for_replacement_washing'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['check_wick_for_replacement_washing'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('check_wick_for_replacement_washing', $this) !!}
                                 </div>
@@ -212,8 +230,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Check spray nozzle and water pan:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_spray_nozzle_and_water_pan'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['check_spray_nozzle_and_water_pan'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['check_spray_nozzle_and_water_pan'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['check_spray_nozzle_and_water_pan'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('check_spray_nozzle_and_water_pan', $this) !!}
                                 </div>
@@ -221,8 +239,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Check incubator fans for vibration:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_incubator_fans_for_vibration'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['check_incubator_fans_for_vibration'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['check_incubator_fans_for_vibration'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['check_incubator_fans_for_vibration'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('check_incubator_fans_for_vibration', $this) !!}
                                 </div>
@@ -230,8 +248,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Check rack baffle condition:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_rack_baffle_condition'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['check_rack_baffle_condition'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['check_rack_baffle_condition'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['check_rack_baffle_condition'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('check_rack_baffle_condition', $this) !!}
                                 </div>
@@ -239,8 +257,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Drain water out from air compressor tank:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['drain_water_out_from_air_compressor_tank'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['drain_water_out_from_air_compressor_tank'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['drain_water_out_from_air_compressor_tank'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['drain_water_out_from_air_compressor_tank'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('drain_water_out_from_air_compressor_tank', $this) !!}
                                 </div>
@@ -255,8 +273,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Check water level of blue tank:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['check_water_level_of_blue_tank'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['check_water_level_of_blue_tank'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['check_water_level_of_blue_tank'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['check_water_level_of_blue_tank'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('check_water_level_of_blue_tank', $this) !!}
                                 </div>
@@ -264,8 +282,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Cleaning of incubator floor area:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['cleaning_of_incubator_floor_area'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['cleaning_of_incubator_floor_area'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['cleaning_of_incubator_floor_area'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['cleaning_of_incubator_floor_area'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('cleaning_of_incubator_floor_area', $this) !!}
                                 </div>
@@ -273,8 +291,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Cleaning of entrance and exit area flooring:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['cleaning_of_entrance_and_exit_area_flooring'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['cleaning_of_entrance_and_exit_area_flooring'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['cleaning_of_entrance_and_exit_area_flooring'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['cleaning_of_entrance_and_exit_area_flooring'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('cleaning_of_entrance_and_exit_area_flooring', $this) !!}
                                 </div>
@@ -282,8 +300,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Clean and refill water reservoir:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['clean_and_refill_water_reservoir'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['clean_and_refill_water_reservoir'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['clean_and_refill_water_reservoir'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['clean_and_refill_water_reservoir'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('clean_and_refill_water_reservoir', $this) !!}
                                 </div>
@@ -298,8 +316,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Egg setting preparation:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['egg_setting_preparation'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['egg_setting_preparation'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['egg_setting_preparation'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['egg_setting_preparation'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('egg_setting_preparation', $this) !!}
                                 </div>
@@ -307,8 +325,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Egg setting:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['egg_setting'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['egg_setting'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['egg_setting'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['egg_setting'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('egg_setting', $this) !!}
                                 </div>
@@ -316,8 +334,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Record egg setting on board:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['record_egg_setting_on_board'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['record_egg_setting_on_board'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['record_egg_setting_on_board'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['record_egg_setting_on_board'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('record_egg_setting_on_board', $this) !!}
                                 </div>
@@ -325,8 +343,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Record egg setting time:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['record_egg_setting_time'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['record_egg_setting_time'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['record_egg_setting_time'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['record_egg_setting_time'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('record_egg_setting_time', $this) !!}
                                 </div>
@@ -334,8 +352,8 @@
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">Assist in Random Candling:</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($formData['assist_in_random_candling'] ?? 'N/A') }}">
-                                        {{ formatDisplayValue($formData['assist_in_random_candling'] ?? 'N/A') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['assist_in_random_candling'] ?? 'N/A') }}">
+                                        {{ formatDisplayValue($this->formData['assist_in_random_candling'] ?? 'N/A') }}
                                     </span>
                                     {!! getPhotoButton('assist_in_random_candling', $this) !!}
                                 </div>

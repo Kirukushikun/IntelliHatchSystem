@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Livewire\Attributes\Computed;
 
 class IncubatorRoutineDashboard extends Component
 {
@@ -24,9 +25,8 @@ class IncubatorRoutineDashboard extends Component
     public bool $showModal = false;
     public bool $showPhotoModal = false;
     public bool $showDeleteModal = false;
-    public ?Form $selectedForm = null;
+    public ?int $selectedFormId = null; // Changed from selectedForm to just ID
     public ?int $formToDelete = null;
-    public array $formData = [];
     public array $formPhotos = [];
     public string $selectedPhotoField = '';
     public array $selectedPhotos = [];
@@ -207,6 +207,18 @@ class IncubatorRoutineDashboard extends Component
         }
 
         $forms = $query->paginate($this->perPage, ['*'], 'page', $this->page);
+        
+        // Debug: Log paginated form data for comparison
+        $forms->getCollection()->each(function ($form, $index) {
+            Log::info('Paginated Form Data', [
+                'index' => $index,
+                'form_id' => $form->id,
+                'form_inputs_type' => gettype($form->form_inputs),
+                'form_inputs_is_array' => is_array($form->form_inputs),
+                'shift_from_paginated' => $form->form_inputs['shift'] ?? 'NOT_FOUND',
+                'raw_form_inputs' => $form->form_inputs,
+            ]);
+        });
             
         $currentPage = $forms->currentPage();
         $lastPage = $forms->lastPage();
@@ -260,28 +272,50 @@ class IncubatorRoutineDashboard extends Component
         $this->page = $page;
     }
 
-    public function refresh(): void
+    // Computed property to get selectedForm freshly each time
+    #[Computed]
+    public function selectedForm()
     {
-        // This method is called by wire:poll
-        // The component will automatically re-render
+        if (!$this->selectedFormId) {
+            return null;
+        }
+        
+        return Form::with(['user', 'incubator'])->find($this->selectedFormId);
+    }
+
+    // Computed property to get formData freshly each time
+    #[Computed]
+    public function formData()
+    {
+        if (!$this->selectedFormId) {
+            return [];
+        }
+        
+        // Get fresh data directly from database
+        $freshForm = DB::table('forms')
+            ->where('id', $this->selectedFormId)
+            ->first();
+        
+        if ($freshForm && $freshForm->form_inputs) {
+            return json_decode($freshForm->form_inputs, true) ?? [];
+        }
+        
+        return [];
     }
 
     public function viewDetails(int $formId): void
     {
-        $this->selectedForm = Form::with(['user', 'incubator'])->find($formId);
+        // Simply set the ID - computed properties will handle the rest
+        $this->selectedFormId = $formId;
+        $this->formPhotos = $this->getFormPhotos($formId);
+        $this->currentPhotoIndex = 0;
+        $this->showModal = true;
         
-        if ($this->selectedForm) {
-            $this->formData = is_array($this->selectedForm->form_inputs) ? $this->selectedForm->form_inputs : [];
-            $this->formPhotos = $this->getFormPhotos($formId);
-            $this->currentPhotoIndex = 0;
-            $this->showModal = true;
-        }
-    }
-
-    public function editForm(int $formId): void
-    {
-        // TODO: Implement edit functionality
-        $this->dispatch('showToast', message: 'Edit functionality coming soon!', type: 'info');
+        // Debug logging
+        Log::info('ViewDetails Called - Simple', [
+            'form_id' => $formId,
+            'selectedFormId' => $this->selectedFormId,
+        ]);
     }
 
     public function deleteForm(int $formId): void
@@ -378,8 +412,7 @@ class IncubatorRoutineDashboard extends Component
     public function closeModal(): void
     {
         $this->showModal = false;
-        $this->selectedForm = null;
-        $this->formData = [];
+        $this->selectedFormId = null;
         $this->formPhotos = [];
     }
 

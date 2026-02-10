@@ -1,5 +1,13 @@
 @php
     function getStatusPill($value) {
+        // Debug: Log the actual value being passed
+        \Log::info('getStatusPill called with value', [
+            'value' => $value,
+            'type' => gettype($value),
+            'length' => strlen($value ?? ''),
+            'trimmed' => trim($value),
+        ]);
+        
         $value = trim($value);
         $lowerValue = strtolower($value);
         
@@ -17,7 +25,7 @@
             default:
                 // For shift values and other text
                 if (in_array($lowerValue, ['1st shift', '2nd shift', '3rd shift'])) {
-                    return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #dbeafe; color: #1e40af;">' . ucfirst($lowerValue) . '</span>';
+                    return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #dbeafe; color: #1e40af;">' . $value . '</span>';
                 }
                 // For corrective_action field, just show as text
                 if ($value && strlen($value) > 10) {
@@ -29,7 +37,7 @@
     }
 @endphp
 
-<div wire:poll.2s>
+<div wire:poll.2s wire:key="{{ now()->timestamp }}">
     <!-- Header with Title and Search -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
         <div class="text-center sm:text-left">
