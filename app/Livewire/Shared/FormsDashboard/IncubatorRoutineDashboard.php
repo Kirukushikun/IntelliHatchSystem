@@ -17,7 +17,7 @@ class IncubatorRoutineDashboard extends Component
     public string $sortField = 'date_submitted';
     public string $sortDirection = 'desc';
     public int $page = 1;
-    public int $perPage = 15;
+    public int $perPage = 10;
     public string $dateFrom = '';
     public string $dateTo = '';
     public string $shiftFilter = 'all';
