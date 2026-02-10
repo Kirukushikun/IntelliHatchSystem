@@ -216,18 +216,18 @@
                                         @if($field === 'alarm_system_condition')
                                             <div class="flex justify-between items-center py-2 border-b border-gray-100 {{ $fieldIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
                                                 <span class="text-sm font-medium text-gray-600">{{ $config['label'] }}</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($config['value'] ?? 'N/A') }}">
-                                                        {{ formatDisplayValue($config['value'] ?? 'N/A') }}
-                                                    </span>
-                                                    {!! getPhotoButton($field, $this) !!}
-                                                </div>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($config['value'] ?? 'N/A') }}">
+                                                    {{ formatDisplayValue($config['value'] ?? 'N/A') }}
+                                                </span>
                                             </div>
                                             @if(isset($groupedFields['basic']['fields']['corrective_action']) && !empty($groupedFields['basic']['fields']['corrective_action']['value']))
                                                 <div class="py-2 {{ ($fieldIndex + 1) % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
                                                     <span class="text-sm font-medium text-gray-600 block mb-2">{{ $groupedFields['basic']['fields']['corrective_action']['label'] }}</span>
                                                     <div class="bg-gray-50 p-3 rounded-md">
-                                                        <p class="text-sm text-gray-700">{{ $groupedFields['basic']['fields']['corrective_action']['value'] }}</p>
+                                                        <p class="text-sm text-gray-700 mb-2">{{ $groupedFields['basic']['fields']['corrective_action']['value'] }}</p>
+                                                        <div class="mt-2">
+                                                            {!! getPhotoButton('corrective_action', $this) !!}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 @php $fieldIndex += 2; @endphp
