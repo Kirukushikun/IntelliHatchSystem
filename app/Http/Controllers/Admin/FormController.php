@@ -32,6 +32,22 @@ class FormController extends Controller
     }
 
     /**
+     * Display the blower air hatcher form page.
+     */
+    public function blowerAirHatcher()
+    {
+        return view('shared.forms.blower-air-hatcher');
+    }
+
+    /**
+     * Display the blower air incubator form page.
+     */
+    public function blowerAirIncubator()
+    {
+        return view('shared.forms.blower-air-incubator');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Form $form)

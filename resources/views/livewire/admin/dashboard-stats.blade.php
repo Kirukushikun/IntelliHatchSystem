@@ -23,9 +23,9 @@
         @foreach($cards as $card)
             <div x-show="!query || '{{ strtolower($card['type_name'] ?? '') }}'.includes(query.toLowerCase())" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group border-l-4 border-amber-500 cursor-pointer">
                 <a href="{{ match($card['type_name']) {
-                    'Incubator Routine Checklist Per Shift' => 'admin.incubator-routine-dashboard',
-                    'Hatcher Blower Air Speed Monitoring' => 'admin.blower-air-hatcher-dashboard',
-                    'Incubator Blower Air Speed Monitoring' => 'admin.blower-air-incubator-dashboard',
+                    'Incubator Routine Checklist Per Shift' => 'incubator-routine-dashboard',
+                    'Hatcher Blower Air Speed Monitoring' => 'blower-air-hatcher-dashboard',
+                    'Incubator Blower Air Speed Monitoring' => 'blower-air-incubator-dashboard',
                     default => '#'
                 } }}" class="block h-full">
                 <!-- Card Header -->
