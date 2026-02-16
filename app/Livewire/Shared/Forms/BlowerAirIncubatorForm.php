@@ -2,35 +2,38 @@
 
 namespace App\Livewire\Shared\Forms;
 
-use App\Livewire\Configs\IncubatorRoutineConfig;
+use App\Livewire\Configs\BlowerAirIncubatorConfig;
 use App\Livewire\Components\FormNavigation;
-use App\Models\Incubator;
-use App\Models\User;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use App\Models\Incubator;
+use App\Models\User;
 
-class IncubatorRoutineForm extends FormNavigation
+class BlowerAirIncubatorForm extends FormNavigation
 {
     use WithFileUploads;
-    protected string $shiftKey = 'shift';
 
     public array $form = [];
 
     public array $photoUploads = [];
 
-    /** @var array */
-    public $hatcheryMen = [];
+    public bool $formSubmitted = false;
 
-    /** @var array */
+    // Disable shift-based navigation for this form
+    protected bool $disableShiftLogic = true;
+
+    /**
+     * @var array
+     */
     public $incubators = [];
 
     /** @var array */
-    public $completedIncubators = [];
+    public $hatcheryMen = [];
 
     /** @var array<string, string[]> Track uploaded photo URLs per field */
     public array $uploadedPhotoUrls = [];
@@ -38,15 +41,27 @@ class IncubatorRoutineForm extends FormNavigation
     /** @var array<string, int[]> Track uploaded photo IDs per field */
     public array $uploadedPhotoIds = [];
 
-    public function mount($formType = 'incubator_routine'): void
-    {
-        $this->form = IncubatorRoutineConfig::defaultFormState();
-        parent::mount($formType);
+    /** @var int|null Store uploaded_by user ID from name field */
+    public ?int $uploadedBy = null;
 
+    public function mount($formType = 'blower_air_incubator'): void
+    {
+        $this->form = BlowerAirIncubatorConfig::defaultFormState();
+        
+        parent::mount($formType);
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
         
-        // Load hatchery men and incubators
+        // Load incubators
+        $this->incubators = Incubator::where('isActive', true)
+            ->orderBy('incubatorName')
+            ->get()
+            ->mapWithKeys(function ($incubator) {
+                return [$incubator->id => $incubator->incubatorName];
+            })
+            ->toArray();
+
+        // Load hatchery men
         $this->hatcheryMen = User::where('user_type', 1)
             ->where('is_disabled', false)
             ->orderBy('first_name')
@@ -56,22 +71,6 @@ class IncubatorRoutineForm extends FormNavigation
                 return [$user->id => $user->first_name . ' ' . $user->last_name];
             })
             ->toArray();
-
-        $this->incubators = Incubator::where('isActive', true)
-            ->orderBy('incubatorName')
-            ->get()
-            ->mapWithKeys(function ($incubator) {
-                return [$incubator->id => $incubator->incubatorName];
-            })
-            ->toArray();
-
-        $this->updateCompletedIncubators();
-    }
-
-    public function updatedForm($value, $key): void
-    {
-        // Clear errors for this field when it’s updated via wire:model.live.
-        $this->resetErrorBag("form.{$key}");
     }
 
     public function updated($name, $value): void
@@ -89,7 +88,7 @@ class IncubatorRoutineForm extends FormNavigation
         }
 
         $this->validateOnly("photoUploads.{$photoKey}.*", [
-            "photoUploads.{$photoKey}.*" => ['image', 'max:15360'],
+            "photoUploads.{$photoKey}.*" => ['image', 'max:1024'],
         ]);
 
         $formType = $this->formTypeKey();
@@ -137,39 +136,85 @@ class IncubatorRoutineForm extends FormNavigation
         $this->photoUploads[$photoKey] = [];
     }
 
-    protected function storeSubmission(string $formTypeName, array $formInputs): void
+    protected function formTypeKey(): string
     {
-        DB::beginTransaction();
+        return 'blower_air_incubator';
+    }
+
+    protected function absolutePublicUrlFromDiskPath(string $diskPath): string
+    {
+        return url(Storage::url($diskPath));
+    }
+
+    protected function diskPathFromPublicUrl(string $publicUrl): string
+    {
+        $path = parse_url($publicUrl, PHP_URL_PATH);
+        if (!is_string($path) || $path === '') {
+            return ltrim(str_replace('/storage/', '', $publicUrl), '/');
+        }
+
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'storage/')) {
+            return substr($path, strlen('storage/'));
+        }
+
+        return $path;
+    }
+
+    protected function scheduleConfig(): array
+    {
+        return BlowerAirIncubatorConfig::schedule();
+    }
+
+    protected function messages(): array
+    {
+        return BlowerAirIncubatorConfig::getMessages();
+    }
+
+    protected function stepFieldMap(): array
+    {
+        return BlowerAirIncubatorConfig::stepFieldMap();
+    }
+
+    protected function formTypeName(): string
+    {
+        return BlowerAirIncubatorConfig::getFormTypeName();
+    }
+
+    public function submitForm()
+    {
+        $this->formSubmitted = true;
+        
+        $this->validate(BlowerAirIncubatorConfig::getRules());
 
         try {
-            $formTypeId = DB::table('form_types')
-                ->where('form_name', $formTypeName)
-                ->value('id');
-
-            if (!$formTypeId) {
-                throw new \Exception('Form type not found: ' . $formTypeName);
-            }
-
-            // Get the original form values before they're removed from JSON
-            $hatcheryMan = $this->form['hatchery_man'] ?? null;
-            $incubator = $this->form['incubator'] ?? null;
-
-            DB::table('forms')->insert([
-                'form_type_id' => $formTypeId,
-                'form_inputs' => json_encode($formInputs),
-                'date_submitted' => now(),
-                'uploaded_by' => $hatcheryMan,
-                'created_at' => now(),
+            $formId = $this->storeSubmissionAndReturnId($this->formTypeName(), $this->formInputsForStorageWithoutPhotos());
+            $this->finalizeUploadedPhotosForForm($formId);
+            DB::table('forms')->where('id', $formId)->update([
+                'form_inputs' => json_encode($this->formInputsForStorageWithPhotoUrls()),
                 'updated_at' => now(),
             ]);
-
-            DB::commit();
+            
+            // Send form data to webhook
+            $this->sendFormToWebhook($formId);
+            
+            $this->dispatch('showToast', message: 'Form submitted successfully!', type: 'success');
+            $this->dispatch('formSubmitted');
+            
+            return redirect()->route('forms.blower-air-incubator');
         } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
+            Log::error('Form submission failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->dispatch('showToast', message: 'Failed to submit form. Please try again.', type: 'error');
         }
     }
 
+    /**
+     * Store form submission and return form ID
+     */
     protected function storeSubmissionAndReturnId(string $formTypeName, array $formInputs): int
     {
         DB::beginTransaction();
@@ -183,7 +228,7 @@ class IncubatorRoutineForm extends FormNavigation
                 throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
-            // Get the original form values before they're removed from JSON
+            // Get original form values before they're removed from JSON
             $hatcheryMan = $this->form['hatchery_man'] ?? null;
             $incubator = $this->form['incubator'] ?? null;
 
@@ -191,7 +236,7 @@ class IncubatorRoutineForm extends FormNavigation
                 'form_type_id' => $formTypeId,
                 'form_inputs' => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by' => $hatcheryMan,
+                'uploaded_by' => $this->uploadedBy ?: $hatcheryMan,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -205,6 +250,9 @@ class IncubatorRoutineForm extends FormNavigation
         }
     }
 
+    /**
+     * Finalize uploaded photos for a specific form
+     */
     protected function finalizeUploadedPhotosForForm(int $formId): void
     {
         foreach ($this->uploadedPhotoIds as $photoKey => $ids) {
@@ -241,55 +289,6 @@ class IncubatorRoutineForm extends FormNavigation
         }
     }
 
-    protected function absolutePublicUrlFromDiskPath(string $diskPath): string
-    {
-        return url(Storage::url($diskPath));
-    }
-
-    protected function diskPathFromPublicUrl(string $publicUrl): string
-    {
-        $path = parse_url($publicUrl, PHP_URL_PATH);
-        if (!is_string($path) || $path === '') {
-            return ltrim(str_replace('/storage/', '', $publicUrl), '/');
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/')) {
-            return substr($path, strlen('storage/'));
-        }
-
-        return $path;
-    }
-
-    /**
-     * Cleanup all uploaded photos when component is destroyed or form reset.
-     */
-    protected function cleanupAllUploadedPhotos(): void
-    {
-        foreach ($this->uploadedPhotoUrls as $field => $urls) {
-            foreach ($urls as $url) {
-                $relativePath = $this->diskPathFromPublicUrl($url);
-                Storage::disk('public')->delete($relativePath);
-            }
-        }
-
-        $allIds = [];
-        foreach ($this->uploadedPhotoIds as $field => $ids) {
-            foreach ($ids as $id) {
-                $allIds[] = $id;
-            }
-        }
-
-        if (!empty($allIds)) {
-            DB::table('photos')->whereIn('id', $allIds)->delete();
-        }
-
-        $this->uploadedPhotoUrls = [];
-        $this->uploadedPhotoIds = [];
-        $this->photoUploads = [];
-    }
-
     public function deleteUploadedPhoto(string $photoKey, int $photoId): void
     {
         $ids = $this->uploadedPhotoIds[$photoKey] ?? [];
@@ -324,185 +323,40 @@ class IncubatorRoutineForm extends FormNavigation
         ));
     }
 
-    protected function formTypeKey(): string
-    {
-        return 'incubator_routine';
-    }
-
-    protected function formTypeName(): string
-    {
-        return IncubatorRoutineConfig::getFormTypeName();
-    }
-
-    protected function baseRules(): array
-    {
-        $rules = IncubatorRoutineConfig::getRules();
-
-        // Convert rules to "form.*" keys.
-        $converted = [];
-        foreach ($rules as $key => $rule) {
-            $converted["form.{$key}"] = $rule;
-        }
-
-        return $converted;
-    }
-
-    protected function messages(): array
-    {
-        return IncubatorRoutineConfig::getMessages();
-    }
-
-    public function updatedFormShift($value): void
-    {
-        $this->updateCompletedIncubators();
-        // Reset incubator selection when shift changes
-        $this->form['incubator'] = '';
-        // When shift changes, reset the form (except shift) and navigation.
-        $this->resetFormExceptShift();
-        parent::updatedFormShift($value);
-    }
-
-    protected function resetFormExceptShift(bool $keepShift = true, bool $clearShift = false, bool $cleanupPhotos = true): void
-    {
-        $shift = (string) ($this->form['shift'] ?? '');
-        $hatcheryMan = $this->form['hatchery_man'] ?? '';
-        $incubator = $this->form['incubator'] ?? '';
-
-        foreach (array_keys($this->form) as $key) {
-            if ($key === 'shift' || $key === 'hatchery_man' || $key === 'incubator') {
-                continue;
-            }
-
-            $this->form[$key] = is_array($this->form[$key]) ? [] : '';
-        }
-
-        if ($cleanupPhotos) {
-            $this->cleanupAllUploadedPhotos();
-            $this->dispatch('formReset');
-        }
-
-        if ($clearShift) {
-            $this->form['shift'] = '';
-            $this->form['hatchery_man'] = '';
-            $this->form['incubator'] = '';
-            return;
-        }
-
-        $this->form['shift'] = $keepShift ? $shift : '';
-        $this->form['hatchery_man'] = $hatcheryMan;
-        $this->form['incubator'] = $incubator;
-    }
-
-    protected function updateCompletedIncubators(): void
-    {
-        if (empty($this->form['shift'])) {
-            $this->completedIncubators = [];
-            return;
-        }
-
-        $today = now()->format('Y-m-d');
-        $formTypeName = $this->formTypeName();
-        
-        // Get form type ID
-        $formTypeId = DB::table('form_types')
-            ->where('form_name', $formTypeName)
-            ->value('id');
-
-        if (!$formTypeId) {
-            $this->completedIncubators = [];
-            return;
-        }
-
-        // Get incubators that already have forms for today's date and current shift
-        $completedForms = DB::table('forms')
-            ->where('form_type_id', $formTypeId)
-            ->whereDate('date_submitted', $today)
-            ->whereNotNull('form_inputs')
-            ->get();
-
-        $this->completedIncubators = [];
-        
-        foreach ($completedForms as $form) {
-            $formInputs = is_array($form->form_inputs) ? $form->form_inputs : json_decode($form->form_inputs, true);
-            if (isset($formInputs['shift']) && $formInputs['shift'] === $this->form['shift']) {
-                if (isset($formInputs['incubator'])) {
-                    $this->completedIncubators[] = $formInputs['incubator'];
-                }
-            }
-        }
-    }
-
-    public function submitForm(): \Illuminate\Http\RedirectResponse
-    {
-        // Validate only visible fields.
-        $rules = $this->rulesForVisibleFields();
-        $messages = $this->messages();
-
-        try {
-            $this->validate($rules, $messages);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Jump to the first errored field.
-            $firstKey = array_key_first($e->validator->errors()->messages());
-            if ($firstKey) {
-                $fieldName = str_replace('form.', '', $firstKey);
-                $this->goToStepWithField($fieldName);
-            }
-
-            throw $e;
-        }
-
-        try {
-            $formId = $this->storeSubmissionAndReturnId($this->formTypeName(), $this->formInputsForStorageWithoutPhotos());
-            $this->finalizeUploadedPhotosForForm($formId);
-            DB::table('forms')->where('id', $formId)->update([
-                'form_inputs' => json_encode($this->formInputsForStorageWithPhotoUrls()),
-                'updated_at' => now(),
-            ]);
-            
-            // Send form data to webhook
-            $this->sendFormToWebhook($formId);
-            
-            $this->dispatch('showToast', message: 'Form submitted successfully!', type: 'success');
-            $this->dispatch('formSubmitted');
-            
-            // Redirect to clear form data (like blower forms)
-            return redirect()->route('forms.incubator-routine');
-            
-            // Keep form data intact for potential re-submission
-            // Data will be cleared when redirected to forms page
-        } catch (\Exception $e) {
-            $this->dispatch('showToast', message: 'Failed to submit form. Please try again.', type: 'error');
-            // Keep all form data intact on failure so user can retry
-            // Only cleanup photos to prevent orphaned files
-            $this->cleanupAllUploadedPhotos();
-            throw $e;
-        }
-    }
-
     /**
-     * Build the form inputs array for storage, including photo URLs and N/A for non-scheduled fields.
+     * Build form inputs array for storage
      */
     protected function formInputsForStorageWithoutPhotos(): array
     {
         $inputs = $this->form;
 
         // Remove hatchery_man from JSON as it's stored in dedicated column
-        // Keep incubator in JSON for machine info extraction
+        // Remove incubator from JSON since it's now in machine_info
+        // Photos should stay in form_inputs JSON
         unset($inputs['hatchery_man']);
+        unset($inputs['incubator']);
 
-        // Set N/A for fields that are not scheduled/visible for the selected shift
-        $visibleFields = $this->getVisibleFieldNames();
-
-        $allFields = array_keys(IncubatorRoutineConfig::defaultFormState());
-        foreach ($allFields as $field) {
-            if (!in_array($field, $visibleFields, true)) {
-                $inputs[$field] = 'N/A';
+        // Add machine information to JSON for easier extraction
+        if (isset($this->form['incubator']) && !empty($this->form['incubator'])) {
+            $incubator = DB::table('incubator-machines')
+                ->where('id', $this->form['incubator'])
+                ->first();
+            
+            if ($incubator) {
+                $inputs['machine_info'] = [
+                    'table' => 'incubator-machines',
+                    'id' => $this->form['incubator'],
+                    'name' => $incubator->incubatorName
+                ];
             }
         }
 
         return $inputs;
     }
 
+    /**
+     * Build form inputs array with photo URLs included
+     */
     protected function formInputsForStorageWithPhotoUrls(): array
     {
         $inputs = $this->formInputsForStorageWithoutPhotos();
@@ -514,38 +368,6 @@ class IncubatorRoutineForm extends FormNavigation
         }
 
         return $inputs;
-    }
-
-    protected function rulesForVisibleFields(): array
-    {
-        $rules = $this->baseRules();
-        $visible = $this->getVisibleFieldNames();
-
-        // Always keep shift (step 1).
-        $visible[] = 'shift';
-
-        $visibleKeys = array_unique(array_map(fn ($f) => "form.{$f}", $visible));
-
-        // Remove rules for non-visible fields.
-        foreach (array_keys($rules) as $key) {
-            // Handle wildcard array rules like form.incubator_machine_inspected.*
-            $baseKey = preg_replace('/\\.\\*$/', '', $key);
-            if (!in_array($baseKey, $visibleKeys, true) && !in_array($key, $visibleKeys, true)) {
-                unset($rules[$key]);
-            }
-        }
-
-        return $rules;
-    }
-
-    protected function stepFieldMap(): array
-    {
-        return IncubatorRoutineConfig::stepFieldMap();
-    }
-
-    protected function scheduleConfig(): array
-    {
-        return IncubatorRoutineConfig::schedule();
     }
 
     /**
@@ -600,7 +422,6 @@ class IncubatorRoutineForm extends FormNavigation
                 'machine' => $machineInfo,
                 'message' => [
                     'form_name' => $form->form_type_name ?: 'Unknown Form Type',
-                    'shift' => $formInputs['shift'] ?? null,
                     'machine_name' => $machineInfo['name'] ?? null,
                     'submitted_by' => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
                     'date_time' => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
@@ -632,31 +453,25 @@ class IncubatorRoutineForm extends FormNavigation
                 ]);
             }
         } catch (\Exception $e) {
-            Log::error('Exception sending form to webhook', [
+            Log::error('Exception occurred while sending form to webhook', [
                 'form_id' => $formId,
-                'error_message' => $e->getMessage(),
-                'error_trace' => $e->getTraceAsString(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }
 
     /**
-     * Extract photo URLs from form inputs
+     * Extract photos from form inputs
      */
     protected function extractPhotos(array $formInputs): array
     {
         $photos = [];
         
-        foreach ($formInputs as $key => $value) {
-            // Check if the field ends with '_photos' and contains an array of URLs
-            if (str_ends_with($key, '_photos') && is_array($value)) {
-                foreach ($value as $photoUrl) {
-                    if (is_string($photoUrl) && filter_var($photoUrl, FILTER_VALIDATE_URL)) {
-                        $photos[] = [
-                            'field' => str_replace('_photos', '', $key),
-                            'url' => $photoUrl
-                        ];
-                    }
+        if (isset($formInputs['photos']) && is_array($formInputs['photos'])) {
+            foreach ($formInputs['photos'] as $photo) {
+                if (is_string($photo)) {
+                    $photos[] = $photo;
                 }
             }
         }
@@ -669,6 +484,12 @@ class IncubatorRoutineForm extends FormNavigation
      */
     protected function extractMachineInfo(array $formInputs): array
     {
+        // Check if machine information is already stored in JSON
+        if (isset($formInputs['machine_info'])) {
+            return $formInputs['machine_info'];
+        }
+
+        // Fallback to original method if machine_info not found
         $machineInfo = [
             'table' => null,
             'id' => null,
@@ -696,6 +517,6 @@ class IncubatorRoutineForm extends FormNavigation
 
     public function render()
     {
-        return view('livewire.shared.forms.incubator-routine-form');
+        return view('livewire.shared.forms.blower-air-incubator-form');
     }
 }

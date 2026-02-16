@@ -19,6 +19,14 @@ Route::get('/forms/incubator-routine', function () {
     return view('shared.forms.incubator-routine');
 })->name('forms.incubator-routine');
 
+Route::get('/forms/blower-air-hatcher', function () {
+    return view('shared.forms.blower-air-hatcher');
+})->name('forms.blower-air-hatcher');
+
+Route::get('/forms/blower-air-incubator', function () {
+    return view('shared.forms.blower-air-incubator');
+})->name('forms.blower-air-incubator');
+
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
     // Unified login route
@@ -38,6 +46,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/forms', [FormController::class, 'index'])->name('admin.forms');
 
         Route::get('/admin/forms/incubator-routine', [FormController::class, 'incubatorRoutine'])->name('admin.forms.incubator-routine');
+        
+        Route::get('/admin/forms/blower-air', [FormController::class, 'blowerAir'])->name('admin.forms.blower-air');
         
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -63,6 +73,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/forms/incubator-routine', function () {
             return view('shared.forms.incubator-routine');
         })->name('user.forms.incubator-routine');
+        
+        Route::get('/user/forms/blower-air', function () {
+            return view('shared.forms.blower-air');
+        })->name('user.forms.blower-air');
         
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 

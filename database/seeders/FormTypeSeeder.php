@@ -15,10 +15,8 @@ class FormTypeSeeder extends Seeder
     {
         $formTypes = [
             'Incubator Routine Checklist Per Shift',
-            // Add more form types here as needed
-            // 'Maintenance Checklist',
-            // 'Safety Inspection Form',
-            // 'Quality Control Report',
+            'Hatcher Blower Air Speed Monitoring',
+            'Incubator Blower Air Speed Monitoring'
         ];
 
         foreach ($formTypes as $formName) {

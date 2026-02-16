@@ -32,6 +32,14 @@ class FormController extends Controller
     }
 
     /**
+     * Display the blower air form page.
+     */
+    public function blowerAir()
+    {
+        return view('shared.forms.blower-air');
+    }
+
+    /**
      * Store a newly submitted form.
      */
     public function store(Request $request)
