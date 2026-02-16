@@ -197,8 +197,8 @@ class BlowerAirHatcherForm extends FormNavigation
             // Send form data to webhook
             $this->sendFormToWebhook($formId);
             
-            $this->dispatch('showToast', message: 'Form submitted successfully!', type: 'success');
-            $this->dispatch('formSubmitted');
+            // Store success message in session for display after redirect
+            session()->flash('success', 'Form submitted successfully!');
             
             return redirect()->route('forms.blower-air-hatcher');
         } catch (\Exception $e) {

@@ -462,8 +462,8 @@ class IncubatorRoutineForm extends FormNavigation
             // Send form data to webhook
             $this->sendFormToWebhook($formId);
             
-            $this->dispatch('showToast', message: 'Form submitted successfully!', type: 'success');
-            $this->dispatch('formSubmitted');
+            // Store success message in session for display after redirect
+            session()->flash('success', 'Form submitted successfully!');
             
             // Redirect to clear form data (like blower forms)
             return redirect()->route('forms.incubator-routine');
