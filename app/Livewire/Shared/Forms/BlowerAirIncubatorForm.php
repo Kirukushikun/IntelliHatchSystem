@@ -409,13 +409,13 @@ class BlowerAirIncubatorForm extends FormNavigation
                     'name' => trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) ?: 'Unknown User',
                 ] : null,
                 'machine' => $machineInfo,
-                'shift' => 'N/A',
                 'message' => [
                     'form_name' => $form->form_type_name ?: 'Unknown Form Type',
                     'machine_name' => $machineInfo['name'] ?? null,
                     'submitted_by' => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
                     'date_time' => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
                     'photos' => $this->extractPhotos($formInputs),
+                    'shift' => 'N/A',
                 ],
                 'timestamp' => now()->toISOString(),
             ];
