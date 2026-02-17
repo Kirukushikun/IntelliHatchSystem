@@ -432,7 +432,7 @@ class IncubatorRoutineForm extends FormNavigation
         }
     }
 
-    public function submitForm(): \Illuminate\Http\RedirectResponse
+    public function submitForm(): void
     {
         // Validate only visible fields.
         $rules = $this->rulesForVisibleFields();
@@ -466,7 +466,7 @@ class IncubatorRoutineForm extends FormNavigation
             session()->flash('success', 'Form submitted successfully!');
             
             // Redirect to clear form data (like blower forms)
-            return redirect()->route('forms.incubator-routine');
+            $this->redirect(route('forms.incubator-routine'));
             
             // Keep form data intact for potential re-submission
             // Data will be cleared when redirected to forms page
