@@ -60,17 +60,6 @@ class BlowerAirIncubatorForm extends FormNavigation
                 return [$incubator->id => $incubator->incubatorName];
             })
             ->toArray();
-
-        // Load hatchery men
-        $this->hatcheryMen = User::where('user_type', 1)
-            ->where('is_disabled', false)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get()
-            ->mapWithKeys(function ($user) {
-                return [$user->id => $user->first_name . ' ' . $user->last_name];
-            })
-            ->toArray();
     }
 
     public function updated($name, $value): void

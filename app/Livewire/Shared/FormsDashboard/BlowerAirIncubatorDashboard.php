@@ -7,6 +7,7 @@ use App\Models\FormType;
 use App\Models\Incubator;
 use App\Models\User;
 use Livewire\Component;
+use Livewire\Attributes\Computed;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
 
@@ -19,9 +20,17 @@ class BlowerAirIncubatorDashboard extends Component
     public string $dateTo = '';
     public bool $showFilterDropdown = false;
     
-    public ?Form $selectedForm = null;
+    public ?int $selectedFormId = null;
     public FormType $formType;
     public int $todayFormCount = 0;
+    
+    // Modal properties
+    public bool $showModal = false;
+    public bool $showPhotoModal = false;
+    public array $selectedPhotos = [];
+    public string $selectedPhotoField = '';
+    public array $formPhotos = [];
+    public int $currentPhotoIndex = 0;
     
     public int $perPage = 10;
     public string $sortField = 'date_submitted';
@@ -97,14 +106,166 @@ class BlowerAirIncubatorDashboard extends Component
         $this->page = (int) $page;
     }
 
-    public function viewDetails($formId): void
+    // Computed property to get selectedForm freshly each time
+    #[Computed]
+    public function selectedForm()
     {
-        $this->selectedForm = Form::with('user')->findOrFail($formId);
+        if (!$this->selectedFormId) {
+            return null;
+        }
+        
+        return Form::with(['user', 'formType'])->find($this->selectedFormId);
     }
 
-    public function closeDetails(): void
+    // Computed property to get formData freshly each time
+    #[Computed]
+    public function formData()
     {
-        $this->selectedForm = null;
+        if (!$this->selectedFormId) {
+            return [];
+        }
+        
+        // Get fresh data directly from database
+        $freshForm = DB::table('forms')
+            ->where('id', $this->selectedFormId)
+            ->first();
+        
+        if ($freshForm && $freshForm->form_inputs) {
+            return is_array($freshForm->form_inputs) ? $freshForm->form_inputs : (json_decode($freshForm->form_inputs, true) ?: []);
+        }
+        
+        return [];
+    }
+
+    // Computed property to get machine_info freshly each time
+    #[Computed]
+    public function machine_info()
+    {
+        if (!$this->selectedFormId) {
+            return [];
+        }
+        
+        $freshForm = DB::table('forms')
+            ->where('id', $this->selectedFormId)
+            ->first();
+        
+        if ($freshForm && $freshForm->form_inputs) {
+            $formData = is_array($freshForm->form_inputs) ? $freshForm->form_inputs : (json_decode($freshForm->form_inputs, true) ?: []);
+            
+            // Check for different machine types in form_inputs
+            if (isset($formData['incubator']) && !empty($formData['incubator'])) {
+                $machineId = $formData['incubator'];
+                $machine = DB::table('incubator-machines')
+                    ->where('id', $machineId)
+                    ->first();
+                
+                if ($machine) {
+                    return [
+                        'table' => 'incubator-machines',
+                        'id' => $machineId,
+                        'name' => $machine->incubatorName
+                    ];
+                }
+            }
+        }
+
+        return [
+            'table' => null,
+            'id' => null,
+            'name' => null
+        ];
+    }
+
+    public function viewDetails($formId): void
+    {
+        $this->selectedFormId = $formId;
+        $this->formPhotos = $this->getFormPhotos($formId);
+        $this->currentPhotoIndex = 0;
+        $this->showModal = true;
+    }
+
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->selectedFormId = null;
+        $this->formPhotos = [];
+    }
+
+    public function viewPhotos(string $field): void
+    {
+        $this->selectedPhotoField = $field;
+        $this->selectedPhotos = $this->getFormPhotos($this->selectedFormId, $field);
+        $this->showPhotoModal = true;
+    }
+
+    public function closePhotoModal(): void
+    {
+        $this->showPhotoModal = false;
+        $this->selectedPhotoField = '';
+        $this->selectedPhotos = [];
+    }
+
+    private function getFormPhotos(int $formId, string $field = null): array
+    {
+        try {
+            $form = Form::findOrFail($formId);
+            $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
+            
+            $photos = [];
+            
+            // Handle CFM fan photos
+            if (isset($formData['cfm_fan_photos'])) {
+                $cfmPhotos = $formData['cfm_fan_photos'];
+                
+                if (is_string($cfmPhotos)) {
+                    // Handle JSON string
+                    $decodedPhotos = json_decode($cfmPhotos, true);
+                    if (is_array($decodedPhotos)) {
+                        foreach ($decodedPhotos as $photo) {
+                            if (is_string($photo)) {
+                                $photos[] = [
+                                    'url' => $photo,
+                                    'name' => 'CFM Fan Photo'
+                                ];
+                            } elseif (is_array($photo) && isset($photo['url'])) {
+                                $photos[] = [
+                                    'url' => $photo['url'],
+                                    'name' => $photo['name'] ?? 'CFM Fan Photo'
+                                ];
+                            }
+                        }
+                    }
+                } elseif (is_array($cfmPhotos)) {
+                    // Handle array format
+                    foreach ($cfmPhotos as $photo) {
+                        if (is_array($photo) && isset($photo['url'])) {
+                            $photos[] = [
+                                'url' => $photo['url'],
+                                'name' => $photo['name'] ?? 'CFM Fan Photo'
+                            ];
+                        } elseif (is_string($photo)) {
+                            $photos[] = [
+                                'url' => $photo,
+                                'name' => 'CFM Fan Photo'
+                            ];
+                        }
+                    }
+                }
+            }
+            
+            return $photos;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    public function getPhotoCount(string $field): int
+    {
+        if (!$this->selectedFormId) {
+            return 0;
+        }
+        
+        return count($this->getFormPhotos($this->selectedFormId, $field));
     }
 
     public function deleteForm($formId): void
@@ -152,16 +313,6 @@ class BlowerAirIncubatorDashboard extends Component
             $query->whereDate('date_submitted', '<=', $this->dateTo);
         }
 
-        // Hatchery man filter
-        if ($this->hatcheryManFilter) {
-            $query->where('uploaded_by', $this->hatcheryManFilter);
-        }
-
-        // Incubator filter
-        if ($this->incubatorFilter) {
-            $query->where('form_inputs->incubator', $this->incubatorFilter);
-        }
-
         // Sorting
         $query->orderBy($this->sortField, $this->sortDirection);
 
@@ -206,8 +357,6 @@ class BlowerAirIncubatorDashboard extends Component
             'currentPage' => $paginationData['currentPage'],
             'lastPage' => $paginationData['lastPage'],
             'formType' => $this->formType,
-            'hatcheryMen' => $this->hatcheryMen,
-            'incubators' => $this->incubators,
         ]);
     }
 }

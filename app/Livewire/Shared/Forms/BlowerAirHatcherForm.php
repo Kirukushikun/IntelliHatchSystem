@@ -30,9 +30,6 @@ class BlowerAirHatcherForm extends FormNavigation
     /** @var array */
     public $hatchers = [];
 
-    /** @var array */
-    public $hatcheryMen = [];
-
     /** @var array<string, string[]> Track uploaded photo URLs per field */
     public array $uploadedPhotoUrls = [];
 
@@ -145,17 +142,6 @@ class BlowerAirHatcherForm extends FormNavigation
             ->get()
             ->mapWithKeys(function ($hatcher) {
                 return [$hatcher->id => $hatcher->hatcherName];
-            })
-            ->toArray();
-
-        // Load hatchery men
-        $this->hatcheryMen = User::where('user_type', 1)
-            ->where('is_disabled', false)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get()
-            ->mapWithKeys(function ($user) {
-                return [$user->id => $user->first_name . ' ' . $user->last_name];
             })
             ->toArray();
     }

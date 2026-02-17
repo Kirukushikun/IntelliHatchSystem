@@ -46,46 +46,41 @@
             @if ($showFilterDropdown)
                 <div class="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div class="p-4">
-                        <div class="grid grid-cols-2 gap-1">
-                            <!-- Date Filter Column -->
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-900 mb-3">Date Range</h3>
-                                <div class="space-y-2">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">From</label>
-                                        <input 
-                                            type="date" 
-                                            wire:model="dateFrom"
-                                            class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">To</label>
-                                        <input 
-                                            type="date" 
-                                            wire:model="dateTo"
-                                            class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                    </div>
-                                    <div class="pt-2">
-                                        <button 
-                                            wire:click="quickFilterToday"
-                                            class="w-full px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
-                                        >
-                                            Today
-                                        </button>
-                                    </div>
+                        <!-- Date Filter Column -->
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900 mb-3">Date Range</h3>
+                            <div class="space-y-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">From</label>
+                                    <input 
+                                        type="date" 
+                                        wire:model="dateFrom"
+                                        class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="YYYY-MM-DD"
+                                        max="{{ $dateTo ?: now()->format('Y-m-d') }}"
+                                        wire:target="dateFrom"
+                                        wire:loading.attr="disabled"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">To</label>
+                                    <input 
+                                        type="date" 
+                                        wire:model="dateTo"
+                                        class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="YYYY-MM-DD"
+                                        max="{{ now()->format('Y-m-d') }}"
+                                        min="{{ $dateFrom ?: '' }}"
+                                        wire:target="dateTo"
+                                        wire:loading.attr="disabled"
+                                    />
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="mt-3 pt-3 border-t border-gray-100">
-                            <button 
-                                wire:click="clearFilters"
-                                class="w-full px-3 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-                            >
-                                Clear Filters
-                            </button>
+                        <div class="flex justify-between mt-4 pt-3 border-t border-gray-200">
+                            <button type="button" wire:click="clearFilters" class="text-sm text-gray-600 hover:text-gray-800">Reset</button>
+                            <button type="button" wire:click="toggleFilterDropdown" class="text-sm text-blue-600 hover:text-blue-800">Done</button>
                         </div>
                     </div>
                 </div>
@@ -101,7 +96,7 @@
             class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
                 {{ ($dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d')) 
                     ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
         >
             Today
             <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
@@ -115,7 +110,7 @@
     </div>
 
     <!-- Table Section -->
-    <div class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
+    <div wire:poll.2s wire:key="{{ now()->timestamp }}" class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
         <!-- Desktop Table View -->
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left table-auto min-w-max">
@@ -266,64 +261,6 @@
         @endif
     </div>
 
-    <!-- Details Modal -->
-    @if($selectedForm)
-        <div wire:click="closeDetails" class="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
-            <div wire:click.stop class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">Form Details</h3>
-                        <button wire:click="closeDetails" class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    @php
-                        $formData = is_array($selectedForm->form_inputs) ? $selectedForm->form_inputs : [];
-                    @endphp
-                    
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-sm font-medium text-gray-500">Date Submitted:</label>
-                                <p class="text-sm text-gray-900">{{ $selectedForm->date_submitted ? $selectedForm->date_submitted->format('M d, Y H:i:s') : 'N/A' }}</p>
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-500">Hatchery Man:</label>
-                                <p class="text-sm text-gray-900">{{ $selectedForm->user ? ($selectedForm->user->first_name . ' ' . $selectedForm->user->last_name) : 'Unknown' }}</p>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">Incubator:</label>
-                            <p class="text-sm text-gray-900">{{ getMachineName($formData) }}</p>
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">CFM Fan Reading:</label>
-                            <p class="text-sm text-gray-900">{{ $formData['cfm_fan_reading'] ?? 'N/A' }}</p>
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">Action Taken:</label>
-                            <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ $formData['cfm_fan_action_taken'] ?? 'N/A' }}</p>
-                        </div>
-                        
-                        @if(isset($formData['cfm_fan_photos']) && is_array($formData['cfm_fan_photos']) && count($formData['cfm_fan_photos']) > 0)
-                            <div>
-                                <label class="text-sm font-medium text-gray-500">Photos:</label>
-                                <div class="grid grid-cols-2 gap-2 mt-2">
-                                    @foreach($formData['cfm_fan_photos'] as $photo)
-                                        <img src="{{ $photo }}" alt="Form photo" class="w-full h-32 object-cover rounded-lg border border-gray-200">
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    <!-- Include Modal -->
+    @include('livewire.shared.forms-dashboard.modals.blower-air-incubator-view')
 </div>
