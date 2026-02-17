@@ -128,7 +128,7 @@
                             <div class="py-2 bg-gray-50">
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm font-medium text-gray-600">CFM Fan Reading:</span>
-                                </div>
+                                 </div>
                                 <div class="bg-gray-50 p-3 rounded-md">
                                     <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $this->formData['cfm_fan_reading'] ?? 'N/A' }}</p>
                                 </div>
