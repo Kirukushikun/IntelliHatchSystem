@@ -19,6 +19,14 @@ Route::get('/forms/incubator-routine', function () {
     return view('shared.forms.incubator-routine');
 })->name('forms.incubator-routine');
 
+Route::get('/forms/blower-air-hatcher', function () {
+    return view('shared.forms.blower-air-hatcher');
+})->name('forms.blower-air-hatcher');
+
+Route::get('/forms/blower-air-incubator', function () {
+    return view('shared.forms.blower-air-incubator');
+})->name('forms.blower-air-incubator');
+
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
     // Unified login route
@@ -39,9 +47,17 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/forms/incubator-routine', [FormController::class, 'incubatorRoutine'])->name('admin.forms.incubator-routine');
         
+        Route::get('/admin/forms/blower-air-hatcher-routine', [FormController::class, 'blowerAirHatcher'])->name('admin.forms.blower-air-hatcher-routine');
+
+        Route::get('/admin/forms/blower-air-incubator-routine', [FormController::class, 'blowerAirIncubator'])->name('admin.forms.blower-air-incubator-routine');
+
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::get('/admin/incubator-routine-dashboard', [DashboardController::class, 'incubatorRoutine'])->name('admin.incubator-routine-dashboard');
+
+        Route::get('/admin/blower-air-hatcher-dashboard', [DashboardController::class, 'blowerAirHatcher'])->name('admin.blower-air-hatcher-dashboard');
+
+        Route::get('/admin/blower-air-incubator-dashboard', [DashboardController::class, 'blowerAirIncubator'])->name('admin.blower-air-incubator-dashboard');
 
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
@@ -60,9 +76,11 @@ Route::middleware('auth')->group(function () {
             return view('shared.forms');
         })->name('user.forms');
 
-        Route::get('/user/forms/incubator-routine', function () {
-            return view('shared.forms.incubator-routine');
-        })->name('user.forms.incubator-routine');
+        Route::get('/user/forms/incubator-routine', [FormController::class, 'incubatorRoutine'])->name('user.forms.incubator-routine');
+        
+        Route::get('/user/forms/blower-air-hatcher', [FormController::class, 'blowerAirHatcher'])->name('user.forms.blower-air-hatcher');
+        
+        Route::get('/user/forms/blower-air-incubator', [FormController::class, 'blowerAirIncubator'])->name('user.forms.blower-air-incubator');
         
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 

@@ -166,7 +166,7 @@ class IncubatorRoutineDashboard extends Component
 
     public function getPaginationData()
     {
-        $query = Form::with(['user', 'formType', 'incubator'])
+        $query = Form::with(['user', 'formType'])
             ->where('form_type_id', $this->typeId);
 
         if ($this->search !== '') {
@@ -280,7 +280,7 @@ class IncubatorRoutineDashboard extends Component
             return null;
         }
         
-        return Form::with(['user', 'incubator'])->find($this->selectedFormId);
+        return Form::with(['user', 'formType'])->find($this->selectedFormId);
     }
 
     // Computed property to get formData freshly each time

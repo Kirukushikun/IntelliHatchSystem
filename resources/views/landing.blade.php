@@ -6,6 +6,18 @@
                 'description' => 'Lorem Ipsum',
                 'route' => '/forms/incubator-routine',
                 'color' => 'amber',
+            ],
+            [
+                'title' => 'Hatcher Blower Air Speed Monitoring',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/blower-air-hatcher',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Incubator Blower Air Speed Monitoring',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/blower-air-incubator',
+                'color' => 'amber',
             ]
         ];
         

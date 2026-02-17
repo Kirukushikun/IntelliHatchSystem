@@ -18,8 +18,14 @@ abstract class FormNavigation extends Component
     /**
      * If your form uses a shift selector to unlock scheduled steps,
      * keep this as 'shift' and store it at form['shift'].
+     * Set to empty string for forms that don't use shifts.
      */
     protected string $shiftKey = 'shift';
+
+    /**
+     * Set to true to disable shift-based navigation logic
+     */
+    protected bool $disableShiftLogic = false;
 
     /**
      * Child components must provide the schedule config.
@@ -76,7 +82,7 @@ abstract class FormNavigation extends Component
 
     public function canProceed(): bool
     {
-        if (!empty($this->schedule) && $this->currentStep === 1) {
+        if (!$this->disableShiftLogic && !empty($this->schedule) && $this->currentStep === 1) {
             return (string) ($this->form[$this->shiftKey] ?? '') !== '';
         }
 
@@ -86,7 +92,7 @@ abstract class FormNavigation extends Component
     public function isLastVisibleStep(): bool
     {
         // If schedule is used and shift isn't selected, step 1 should not be treated as last.
-        if (!empty($this->schedule) && (string) ($this->form[$this->shiftKey] ?? '') === '') {
+        if (!$this->disableShiftLogic && !empty($this->schedule) && (string) ($this->form[$this->shiftKey] ?? '') === '') {
             return false;
         }
 
@@ -95,6 +101,10 @@ abstract class FormNavigation extends Component
 
     public function showProgress(): bool
     {
+        if ($this->disableShiftLogic) {
+            return count($this->visibleStepIds) > 1;
+        }
+        
         return (string) ($this->form[$this->shiftKey] ?? '') !== '' && count($this->visibleStepIds) > 1;
     }
 
@@ -139,7 +149,7 @@ abstract class FormNavigation extends Component
     {
         $visible = [1];
 
-        if ((string) ($this->form[$this->shiftKey] ?? '') === '') {
+        if (!$this->disableShiftLogic && (string) ($this->form[$this->shiftKey] ?? '') === '') {
             $this->visibleStepIds = $visible;
             return;
         }
@@ -175,6 +185,11 @@ abstract class FormNavigation extends Component
 
     protected function getAllowedFieldsForCurrentShift(): array
     {
+        if ($this->disableShiftLogic) {
+            // When shift logic is disabled, return all daily fields
+            return $this->schedule['_daily'] ?? [];
+        }
+
         $shift = (string) ($this->form[$this->shiftKey] ?? '');
         if ($shift === '') {
             return [];

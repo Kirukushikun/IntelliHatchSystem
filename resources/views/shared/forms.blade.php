@@ -4,7 +4,19 @@
             [
                 'title' => 'Incubator Routine Checklist Per Shift',
                 'description' => 'Lorem Ipsum',
-                'route' => Auth::check() && Auth::user()->user_type === 0 ? route('admin.forms.incubator-routine') : route('user.forms.incubator-routine'),
+                'route' => '/forms/incubator-routine',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Hatcher Blower Air Speed Monitoring',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/blower-air-hatcher',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Incubator Blower Air Speed Monitoring',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/blower-air-incubator',
                 'color' => 'amber',
             ]
         ];

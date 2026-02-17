@@ -17,7 +17,6 @@ return new class extends Migration
             $table->json('form_inputs');
             $table->timestamp('date_submitted')->nullable();
             $table->foreignId('uploaded_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('incubator_id')->nullable()->constrained('incubator-machines')->onDelete('set null');
             $table->timestamps();
         });
     }

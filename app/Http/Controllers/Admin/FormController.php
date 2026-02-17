@@ -14,7 +14,7 @@ class FormController extends Controller
      */
     public function index()
     {
-        $forms = Form::with(['formType', 'user', 'incubator'])
+        $forms = Form::with(['formType', 'user'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -32,27 +32,19 @@ class FormController extends Controller
     }
 
     /**
-     * Store a newly submitted form.
+     * Display the blower air hatcher form page.
      */
-    public function store(Request $request)
+    public function blowerAirHatcher()
     {
-        $validated = $request->validate([
-            'form_type_id' => 'required|exists:form_types,id',
-            'form_inputs' => 'required|array',
-            'uploaded_by' => 'nullable|exists:users,id',
-            'incubator_id' => 'nullable|exists:incubator-machines,id',
-        ]);
+        return view('shared.forms.blower-air-hatcher');
+    }
 
-        Form::create([
-            'form_type_id' => $validated['form_type_id'],
-            'form_inputs' => json_encode($validated['form_inputs']),
-            'date_submitted' => now(),
-            'uploaded_by' => $validated['uploaded_by'] ?? null,
-            'incubator_id' => $validated['incubator_id'] ?? null,
-        ]);
-
-        return redirect()->back()
-            ->with('success', 'Form submitted successfully.');
+    /**
+     * Display the blower air incubator form page.
+     */
+    public function blowerAirIncubator()
+    {
+        return view('shared.forms.blower-air-incubator');
     }
 
     /**

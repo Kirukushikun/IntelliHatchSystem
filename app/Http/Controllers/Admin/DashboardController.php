@@ -24,10 +24,26 @@ class DashboardController extends Controller
         $incubatorForms = Form::whereHas('formType', function($query) {
             $query->where('form_name', 'like', '%incubator%');
         })
-        ->with(['formType', 'user', 'incubator'])
+        ->with(['formType', 'user'])
         ->orderBy('created_at', 'desc')
         ->paginate(10);
 
         return view('admin.incubator-routine-dashboard', compact('incubatorForms'));
+    }
+
+    /**
+     * Display the blower air hatcher dashboard.
+     */
+    public function blowerAirHatcher()
+    {
+        return view('admin.blower-air-hatcher-dashboard');
+    }
+
+    /**
+     * Display the blower air incubator dashboard.
+     */
+    public function blowerAirIncubator()
+    {
+        return view('admin.blower-air-incubator-dashboard');
     }
 }

@@ -137,20 +137,16 @@
             <button 
                 wire:click="quickFilterTodayShift('{{ $shift }}')"
                 class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
-                    @if ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
-                        bg-blue-600 text-white hover:bg-blue-700
-                    @else
-                        bg-gray-100 text-gray-700 hover:bg-gray-200
-                    @endif
+                    {{ ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d')) 
+                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}
                 "
             >
                 {{ $shift }}
                 <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                    @if ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
-                        bg-blue-100 text-blue-800
-                    @else
-                        bg-gray-200 text-gray-600
-                    @endif
+                    {{ ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d')) 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-gray-200 text-gray-600' }}
                 ">
                     {{ $todayShiftCounts[$shift] ?? 0 }}
                 </span>
