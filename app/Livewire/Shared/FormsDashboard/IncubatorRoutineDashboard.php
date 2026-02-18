@@ -43,6 +43,7 @@ class IncubatorRoutineDashboard extends Component
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
         'shiftFilter' => ['except' => 'all'],
+        'perPage' => ['except' => 10],
     ];
 
     public function mount(): void

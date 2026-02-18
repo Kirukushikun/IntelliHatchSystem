@@ -1,4 +1,4 @@
-<div wire:poll.2s>
+<div>
     <!-- Header with Title, Search, and Add Plenum -->
     <div class="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between md:gap-6">
         <div class="text-center md:text-left">
@@ -83,7 +83,7 @@
     </div>
 
     <!-- Plenums Table -->
-    <div class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
+    <div wire:poll.30s class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
         <!-- Desktop Table View -->
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left table-auto min-w-max">
