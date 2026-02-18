@@ -236,23 +236,34 @@ trait TempPhotoManager
 
     /**
      * Cleanup all uploaded photos (for form reset/cancel)
+     * Only deletes pending photos, preserves finalized ones
      */
     protected function cleanupAllUploadedPhotos(): void
     {
         try {
-            // Delete physical files
+            // Delete physical files - only pending ones
             foreach ($this->uploadedPhotoUrls as $field => $urls) {
                 foreach ($urls as $url) {
                     $relativePath = $this->diskPathFromPublicUrl($url);
-                    Storage::disk('public')->delete($relativePath);
+                    // Only delete pending photos (not finalized ones)
+                    if (str_contains($relativePath, '_pending_')) {
+                        Storage::disk('public')->delete($relativePath);
+                    }
                 }
             }
 
-            // Delete database records
+            // Delete database records - only pending ones
             $allIds = [];
             foreach ($this->uploadedPhotoIds as $field => $ids) {
                 foreach ($ids as $id) {
-                    $allIds[] = $id;
+                    $photo = DB::table('photos')->where('id', $id)->first();
+                    if ($photo && isset($photo->public_path)) {
+                        $relativePath = $this->diskPathFromPublicUrl($photo->public_path);
+                        // Only delete records for pending photos
+                        if (str_contains($relativePath, '_pending_')) {
+                            $allIds[] = $id;
+                        }
+                    }
                 }
             }
 
