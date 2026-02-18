@@ -52,7 +52,7 @@ class Edit extends Component
     public function updatePlenum()
     {
         // Sanitize input before validation
-        $this->plenumName = $this->sanitizeInput($this->plenumName);
+        $this->plenumName = $this->sanitizeName($this->plenumName);
         
         $this->updatedPlenumName(); // Update validation rules
         $this->validate();
