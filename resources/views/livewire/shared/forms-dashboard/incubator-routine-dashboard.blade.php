@@ -37,9 +37,16 @@
     }
     
     function getMachineName($formData) {
-        // For incubator routine, the incubator name is stored directly in form_inputs
-        if (isset($formData['incubator'])) {
-            return $formData['incubator'];
+        // For incubator routine, the incubator field stores the ID, so we need to resolve it to name
+        if (isset($formData['incubator']) && !empty($formData['incubator'])) {
+            $incubatorId = $formData['incubator'];
+            $incubator = \Illuminate\Support\Facades\DB::table('incubator-machines')
+                ->where('id', $incubatorId)
+                ->first();
+            
+            if ($incubator) {
+                return $incubator->incubatorName;
+            }
         }
         return 'N/A';
     }
