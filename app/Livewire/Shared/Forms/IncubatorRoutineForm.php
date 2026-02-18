@@ -293,6 +293,22 @@ class IncubatorRoutineForm extends FormNavigation
         // Keep incubator in JSON for machine info extraction
         unset($inputs['hatchery_man']);
 
+        // Add machine_info structure for consistency with blower air forms
+        if (isset($inputs['incubator']) && !empty($inputs['incubator'])) {
+            $incubatorId = $inputs['incubator'];
+            $incubator = DB::table('incubator-machines')
+                ->where('id', $incubatorId)
+                ->first();
+            
+            if ($incubator) {
+                $inputs['machine_info'] = [
+                    'table' => 'incubator-machines',
+                    'id' => $incubatorId,
+                    'name' => $incubator->incubatorName
+                ];
+            }
+        }
+
         // Set N/A for fields that are not scheduled/visible for the selected shift
         $visibleFields = $this->getVisibleFieldNames();
 
