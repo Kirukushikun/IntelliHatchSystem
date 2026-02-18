@@ -179,7 +179,7 @@ class CleanupOrphanedPhotos extends Command
                 }
 
                 // Check if file exists in database
-                $publicUrl = Storage::disk('public')->url('forms/' . $file);
+                $publicUrl = asset('storage/' . $file);
                 $existsInDb = DB::table('photos')
                     ->where('public_path', $publicUrl)
                     ->exists();
