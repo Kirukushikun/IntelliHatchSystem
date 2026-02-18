@@ -4,7 +4,8 @@
     'errorKey' => null,
     'value' => '', 
     'placeholder' => 'Enter text here', 
-    'required' => false
+    'required' => false,
+    'subtext' => ''
 ])
 
 @php
@@ -19,6 +20,9 @@
                 <span class="text-red-500">*</span>
             @endif
         </label>
+        @if($subtext)
+            <p class="text-sm text-gray-600 mb-2">{!! $subtext !!}</p>
+        @endif
     @endif
 
     <textarea
