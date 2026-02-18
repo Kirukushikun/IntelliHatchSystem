@@ -7,7 +7,8 @@
     'type' => 'text',
     'class' => '',
     'icon' => '',
-    'wireModel' => null
+    'wireModel' => null,
+    'subtext' => ''
 ])
 
 <div class="mb-6 {{ $class }}">
@@ -18,6 +19,9 @@
                 <span class="text-red-500">*</span>
             @endif
         </label>
+        @if($subtext)
+            <p class="text-sm text-gray-600 mb-2">{!! $subtext !!}</p>
+        @endif
     @endif
 
     <div class="relative">

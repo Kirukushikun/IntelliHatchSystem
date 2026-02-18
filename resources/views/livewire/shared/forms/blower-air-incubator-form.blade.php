@@ -35,7 +35,7 @@
                 <x-title>FAN DETAILS</x-title>
 
                 <div data-field="cfm_fan_reading">
-                    <x-text-area label="CFM Fan Reading" name="cfm_fan_reading" error-key="form.cfm_fan_reading" placeholder="Enter CFM fan reading..." wire:model.live="form.cfm_fan_reading" required/>
+                    <x-text-area label="CFM Fan Reading" name="cfm_fan_reading" error-key="form.cfm_fan_reading" placeholder="Enter CFM fan reading..." wire:model.live="form.cfm_fan_reading" required subtext="Ex. : Fan 1 - 375 cfm and so on<br>All CFM reading must be only within + - 2.5% variance from each fan"/>
                 </div>
 
                 <div data-field="cfm_fan_action_taken">
