@@ -35,7 +35,7 @@ class Create extends Component
     public function createIncubator()
     {
         // Sanitize input before validation
-        $this->incubatorName = $this->sanitizeInput($this->incubatorName);
+        $this->incubatorName = $this->sanitizeName($this->incubatorName);
         
         $this->validate();
 

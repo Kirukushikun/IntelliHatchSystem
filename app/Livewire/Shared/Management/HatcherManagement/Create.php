@@ -35,7 +35,7 @@ class Create extends Component
     public function createHatcher()
     {
         // Sanitize input before validation
-        $this->hatcherName = $this->sanitizeInput($this->hatcherName);
+        $this->hatcherName = $this->sanitizeName($this->hatcherName);
         
         $this->validate();
 

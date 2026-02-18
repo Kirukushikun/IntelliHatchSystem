@@ -52,7 +52,7 @@ class Edit extends Component
     public function updateIncubator()
     {
         // Sanitize input before validation
-        $this->incubatorName = $this->sanitizeInput($this->incubatorName);
+        $this->incubatorName = $this->sanitizeName($this->incubatorName);
         
         $this->updatedIncubatorName(); // Update validation rules
         $this->validate();

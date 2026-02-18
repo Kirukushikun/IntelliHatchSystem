@@ -35,7 +35,7 @@ class Create extends Component
     public function createPlenum()
     {
         // Sanitize input before validation
-        $this->plenumName = $this->sanitizeInput($this->plenumName);
+        $this->plenumName = $this->sanitizeName($this->plenumName);
         
         $this->validate();
 

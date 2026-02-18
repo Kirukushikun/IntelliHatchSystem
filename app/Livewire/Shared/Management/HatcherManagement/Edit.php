@@ -52,7 +52,7 @@ class Edit extends Component
     public function updateHatcher()
     {
         // Sanitize input before validation
-        $this->hatcherName = $this->sanitizeInput($this->hatcherName);
+        $this->hatcherName = $this->sanitizeName($this->hatcherName);
         
         $this->updatedHatcherName(); // Update validation rules
         $this->validate();
