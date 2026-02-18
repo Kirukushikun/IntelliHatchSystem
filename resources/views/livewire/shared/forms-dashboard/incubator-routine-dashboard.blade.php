@@ -58,7 +58,7 @@
     }
 @endphp
 
-<div wire:poll.2s wire:key="{{ now()->timestamp }}">
+<div wire:poll.30s wire:key="{{ now()->timestamp }}">
     <!-- Header with Title and Search -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
         <div class="text-center sm:text-left">

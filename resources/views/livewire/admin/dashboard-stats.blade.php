@@ -1,4 +1,4 @@
-<div wire:poll="refreshStats" x-data="{ query: '' }">
+<div x-data="{ query: '' }">
     <!-- Header with Search -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
         <div class="text-center sm:text-left">
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div wire:poll.30s="refreshStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($cards as $card)
             <div x-show="!query || '{{ strtolower($card['type_name'] ?? '') }}'.includes(query.toLowerCase())" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group border-l-4 border-amber-500 cursor-pointer">
                 <a href="{{ match($card['type_name']) {

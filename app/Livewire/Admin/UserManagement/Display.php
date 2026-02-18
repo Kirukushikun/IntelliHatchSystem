@@ -23,6 +23,9 @@ class Display extends Component
         'statusFilter' => ['except' => 'all'],
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
+        'perPage' => ['except' => 10],
+        'sortField' => ['except' => 'first_name'],
+        'sortDirection' => ['except' => 'asc'],
     ];
 
     protected $listeners = ['refreshUsers' => '$refresh'];

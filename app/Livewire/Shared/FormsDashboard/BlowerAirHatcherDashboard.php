@@ -48,6 +48,7 @@ class BlowerAirHatcherDashboard extends Component
         'page' => ['except' => 1],
         'sortField' => ['except' => 'date_submitted'],
         'sortDirection' => ['except' => 'desc'],
+        'perPage' => ['except' => 10],
     ];
 
     public function mount(): void
