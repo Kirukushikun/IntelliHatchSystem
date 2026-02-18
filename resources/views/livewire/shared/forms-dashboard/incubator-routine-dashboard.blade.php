@@ -35,6 +35,14 @@
                 return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #f3f4f6; color: #374151;" title="Original: \'' . $value . '\'">' . ($value ?: 'Empty') . '</span>';
         }
     }
+    
+    function getMachineName($formData) {
+        // For incubator routine, the incubator name is stored directly in form_inputs
+        if (isset($formData['incubator'])) {
+            return $formData['incubator'];
+        }
+        return 'N/A';
+    }
 @endphp
 
 <div wire:poll.2s wire:key="{{ now()->timestamp }}">
@@ -208,6 +216,9 @@
                 </thead>
                 <tbody>
                     @forelse ($forms as $form)
+                        @php
+                            $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
+                        @endphp
                         <tr class="even:bg-slate-50 hover:bg-slate-100">
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
@@ -216,11 +227,8 @@
                                 <p class="block text-xs md:text-sm text-slate-800">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
-                                <p class="block text-xs md:text-sm text-slate-800">{{ $form->incubator ? $form->incubator->incubatorName : 'N/A' }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800">{{ getMachineName($formData) }}</p>
                             </td>
-                            @php
-                                $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
-                            @endphp
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
                                 {!! getStatusPill($formData['shift'] ?? 'N/A') !!}
                             </td>
@@ -280,7 +288,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-xs font-medium text-gray-500">Incubator:</span>
-                            <span class="text-xs text-gray-900">{{ $form->incubator ? $form->incubator->incubatorName : 'N/A' }}</span>
+                            <span class="text-xs text-gray-900">{{ getMachineName($formData) }}</span>
                         </div>
                     </div>
                     
