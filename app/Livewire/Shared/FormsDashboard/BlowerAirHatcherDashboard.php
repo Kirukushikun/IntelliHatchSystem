@@ -295,8 +295,7 @@ class BlowerAirHatcherDashboard extends Component
                     $userQuery->where('first_name', 'like', '%' . $this->search . '%')
                            ->orWhere('last_name', 'like', '%' . $this->search . '%');
                 })
-                ->orWhere('form_inputs->cfm_fan_reading', 'like', '%' . $this->search . '%')
-                ->orWhere('form_inputs->cfm_fan_action_taken', 'like', '%' . $this->search . '%');
+                ->orWhere('form_inputs->machine_info->name', 'like', '%' . $this->search . '%');
             });
         }
 

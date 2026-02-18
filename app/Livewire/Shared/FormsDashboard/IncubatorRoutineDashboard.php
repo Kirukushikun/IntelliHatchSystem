@@ -175,8 +175,7 @@ class IncubatorRoutineDashboard extends Component
                     $subQ->where('first_name', 'like', '%' . $this->search . '%')
                         ->orWhere('last_name', 'like', '%' . $this->search . '%');
                 })
-                ->orWhere('form_inputs', 'like', '%' . $this->search . '%')
-                ->orWhere('date_submitted', 'like', '%' . $this->search . '%');
+                ->orWhere('form_inputs->incubator', 'like', '%' . $this->search . '%');
             });
         }
 
