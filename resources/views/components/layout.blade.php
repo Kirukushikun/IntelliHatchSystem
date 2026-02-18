@@ -16,9 +16,17 @@
             (function() {
                 const darkMode = localStorage.getItem('dark_mode');
                 const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (darkMode === 'true' || (!darkMode && systemDark)) {
-                    document.documentElement.classList.add('dark');
+                const isDark = darkMode === 'true' || (!darkMode && systemDark);
+                
+                // Set theme immediately to prevent flash
+                if (isDark) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
                 }
+                
+                // Add loaded class after a tiny delay to allow theme to be set
+                setTimeout(() => {
+                    document.documentElement.classList.add('loaded');
+                }, 10);
             })();
         </script>
 

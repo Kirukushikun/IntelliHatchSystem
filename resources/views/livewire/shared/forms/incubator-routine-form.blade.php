@@ -1,7 +1,7 @@
 <div x-data="{ formSubmitted: false }">
     <form wire:submit.prevent="submitForm" id="step-form" class="space-y-4" novalidate>
         @csrf
-
+        
         <x-progress-navigation
             :current-step="$currentStep"
             :visible-step-ids="$visibleStepIds"
@@ -10,7 +10,7 @@
             :show-progress="$this->showProgress()"
         >
             <div data-step="1" class="space-y-4" @style(["display:none" => $currentStep !== 1])>
-                <x-title>INCUBATOR ROUTINE CHECKLIST</x-title>
+                <x-title>INCUBATOR ROUTINE CHECKLIST PER SHIFT</x-title>
 
                 <div data-field="hatchery_man" @style(["display:none" => !$this->isFieldVisible('hatchery_man')])>
                     <x-dropdown label="Hatchery Man" name="hatchery_man" error-key="form.hatchery_man" placeholder="Select hatchery man" wire:model.live="form.hatchery_man" required>
@@ -20,11 +20,10 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="shift">
+                <div data-field="shift" @style(["display:none" => !$this->isFieldVisible('shift')])>
                     <x-dropdown label="Shift" name="shift" error-key="form.shift" placeholder="Select shift" wire:model.live="form.shift" required>
-                        <option value="1st Shift">1st Shift</option>
-                        <option value="2nd Shift">2nd Shift</option>
-                        <option value="3rd Shift">3rd Shift</option>
+                        <option value="Day">Day</option>
+                        <option value="Night">Night</option>
                     </x-dropdown>
                 </div>
 

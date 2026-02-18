@@ -52,7 +52,8 @@
             {{ $icon ? 'pl-10' : 'px-4' }} py-2
             {{ $errors->first($name) 
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
-                : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}"
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}
+            autofill:bg-white autofill:text-gray-900 dark:autofill:bg-gray-800 dark:autofill:text-white"
         >
 
         @if($type === 'password')
