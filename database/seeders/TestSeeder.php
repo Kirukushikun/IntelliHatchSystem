@@ -67,7 +67,12 @@ class TestSeeder extends Seeder
         
         // Create 50 hatcher blower air speed forms for past 3 months
         echo "Creating 50 hatcher blower air speed forms...\n";
+        $usedMachines = []; // Track used machines to prevent repetition
+        
         for ($i = 1; $i <= 50; $i++) {
+            $currentDate = Carbon::now()->subDays(rand(1, 90));
+            $dateKey = $currentDate->format('Y-m-d');
+            
             // Get random subset of active hatchers (60-100% to simulate some being inactive)
             $activeHatchers = $hatchers;
             $inactiveCount = rand(0, floor(count($hatchers) * 0.4)); // 0-40% may be inactive
@@ -80,7 +85,19 @@ class TestSeeder extends Seeder
                 $activeHatchers = array_values($activeHatchers);
             }
             
-            $hatcher = $activeHatchers[array_rand($activeHatchers)];
+            // Filter out already used machines for this date
+            $availableHatchers = array_filter($activeHatchers, function($hatcher) use ($usedMachines, $dateKey) {
+                return !isset($usedMachines[$dateKey][$hatcher->id]);
+            });
+            
+            // If all machines used for this date, skip to next date
+            if (empty($availableHatchers)) {
+                $i--; // Retry with different date
+                continue;
+            }
+            
+            $hatcher = $availableHatchers[array_rand($availableHatchers)];
+            $usedMachines[$dateKey][$hatcher->id] = true;
             $user = $hatcheryUsers->random();
             
             // Generate base CFM reading with +/- 2.5% variance for each fan
@@ -116,7 +133,12 @@ class TestSeeder extends Seeder
         
         // Create 50 incubator blower air speed forms for past 3 months
         echo "Creating 50 incubator blower air speed forms...\n";
+        $usedIncubators = []; // Track used incubators to prevent repetition
+        
         for ($i = 1; $i <= 50; $i++) {
+            $currentDate = Carbon::now()->subDays(rand(1, 90));
+            $dateKey = $currentDate->format('Y-m-d');
+            
             // Get random subset of active incubators (60-100% to simulate some being inactive)
             $activeIncubators = $incubators;
             $inactiveCount = rand(0, floor(count($incubators) * 0.4)); // 0-40% may be inactive
@@ -129,7 +151,19 @@ class TestSeeder extends Seeder
                 $activeIncubators = array_values($activeIncubators);
             }
             
-            $incubator = $activeIncubators[array_rand($activeIncubators)];
+            // Filter out already used incubators for this date
+            $availableIncubators = array_filter($activeIncubators, function($incubator) use ($usedIncubators, $dateKey) {
+                return !isset($usedIncubators[$dateKey][$incubator->id]);
+            });
+            
+            // If all incubators used for this date, skip to next date
+            if (empty($availableIncubators)) {
+                $i--; // Retry with different date
+                continue;
+            }
+            
+            $incubator = $availableIncubators[array_rand($availableIncubators)];
+            $usedIncubators[$dateKey][$incubator->id] = true;
             $user = $hatcheryUsers->random();
             
             // Generate base CFM reading with +/- 2.5% variance for each fan

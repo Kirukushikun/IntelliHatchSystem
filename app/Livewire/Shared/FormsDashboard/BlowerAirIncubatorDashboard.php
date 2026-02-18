@@ -32,6 +32,10 @@ class BlowerAirIncubatorDashboard extends Component
     public array $formPhotos = [];
     public int $currentPhotoIndex = 0;
     
+    // Delete confirmation properties
+    public bool $showDeleteModal = false;
+    public ?int $formToDelete = null;
+    
     public int $perPage = 10;
     public string $sortField = 'date_submitted';
     public string $sortDirection = 'desc';
@@ -270,11 +274,27 @@ class BlowerAirIncubatorDashboard extends Component
 
     public function deleteForm($formId): void
     {
-        $form = Form::findOrFail($formId);
-        $formName = $form->formType->form_name ?? 'Unknown form';
-        $form->delete();
+        $this->formToDelete = $formId;
+        $this->showDeleteModal = true;
+    }
+    
+    public function confirmDelete(): void
+    {
+        if ($this->formToDelete) {
+            $form = Form::findOrFail($this->formToDelete);
+            $formName = $form->formType->form_name ?? 'Unknown form';
+            $form->delete();
 
-        session()->flash('success', "Form '{$formName}' deleted successfully.");
+            session()->flash('success', "Form '{$formName}' deleted successfully.");
+            
+            $this->cancelDelete();
+        }
+    }
+    
+    public function cancelDelete(): void
+    {
+        $this->showDeleteModal = false;
+        $this->formToDelete = null;
     }
 
     public function sortBy($field): void
