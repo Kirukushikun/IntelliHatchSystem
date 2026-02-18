@@ -23,7 +23,9 @@
                 <div data-field="hatcher">
                     <x-dropdown label="Hatcher" name="hatcher" error-key="form.hatcher" placeholder="Select hatcher" wire:model.live="form.hatcher" required>
                         @foreach($hatchers as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
+                            <option value="{{ $id }}" {{ in_array($id, $completedHatchers) ? 'disabled' : '' }}>
+                                {{ $name }}{{ in_array($id, $completedHatchers) ? ' (Done)' : '' }}
+                            </option>
                         @endforeach
                     </x-dropdown>
                 </div>

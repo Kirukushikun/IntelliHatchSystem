@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Forms;
 
 use App\Livewire\Configs\BlowerAirHatcherConfig;
 use App\Livewire\Components\FormNavigation;
+use App\Livewire\Shared\Forms\Traits\TempPhotoManager;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ use App\Models\User;
 
 class BlowerAirHatcherForm extends FormNavigation
 {
-    use WithFileUploads;
+    use WithFileUploads, TempPhotoManager;
 
     public array $form = [];
 
@@ -30,11 +31,11 @@ class BlowerAirHatcherForm extends FormNavigation
     /** @var array */
     public $hatchers = [];
 
-    /** @var array<string, string[]> Track uploaded photo URLs per field */
-    public array $uploadedPhotoUrls = [];
+    /** @var array */
+    public $hatcheryMen = [];
 
-    /** @var array<string, int[]> Track uploaded photo IDs per field */
-    public array $uploadedPhotoIds = [];
+    /** @var array */
+    public $completedHatchers = [];
 
     /** @var int|null Store uploaded_by user ID from name field */
     public ?int $uploadedBy = null;
@@ -53,53 +54,8 @@ class BlowerAirHatcherForm extends FormNavigation
             return;
         }
 
-        $this->validateOnly("photoUploads.{$photoKey}.*", [
-            "photoUploads.{$photoKey}.*" => ['image', 'max:1024'],
-        ]);
-
         $formType = $this->formTypeKey();
-        $timestamp = now()->format('Ymd_His');
-
-        foreach ($files as $file) {
-            if (!$file) {
-                continue;
-            }
-
-            $uuid = Str::uuid()->getHex();
-
-            $ext = method_exists($file, 'getClientOriginalExtension') ? $file->getClientOriginalExtension() : 'jpg';
-
-            $originalName = method_exists($file, 'getClientOriginalName') ? (string) $file->getClientOriginalName() : 'photo';
-            $baseName = pathinfo($originalName, PATHINFO_FILENAME);
-            $safePhotoName = Str::slug($baseName);
-            if ($safePhotoName === '') {
-                $safePhotoName = 'photo';
-            }
-
-            $filename = "{$timestamp}_{$formType}_FORMID_{$photoKey}_{$safePhotoName}-{$uuid}.{$ext}";
-            $path = $file->storeAs('forms', $filename, 'public');
-
-            if (!$path) {
-                continue;
-            }
-
-            $url = $this->absolutePublicUrlFromDiskPath($path);
-
-            $photoId = (int) DB::table('photos')->insertGetId([
-                'public_path' => $url,
-                'disk' => 'public',
-                'uploaded_by' => Auth::id() ?: null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $this->uploadedPhotoUrls[$photoKey][] = $url;
-            $this->uploadedPhotoIds[$photoKey][] = $photoId;
-
-            $this->dispatch('photoStored', photoKey: $photoKey, photoId: $photoId, url: $url);
-        }
-
-        $this->photoUploads[$photoKey] = [];
+        $this->handleTempPhotoUpload($photoKey, $files, $formType);
     }
 
     protected function formTypeKey(): string
@@ -107,26 +63,6 @@ class BlowerAirHatcherForm extends FormNavigation
         return 'blower_air_hatcher';
     }
 
-    protected function absolutePublicUrlFromDiskPath(string $diskPath): string
-    {
-        return url(Storage::url($diskPath));
-    }
-
-    protected function diskPathFromPublicUrl(string $publicUrl): string
-    {
-        $path = parse_url($publicUrl, PHP_URL_PATH);
-        if (!is_string($path) || $path === '') {
-            return ltrim(str_replace('/storage/', '', $publicUrl), '/');
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/')) {
-            return substr($path, strlen('storage/'));
-        }
-
-        return $path;
-    }
 
     public function mount($formType = 'blower_air_hatcher'): void
     {
@@ -144,6 +80,20 @@ class BlowerAirHatcherForm extends FormNavigation
                 return [$hatcher->id => $hatcher->hatcherName];
             })
             ->toArray();
+        
+        // Load hatchery men
+        $this->hatcheryMen = User::where('user_type', 1)
+            ->where('is_disabled', false)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get()
+            ->mapWithKeys(function ($user) {
+                return [$user->id => $user->first_name . ' ' . $user->last_name];
+            })
+            ->toArray();
+        
+        // Update completed hatchers for today
+        $this->updateCompletedHatchers();
     }
 
     protected function scheduleConfig(): array
@@ -174,9 +124,9 @@ class BlowerAirHatcherForm extends FormNavigation
 
         try {
             $formId = $this->storeSubmissionAndReturnId($this->formTypeName(), $this->formInputsForStorageWithoutPhotos());
-            $this->finalizeUploadedPhotosForForm($formId);
+            $this->finalizePhotosForForm($formId);
             DB::table('forms')->where('id', $formId)->update([
-                'form_inputs' => json_encode($this->formInputsForStorageWithPhotoUrls()),
+                'form_inputs' => json_encode($this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos())),
                 'updated_at' => now(),
             ]);
             
@@ -234,81 +184,7 @@ class BlowerAirHatcherForm extends FormNavigation
         }
     }
 
-    /**
-     * Finalize uploaded photos for a specific form
-     */
-    protected function finalizeUploadedPhotosForForm(int $formId): void
-    {
-        foreach ($this->uploadedPhotoIds as $photoKey => $ids) {
-            foreach ($ids as $i => $photoId) {
-                $photo = DB::table('photos')->where('id', (int) $photoId)->first();
-                if (!$photo || !isset($photo->public_path)) {
-                    continue;
-                }
 
-                $currentUrl = (string) $photo->public_path;
-                $relativePath = $this->diskPathFromPublicUrl($currentUrl);
-                if ($relativePath === '' || !str_contains($relativePath, '_FORMID_')) {
-                    continue;
-                }
-
-                $newRelativePath = str_replace('_FORMID_', "_{$formId}_", $relativePath);
-
-                $moved = Storage::disk('public')->move($relativePath, $newRelativePath);
-                if (!$moved) {
-                    continue;
-                }
-
-                $newUrl = $this->absolutePublicUrlFromDiskPath($newRelativePath);
-
-                DB::table('photos')->where('id', (int) $photoId)->update([
-                    'public_path' => $newUrl,
-                    'updated_at' => now(),
-                ]);
-
-                if (isset($this->uploadedPhotoUrls[$photoKey][$i])) {
-                    $this->uploadedPhotoUrls[$photoKey][$i] = $newUrl;
-                }
-            }
-        }
-    }
-
-    /**
-     * Build the form inputs array for storage
-     */
-    public function deleteUploadedPhoto(string $photoKey, int $photoId): void
-    {
-        $ids = $this->uploadedPhotoIds[$photoKey] ?? [];
-        if (!in_array($photoId, $ids, true)) {
-            return;
-        }
-
-        $photo = DB::table('photos')->where('id', $photoId)->first();
-        if ($photo && isset($photo->public_path)) {
-            $relativePath = $this->diskPathFromPublicUrl((string) $photo->public_path);
-            if ($relativePath !== '') {
-                Storage::disk('public')->delete($relativePath);
-            }
-        }
-
-        DB::table('photos')->where('id', $photoId)->delete();
-
-        $this->uploadedPhotoIds[$photoKey] = array_values(array_filter(
-            $this->uploadedPhotoIds[$photoKey] ?? [],
-            fn ($id) => (int) $id !== $photoId
-        ));
-
-        $this->uploadedPhotoUrls[$photoKey] = array_values(array_filter(
-            $this->uploadedPhotoUrls[$photoKey] ?? [],
-            function ($url) use ($photo, $photoId) {
-                if ($photo && isset($photo->public_path)) {
-                    return (string) $url !== (string) $photo->public_path;
-                }
-
-                return true;
-            }
-        ));
-    }
 
     protected function formInputsForStorageWithoutPhotos(): array
     {
@@ -339,20 +215,40 @@ class BlowerAirHatcherForm extends FormNavigation
     }
 
     /**
-     * Build the form inputs array with photo URLs included
+     * Update completed hatchers based on day and form type (no shift logic)
      */
-    protected function formInputsForStorageWithPhotoUrls(): array
+    protected function updateCompletedHatchers(): void
     {
-        $inputs = $this->formInputsForStorageWithoutPhotos();
+        $today = now()->format('Y-m-d');
+        $formTypeName = $this->formTypeName();
+        
+        // Get form type ID
+        $formTypeId = DB::table('form_types')
+            ->where('form_name', $formTypeName)
+            ->value('id');
 
-        foreach ($this->uploadedPhotoUrls as $photoKey => $urls) {
-            if (!empty($urls)) {
-                $inputs[$photoKey] = $urls;
-            }
+        if (!$formTypeId) {
+            $this->completedHatchers = [];
+            return;
         }
 
-        return $inputs;
+        // Get hatchers that already have forms for today's date and same form type
+        $completedForms = DB::table('forms')
+            ->where('form_type_id', $formTypeId)
+            ->whereDate('date_submitted', $today)
+            ->whereNotNull('form_inputs')
+            ->get();
+
+        $this->completedHatchers = [];
+        
+        foreach ($completedForms as $form) {
+            $formInputs = is_array($form->form_inputs) ? $form->form_inputs : json_decode($form->form_inputs, true);
+            if (isset($formInputs['hatcher'])) {
+                $this->completedHatchers[] = $formInputs['hatcher'];
+            }
+        }
     }
+
 
     /**
      * Send form data to webhook after successful submission

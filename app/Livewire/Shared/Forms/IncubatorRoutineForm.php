@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Forms;
 
 use App\Livewire\Configs\IncubatorRoutineConfig;
 use App\Livewire\Components\FormNavigation;
+use App\Livewire\Shared\Forms\Traits\TempPhotoManager;
 use App\Models\Incubator;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class IncubatorRoutineForm extends FormNavigation
 {
-    use WithFileUploads;
+    use WithFileUploads, TempPhotoManager;
     protected string $shiftKey = 'shift';
 
     public array $form = [];
@@ -31,12 +32,6 @@ class IncubatorRoutineForm extends FormNavigation
 
     /** @var array */
     public $completedIncubators = [];
-
-    /** @var array<string, string[]> Track uploaded photo URLs per field */
-    public array $uploadedPhotoUrls = [];
-
-    /** @var array<string, int[]> Track uploaded photo IDs per field */
-    public array $uploadedPhotoIds = [];
 
     public function mount($formType = 'incubator_routine'): void
     {
@@ -88,87 +83,10 @@ class IncubatorRoutineForm extends FormNavigation
             return;
         }
 
-        $this->validateOnly("photoUploads.{$photoKey}.*", [
-            "photoUploads.{$photoKey}.*" => ['image', 'max:15360'],
-        ]);
-
         $formType = $this->formTypeKey();
-        $timestamp = now()->format('Ymd_His');
-
-        foreach ($files as $file) {
-            if (!$file) {
-                continue;
-            }
-
-            $uuid = Str::uuid()->getHex();
-
-            $ext = method_exists($file, 'getClientOriginalExtension') ? $file->getClientOriginalExtension() : 'jpg';
-
-            $originalName = method_exists($file, 'getClientOriginalName') ? (string) $file->getClientOriginalName() : 'photo';
-            $baseName = pathinfo($originalName, PATHINFO_FILENAME);
-            $safePhotoName = Str::slug($baseName);
-            if ($safePhotoName === '') {
-                $safePhotoName = 'photo';
-            }
-
-            $filename = "{$timestamp}_{$formType}_FORMID_{$photoKey}_{$safePhotoName}-{$uuid}.{$ext}";
-            $path = $file->storeAs('forms', $filename, 'public');
-
-            if (!$path) {
-                continue;
-            }
-
-            $url = $this->absolutePublicUrlFromDiskPath($path);
-
-            $photoId = (int) DB::table('photos')->insertGetId([
-                'public_path' => $url,
-                'disk' => 'public',
-                'uploaded_by' => Auth::id() ?: null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $this->uploadedPhotoUrls[$photoKey][] = $url;
-            $this->uploadedPhotoIds[$photoKey][] = $photoId;
-
-            $this->dispatch('photoStored', photoKey: $photoKey, photoId: $photoId, url: $url);
-        }
-
-        $this->photoUploads[$photoKey] = [];
+        $this->handleTempPhotoUpload($photoKey, $files, $formType);
     }
 
-    protected function storeSubmission(string $formTypeName, array $formInputs): void
-    {
-        DB::beginTransaction();
-
-        try {
-            $formTypeId = DB::table('form_types')
-                ->where('form_name', $formTypeName)
-                ->value('id');
-
-            if (!$formTypeId) {
-                throw new \Exception('Form type not found: ' . $formTypeName);
-            }
-
-            // Get the original form values before they're removed from JSON
-            $hatcheryMan = $this->form['hatchery_man'] ?? null;
-            $incubator = $this->form['incubator'] ?? null;
-
-            DB::table('forms')->insert([
-                'form_type_id' => $formTypeId,
-                'form_inputs' => json_encode($formInputs),
-                'date_submitted' => now(),
-                'uploaded_by' => $hatcheryMan,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
 
     protected function storeSubmissionAndReturnId(string $formTypeName, array $formInputs): int
     {
@@ -205,124 +123,9 @@ class IncubatorRoutineForm extends FormNavigation
         }
     }
 
-    protected function finalizeUploadedPhotosForForm(int $formId): void
-    {
-        foreach ($this->uploadedPhotoIds as $photoKey => $ids) {
-            foreach ($ids as $i => $photoId) {
-                $photo = DB::table('photos')->where('id', (int) $photoId)->first();
-                if (!$photo || !isset($photo->public_path)) {
-                    continue;
-                }
 
-                $currentUrl = (string) $photo->public_path;
-                $relativePath = $this->diskPathFromPublicUrl($currentUrl);
-                if ($relativePath === '' || !str_contains($relativePath, '_FORMID_')) {
-                    continue;
-                }
 
-                $newRelativePath = str_replace('_FORMID_', "_{$formId}_", $relativePath);
 
-                $moved = Storage::disk('public')->move($relativePath, $newRelativePath);
-                if (!$moved) {
-                    continue;
-                }
-
-                $newUrl = $this->absolutePublicUrlFromDiskPath($newRelativePath);
-
-                DB::table('photos')->where('id', (int) $photoId)->update([
-                    'public_path' => $newUrl,
-                    'updated_at' => now(),
-                ]);
-
-                if (isset($this->uploadedPhotoUrls[$photoKey][$i])) {
-                    $this->uploadedPhotoUrls[$photoKey][$i] = $newUrl;
-                }
-            }
-        }
-    }
-
-    protected function absolutePublicUrlFromDiskPath(string $diskPath): string
-    {
-        return url(Storage::url($diskPath));
-    }
-
-    protected function diskPathFromPublicUrl(string $publicUrl): string
-    {
-        $path = parse_url($publicUrl, PHP_URL_PATH);
-        if (!is_string($path) || $path === '') {
-            return ltrim(str_replace('/storage/', '', $publicUrl), '/');
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/')) {
-            return substr($path, strlen('storage/'));
-        }
-
-        return $path;
-    }
-
-    /**
-     * Cleanup all uploaded photos when component is destroyed or form reset.
-     */
-    protected function cleanupAllUploadedPhotos(): void
-    {
-        foreach ($this->uploadedPhotoUrls as $field => $urls) {
-            foreach ($urls as $url) {
-                $relativePath = $this->diskPathFromPublicUrl($url);
-                Storage::disk('public')->delete($relativePath);
-            }
-        }
-
-        $allIds = [];
-        foreach ($this->uploadedPhotoIds as $field => $ids) {
-            foreach ($ids as $id) {
-                $allIds[] = $id;
-            }
-        }
-
-        if (!empty($allIds)) {
-            DB::table('photos')->whereIn('id', $allIds)->delete();
-        }
-
-        $this->uploadedPhotoUrls = [];
-        $this->uploadedPhotoIds = [];
-        $this->photoUploads = [];
-    }
-
-    public function deleteUploadedPhoto(string $photoKey, int $photoId): void
-    {
-        $ids = $this->uploadedPhotoIds[$photoKey] ?? [];
-        if (!in_array($photoId, $ids, true)) {
-            return;
-        }
-
-        $photo = DB::table('photos')->where('id', $photoId)->first();
-        if ($photo && isset($photo->public_path)) {
-            $relativePath = $this->diskPathFromPublicUrl((string) $photo->public_path);
-            if ($relativePath !== '') {
-                Storage::disk('public')->delete($relativePath);
-            }
-        }
-
-        DB::table('photos')->where('id', $photoId)->delete();
-
-        $this->uploadedPhotoIds[$photoKey] = array_values(array_filter(
-            $this->uploadedPhotoIds[$photoKey] ?? [],
-            fn ($id) => (int) $id !== $photoId
-        ));
-
-        $this->uploadedPhotoUrls[$photoKey] = array_values(array_filter(
-            $this->uploadedPhotoUrls[$photoKey] ?? [],
-            function ($url) use ($photo, $photoId) {
-                if ($photo && isset($photo->public_path)) {
-                    return (string) $url !== (string) $photo->public_path;
-                }
-
-                return true;
-            }
-        ));
-    }
 
     protected function formTypeKey(): string
     {
@@ -453,9 +256,9 @@ class IncubatorRoutineForm extends FormNavigation
 
         try {
             $formId = $this->storeSubmissionAndReturnId($this->formTypeName(), $this->formInputsForStorageWithoutPhotos());
-            $this->finalizeUploadedPhotosForForm($formId);
+            $this->finalizePhotosForForm($formId);
             DB::table('forms')->where('id', $formId)->update([
-                'form_inputs' => json_encode($this->formInputsForStorageWithPhotoUrls()),
+                'form_inputs' => json_encode($this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos())),
                 'updated_at' => now(),
             ]);
             
@@ -503,18 +306,6 @@ class IncubatorRoutineForm extends FormNavigation
         return $inputs;
     }
 
-    protected function formInputsForStorageWithPhotoUrls(): array
-    {
-        $inputs = $this->formInputsForStorageWithoutPhotos();
-
-        foreach ($this->uploadedPhotoUrls as $photoKey => $urls) {
-            if (!empty($urls)) {
-                $inputs[$photoKey] = $urls;
-            }
-        }
-
-        return $inputs;
-    }
 
     protected function rulesForVisibleFields(): array
     {
