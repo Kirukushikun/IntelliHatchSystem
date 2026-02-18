@@ -404,20 +404,4 @@ class BlowerAirIncubatorForm extends FormNavigation
     {
         return view('livewire.shared.forms.blower-air-incubator-form');
     }
-
-    /**
-     * Cleanup uploaded photos when component is dehydrated (user navigates away)
-     */
-    public function dehydrate()
-    {
-        $this->cleanupAllUploadedPhotos();
-    }
-
-    /**
-     * Cleanup uploaded photos when component is destroyed (backup for page reloads)
-     */
-    public function __destruct()
-    {
-        $this->cleanupAllUploadedPhotos();
-    }
 }
