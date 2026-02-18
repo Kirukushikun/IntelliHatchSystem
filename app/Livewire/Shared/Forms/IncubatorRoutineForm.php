@@ -243,20 +243,18 @@ class IncubatorRoutineForm extends FormNavigation
 
         try {
             $this->validate($rules, $messages);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Jump to the first errored field.
-            $firstKey = array_key_first($e->validator->errors()->messages());
-            if ($firstKey) {
-                $fieldName = str_replace('form.', '', $firstKey);
-                $this->goToStepWithField($fieldName);
+            
+            // Ensure all pending photos are fully uploaded before proceeding
+            if (!$this->ensureAllPhotosUploaded()) {
+                $this->dispatch('showToast', message: 'Photo uploads are still in progress. Please wait for all photos to finish uploading before submitting the form.', type: 'error');
+                return;
             }
-
-            throw $e;
-        }
-
-        try {
+            
+            // Finalize photos BEFORE storing form to avoid race condition
             $formId = $this->storeSubmissionAndReturnId($this->formTypeName(), $this->formInputsForStorageWithoutPhotos());
             $this->finalizePhotosForForm($formId);
+            
+            // Now store form with finalized photo URLs
             DB::table('forms')->where('id', $formId)->update([
                 'form_inputs' => json_encode($this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos())),
                 'updated_at' => now(),
@@ -273,6 +271,15 @@ class IncubatorRoutineForm extends FormNavigation
             
             // Keep form data intact for potential re-submission
             // Data will be cleared when redirected to forms page
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Jump to the first errored field.
+            $firstKey = array_key_first($e->validator->errors()->messages());
+            if ($firstKey) {
+                $fieldName = str_replace('form.', '', $firstKey);
+                $this->goToStepWithField($fieldName);
+            }
+
+            throw $e;
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to submit form. Please try again.', type: 'error');
             // Keep all form data intact on failure so user can retry

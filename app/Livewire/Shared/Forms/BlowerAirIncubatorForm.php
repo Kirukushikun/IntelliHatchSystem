@@ -125,8 +125,17 @@ class BlowerAirIncubatorForm extends FormNavigation
         $this->validate(BlowerAirIncubatorConfig::getRules());
 
         try {
+            // Ensure all pending photos are fully uploaded before proceeding
+            if (!$this->ensureAllPhotosUploaded()) {
+                $this->dispatch('showToast', message: 'Photo uploads are still in progress. Please wait for all photos to finish uploading before submitting the form.', type: 'error');
+                return;
+            }
+            
+            // Finalize photos BEFORE storing form to avoid race condition
             $formId = $this->storeSubmissionAndReturnId($this->formTypeName(), $this->formInputsForStorageWithoutPhotos());
             $this->finalizePhotosForForm($formId);
+            
+            // Now store form with finalized photo URLs
             DB::table('forms')->where('id', $formId)->update([
                 'form_inputs' => json_encode($this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos())),
                 'updated_at' => now(),
