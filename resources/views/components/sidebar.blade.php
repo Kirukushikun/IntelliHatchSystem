@@ -147,13 +147,13 @@ x-cloak>
          x-transition:leave="transition-opacity ease-linear duration-300"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-gray-600/75 z-40 lg:hidden"
+         class="fixed inset-0 bg-gray-600/75 dark:bg-gray-900/75 z-40 lg:hidden"
          @click="closeMobile()">
     </div>
 
     <!-- Sidebar -->
     <aside :class="[
-        'fixed inset-y-0 left-0 z-50 flex flex-col bg-white shadow-xl transform transition-all duration-300 ease-in-out lg:relative lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-gray-800 shadow-xl transform transition-all duration-300 ease-in-out lg:relative lg:translate-x-0',
         isOpen ? 'translate-x-0' : '-translate-x-full',
         isCollapsed ? 'lg:w-16' : 'lg:w-64',
         'w-64'
@@ -162,7 +162,7 @@ x-cloak>
     @click.stop>
         
         <!-- Header -->
-        <div class="flex items-center h-16 px-4 border-b border-gray-200 shrink-0 bg-white">
+        <div class="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-800">
             <!-- Logo/Brand - Always visible on mobile, conditional on desktop -->
             <div class="flex items-center flex-1 lg:hidden">
                 <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
@@ -189,8 +189,8 @@ x-cloak>
 
             <!-- Mobile close button -->
             <button @click="closeMobile()" 
-                    class="lg:hidden ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="lg:hidden ml-auto p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
@@ -198,8 +198,8 @@ x-cloak>
             <!-- Desktop toggle button - shown when collapsed (centered) -->
             <div x-show="isCollapsed" class="hidden lg:flex items-center justify-center w-full">
                 <button @click="toggleSidebar()" 
-                        class="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
                     </svg>
                 </button>
@@ -207,15 +207,15 @@ x-cloak>
 
             <!-- Desktop toggle button - shown when not collapsed (right side) -->
             <button x-show="!isCollapsed" @click="toggleSidebar()" 
-                    class="hidden lg:block ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="hidden lg:block ml-auto p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
                 </svg>
             </button>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto bg-white" x-cloak>
+        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto bg-white dark:bg-gray-800" x-cloak>
             @foreach($sidebarItems as $item)
                 @if(isset($item['dropdown']) && $item['dropdown'])
                     <!-- Dropdown Parent -->
@@ -238,7 +238,7 @@ x-cloak>
                                class="group relative flex items-center w-full px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200"
                                :class="{
                                    'bg-orange-100 text-orange-700 shadow-sm': hasActiveChild && isCollapsed,
-                                   'text-gray-600 hover:bg-gray-50 hover:text-gray-900': !(hasActiveChild && isCollapsed)
+                                   'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white': !(hasActiveChild && isCollapsed)
                                }">
                             
                             <!-- Icon -->
@@ -285,8 +285,8 @@ x-cloak>
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 scale-90"
                                  :style="`position: fixed; left: ${dropdownPosition.x}px; top: ${dropdownPosition.y}px; transform: translateY(-50%);`"
-                                 class="hidden lg:block bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-50 z-50">
-                                <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                 class="hidden lg:block bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 py-2 min-w-50 z-50">
+                                <div class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase border-b border-gray-100 dark:border-gray-700">
                                     {{ $item['label'] }}
                                 </div>
                                 @foreach($item['children'] as $child)
@@ -294,12 +294,12 @@ x-cloak>
                                        class="flex items-center px-3 py-2 text-sm font-medium transition-colors
                                               {{ request()->is($child['active'] ?? $child['href']) 
                                                   ? 'bg-orange-100 text-orange-700' 
-                                                  : 'text-gray-700 hover:bg-gray-50' }}">
+                                                  : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700' }}">
                                         <span class="whitespace-nowrap">{{ $child['label'] }}</span>
                                     </a>
                                 @endforeach
                                 <!-- Arrow pointer -->
-                                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 rotate-45 w-2 h-2 bg-white border-l border-t border-gray-200"></div>
+                                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 rotate-45 w-2 h-2 bg-white dark:bg-gray-800 border-l border-t border-gray-200 dark:border-gray-600"></div>
                             </div>
                         </template>
                         
@@ -318,7 +318,7 @@ x-cloak>
                                    class="group relative flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
                                           {{ request()->is($child['active'] ?? $child['href']) 
                                               ? 'bg-orange-100 text-orange-700 shadow-sm' 
-                                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
                                     
                                     <span class="whitespace-nowrap pl-8">{{ $child['label'] }}</span>
                                 </a>
@@ -339,7 +339,7 @@ x-cloak>
                                    class="group relative flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
                                           {{ request()->is($child['active'] ?? $child['href']) 
                                               ? 'bg-orange-100 text-orange-700 shadow-sm' 
-                                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
                                     
                                     <span class="whitespace-nowrap pl-8">{{ $child['label'] }}</span>
                                 </a>
@@ -368,7 +368,7 @@ x-cloak>
                                   ? 'bg-orange-100 text-orange-700 shadow-sm' 
                                   : (request()->is($item['active'] ?? $item['href']) 
                                       ? 'bg-orange-100 text-orange-700 shadow-sm' 
-                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900') }}">
+                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white') }}">
                         
                         <!-- Icon -->
                         <div class="shrink-0 w-6 h-6 flex items-center justify-center"
