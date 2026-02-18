@@ -65,11 +65,11 @@ class TestSeeder extends Seeder
             return;
         }
         
-        // Create 50 hatcher blower air speed forms for past 3 months
-        echo "Creating 50 hatcher blower air speed forms...\n";
+        // Create 500 hatcher blower air speed forms for past 3 months
+        echo "Creating 500 hatcher blower air speed forms...\n";
         $usedMachines = []; // Track used machines to prevent repetition
         
-        for ($i = 1; $i <= 50; $i++) {
+        for ($i = 1; $i <= 500; $i++) {
             $currentDate = Carbon::now()->subDays(rand(1, 90));
             $dateKey = $currentDate->format('Y-m-d');
             
@@ -126,16 +126,16 @@ class TestSeeder extends Seeder
                 'uploaded_by' => $user->id,
             ]);
             
-            if ($i % 10 == 0) {
+            if ($i % 100 == 0) {
                 echo "Created {$i} hatcher blower forms...\n";
             }
         }
         
-        // Create 50 incubator blower air speed forms for past 3 months
-        echo "Creating 50 incubator blower air speed forms...\n";
+        // Create 500 incubator blower air speed forms for past 3 months
+        echo "Creating 500 incubator blower air speed forms...\n";
         $usedIncubators = []; // Track used incubators to prevent repetition
         
-        for ($i = 1; $i <= 50; $i++) {
+        for ($i = 1; $i <= 500; $i++) {
             $currentDate = Carbon::now()->subDays(rand(1, 90));
             $dateKey = $currentDate->format('Y-m-d');
             
@@ -192,7 +192,7 @@ class TestSeeder extends Seeder
                 'uploaded_by' => $user->id,
             ]);
             
-            if ($i % 10 == 0) {
+            if ($i % 100 == 0) {
                 echo "Created {$i} incubator blower forms...\n";
             }
         }
@@ -286,8 +286,8 @@ class TestSeeder extends Seeder
         echo "- 10 incubators\n";
         echo "- 10 hatchers\n";
         echo "- 10 hatchery users\n";
-        echo "- 50 hatcher blower air speed forms\n";
-        echo "- 50 incubator blower air speed forms\n";
+        echo "- 500 hatcher blower air speed forms\n";
+        echo "- 500 incubator blower air speed forms\n";
         echo "- {$formCount} incubator routine checklist forms\n";
     }
 }
