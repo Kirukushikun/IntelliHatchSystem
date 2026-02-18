@@ -70,7 +70,9 @@ class TestSeeder extends Seeder
         $usedMachines = []; // Track used machines to prevent repetition
         
         for ($i = 1; $i <= 500; $i++) {
-            $currentDate = Carbon::now()->subDays(rand(1, 90));
+            // Use sequential dates to ensure proper distribution across past 3 months
+            $daysOffset = floor(($i - 1) / 10); // Spread forms across days
+            $currentDate = Carbon::now()->subDays($daysOffset);
             $dateKey = $currentDate->format('Y-m-d');
             
             // Get random subset of active hatchers (60-100% to simulate some being inactive)
@@ -136,7 +138,9 @@ class TestSeeder extends Seeder
         $usedIncubators = []; // Track used incubators to prevent repetition
         
         for ($i = 1; $i <= 500; $i++) {
-            $currentDate = Carbon::now()->subDays(rand(1, 90));
+            // Use sequential dates to ensure proper distribution across past 3 months
+            $daysOffset = floor(($i - 1) / 10); // Spread forms across days
+            $currentDate = Carbon::now()->subDays($daysOffset);
             $dateKey = $currentDate->format('Y-m-d');
             
             // Get random subset of active incubators (60-100% to simulate some being inactive)
