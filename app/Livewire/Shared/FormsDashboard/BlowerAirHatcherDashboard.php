@@ -295,7 +295,10 @@ class BlowerAirHatcherDashboard extends Component
                     $userQuery->where('first_name', 'like', '%' . $this->search . '%')
                            ->orWhere('last_name', 'like', '%' . $this->search . '%');
                 })
-                ->orWhere('form_inputs->machine_info->name', 'like', '%' . $this->search . '%');
+                ->orWhere(function ($subQ) {
+                    $subQ->where('form_inputs', 'like', '%"machine_info":%')
+                          ->where('form_inputs', 'like', '%"name":"' . $this->search . '"%');
+                });
             });
         }
 

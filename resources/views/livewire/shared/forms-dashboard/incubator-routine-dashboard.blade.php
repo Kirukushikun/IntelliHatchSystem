@@ -37,7 +37,12 @@
     }
     
     function getMachineName($formData) {
-        // For incubator routine, the incubator field stores the ID, so we need to resolve it to name
+        // Use machine_info structure for consistency with blower air forms
+        if (isset($formData['machine_info']['name'])) {
+            return $formData['machine_info']['name'];
+        }
+        
+        // Fallback to old incubator field for backward compatibility
         if (isset($formData['incubator']) && !empty($formData['incubator'])) {
             $incubatorId = $formData['incubator'];
             $incubator = \Illuminate\Support\Facades\DB::table('incubator-machines')
@@ -48,6 +53,7 @@
                 return $incubator->incubatorName;
             }
         }
+        
         return 'N/A';
     }
 @endphp

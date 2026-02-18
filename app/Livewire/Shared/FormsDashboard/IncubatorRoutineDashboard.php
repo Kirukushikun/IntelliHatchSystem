@@ -175,11 +175,9 @@ class IncubatorRoutineDashboard extends Component
                     $subQ->where('first_name', 'like', '%' . $this->search . '%')
                         ->orWhere('last_name', 'like', '%' . $this->search . '%');
                 })
-                ->orWhereExists(function ($subQuery) {
-                    $subQuery->select(DB::raw(1))
-                        ->from('incubator-machines')
-                        ->whereRaw('incubator-machines.id = JSON_EXTRACT(forms.form_inputs, "$.incubator")')
-                        ->where('incubator-machines.incubatorName', 'like', '%' . $this->search . '%');
+                ->orWhere(function ($subQ) {
+                    $subQ->where('form_inputs', 'like', '%"machine_info":%')
+                          ->where('form_inputs', 'like', '%"name":"' . $this->search . '"%');
                 });
             });
         }
