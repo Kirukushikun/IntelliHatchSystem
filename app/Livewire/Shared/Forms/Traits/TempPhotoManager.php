@@ -358,4 +358,28 @@ trait TempPhotoManager
 
         return $baseInputs;
     }
+
+    /**
+     * Ensure all photos are fully uploaded before form submission
+     * This prevents race conditions where photos are still uploading when form is submitted
+     * Returns true if all photos are uploaded, false if some are still uploading
+     */
+    protected function ensureAllPhotosUploaded(): bool
+    {
+        // Check if there are any photos that might still be uploading
+        foreach ($this->uploadedPhotoUrls as $photoKey => $urls) {
+            if (!empty($urls)) {
+                foreach ($urls as $url) {
+                    // Check if photo file exists on disk (regardless of pending status)
+                    $relativePath = $this->diskPathFromPublicUrl($url);
+                    if (!Storage::disk('public')->exists($relativePath)) {
+                        // If file doesn't exist on disk, it's still uploading
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        return true;
+    }
 }
