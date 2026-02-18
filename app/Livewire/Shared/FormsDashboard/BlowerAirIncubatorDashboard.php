@@ -302,7 +302,7 @@ class BlowerAirIncubatorDashboard extends Component
                 })
                 ->orWhere(function ($subQ) {
                     $subQ->where('form_inputs', 'like', '%"machine_info":%')
-                          ->where('form_inputs', 'like', '%"name":"' . $this->search . '"%');
+                          ->where('form_inputs', 'like', '%"name":%' . $this->search . '%');
                 });
             });
         }
