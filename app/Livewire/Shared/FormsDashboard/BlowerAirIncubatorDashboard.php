@@ -79,6 +79,11 @@ class BlowerAirIncubatorDashboard extends Component
         $this->resetPage();
     }
 
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     public function quickFilterToday(): void
     {
         $today = now()->format('Y-m-d');

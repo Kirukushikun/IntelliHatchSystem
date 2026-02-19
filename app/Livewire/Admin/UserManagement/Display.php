@@ -49,6 +49,11 @@ class Display extends Component
         $this->page = 1;
     }
 
+    public function updatingPerPage(): void
+    {
+        $this->page = 1;
+    }
+
     public function updatedDateFrom()
     {
         // Ensure dateFrom is not after dateTo

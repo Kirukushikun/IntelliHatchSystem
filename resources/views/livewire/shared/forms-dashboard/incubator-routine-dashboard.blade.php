@@ -122,6 +122,7 @@
                                             max="{{ $dateTo ?: now()->format('Y-m-d') }}"
                                             wire:target="dateFrom"
                                             wire:loading.attr="disabled"
+                                            x-on:change="$wire.set('dateTo', ($wire.get('dateTo') && $el.value > $wire.get('dateTo')) ? '' : $wire.get('dateTo'))"
                                         />
                                     </div>
                                     <div>
@@ -135,6 +136,7 @@
                                             min="{{ $dateFrom ?: '' }}"
                                             wire:target="dateTo"
                                             wire:loading.attr="disabled"
+                                            x-on:change="($wire.get('dateFrom') && $el.value < $wire.get('dateFrom')) ? $wire.set('dateTo', '') : null"
                                         />
                                     </div>
                                 </div>

@@ -59,6 +59,11 @@ class Display extends Component
         $this->page = 1;
     }
 
+    public function updatingPerPage(): void
+    {
+        $this->page = 1;
+    }
+
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
