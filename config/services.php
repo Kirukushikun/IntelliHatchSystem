@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'webhook' => [
+        'url' => env('WEBHOOK_URL'),
+        'secret' => env('WEBHOOK_SECRET'),
+    ],
+
+    'api' => [
+        'key' => env('API_KEY'),
+    ],
+
 ];

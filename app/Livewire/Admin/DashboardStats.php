@@ -84,19 +84,25 @@ class DashboardStats extends Component
         $filteredTypeNamesById = array_intersect_key($typeNamesById, $selectedIdSet);
 
         $now = now();
-        $weekStart = $now->copy()->subDays(6)->startOfDay();
-        $weekEnd = $now->copy()->endOfDay();
-        $monthStart = $now->copy()->subDays(29)->startOfDay();
-        $monthEnd = $now->copy()->endOfDay();
-        $yearStart = $now->copy()->subMonths(11)->startOfMonth();
-        $yearEnd = $now->copy()->endOfDay();
+        $weekStart = $now->copy()->startOfWeek(Carbon::SUNDAY)->startOfDay();
+        $weekEnd = $now->copy()->endOfWeek(Carbon::SATURDAY)->endOfDay();
+        $monthStart = $now->copy()->startOfMonth()->startOfDay();
+        $monthEnd = $now->copy()->endOfMonth()->endOfDay();
+        $yearStart = $now->copy()->startOfYear()->startOfDay();
+        $yearEnd = $now->copy()->endOfYear()->endOfDay();
 
+        // Charts use filtered types
         $weekCounts = $this->countsByType($filteredTypeNamesById, $weekStart, $weekEnd);
         $monthCounts = $this->countsByType($filteredTypeNamesById, $monthStart, $monthEnd);
         $yearCounts = $this->countsByType($filteredTypeNamesById, $yearStart, $yearEnd);
 
+        // Cards always use all types (not filtered)
+        $allWeekCounts = $this->countsByType($typeNamesById, $weekStart, $weekEnd);
+        $allMonthCounts = $this->countsByType($typeNamesById, $monthStart, $monthEnd);
+        $allYearCounts = $this->countsByType($typeNamesById, $yearStart, $yearEnd);
+
         $cards = [];
-        foreach ($filteredTypeNamesById as $typeId => $typeName) {
+        foreach ($typeNamesById as $typeId => $typeName) {
             if ($this->onlyType !== null && $this->onlyType !== '') {
                 if ($this->onlyType !== $typeId && $this->onlyType !== $typeName) {
                     continue;
@@ -106,9 +112,9 @@ class DashboardStats extends Component
             $cards[] = [
                 'type_id' => $typeId,
                 'type_name' => $typeName,
-                'week' => (int) ($weekCounts[$typeName] ?? 0),
-                'month' => (int) ($monthCounts[$typeName] ?? 0),
-                'year' => (int) ($yearCounts[$typeName] ?? 0),
+                'week' => (int) ($allWeekCounts[$typeName] ?? 0),
+                'month' => (int) ($allMonthCounts[$typeName] ?? 0),
+                'year' => (int) ($allYearCounts[$typeName] ?? 0),
             ];
         }
 
@@ -122,9 +128,10 @@ class DashboardStats extends Component
         $this->cards = $cards;
 
         if ($this->showCharts) {
+            $daysInMonth = $now->daysInMonth;
             $this->charts = [
                 'week' => $this->stackedByDayChart($filteredTypeNamesById, $weekStart, 7),
-                'month' => $this->lineByDayChart($filteredTypeNamesById, $monthStart, 30),
+                'month' => $this->lineByDayChart($filteredTypeNamesById, $monthStart, $daysInMonth),
                 'year' => $this->doughnutByTypeChart($yearCounts), // 12 months
             ];
         } else {

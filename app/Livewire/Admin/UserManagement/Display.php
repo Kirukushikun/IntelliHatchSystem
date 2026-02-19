@@ -180,14 +180,33 @@ class Display extends Component
         $page = (int) $page;
         
         // Validate page number
-        $totalPages = User::query()
-            ->where('user_type', 1) // Only show hatchery users (user_type = 1)
-            ->where(function($query) {
+        $usersQuery = User::query()
+            ->where('user_type', 1); // Only show hatchery users (user_type = 1)
+
+        if ($this->search !== '') {
+            $usersQuery->where(function ($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('last_name', 'like', '%' . $this->search . '%');
-            })
-            ->paginate($this->perPage)
-            ->lastPage();
+                    ->orWhere('last_name', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        if ($this->statusFilter === 'disabled') {
+            $usersQuery->where('is_disabled', true);
+        } elseif ($this->statusFilter === 'enabled') {
+            $usersQuery->where('is_disabled', false);
+        }
+
+        if ($this->dateFrom || $this->dateTo) {
+            if ($this->dateFrom && $this->dateTo) {
+                $usersQuery->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+            } elseif ($this->dateFrom) {
+                $usersQuery->whereDate('created_at', '>=', $this->dateFrom);
+            } elseif ($this->dateTo) {
+                $usersQuery->whereDate('created_at', '<=', $this->dateTo);
+            }
+        }
+
+        $totalPages = $usersQuery->paginate($this->perPage)->lastPage();
         
         if ($page < 1) {
             $page = 1;

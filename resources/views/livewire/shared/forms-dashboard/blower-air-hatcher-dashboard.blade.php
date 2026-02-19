@@ -222,14 +222,14 @@
                     <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
                         <button 
                             wire:click="viewDetails({{ $form->id }})"
-                            class="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                        >
+                            class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                            title="View Details">
                             View
                         </button>
                         <button 
                             wire:click="deleteForm({{ $form->id }})"
-                            class="text-red-600 hover:text-red-800 text-xs font-medium"
-                        >
+                            class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                            title="Delete Form">
                             Delete
                         </button>
                     </div>

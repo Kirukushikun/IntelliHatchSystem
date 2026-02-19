@@ -54,7 +54,7 @@ class WebhookController extends Controller
             'webhook_url' => 'nullable|url',
         ]);
 
-        $webhookUrl = $request->webhook_url ?? env('WEBHOOK_URL');
+        $webhookUrl = $request->webhook_url ?? config('services.webhook.url');
 
         try {
             $form = Form::with(['formType', 'user', 'incubator'])->findOrFail($request->form_id);

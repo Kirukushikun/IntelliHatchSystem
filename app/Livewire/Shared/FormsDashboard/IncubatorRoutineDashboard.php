@@ -262,9 +262,40 @@ class IncubatorRoutineDashboard extends Component
         $page = (int) $page;
         
         // Validate page number
-        $totalPages = Form::where('form_type_id', $this->typeId)
-            ->paginate($this->perPage)
-            ->lastPage();
+        $query = Form::with(['user', 'formType'])
+            ->where('form_type_id', $this->typeId);
+
+        if ($this->search !== '') {
+            $query->where(function ($q) {
+                $q->whereHas('user', function ($subQ) {
+                    $subQ->where('first_name', 'like', '%' . $this->search . '%')
+                        ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                })
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('form_inputs', 'like', '%"machine_info":%')
+                            ->where('form_inputs', 'like', '%"name":%' . $this->search . '%');
+                    });
+            });
+        }
+
+        if ($this->dateFrom || $this->dateTo) {
+            if ($this->dateFrom && $this->dateTo) {
+                $query->whereBetween('date_submitted', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+            } elseif ($this->dateFrom) {
+                $query->whereDate('date_submitted', '>=', $this->dateFrom);
+            } elseif ($this->dateTo) {
+                $query->whereDate('date_submitted', '<=', $this->dateTo);
+            }
+        }
+
+        if ($this->shiftFilter !== 'all') {
+            $query->where(function ($q) {
+                $q->where('form_inputs', 'like', '%"' . $this->shiftFilter . '"%')
+                    ->orWhere('form_inputs', 'like', '%' . $this->shiftFilter . '%');
+            });
+        }
+
+        $totalPages = $query->paginate($this->perPage)->lastPage();
         
         if ($page < 1) {
             $page = 1;

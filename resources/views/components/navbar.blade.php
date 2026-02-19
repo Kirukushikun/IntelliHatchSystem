@@ -75,7 +75,7 @@
                                 <div class="relative" x-data="{ open: false, showLogoutConfirmation: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
                                 <button 
                                     @click="open = !open"
-                                    class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
+                                    class="flex items-center space-x-3 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
                                     aria-expanded="false"
                                     aria-haspopup="true"
                                 >
@@ -251,7 +251,7 @@
                         <div class="relative" x-data="{ open: false, showLogoutConfirmation: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
                         <button 
                             @click="open = !open"
-                            class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
+                            class="flex items-center space-x-3 cursor-pointer text-gray-700 hover:bg-gray-100 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
                             aria-expanded="false"
                             aria-haspopup="true"
                         >

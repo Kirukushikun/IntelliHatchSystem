@@ -265,13 +265,13 @@ class BlowerAirHatcherForm extends FormNavigation
     protected function sendFormToWebhook(int $formId): void
     {
         try {
-            $webhookUrl = env('WEBHOOK_URL');
+            $webhookUrl = config('services.webhook.url');
             
             // Check if webhook URL is configured
             if (!$webhookUrl) {
                 Log::error('Webhook URL not configured', [
                     'form_id' => $formId,
-                    'env_variable' => 'WEBHOOK_URL'
+                    'config_key' => 'services.webhook.url'
                 ]);
                 return;
             }

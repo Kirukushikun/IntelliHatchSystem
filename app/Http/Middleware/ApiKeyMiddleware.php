@@ -18,13 +18,13 @@ class ApiKeyMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $apiKey = $request->header('x-api-key');
-        $requiredKey = env('API_KEY');
+        $requiredKey = config('services.api.key');
         
         // If API_KEY is not configured, deny all requests
         if (empty($requiredKey)) {
             return response()->json([
                 'error' => 'API key not configured',
-                'message' => 'Server configuration error: API_KEY environment variable is not set'
+                'message' => 'Server configuration error: services.api.key is not set'
             ], 500, [], JSON_PRETTY_PRINT);
         }
         
