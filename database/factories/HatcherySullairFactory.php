@@ -36,9 +36,11 @@ class HatcherySullairFactory extends Factory
                     'Sullair 2 (Maintenance Area)',
                 ];
 
+                $phCellphoneNumber = '09' . str_pad((string) $this->faker->numberBetween(0, 999999999), 9, '0', STR_PAD_LEFT);
+
                 return [
                     'hatchery_man' => User::factory()->create(['user_type' => 1])->id,
-                    'cellphone_number' => $this->faker->phoneNumber(),
+                    'cellphone_number' => $phCellphoneNumber,
                     'sullair_number' => $this->faker->randomElement($sullairOptions),
 
                     'actual_psi_reading' => $this->faker->numberBetween(60, 90) . ' psi',
