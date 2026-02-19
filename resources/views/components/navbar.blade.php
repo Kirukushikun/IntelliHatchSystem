@@ -72,7 +72,7 @@
                                 <x-dark-mode-toggle />
                                 
                                 <!-- User Profile Dropdown -->
-                                <div class="relative" x-data="{ open: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
+                                <div class="relative" x-data="{ open: false, showLogoutConfirmation: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
                                 <button 
                                     @click="open = !open"
                                     class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
@@ -135,20 +135,54 @@
                                             </svg>
                                             Change Password
                                         </a>
-                                        <form method="POST" action="{{ route('logout') }}">
-                                            @csrf
-                                            <button 
-                                                type="submit"
-                                                class="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 cursor-pointer"
-                                            >
-                                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                                </svg>
-                                                Logout
-                                            </button>
-                                        </form>
+                                        <button
+                                            type="button"
+                                            @click="open = false; showLogoutConfirmation = true"
+                                            class="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 cursor-pointer"
+                                        >
+                                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            Logout
+                                        </button>
                                     </div>
                                 </div>
+
+                                <!-- Logout Confirmation Modal -->
+                                <div x-show="showLogoutConfirmation"
+                                    x-cloak
+                                    class="fixed inset-0 z-50 overflow-y-auto"
+                                    style="display: none;">
+                                    <div class="fixed inset-0 bg-black/50" @click="showLogoutConfirmation = false"></div>
+                                    <div class="relative min-h-screen flex items-center justify-center p-4">
+                                        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+                                            <div class="text-center">
+                                                <div class="mx-auto mb-4 text-yellow-500 w-16 h-16">
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                    </svg>
+                                                </div>
+                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Log Out?</h3>
+                                                <p class="text-gray-700 dark:text-gray-300 mb-4">Are you sure you want to log out of your account?</p>
+                                                <div class="flex gap-3 justify-center">
+                                                    <button @click="showLogoutConfirmation = false" type="button"
+                                                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                        Stay Logged In
+                                                    </button>
+                                                    <form method="POST" action="{{ route('logout') }}">
+                                                        @csrf
+                                                        <button type="submit"
+                                                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                                            Yes, Log Out
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -214,7 +248,7 @@
                         <x-dark-mode-toggle />
                         
                         <!-- User Profile Dropdown -->
-                        <div class="relative" x-data="{ open: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
+                        <div class="relative" x-data="{ open: false, showLogoutConfirmation: false }" x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))">
                         <button 
                             @click="open = !open"
                             class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 focus:outline-none rounded-xl p-2 pr-3 transition-all duration-200"
@@ -274,20 +308,54 @@
                                     </svg>
                                     Change Password
                                 </a>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button 
-                                        type="submit"
-                                        class="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 cursor-pointer"
-                                    >
-                                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        Logout
-                                    </button>
-                                </form>
+                                <button
+                                    type="button"
+                                    @click="open = false; showLogoutConfirmation = true"
+                                    class="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 cursor-pointer"
+                                >
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Logout
+                                </button>
                             </div>
                         </div>
+
+                        <!-- Logout Confirmation Modal -->
+                        <div x-show="showLogoutConfirmation"
+                            x-cloak
+                            class="fixed inset-0 z-50 overflow-y-auto"
+                            style="display: none;">
+                            <div class="fixed inset-0 bg-black/50" @click="showLogoutConfirmation = false"></div>
+                            <div class="relative min-h-screen flex items-center justify-center p-4">
+                                <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+                                    <div class="text-center">
+                                        <div class="mx-auto mb-4 text-yellow-500 w-16 h-16">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Log Out?</h3>
+                                        <p class="text-gray-700 dark:text-gray-300 mb-4">Are you sure you want to log out of your account?</p>
+                                        <div class="flex gap-3 justify-center">
+                                            <button @click="showLogoutConfirmation = false" type="button"
+                                                    class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                Stay Logged In
+                                            </button>
+                                            <form method="POST" action="{{ route('logout') }}">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                                    Yes, Log Out
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
