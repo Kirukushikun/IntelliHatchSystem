@@ -46,4 +46,9 @@ class DashboardController extends Controller
     {
         return view('admin.blower-air-incubator-dashboard');
     }
+
+    public function hatcherySullair()
+    {
+        return view('admin.hatchery-sullair-dashboard');
+    }
 }

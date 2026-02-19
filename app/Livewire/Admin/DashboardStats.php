@@ -83,9 +83,9 @@ class DashboardStats extends Component
 
         if ($this->showCharts) {
             $this->charts = [
-                'week' => $this->stackedByDayChart($typeNamesById, $weekStart, 7),
-                'month' => $this->lineByDayChart($typeNamesById, $monthStart, 30),
-                'year' => $this->doughnutByTypeChart($yearCounts),
+                'week' => $this->stackedByDayChart($typeNamesById, $weekStart, 7), // 7 days
+                'month' => $this->lineByDayChart($typeNamesById, $monthStart, 30), // 30 days
+                'year' => $this->doughnutByTypeChart($yearCounts), // 12 months
             ];
         } else {
             $this->charts = [];
@@ -139,7 +139,9 @@ class DashboardStats extends Component
 
         foreach ($rows as $row) {
             $bucket = (string) $row->bucket;
-            $index = (int) Carbon::parse($bucket)->diffInDays($start->copy()->startOfDay());
+            $bucketDate = Carbon::parse($bucket);
+            $index = (int) $start->copy()->startOfDay()->diffInDays($bucketDate);
+            
             if ($index < 0 || $index >= $days) {
                 continue;
             }
@@ -192,7 +194,9 @@ class DashboardStats extends Component
 
         foreach ($rows as $row) {
             $bucket = (string) $row->bucket;
-            $index = (int) Carbon::parse($bucket)->diffInDays($start->copy()->startOfDay());
+            $bucketDate = Carbon::parse($bucket);
+            $index = (int) $start->copy()->startOfDay()->diffInDays($bucketDate);
+            
             if ($index < 0 || $index >= $days) {
                 continue;
             }

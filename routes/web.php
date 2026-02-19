@@ -82,6 +82,8 @@ Route::middleware('auth')->group(function () {
         
         Route::get('/user/forms/blower-air-incubator', [FormController::class, 'blowerAirIncubator'])->name('user.forms.blower-air-incubator');
         
+        Route::get('/user/forms/hatchery-sullair', [FormController::class, 'hatcherySullair'])->name('user.forms.hatchery-sullair');
+        
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 
         Route::get('/user/hatcher-machines', [HatcherController::class, 'index'])->name('user.hatcher-machines');
