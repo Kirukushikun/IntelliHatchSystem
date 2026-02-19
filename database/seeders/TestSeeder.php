@@ -283,6 +283,71 @@ class TestSeeder extends Seeder
                 }
             }
         }
+
+        // Create 500 Hatchery Sullair forms for past 3 months
+        echo "Creating 500 Hatchery Sullair forms...\n";
+        $usedSullairs = []; // Track used sullair numbers to prevent repetition
+        $sullairOptions = [
+            'Sullair 1 (Inside Incubation Area)',
+            'Sullair 2 (Maintenance Area)',
+        ];
+
+        $hatcherySullairFormTypeId = FormType::where('form_name', 'Hatchery Sullair Air Compressor Weekly PMS Checklist')->value('id');
+
+        for ($i = 1; $i <= 500; $i++) {
+            // Use sequential dates to ensure proper distribution across past 3 months
+            $daysOffset = floor(($i - 1) / max(1, count($sullairOptions))); // Spread forms across days
+            $currentDate = Carbon::now()->subDays($daysOffset);
+            $dateKey = $currentDate->format('Y-m-d');
+
+            // Filter out already used sullair numbers for this date
+            $availableSullairs = array_filter($sullairOptions, function ($sullair) use ($usedSullairs, $dateKey) {
+                return !isset($usedSullairs[$dateKey][$sullair]);
+            });
+
+            // If all machines used for this date, skip (should not happen with the day spread above)
+            if (empty($availableSullairs)) {
+                continue;
+            }
+
+            $selectedSullair = $availableSullairs[array_rand($availableSullairs)];
+            $usedSullairs[$dateKey][$selectedSullair] = true;
+            $user = $hatcheryUsers->random();
+
+            Form::create([
+                'form_type_id' => $hatcherySullairFormTypeId,
+                'form_inputs' => [
+                    'hatchery_man' => $user->id,
+                    'cellphone_number' => fake()->phoneNumber(),
+                    'sullair_number' => $selectedSullair,
+
+                    'actual_psi_reading' => fake()->numberBetween(60, 90) . ' psi',
+                    'actual_temperature_reading' => fake()->numberBetween(150, 200) . ' F',
+                    'actual_volt_reading' => fake()->numberBetween(200, 240) . ' V',
+                    'actual_ampere_reading' => fake()->numberBetween(8, 15) . ' A',
+
+                    'status_wiring_lugs_control' => fake()->randomElement(['Good Condition', 'With Minimal Damage', 'For Replacement']),
+                    'status_solenoid_valve' => fake()->randomElement(['Good Condition', 'With Minimal Damage', 'For Replacement']),
+                    'status_fan_motor' => fake()->randomElement(['Good Condition', 'With Minimal Damage', 'For Replacement']),
+
+                    'status_hose' => fake()->randomElement(['No Leak', 'With Leak for Repair', 'With Leak for Replacement']),
+                    'actual_oil_level_status' => fake()->randomElement(['Above or On Its Level Requirement', 'For Refill']),
+                    'tension_belt_status' => fake()->randomElement(['Good Condition', 'For Replacement']),
+
+                    'status_water_filter' => fake()->randomElement(['Good Condition', 'For Replacement']),
+                    'air_pipe_status' => fake()->randomElement(['No Any Leak', 'With Leak For Repair or Replacement']),
+                    'air_dryer_status' => fake()->randomElement(['Clean and Good Status', 'For Repair and Replacement']),
+
+                    'inspected_by' => fake()->name(),
+                ],
+                'date_submitted' => $currentDate,
+                'uploaded_by' => $user->id,
+            ]);
+
+            if ($i % 100 == 0) {
+                echo "Created {$i} Hatchery Sullair forms...\n";
+            }
+        }
         
         echo "Test data creation completed!\n";
         echo "Created:\n";
@@ -292,6 +357,7 @@ class TestSeeder extends Seeder
         echo "- 10 hatchery users\n";
         echo "- 500 hatcher blower air speed forms\n";
         echo "- 500 incubator blower air speed forms\n";
+        echo "- 500 hatchery sullair forms\n";
         echo "- {$formCount} incubator routine checklist forms\n";
     }
 }

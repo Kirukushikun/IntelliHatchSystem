@@ -64,6 +64,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/blower-air-incubator-dashboard', [DashboardController::class, 'blowerAirIncubator'])->name('admin.blower-air-incubator-dashboard');
 
+        Route::get('/admin/hatchery-sullair-dashboard', [DashboardController::class, 'hatcherySullair'])->name('admin.hatchery-sullair-dashboard');
+
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
         Route::get('/admin/incubator-machines', [IncubatorController::class, 'index'])->name('admin.incubator-machines');
@@ -79,6 +81,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/print/forms/blower-air-incubator', [FormsPrintController::class, 'blowerAirIncubator'])
             ->middleware('signed')
             ->name('admin.print.forms.blower-air-incubator');
+
+        Route::get('/admin/print/forms/hatchery-sullair', [FormsPrintController::class, 'hatcherySullair'])
+            ->middleware('signed')
+            ->name('admin.print.forms.hatchery-sullair');
 
         Route::get('/admin/print/forms/incubator-routine', [FormsPrintController::class, 'incubatorRoutine'])
             ->middleware('signed')

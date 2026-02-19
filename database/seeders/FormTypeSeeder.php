@@ -21,7 +21,7 @@ class FormTypeSeeder extends Seeder
         ];
 
         foreach ($formTypes as $formName) {
-            DB::table('form_types')->insert([
+            DB::table('form_types')->insertOrIgnore([
                 'form_name' => $formName,
                 'created_at' => now(),
                 'updated_at' => now(),
