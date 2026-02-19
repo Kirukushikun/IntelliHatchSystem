@@ -323,8 +323,8 @@ class TestSeeder extends Seeder
                     'cellphone_number' => $phCellphoneNumber,
                     'sullair_number' => $selectedSullair,
 
-                    'actual_psi_reading' => fake()->numberBetween(60, 90) . ' psi',
-                    'actual_temperature_reading' => fake()->numberBetween(150, 200) . ' F',
+                    'actual_psi_reading' => fake()->numberBetween(60, 90),
+                    'actual_temperature_reading' => fake()->numberBetween(150, 200),
                     'actual_volt_reading' => fake()->numberBetween(200, 240) . ' V',
                     'actual_ampere_reading' => fake()->numberBetween(8, 15) . ' A',
 

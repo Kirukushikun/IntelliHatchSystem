@@ -43,8 +43,8 @@ class HatcherySullairFactory extends Factory
                     'cellphone_number' => $phCellphoneNumber,
                     'sullair_number' => $this->faker->randomElement($sullairOptions),
 
-                    'actual_psi_reading' => $this->faker->numberBetween(60, 90) . ' psi',
-                    'actual_temperature_reading' => $this->faker->numberBetween(150, 200) . ' F',
+                    'actual_psi_reading' => $this->faker->numberBetween(60, 90),
+                    'actual_temperature_reading' => $this->faker->numberBetween(150, 200),
                     'actual_volt_reading' => $this->faker->numberBetween(200, 240) . ' V',
                     'actual_ampere_reading' => $this->faker->numberBetween(8, 15) . ' A',
 

@@ -95,9 +95,9 @@ class HatcherySullairForm extends FormNavigation
     {
         $this->formSubmitted = true;
 
-        $this->validate(HatcherySullairConfig::getRules(), $this->messages());
-
         try {
+            $this->validate(HatcherySullairConfig::getRules(), $this->messages());
+
             if (!$this->ensureAllPhotosUploaded()) {
                 $this->dispatch('showToast', message: 'Photo uploads are still in progress. Please wait for all photos to finish uploading before submitting the form.', type: 'error');
                 return;
@@ -116,6 +116,14 @@ class HatcherySullairForm extends FormNavigation
             session()->flash('success', 'Form submitted successfully!');
 
             return redirect()->route('forms.hatchery-sullair');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $firstKey = array_key_first($e->validator->errors()->messages());
+            if ($firstKey) {
+                $fieldName = str_replace('form.', '', $firstKey);
+                $this->goToStepWithField($fieldName);
+            }
+
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Form submission failed', [
                 'error' => $e->getMessage(),
