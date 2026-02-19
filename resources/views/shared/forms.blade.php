@@ -18,6 +18,12 @@
                 'description' => 'Lorem Ipsum',
                 'route' => '/forms/blower-air-incubator',
                 'color' => 'amber',
+            ],
+            [
+                'title' => 'Hatchery Sullair Air Compressor Weekly PMS Checklist',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/hatchery-sullair',
+                'color' => 'amber',
             ]
         ];
         

@@ -48,6 +48,14 @@ class FormController extends Controller
     }
 
     /**
+     * Display the hatchery sullair form page.
+     */
+    public function hatcherySullair()
+    {
+        return view('shared.forms.hatchery-sullair');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Form $form)
