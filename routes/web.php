@@ -28,6 +28,10 @@ Route::get('/forms/blower-air-incubator', function () {
     return view('shared.forms.blower-air-incubator');
 })->name('forms.blower-air-incubator');
 
+Route::get('/forms/hatchery-sullair', function () {
+    return view('shared.forms.hatchery-sullair');
+})->name('forms.hatchery-sullair');
+
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
     // Unified login route

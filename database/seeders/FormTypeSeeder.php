@@ -16,7 +16,8 @@ class FormTypeSeeder extends Seeder
         $formTypes = [
             'Incubator Routine Checklist Per Shift',
             'Hatcher Blower Air Speed Monitoring',
-            'Incubator Blower Air Speed Monitoring'
+            'Incubator Blower Air Speed Monitoring',
+            'Hatchery Sullair Air Compressor Weekly PMS Checklist'
         ];
 
         foreach ($formTypes as $formName) {
