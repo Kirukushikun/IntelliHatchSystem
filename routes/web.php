@@ -9,6 +9,7 @@ use App\Http\Controllers\Shared\Management\PlenumController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FormController;
+use App\Http\Controllers\Admin\FormsPrintController;
 
 Route::get('/', function () {
     return view('landing');
@@ -66,6 +67,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/hatcher-machines', [HatcherController::class, 'index'])->name('admin.hatcher-machines');
 
         Route::get('/admin/plenum-machines', [PlenumController::class, 'index'])->name('admin.plenum-machines');
+
+        Route::get('/admin/print/forms/blower-air-hatcher', [FormsPrintController::class, 'blowerAirHatcher'])
+            ->middleware('signed')
+            ->name('admin.print.forms.blower-air-hatcher');
+
+        Route::get('/admin/print/forms/blower-air-incubator', [FormsPrintController::class, 'blowerAirIncubator'])
+            ->middleware('signed')
+            ->name('admin.print.forms.blower-air-incubator');
+
+        Route::get('/admin/print/forms/incubator-routine', [FormsPrintController::class, 'incubatorRoutine'])
+            ->middleware('signed')
+            ->name('admin.print.forms.incubator-routine');
 
         Route::get('/admin/change-password', [UserController::class, 'changePassword'])->name('admin.change-password');
     });
