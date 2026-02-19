@@ -90,13 +90,13 @@
 
     <!-- Quick Filters for Today -->
     <div class="flex flex-wrap gap-3 mb-6">
-        <div class="text-sm font-medium text-gray-700 self-center">Today:</div>
+        <div class="text-sm font-medium text-gray-700 dark:text-gray-300 self-center">Today:</div>
         <button 
             wire:click="quickFilterToday"
             class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
                 {{ ($dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d')) 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:text-white dark:hover:bg-blue-800' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}"
         >
             Today
             <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
@@ -130,7 +130,7 @@
                                 @endif
                             </p>
                         </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 bg-slate-50">
+                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">
                                 Hatchery Man
                             </p>
@@ -166,13 +166,13 @@
                                 <div class="flex items-center justify-center gap-2">
                                     <button 
                                         wire:click="viewDetails({{ $form->id }})"
-                                        class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                                        class="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors"
                                         title="View Details">
                                         View
                                     </button>
                                     <button 
                                         wire:click="deleteForm({{ $form->id }})"
-                                        class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                                        class="px-3 py-1 text-xs font-medium text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/40 rounded-md hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                                         title="Delete Form">
                                         Delete
                                     </button>
@@ -201,34 +201,34 @@
                 @php
                     $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
                 @endphp
-                <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-3 mb-4">
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-lg p-4 space-y-3 mb-4">
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
-                            <p class="text-xs text-gray-500">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
                         </div>
                     </div>
                     
                     <div class="space-y-2">
                         <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500">Hatchery Man:</span>
-                            <span class="text-xs text-gray-900">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span>
+                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500">Incubator:</span>
-                            <span class="text-xs text-gray-900">{{ getMachineName($formData) }}</span>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Incubator:</span>
+                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ getMachineName($formData) }}</span>
                         </div>
                     </div>
                     
-                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                         <button 
                             wire:click="viewDetails({{ $form->id }})"
-                            class="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                            class="text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 text-xs font-medium"
                         >
                             View
                         </button>
                         <button 
                             wire:click="deleteForm({{ $form->id }})"
-                            class="text-red-600 hover:text-red-800 text-xs font-medium"
+                            class="text-red-600 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 text-xs font-medium"
                         >
                             Delete
                         </button>
@@ -239,8 +239,8 @@
                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900">No forms found</h3>
-                    <p class="text-gray-500 mt-1">Try adjusting your filters or search criteria</p>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">No forms found</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">Try adjusting your filters or search criteria</p>
                 </div>
             @endforelse
         </div>
