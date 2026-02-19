@@ -11,16 +11,16 @@
 
 @php
     $variantClasses = [
-        'primary' => 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600',
-        'secondary' => 'bg-gray-600 hover:bg-gray-700 text-white border-gray-600',
-        'success' => 'bg-green-600 hover:bg-green-700 text-white border-green-600',
-        'warning' => 'bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500',
-        'danger' => 'bg-red-600 hover:bg-red-700 text-white border-red-600',
-        'outline-primary' => 'bg-white hover:bg-orange-50 text-orange-600 border-orange-600',
-        'outline-secondary' => 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300',
-        'outline-danger' => 'bg-white hover:bg-red-50 text-red-600 border-red-600',
-        'ghost' => 'bg-transparent hover:bg-gray-100 text-gray-700 border-transparent',
-        'link' => 'bg-transparent hover:underline text-blue-600 border-transparent p-0',
+        'primary' => 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600 dark:bg-orange-700 dark:hover:bg-orange-800 dark:border-orange-700',
+        'secondary' => 'bg-gray-600 hover:bg-gray-700 text-white border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-800 dark:border-gray-700',
+        'success' => 'bg-green-600 hover:bg-green-700 text-white border-green-600 dark:bg-green-700 dark:hover:bg-green-800 dark:border-green-700',
+        'warning' => 'bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500 dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:border-yellow-600',
+        'danger' => 'bg-red-600 hover:bg-red-700 text-white border-red-600 dark:bg-red-700 dark:hover:bg-red-800 dark:border-red-700',
+        'outline-primary' => 'bg-white hover:bg-orange-50 text-orange-600 border-orange-600 dark:bg-gray-800 dark:hover:bg-orange-900/20 dark:text-orange-400 dark:border-orange-500',
+        'outline-secondary' => 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
+        'outline-danger' => 'bg-white hover:bg-red-50 text-red-600 border-red-600 dark:bg-gray-800 dark:hover:bg-red-900/20 dark:text-red-400 dark:border-red-500',
+        'ghost' => 'bg-transparent hover:bg-gray-100 text-gray-700 border-transparent dark:bg-transparent dark:hover:bg-gray-700 dark:text-gray-300 dark:border-transparent',
+        'link' => 'bg-transparent hover:underline text-blue-600 border-transparent p-0 dark:text-blue-400',
     ];
 
     $sizeClasses = [

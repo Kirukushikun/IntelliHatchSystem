@@ -8,6 +8,7 @@
     showCameraModal: false,
     showCancelConfirmation: false,
     showCarouselModal: false,
+    showRemoveConfirmation: false,
     attachMode: 'camera',
     photoKey: '{{ $name }}',
     stream: null,
@@ -50,6 +51,7 @@
             this.showCarouselModal = false;
             this.showCameraModal = false;
             this.showCancelConfirmation = false;
+            this.showRemoveConfirmation = false;
 
             if (this.$refs && this.$refs.originalInput) {
                 this.suppressInputChange = true;
@@ -69,6 +71,7 @@
             this.showCarouselModal = false;
             this.showCameraModal = false;
             this.showCancelConfirmation = false;
+            this.showRemoveConfirmation = false;
 
             if (this.$refs && this.$refs.originalInput) {
                 this.suppressInputChange = true;
@@ -437,7 +440,12 @@
         }
         this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.attachedPhotos.length) % this.attachedPhotos.length;
     },
+    tryRemoveCurrentAttachedPhoto() {
+        this.showRemoveConfirmation = true;
+    },
     async removeCurrentAttachedPhoto() {
+        this.showRemoveConfirmation = false;
+
         if (this.attachedPhotos.length === 0) {
             return;
         }
@@ -557,7 +565,7 @@
             </label>
             <button type="button"
                     @click="attachMode = (attachMode === 'camera' ? 'upload' : 'camera')"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 cursor-pointer">
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"></path>
                 </svg>
@@ -644,11 +652,11 @@
     <div class="fixed inset-0 bg-black/80" @click="tryCancel()"></div>
 
     <div class="relative min-h-screen flex items-start sm:items-center justify-center p-2 sm:p-4">
-        <div class="relative bg-white rounded-lg shadow-xl max-w-2xl w-full p-4 sm:p-6 my-4 sm:my-8 max-h-[95vh] overflow-y-auto">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-4 sm:p-6 my-4 sm:my-8 max-h-[95vh] overflow-y-auto">
             
-            <div class="flex items-center justify-between mb-4 sticky top-0 bg-white z-10 pb-2">
-                <h3 class="text-base sm:text-lg font-semibold text-gray-900">Add Photos</h3>
-                <button @click="tryCancel()" type="button" class="text-gray-400 hover:text-gray-600 shrink-0">
+            <div class="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10 pb-2">
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Add Photos</h3>
+                <button @click="tryCancel()" type="button" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shrink-0">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -658,7 +666,7 @@
             <div class="flex flex-col items-center space-y-3 sm:space-y-4">
                 {{-- Status --}}
                 <div class="w-full text-center py-2 px-3 sm:px-4 rounded-lg font-medium text-xs sm:text-sm"
-                    :class="uploading ? 'bg-blue-100 text-blue-700' : (processingGallery ? 'bg-purple-100 text-purple-700' : (cameraActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'))">
+                    :class="uploading ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : (processingGallery ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : (cameraActive ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'))">
                     <span x-text="uploading ? 'Uploading...' : (processingGallery ? 'Processing images...' : (cameraActive ? 'Camera is active' : 'Capture or select photos'))"></span>
                 </div>
                 
@@ -671,7 +679,7 @@
 
                 {{-- Photos Grid --}}
                 <div class="w-full" x-show="photos.length > 0">
-                    <h4 class="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">Captured Photos (<span x-text="photos.length"></span>)</h4>
+                    <h4 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">Captured Photos (<span x-text="photos.length"></span>)</h4>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-h-[40vh] overflow-y-auto pr-1">
                         <template x-for="photo in photos" :key="photo.id">
                             <div class="relative rounded-lg overflow-hidden shadow-md">
@@ -687,10 +695,10 @@
             </div>
 
             {{-- Footer Buttons --}}
-            <div class="flex flex-wrap justify-center sm:justify-end gap-2 mt-4 sm:mt-6 sticky bottom-0 bg-white pt-2 pb-1 border-t border-gray-100">
+            <div class="flex flex-wrap justify-center sm:justify-end gap-2 mt-4 sm:mt-6 sticky bottom-0 bg-white dark:bg-gray-800 pt-2 pb-1 border-t border-gray-100 dark:border-gray-700">
                 <button @click="tryCancel()" type="button"
                         :disabled="uploading || processingGallery"
-                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                     Cancel
                 </button>
                 
@@ -734,7 +742,7 @@
             style="display: none;">
             <div class="fixed inset-0 bg-black/50"></div>
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
                     <div class="text-center">
                         <div class="mx-auto mb-4 text-yellow-500 w-16 h-16">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -742,11 +750,11 @@
                                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Cancel Photo Capture?</h3>
-                        <p class="text-gray-700 mb-4">Any captured photos that haven't been uploaded will be lost.</p>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Cancel Photo Capture?</h3>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4">Any captured photos that haven't been uploaded will be lost.</p>
                         <div class="flex gap-3 justify-center">
                             <button @click="showCancelConfirmation = false" type="button"
-                                    class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                    class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 Continue Capturing
                             </button>
                             <button @click="confirmCancel()" type="button"
@@ -766,10 +774,10 @@
     <div x-show="showCarouselModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
         <div class="fixed inset-0 bg-black/80" @click="showCarouselModal = false"></div>
         <div class="relative min-h-screen flex items-center justify-center p-4">
-            <div class="relative bg-white rounded-lg shadow-xl max-w-sm w-full p-4 sm:p-6">
+            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">Attached Photos</h3>
-                    <button type="button" @click="showCarouselModal = false" class="text-gray-400 hover:text-gray-600">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Attached Photos</h3>
+                    <button type="button" @click="showCarouselModal = false" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -802,11 +810,44 @@
 
                 <div class="mt-4 flex justify-end">
                     <button type="button"
-                            @click="removeCurrentAttachedPhoto()"
+                            @click="tryRemoveCurrentAttachedPhoto()"
                             class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
                         Remove
                     </button>
                 </div>
+
+                {{-- Remove Photo Confirmation Modal --}}
+                <div x-show="showRemoveConfirmation"
+                    x-cloak
+                    class="fixed inset-0 z-60 overflow-y-auto"
+                    style="display: none;">
+                    <div class="fixed inset-0 bg-black/50"></div>
+                    <div class="relative min-h-screen flex items-center justify-center p-4">
+                        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+                            <div class="text-center">
+                                <div class="mx-auto mb-4 text-yellow-500 w-16 h-16">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Remove Photo?</h3>
+                                <p class="text-gray-700 dark:text-gray-300 mb-4">Are you sure you want to remove this photo? This action cannot be undone.</p>
+                                <div class="flex gap-3 justify-center">
+                                    <button @click="showRemoveConfirmation = false" type="button"
+                                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        Keep Photo
+                                    </button>
+                                    <button @click="removeCurrentAttachedPhoto()" type="button"
+                                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                        Yes, Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

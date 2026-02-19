@@ -9,3 +9,219 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Custom dark mode using data attribute */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Explicit dark mode styles to ensure proper text colors */
+[data-theme=dark] {
+    color: white;
+}
+
+[data-theme=dark] .text-gray-900 {
+    color: white !important;
+}
+
+[data-theme=dark] .text-gray-800 {
+    color: white !important;
+}
+
+[data-theme=dark] .text-gray-700 {
+    color: white !important;
+}
+
+[data-theme=dark] .text-gray-600 {
+    color: white !important;
+}
+
+[data-theme=dark] .text-gray-500 {
+    color: white !important;
+}
+
+[data-theme=dark] .text-gray-400 {
+    color: white !important;
+}
+
+[data-theme=dark] .text-gray-300 {
+    color: white !important;
+}
+
+[data-theme=dark] input,
+[data-theme=dark] textarea,
+[data-theme=dark] select {
+    color: white !important;
+    background-color: rgb(31, 41, 55) !important;
+    border-color: rgb(75, 85, 99) !important;
+}
+
+[data-theme=dark] input::placeholder,
+[data-theme=dark] textarea::placeholder {
+    color: rgb(156, 163, 175) !important;
+}
+
+[data-theme=dark] select option {
+    color: black !important;
+    background-color: rgb(31, 41, 55) !important;
+}
+
+/* Prevent transitions during initial page load */
+* {
+    transition: none !important;
+}
+
+/* Enable transitions only after page load */
+html.loaded * {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Or use targeted transitions for better performance */
+html.loaded button, 
+html.loaded .btn, 
+html.loaded input, 
+html.loaded textarea, 
+html.loaded select, 
+html.loaded .card, 
+html.loaded .transition-theme {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Enhanced dark mode styles for better contrast */
+[data-theme=dark] .text-blue-600 {
+    color: white !important;
+}
+
+[data-theme=dark] .bg-blue-50 {
+    background-color: #1e40af !important;
+}
+
+[data-theme=dark] .hover\:bg-blue-100:hover {
+    background-color: #1d4ed8 !important;
+}
+
+[data-theme=dark] .text-yellow-600 {
+    color: white !important;
+}
+
+[data-theme=dark] .bg-yellow-50 {
+    background-color: #b45309 !important;
+}
+
+[data-theme=dark] .hover\:bg-yellow-100:hover {
+    background-color: #b45309 !important;
+}
+
+[data-theme=dark] .text-red-600 {
+    color: white !important;
+}
+
+[data-theme=dark] .bg-red-50 {
+    background-color: #dc2626 !important;
+}
+
+[data-theme=dark] .hover\:bg-red-100:hover {
+    background-color: #b91c1c !important;
+}
+
+[data-theme=dark] .text-green-600 {
+    color: white !important;
+}
+
+[data-theme=dark] .bg-green-50 {
+    background-color: #16a34a !important;
+}
+
+[data-theme=dark] .hover\:bg-green-100:hover {
+    background-color: #15803d !important;
+}
+
+/* Enhanced orange colors for dark mode */
+[data-theme=dark] .text-orange-600 {
+    color: #fb923c !important;
+}
+
+[data-theme=dark] .text-orange-500 {
+    color: #fb923c !important;
+}
+
+[data-theme=dark] .bg-orange-50 {
+    background-color: #c2410c !important;
+}
+
+[data-theme=dark] .bg-orange-500 {
+    background-color: #c2410c !important;
+}
+
+[data-theme=dark] .bg-orange-600 {
+    background-color: #c2410c !important;
+}
+
+[data-theme=dark] .hover\:bg-orange-700:hover {
+    background-color: #dc2626 !important;
+}
+
+[data-theme=dark] .border-orange-600 {
+    border-color: #c2410c !important;
+}
+
+/* Enhanced status pill colors for dark mode */
+[data-theme=dark] .bg-red-100 {
+    background-color: #dc2626 !important;
+}
+
+[data-theme=dark] .text-red-800 {
+    color: white !important;
+}
+
+[data-theme=dark] .bg-green-100 {
+    background-color: #16a34a !important;
+}
+
+[data-theme=dark] .text-green-800 {
+    color: white !important;
+}
+
+[data-theme=dark] .bg-red-900\/30 {
+    background-color: rgba(220, 38, 38, 0.3) !important;
+}
+
+[data-theme=dark] .text-red-300 {
+    color: #fca5a5 !important;
+}
+
+[data-theme=dark] .bg-green-900\/30 {
+    background-color: rgba(22, 163, 74, 0.3) !important;
+}
+
+[data-theme=dark] .text-green-300 {
+    color: #86efac !important;
+}
+
+/* Force dark mode styling for autofilled inputs */
+[data-theme=dark] input:-webkit-autofill,
+[data-theme=dark] input:-webkit-autofill:hover,
+[data-theme=dark] input:-webkit-autofill:focus,
+[data-theme=dark] input:-moz-autofill,
+[data-theme=dark] input:-moz-autofill:hover,
+[data-theme=dark] input:-moz-autofill:focus {
+    background-color: rgb(31, 41, 55) !important;
+    background-image: none !important;
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgb(31, 41, 55) inset !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+}
+
+[data-theme=dark] input:-webkit-autofill::first-line {
+    color: white !important;
+}
+
+[data-theme=dark] input::placeholder {
+    color: rgb(156, 163, 175) !important;
+}
+
+/* Additional autofill overrides */
+[data-theme=dark] input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px rgb(31, 41, 55) inset !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white !important;
+}

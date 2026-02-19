@@ -11,6 +11,25 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
+        <!-- Dark mode script to prevent flash -->
+        <script>
+            (function() {
+                const darkMode = localStorage.getItem('dark_mode');
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDark = darkMode === 'true' || (!darkMode && systemDark);
+                
+                // Set theme immediately to prevent flash
+                if (isDark) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+                
+                // Add loaded class after a tiny delay to allow theme to be set
+                setTimeout(() => {
+                    document.documentElement.classList.add('loaded');
+                }, 10);
+            })();
+        </script>
+
         <!-- Styles / Scripts -->
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
             @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -30,7 +49,7 @@
             [x-cloak] { display: none !important; }
         </style>
     </head>
-    <body class="h-full bg-gray-100">
+    <body class="h-full bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
         {{ $slot }}
         
         <!-- Global Toast Component -->

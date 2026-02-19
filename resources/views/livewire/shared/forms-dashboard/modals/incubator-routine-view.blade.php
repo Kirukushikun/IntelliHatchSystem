@@ -47,14 +47,14 @@
         if ($photoCount > 0) {
             return '<button 
                 @click="$wire.viewPhotos(\'' . $field . '\')"
-                class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-150 shadow-sm">
+                class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/70 hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-150 shadow-sm cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
                 <span>Photos (' . $photoCount . ')</span>
             </button>';
         } else {
-            return '<span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-500 border border-gray-200">
+            return '<span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -85,18 +85,18 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-4xl"
+             class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl dark:shadow-2xl transition-all w-full max-w-4xl"
              @click.stop>
             
             <!-- Modal Header -->
-            <div class="bg-white px-4 py-3 border-b border-gray-200 sm:px-6">
+            <div class="bg-white dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sm:px-6">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">
                         INCUBATOR ROUTINE CHECKLIST PER SHIFT
                     </h3>
                     <button type="button" 
                             @click="showModal = false; $wire.closeModal()"
-                            class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            class="rounded-md bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 cursor-pointer">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -105,34 +105,34 @@
             </div>
             
             <!-- Modal Body -->
-            <div class="bg-white px-4 py-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto">
+            <div class="bg-white dark:bg-gray-800 px-4 py-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto">
                 @if($this->selectedForm)
                     <!-- Basic Information -->
                     <div class="mb-8">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-white">
-                                <span class="text-sm font-medium text-gray-600">Date:</span>
-                                <span class="text-sm text-gray-900">{{ $this->selectedForm->date_submitted ? $this->selectedForm->date_submitted->format('M d, Y H:i') : 'N/A' }}</span>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Date:</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->selectedForm->date_submitted ? $this->selectedForm->date_submitted->format('M d, Y H:i') : 'N/A' }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-gray-50">
-                                <span class="text-sm font-medium text-gray-600">Shift:</span>
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Shift:</span>
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['shift'] ?? 'N/A') }}">
                                     {{ $this->formData['shift'] ?? 'N/A' }}
                                 </span>
                             </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-white">
-                                <span class="text-sm font-medium text-gray-600">Hatchery Man:</span>
-                                <span class="text-sm text-gray-900">{{ $this->selectedForm->user ? ($this->selectedForm->user->first_name . ' ' . $this->selectedForm->user->last_name) : 'Unknown' }}</span>
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Hatchery Man:</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->selectedForm->user ? ($this->selectedForm->user->first_name . ' ' . $this->selectedForm->user->last_name) : 'Unknown' }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-gray-50">
-                                <span class="text-sm font-medium text-gray-600">Incubator:</span>
-                                <span class="text-sm text-gray-900">{{ $this->selectedForm->machine_info['name'] ?? 'N/A' }}</span>
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Incubator:</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->selectedForm->machine_info['name'] ?? 'N/A' }}</span>
                             </div>
                         </div>
                         
-                        <div class="mt-4 space-y-3">
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 bg-white">
-                                <span class="text-sm font-medium text-gray-600">Check for Alarm system condition:</span>
+                        <div class="mt-6 space-y-4">
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Check for Alarm system condition:</span>
                                 <div class="flex items-center gap-2">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ getStatusColor($this->formData['alarm_system_condition'] ?? 'N/A') }}">
                                         {{ $this->formData['alarm_system_condition'] ?? 'N/A' }}
@@ -140,15 +140,15 @@
                                 </div>
                             </div>
                             @if(isset($this->formData['corrective_action']) && $this->formData['corrective_action'])
-                                <div class="py-2 bg-gray-50">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm font-medium text-gray-600">Corrective Action:</span>
+                                <div class="py-3 border-b border-gray-100 dark:border-gray-700">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Corrective Action:</span>
                                         <div class="flex items-center gap-2">
                                             {!! getPhotoButton('corrective_action', $this) !!}
                                         </div>
                                     </div>
-                                    <div class="bg-gray-50 p-3 rounded-md">
-                                        <p class="text-sm text-gray-700">{{ $this->formData['corrective_action'] }}</p>
+                                    <div class="p-4 rounded-md bg-gray-50 dark:bg-gray-700">
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ $this->formData['corrective_action'] }}</p>
                                     </div>
                                 </div>
                             @endif
@@ -356,10 +356,10 @@
             </div>
             
             <!-- Modal Footer -->
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="button" 
                         @click="showModal = false; $wire.closeModal()"
-                        class="w-full inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm cursor-pointer">
                     Close
                 </button>
             </div>

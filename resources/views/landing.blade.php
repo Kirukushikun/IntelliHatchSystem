@@ -32,30 +32,34 @@
     @endphp
     
     <!-- Simple Public Navbar -->
-    <nav class="shadow-lg border-b border-gray-200 bg-white sticky top-0 z-30">
+    <nav class="shadow-lg border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-30">
         <div class="mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo/Brand -->
                 <div class="flex items-center space-x-3">
-                    <h1 class="text-xl font-bold text-gray-900">IntelliHatch System</h1>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">IntelliHatch System</h1>
                 </div>
                 
-                <!-- Login -->
-                @guest
-                    <div class="flex items-center space-x-4">
-                        <a href="/login" class="inline-flex items-center px-4 py-2 text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors">
+                <!-- Right Side Actions -->
+                <div class="flex items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <x-dark-mode-toggle />
+                    
+                    <!-- Login -->
+                    @guest
+                        <a href="/login" class="inline-flex items-center px-4 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                             Login
                         </a>
-                    </div>
-                @endguest
+                    @endguest
+                </div>
                 
                 <!-- Authenticated User Actions -->
                 @auth
                     <div class="flex items-center space-x-4">
-                        <a href="{{ Auth::user() && ((int) Auth::user()->user_type) === 0 ? '/admin/dashboard' : '/user/forms' }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                        <a href="{{ Auth::user() && ((int) Auth::user()->user_type) === 0 ? '/admin/dashboard' : '/user/forms' }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                             </svg>
@@ -67,20 +71,20 @@
         </div>
     </nav>
     
-    <div class="min-h-screen bg-linear-to-br from-orange-50 via-white to-orange-100" x-data="{ query: '' }">
+    <div class="min-h-screen bg-linear-to-br from-orange-50 dark:from-gray-900 via-white dark:via-gray-800 to-orange-100 dark:to-gray-900" x-data="{ query: '' }">
             <!-- Hero Section -->
             <div class="container mx-auto px-4 py-6">
                 <!-- Search Section -->
                 <div class="max-w-2xl mx-auto mb-6">
                     <div class="relative">
-                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <input
                             type="text"
                             x-model="query"
                             placeholder="Search forms..."
-                            class="w-full pl-11 pr-4 py-4 text-lg bg-white border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all placeholder:text-gray-400 shadow-lg"
+                            class="w-full pl-11 pr-4 py-4 text-lg bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-lg dark:shadow-xl"
                         />
                     </div>
                 </div>
@@ -90,7 +94,7 @@
                     @foreach($forms as $form)
                         <a href="{{ $form['route'] }}"
                            x-show="!query || '{{ strtolower($form['title']) }}'.includes(query.toLowerCase())"
-                           class="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group border-l-4 {{ $borderColors[$form['color']] ?? 'border-gray-500' }}">
+                           class="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-xl dark:hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-l-4 border-gray-200 dark:border-gray-700 border-l-amber-500 cursor-pointer transform hover:scale-[1.02] hover:-translate-y-1">
                             <!-- Card Header -->
                             <div class="px-6 py-4">
                                 <div class="flex items-center justify-between">
@@ -99,7 +103,7 @@
                                             {{ $form['title'] }}
                                         </x-title>
                                     </div>
-                                    <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
                                 </div>
@@ -111,13 +115,13 @@
                 <!-- Empty State (when no forms are available) -->
                 @if(empty($forms))
                     <div class="text-center py-6">
-                        <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-6">
-                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full mb-6">
+                            <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">No forms available</h3>
-                        <p class="text-gray-600 text-lg">Check back later for available forms.</p>
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">No forms available</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-lg">Check back later for available forms.</p>
                     </div>
                 @endif
             </div>
