@@ -1,6 +1,7 @@
 @props([
     'label' => '', 
     'name' => '', 
+    'errorKey' => null,
     'value' => '', 
     'placeholder' => 'Enter text here', 
     'required' => false,
@@ -10,6 +11,10 @@
     'wireModel' => null,
     'subtext' => ''
 ])
+
+@php
+    $errorKey = $errorKey ?: $name;
+@endphp
 
 <div class="mb-6 {{ $class }}">
     @if($label)
@@ -50,7 +55,7 @@
             @if($required) required @endif
             class="mt-1 block w-full rounded-lg border shadow-sm 
             {{ $icon ? 'pl-10' : 'px-4' }} py-2
-            {{ $errors->first($name) 
+            {{ $errors->has($errorKey) 
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}
             autofill:bg-white autofill:text-gray-900 dark:autofill:bg-gray-800 dark:autofill:text-white"
@@ -71,8 +76,8 @@
         @endif
     </div>
 
-    @error($name)
-        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+    @error($errorKey)
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
     @enderror
 </div>
 
