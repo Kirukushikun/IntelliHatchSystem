@@ -21,7 +21,7 @@
                 </div>
 
                 <div data-field="cellphone_number">
-                    <x-text-input label="Cellphone Number" name="cellphone_number" :required="true" placeholder="Enter cellphone number..." wireModel="form.cellphone_number" />
+                    <x-text-input label="Cellphone Number" name="cellphone_number" error-key="form.cellphone_number" :required="true" placeholder="Enter cellphone number..." wireModel="form.cellphone_number" />
                 </div>
 
                 <div data-field="sullair_number">
@@ -36,11 +36,11 @@
                 <x-title>READINGS</x-title>
 
                 <div data-field="actual_psi_reading">
-                    <x-text-input label="Actual PSI Reading" name="actual_psi_reading" :required="true" placeholder="Enter PSI reading..." wireModel="form.actual_psi_reading" subtext="Required: 60 psi to 90 psi" />
+                    <x-text-input label="Actual PSI Reading" name="actual_psi_reading" error-key="form.actual_psi_reading" :required="true" placeholder="Enter PSI reading..." wireModel="form.actual_psi_reading" subtext="Required: 60 psi to 90 psi" />
                 </div>
 
                 <div data-field="actual_temperature_reading">
-                    <x-text-input label="Actual Temperature Reading" name="actual_temperature_reading" :required="true" placeholder="Enter temperature reading..." wireModel="form.actual_temperature_reading" subtext="150 F to 200 F" />
+                    <x-text-input label="Actual Temperature Reading" name="actual_temperature_reading" error-key="form.actual_temperature_reading" :required="true" placeholder="Enter temperature reading..." wireModel="form.actual_temperature_reading" subtext="150 F to 200 F" />
                 </div>
 
                 <div data-field="actual_psi_temperature_photos">
@@ -48,7 +48,7 @@
                 </div>
 
                 <div data-field="actual_volt_reading">
-                    <x-text-input label="Actual Volt Reading" name="actual_volt_reading" :required="true" placeholder="Enter volt reading..." wireModel="form.actual_volt_reading" />
+                    <x-text-input label="Actual Volt Reading" name="actual_volt_reading" error-key="form.actual_volt_reading" :required="true" placeholder="Enter volt reading..." wireModel="form.actual_volt_reading" />
                 </div>
 
                 <div data-field="actual_volt_photos">
@@ -56,7 +56,7 @@
                 </div>
 
                 <div data-field="actual_ampere_reading">
-                    <x-text-input label="Actual Ampere Reading" name="actual_ampere_reading" :required="true" placeholder="Enter ampere reading..." wireModel="form.actual_ampere_reading" />
+                    <x-text-input label="Actual Ampere Reading" name="actual_ampere_reading" error-key="form.actual_ampere_reading" :required="true" placeholder="Enter ampere reading..." wireModel="form.actual_ampere_reading" />
                 </div>
 
                 <div data-field="actual_ampere_photos">
