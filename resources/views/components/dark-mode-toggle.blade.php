@@ -40,7 +40,7 @@
     <!-- Dark Mode Toggle Button -->
     <button 
         @click="toggle()"
-        class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg transition-colors duration-200"
+        class="p-2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg transition-colors duration-200"
         :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
     >
         <!-- Sun Icon (visible in dark mode) -->

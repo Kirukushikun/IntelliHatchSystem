@@ -108,7 +108,40 @@ class BlowerAirIncubatorDashboard extends Component
 
     public function gotoPage($page): void
     {
-        $this->page = (int) $page;
+        $page = (int) $page;
+
+        $query = Form::where('form_type_id', $this->formType->id)
+            ->with(['user']);
+
+        if ($this->search !== '') {
+            $query->where(function ($q) {
+                $q->whereHas('user', function ($userQuery) {
+                    $userQuery->where('first_name', 'like', '%' . $this->search . '%')
+                        ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                })
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('form_inputs', 'like', '%"machine_info":%')
+                            ->where('form_inputs', 'like', '%"name":%' . $this->search . '%');
+                    });
+            });
+        }
+
+        if ($this->dateFrom) {
+            $query->whereDate('date_submitted', '>=', $this->dateFrom);
+        }
+        if ($this->dateTo) {
+            $query->whereDate('date_submitted', '<=', $this->dateTo);
+        }
+
+        $totalPages = $query->paginate($this->perPage)->lastPage();
+
+        if ($page < 1) {
+            $page = 1;
+        } elseif ($page > $totalPages) {
+            $page = $totalPages;
+        }
+
+        $this->page = $page;
     }
 
     // Computed property to get selectedForm freshly each time

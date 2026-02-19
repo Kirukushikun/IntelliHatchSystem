@@ -39,6 +39,26 @@ class Display extends Component
         $this->dateTo = request()->get('dateTo', '');
     }
 
+    public function updatingSearch(): void
+    {
+        $this->page = 1;
+    }
+
+    public function updatingStatusFilter(): void
+    {
+        $this->page = 1;
+    }
+
+    public function updatingDateFrom(): void
+    {
+        $this->page = 1;
+    }
+
+    public function updatingDateTo(): void
+    {
+        $this->page = 1;
+    }
+
     public function sortBy($field)
     {
         if ($this->sortField === $field) {

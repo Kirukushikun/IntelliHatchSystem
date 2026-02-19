@@ -33,9 +33,9 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
             <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="text-sm font-semibold text-gray-900 dark:text-white">Form types</div>
+                    <div class="text-sm font-semibold text-gray-900 dark:text-white">Forms Filter</div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ count($selectedTypes) }} selected
+                        {{ count($selectedTypes) }} Forms Selected
                     </div>
                 </div>
                 <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,12 +71,13 @@
                     <div class="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                         @foreach($typeOptions as $opt)
                             <label
+                                wire:key="dashboard-type-opt-{{ $opt['id'] }}"
                                 x-show="!typeQuery || '{{ strtolower($opt['name']) }}'.includes(typeQuery.toLowerCase())"
                                 class="flex items-start gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
                             >
                                 <input
                                     type="checkbox"
-                                    value="{{ $opt['id'] }}"
+                                    value="{{ (string) $opt['id'] }}"
                                     wire:model.live="selectedTypes"
                                     class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                                 />
@@ -553,6 +554,20 @@
                 } catch (error) {
                     console.error('Error creating charts:', error);
                 }
+            }
+
+            function updateCharts(charts) {
+                if (!charts || !window.__adminDashboardCharts) return;
+
+                baseCharts = charts;
+                const chartsForView = filterChartDataByQuery(baseCharts, currentQuery, currentView);
+
+                ['week', 'month', 'year'].forEach(period => {
+                    if (window.__adminDashboardCharts[period] && chartsForView[period]) {
+                        window.__adminDashboardCharts[period].data = chartsForView[period];
+                        window.__adminDashboardCharts[period].update();
+                    }
+                });
             }
 
             // Listen for Livewire updates using window.addEventListener as fallback
