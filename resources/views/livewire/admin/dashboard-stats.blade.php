@@ -7,11 +7,28 @@
         </div>
         <div class="flex w-full sm:w-auto sm:shrink-0 gap-2">
             <div class="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
-                <button type="button" @click="view = 'charts'" :class="view === 'charts' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'" class="px-3 py-2 text-xs font-medium transition-colors">
-                    Charts
+                <!-- Mobile: Single toggle button -->
+                <button type="button" @click="view = view === 'charts' ? 'cards' : 'charts'" class="sm:hidden px-4 py-2.5 text-xs font-medium transition-colors text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <svg x-show="view === 'charts'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <svg x-show="view === 'cards'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
                 </button>
-                <button type="button" @click="view = 'cards'" :class="view === 'cards' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'" class="px-3 py-2 text-xs font-medium transition-colors">
-                    Dashboards
+                
+                <!-- Desktop: Two separate buttons -->
+                <button type="button" @click="view = 'charts'" :class="view === 'charts' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'" class="hidden sm:flex px-3 py-2 text-xs font-medium transition-colors items-center cursor-pointer">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span>Charts</span>
+                </button>
+                <button type="button" @click="view = 'cards'" :class="view === 'cards' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'" class="hidden sm:flex px-3 py-2 text-xs font-medium transition-colors items-center cursor-pointer">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span>Dashboards</span>
                 </button>
             </div>
 
@@ -31,7 +48,7 @@
 
     <div x-data="{ open: false, typeQuery: '' }" x-show="view === 'charts'" x-transition class="mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-            <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between">
+            <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between cursor-pointer">
                 <div class="flex items-center gap-3">
                     <div class="text-sm font-semibold text-gray-900 dark:text-white">Forms Filter</div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
@@ -98,9 +115,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Last 7 Days</h3>
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Week {{ now()->format('W') }} Statistics</h3>
                 <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">Live</span>
                 </div>
             </div>
@@ -111,29 +128,29 @@
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Last 30 Days</h3>
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ now()->format('Y') }} Statistics</h3>
                 <div class="flex items-center space-x-2">
                     <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">Live</span>
                 </div>
             </div>
             <div class="relative h-64" wire:ignore>
-                <canvas id="adminDashboardMonthChart"></canvas>
+                <canvas id="adminDashboardYearChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Full Width Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
+    <!-- Full Width Month Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300 mb-4">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Last 12 Months</h3>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Month of {{ now()->format('F') }} Statistics</h3>
             <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 <span class="text-xs text-gray-500 dark:text-gray-400">Live</span>
             </div>
         </div>
         <div class="relative h-80" wire:ignore>
-            <canvas id="adminDashboardYearChart"></canvas>
+            <canvas id="adminDashboardMonthChart"></canvas>
         </div>
     </div>
     </div>
@@ -143,7 +160,7 @@
     <div x-show="view === 'cards'" x-transition>
     <div wire:poll.30s="refreshStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($cards as $card)
-            <div x-show="(!query || '{{ strtolower($card['type_name'] ?? '') }}'.includes(query.toLowerCase()))" class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-xl dark:hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-l-4 border-gray-200 dark:border-gray-700 border-l-amber-500 cursor-pointer transform hover:scale-[1.02] hover:-translate-y-1">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-xl dark:hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-l-4 border-gray-200 dark:border-gray-700 border-l-amber-500 cursor-pointer transform hover:scale-[1.02] hover:-translate-y-1">
                 <a href="{{ match($card['type_name']) {
                     'Incubator Routine Checklist Per Shift' => 'incubator-routine-dashboard',
                     'Hatcher Blower Air Speed Monitoring' => 'blower-air-hatcher-dashboard',
