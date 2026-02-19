@@ -8,7 +8,7 @@ class HatcherySullairConfig
     {
         return [
             'form.hatchery_man' => 'required|integer|exists:users,id',
-            'form.cellphone_number' => 'required|string',
+            'form.cellphone_number' => ['required', 'string', 'regex:/^(09\d{9}|\+639\d{9})$/'],
             'form.sullair_number' => 'required|string|in:Sullair 1 (Inside Incubation Area),Sullair 2 (Maintenance Area)',
 
             'form.actual_psi_reading' => 'required|string',
@@ -51,6 +51,7 @@ class HatcherySullairConfig
     {
         return [
             'required' => 'Please fill in this field.',
+            'form.cellphone_number.regex' => 'Please enter a valid Philippine cellphone number (09XXXXXXXXX or +639XXXXXXXXX).',
             'in' => 'Please select a valid option.',
             'integer' => 'Please enter a valid number.',
             'string' => 'Please enter valid text.',

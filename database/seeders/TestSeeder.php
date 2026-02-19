@@ -314,11 +314,13 @@ class TestSeeder extends Seeder
             $usedSullairs[$dateKey][$selectedSullair] = true;
             $user = $hatcheryUsers->random();
 
+            $phCellphoneNumber = '09' . str_pad((string) fake()->numberBetween(0, 999999999), 9, '0', STR_PAD_LEFT);
+
             Form::create([
                 'form_type_id' => $hatcherySullairFormTypeId,
                 'form_inputs' => [
                     'hatchery_man' => $user->id,
-                    'cellphone_number' => fake()->phoneNumber(),
+                    'cellphone_number' => $phCellphoneNumber,
                     'sullair_number' => $selectedSullair,
 
                     'actual_psi_reading' => fake()->numberBetween(60, 90) . ' psi',
