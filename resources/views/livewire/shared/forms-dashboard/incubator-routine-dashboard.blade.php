@@ -286,10 +286,10 @@
                 @php
                     $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
                 @endphp
-                <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-3">
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-lg p-4 space-y-3">
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
-                            <p class="text-xs text-gray-500">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
                         </div>
                         <div class="text-center">
                             {!! getStatusPill($formData['shift'] ?? 'N/A') !!}
@@ -298,25 +298,25 @@
                     
                     <div class="space-y-2">
                         <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500">Hatchery Man:</span>
-                            <span class="text-xs text-gray-900">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span>
+                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500">Incubator:</span>
-                            <span class="text-xs text-gray-900">{{ getMachineName($formData) }}</span>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Incubator:</span>
+                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ getMachineName($formData) }}</span>
                         </div>
                     </div>
                     
-                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                         <button 
                             wire:click="viewDetails({{ $form->id }})"
-                            class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                            class="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors"
                             title="View Details">
                             View
                         </button>
                         <button 
                             wire:click="deleteForm({{ $form->id }})"
-                            class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                            class="px-3 py-1 text-xs font-medium text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/40 rounded-md hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                             title="Delete Form">
                             Delete
                         </button>
@@ -327,12 +327,12 @@
                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900">No forms found</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">No forms found</h3>
                 </div>
             @endforelse
         </div>
         
-        @if ($forms->hasPages())
+        @if (is_object($forms) && method_exists($forms, 'hasPages') && $forms->hasPages())
             <!-- Pagination -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center px-3 md:px-4 py-3 border-t border-slate-200 dark:border-gray-700 gap-3 sm:gap-0">
                 <div class="text-xs md:text-sm text-slate-500 dark:text-slate-400 text-center sm:text-left">
