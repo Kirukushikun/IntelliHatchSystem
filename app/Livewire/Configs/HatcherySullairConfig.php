@@ -11,8 +11,8 @@ class HatcherySullairConfig
             'form.cellphone_number' => ['required', 'string', 'regex:/^(09\d{9}|\+639\d{9})$/'],
             'form.sullair_number' => 'required|string|in:Sullair 1 (Inside Incubation Area),Sullair 2 (Maintenance Area)',
 
-            'form.actual_psi_reading' => 'required|string',
-            'form.actual_temperature_reading' => 'required|string',
+            'form.actual_psi_reading' => 'required|numeric|between:60,90',
+            'form.actual_temperature_reading' => 'required|numeric|between:150,200',
             'form.actual_volt_reading' => 'required|string',
             'form.actual_ampere_reading' => 'required|string',
 
@@ -52,6 +52,10 @@ class HatcherySullairConfig
         return [
             'required' => 'Please fill in this field.',
             'form.cellphone_number.regex' => 'Please enter a valid Philippine cellphone number (09XXXXXXXXX or +639XXXXXXXXX).',
+            'form.actual_psi_reading.numeric' => 'Actual PSI Reading must be a number only (no text).',
+            'form.actual_psi_reading.between' => 'Actual PSI Reading must be between 60 and 90.',
+            'form.actual_temperature_reading.numeric' => 'Actual Temperature Reading must be a number only (no text).',
+            'form.actual_temperature_reading.between' => 'Actual Temperature Reading must be between 150 and 200.',
             'in' => 'Please select a valid option.',
             'integer' => 'Please enter a valid number.',
             'string' => 'Please enter valid text.',
