@@ -19,7 +19,8 @@
                     return request()->is('admin/dashboard*') || 
                            request()->is('admin/incubator-routine-dashboard*') ||
                            request()->is('admin/blower-air-hatcher-dashboard*') ||
-                           request()->is('admin/blower-air-incubator-dashboard*');
+                           request()->is('admin/blower-air-incubator-dashboard*') ||
+                           request()->is('admin/hatchery-sullair-dashboard*');
                 }
             ],
             [

@@ -16,7 +16,7 @@
         <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {{ $label }}
             @if($required)
-                <span class="ml-3 text-xl font-bold text-gray-900 dark:text-gray-100">IntelliHatch</span>
+                <span class="text-red-500">*</span>
             @endif
         </label>
         @if($subtext)

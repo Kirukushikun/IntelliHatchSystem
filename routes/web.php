@@ -9,6 +9,7 @@ use App\Http\Controllers\Shared\Management\PlenumController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FormController;
+use App\Http\Controllers\Admin\FormsPrintController;
 
 Route::get('/', function () {
     return view('landing');
@@ -26,6 +27,10 @@ Route::get('/forms/blower-air-hatcher', function () {
 Route::get('/forms/blower-air-incubator', function () {
     return view('shared.forms.blower-air-incubator');
 })->name('forms.blower-air-incubator');
+
+Route::get('/forms/hatchery-sullair', function () {
+    return view('shared.forms.hatchery-sullair');
+})->name('forms.hatchery-sullair');
 
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
@@ -59,6 +64,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/blower-air-incubator-dashboard', [DashboardController::class, 'blowerAirIncubator'])->name('admin.blower-air-incubator-dashboard');
 
+        Route::get('/admin/hatchery-sullair-dashboard', [DashboardController::class, 'hatcherySullair'])->name('admin.hatchery-sullair-dashboard');
+
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
         Route::get('/admin/incubator-machines', [IncubatorController::class, 'index'])->name('admin.incubator-machines');
@@ -66,6 +73,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/hatcher-machines', [HatcherController::class, 'index'])->name('admin.hatcher-machines');
 
         Route::get('/admin/plenum-machines', [PlenumController::class, 'index'])->name('admin.plenum-machines');
+
+        Route::get('/admin/print/forms/blower-air-hatcher', [FormsPrintController::class, 'blowerAirHatcher'])
+            ->middleware('signed')
+            ->name('admin.print.forms.blower-air-hatcher');
+
+        Route::get('/admin/print/forms/blower-air-incubator', [FormsPrintController::class, 'blowerAirIncubator'])
+            ->middleware('signed')
+            ->name('admin.print.forms.blower-air-incubator');
+
+        Route::get('/admin/print/forms/hatchery-sullair', [FormsPrintController::class, 'hatcherySullair'])
+            ->middleware('signed')
+            ->name('admin.print.forms.hatchery-sullair');
+
+        Route::get('/admin/print/forms/incubator-routine', [FormsPrintController::class, 'incubatorRoutine'])
+            ->middleware('signed')
+            ->name('admin.print.forms.incubator-routine');
 
         Route::get('/admin/change-password', [UserController::class, 'changePassword'])->name('admin.change-password');
     });

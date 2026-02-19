@@ -4,14 +4,12 @@ namespace App\Livewire\Shared\FormsDashboard;
 
 use App\Models\Form;
 use App\Models\FormType;
-use App\Models\Hatcher;
-use App\Models\User;
-use Livewire\Component;
-use Livewire\Attributes\Computed;
-use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-class BlowerAirHatcherDashboard extends Component
+class HatcherySullairDashboard extends Component
 {
     use WithPagination;
 
@@ -19,11 +17,12 @@ class BlowerAirHatcherDashboard extends Component
     public string $dateFrom = '';
     public string $dateTo = '';
     public bool $showFilterDropdown = false;
-    
+    public string $sullairNumberFilter = '';
+
     public ?int $selectedFormId = null;
     public FormType $formType;
     public int $todayFormCount = 0;
-    
+
     // Modal properties
     public bool $showModal = false;
     public bool $showPhotoModal = false;
@@ -31,20 +30,24 @@ class BlowerAirHatcherDashboard extends Component
     public string $selectedPhotoField = '';
     public array $formPhotos = [];
     public int $currentPhotoIndex = 0;
-    
+
     // Delete confirmation properties
     public bool $showDeleteModal = false;
     public ?int $formToDelete = null;
-    
+
     public int $perPage = 10;
     public string $sortField = 'date_submitted';
     public string $sortDirection = 'desc';
     public int $page = 1;
 
+    /** @var array<int,string> */
+    public array $sullairNumbers = [];
+
     protected $queryString = [
         'search' => ['except' => ''],
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
+        'sullairNumberFilter' => ['except' => ''],
         'page' => ['except' => 1],
         'sortField' => ['except' => 'date_submitted'],
         'sortDirection' => ['except' => 'desc'],
@@ -53,8 +56,13 @@ class BlowerAirHatcherDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Hatcher Blower Air Speed Monitoring')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Hatchery Sullair Air Compressor Weekly PMS Checklist')->firstOrFail();
         $this->calculateTodayFormCount();
+
+        $this->sullairNumbers = [
+            'Sullair 1 (Inside Incubation Area)',
+            'Sullair 2 (Maintenance Area)',
+        ];
     }
 
     protected function calculateTodayFormCount(): void
@@ -79,6 +87,11 @@ class BlowerAirHatcherDashboard extends Component
         $this->resetPage();
     }
 
+    public function updatedSullairNumberFilter(): void
+    {
+        $this->resetPage();
+    }
+
     public function updatedPerPage(): void
     {
         $this->resetPage();
@@ -87,16 +100,14 @@ class BlowerAirHatcherDashboard extends Component
     public function quickFilterToday(): void
     {
         $today = now()->format('Y-m-d');
-        
-        // If already filtered to today, clear the filter
+
         if ($this->dateFrom === $today && $this->dateTo === $today) {
             $this->reset(['dateFrom', 'dateTo']);
         } else {
-            // Otherwise, filter to today
             $this->dateFrom = $today;
             $this->dateTo = $today;
         }
-        
+
         $this->resetPage();
     }
 
@@ -107,7 +118,7 @@ class BlowerAirHatcherDashboard extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'dateFrom', 'dateTo']);
+        $this->reset(['search', 'dateFrom', 'dateTo', 'sullairNumberFilter']);
         $this->resetPage();
     }
 
@@ -115,28 +126,7 @@ class BlowerAirHatcherDashboard extends Component
     {
         $page = (int) $page;
 
-        $query = Form::where('form_type_id', $this->formType->id)
-            ->with(['user']);
-
-        if ($this->search !== '') {
-            $query->where(function ($q) {
-                $q->whereHas('user', function ($userQuery) {
-                    $userQuery->where('first_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'like', '%' . $this->search . '%');
-                })
-                    ->orWhere(function ($subQ) {
-                        $subQ->where('form_inputs', 'like', '%"machine_info":%')
-                            ->where('form_inputs', 'like', '%"name":%' . $this->search . '%');
-                    });
-            });
-        }
-
-        if ($this->dateFrom) {
-            $query->whereDate('date_submitted', '>=', $this->dateFrom);
-        }
-        if ($this->dateTo) {
-            $query->whereDate('date_submitted', '<=', $this->dateTo);
-        }
+        $query = $this->baseQuery();
 
         $totalPages = $query->paginate($this->perPage)->lastPage();
 
@@ -149,80 +139,70 @@ class BlowerAirHatcherDashboard extends Component
         $this->page = $page;
     }
 
-    // Computed property to get selectedForm freshly each time
+    protected function baseQuery()
+    {
+        $query = Form::where('form_type_id', $this->formType->id)
+            ->with(['user']);
+
+        if ($this->search !== '') {
+            $query->where(function ($q) {
+                $q->whereHas('user', function ($userQuery) {
+                    $userQuery->where('first_name', 'like', '%' . $this->search . '%')
+                        ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                })
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('form_inputs', 'like', '%"sullair_number"%')
+                            ->where('form_inputs', 'like', '%' . $this->search . '%');
+                    });
+            });
+        }
+
+        if ($this->dateFrom) {
+            $query->whereDate('date_submitted', '>=', $this->dateFrom);
+        }
+        if ($this->dateTo) {
+            $query->whereDate('date_submitted', '<=', $this->dateTo);
+        }
+
+        if ($this->sullairNumberFilter !== '') {
+            $query->where('form_inputs', 'like', '%"sullair_number":"' . $this->sullairNumberFilter . '"%');
+        }
+
+        return $query;
+    }
+
     #[Computed]
     public function selectedForm()
     {
         if (!$this->selectedFormId) {
             return null;
         }
-        
+
         return Form::with(['user', 'formType'])->find($this->selectedFormId);
     }
 
-    // Computed property to get formData freshly each time
     #[Computed]
-    public function formData()
+    public function formData(): array
     {
         if (!$this->selectedFormId) {
             return [];
         }
-        
-        // Get fresh data directly from database
+
         $freshForm = DB::table('forms')
             ->where('id', $this->selectedFormId)
             ->first();
-        
+
         if ($freshForm && $freshForm->form_inputs) {
             return is_array($freshForm->form_inputs) ? $freshForm->form_inputs : (json_decode($freshForm->form_inputs, true) ?: []);
         }
-        
+
         return [];
-    }
-
-    // Computed property to get machine_info freshly each time
-    #[Computed]
-    public function machine_info()
-    {
-        if (!$this->selectedFormId) {
-            return [];
-        }
-        
-        $freshForm = DB::table('forms')
-            ->where('id', $this->selectedFormId)
-            ->first();
-        
-        if ($freshForm && $freshForm->form_inputs) {
-            $formData = is_array($freshForm->form_inputs) ? $freshForm->form_inputs : (json_decode($freshForm->form_inputs, true) ?: []);
-            
-            // Check for different machine types in form_inputs
-            if (isset($formData['hatcher']) && !empty($formData['hatcher'])) {
-                $machineId = $formData['hatcher'];
-                $machine = DB::table('hatcher-machines')
-                    ->where('id', $machineId)
-                    ->first();
-                
-                if ($machine) {
-                    return [
-                        'table' => 'hatcher-machines',
-                        'id' => $machineId,
-                        'name' => $machine->hatcherName
-                    ];
-                }
-            }
-        }
-
-        return [
-            'table' => null,
-            'id' => null,
-            'name' => null
-        ];
     }
 
     public function viewDetails($formId): void
     {
-        $this->selectedFormId = $formId;
-        $this->formPhotos = $this->getFormPhotos($formId);
+        $this->selectedFormId = (int) $formId;
+        $this->formPhotos = $this->getFormPhotos($this->selectedFormId);
         $this->currentPhotoIndex = 0;
         $this->showModal = true;
     }
@@ -237,7 +217,7 @@ class BlowerAirHatcherDashboard extends Component
     public function viewPhotos(string $field): void
     {
         $this->selectedPhotoField = $field;
-        $this->selectedPhotos = $this->getFormPhotos($this->selectedFormId, $field);
+        $this->selectedPhotos = $this->getFormPhotos((int) $this->selectedFormId, $field);
         $this->showPhotoModal = true;
     }
 
@@ -253,49 +233,40 @@ class BlowerAirHatcherDashboard extends Component
         try {
             $form = Form::findOrFail($formId);
             $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
-            
+
             $photos = [];
-            
-            // Handle CFM fan photos
-            if (isset($formData['cfm_fan_photos'])) {
-                $cfmPhotos = $formData['cfm_fan_photos'];
-                
-                if (is_string($cfmPhotos)) {
-                    // Handle JSON string
-                    $decodedPhotos = json_decode($cfmPhotos, true);
-                    if (is_array($decodedPhotos)) {
-                        foreach ($decodedPhotos as $photo) {
-                            if (is_string($photo)) {
-                                $photos[] = [
-                                    'url' => $photo,
-                                    'name' => 'CFM Fan Photo'
-                                ];
-                            } elseif (is_array($photo) && isset($photo['url'])) {
-                                $photos[] = [
-                                    'url' => $photo['url'],
-                                    'name' => $photo['name'] ?? 'CFM Fan Photo'
-                                ];
-                            }
-                        }
-                    }
-                } elseif (is_array($cfmPhotos)) {
-                    // Handle array format
-                    foreach ($cfmPhotos as $photo) {
-                        if (is_array($photo) && isset($photo['url'])) {
-                            $photos[] = [
-                                'url' => $photo['url'],
-                                'name' => $photo['name'] ?? 'CFM Fan Photo'
-                            ];
-                        } elseif (is_string($photo)) {
-                            $photos[] = [
-                                'url' => $photo,
-                                'name' => 'CFM Fan Photo'
-                            ];
+
+            if ($field !== null) {
+                $value = $formData[$field] ?? [];
+                if (is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    $value = is_array($decoded) ? $decoded : [];
+                }
+
+                if (is_array($value)) {
+                    foreach ($value as $photo) {
+                        if (is_string($photo)) {
+                            $photos[] = ['url' => $photo, 'name' => $field];
+                        } elseif (is_array($photo) && isset($photo['url'])) {
+                            $photos[] = ['url' => $photo['url'], 'name' => $photo['name'] ?? $field];
                         }
                     }
                 }
+
+                return $photos;
             }
-            
+
+            foreach ($formData as $key => $value) {
+                if (!is_string($key) || !str_ends_with($key, '_photos')) {
+                    continue;
+                }
+
+                $fieldPhotos = $this->getFormPhotos($formId, $key);
+                foreach ($fieldPhotos as $p) {
+                    $photos[] = $p;
+                }
+            }
+
             return $photos;
         } catch (\Exception $e) {
             return [];
@@ -307,16 +278,16 @@ class BlowerAirHatcherDashboard extends Component
         if (!$this->selectedFormId) {
             return 0;
         }
-        
-        return count($this->getFormPhotos($this->selectedFormId, $field));
+
+        return count($this->getFormPhotos((int) $this->selectedFormId, $field));
     }
 
     public function deleteForm($formId): void
     {
-        $this->formToDelete = $formId;
+        $this->formToDelete = (int) $formId;
         $this->showDeleteModal = true;
     }
-    
+
     public function confirmDelete(): void
     {
         if ($this->formToDelete) {
@@ -325,11 +296,11 @@ class BlowerAirHatcherDashboard extends Component
             $form->delete();
 
             session()->flash('success', "Form '{$formName}' deleted successfully.");
-            
+
             $this->cancelDelete();
         }
     }
-    
+
     public function cancelDelete(): void
     {
         $this->showDeleteModal = false;
@@ -349,44 +320,20 @@ class BlowerAirHatcherDashboard extends Component
 
     protected function getForms()
     {
-        $query = Form::where('form_type_id', $this->formType->id)
-            ->with(['user']);
+        $query = $this->baseQuery();
 
-        // Search filter
-        if ($this->search !== '') {
-            $query->where(function ($q) {
-                $q->whereHas('user', function ($userQuery) {
-                    $userQuery->where('first_name', 'like', '%' . $this->search . '%')
-                           ->orWhere('last_name', 'like', '%' . $this->search . '%');
-                })
-                ->orWhere(function ($subQ) {
-                    $subQ->where('form_inputs', 'like', '%"machine_info":%')
-                          ->where('form_inputs', 'like', '%"name":%' . $this->search . '%');
-                });
-            });
-        }
-
-        // Date range filter
-        if ($this->dateFrom) {
-            $query->whereDate('date_submitted', '>=', $this->dateFrom);
-        }
-        if ($this->dateTo) {
-            $query->whereDate('date_submitted', '<=', $this->dateTo);
-        }
-
-        // Sorting
         $query->orderBy($this->sortField, $this->sortDirection);
 
         return $query->paginate($this->perPage, ['*'], 'page', $this->page);
     }
 
-    protected function getPaginationData()
+    protected function getPaginationData(): array
     {
         $forms = $this->getForms();
-        
+
         $currentPage = $forms->currentPage();
         $lastPage = $forms->lastPage();
-        
+
         if ($lastPage <= 3) {
             $startPage = 1;
             $endPage = $lastPage;
@@ -394,12 +341,12 @@ class BlowerAirHatcherDashboard extends Component
             $startPage = max(1, $currentPage - 1);
             $endPage = min($lastPage, $currentPage + 1);
         }
-        
+
         $pages = [];
         for ($i = $startPage; $i <= $endPage; $i++) {
             $pages[] = $i;
         }
-        
+
         return [
             'forms' => $forms,
             'pages' => $pages,
@@ -411,8 +358,8 @@ class BlowerAirHatcherDashboard extends Component
     public function render()
     {
         $paginationData = $this->getPaginationData();
-        
-        return view('livewire.shared.forms-dashboard.blower-air-hatcher-dashboard', [
+
+        return view('livewire.shared.forms-dashboard.hatchery-sullair-dashboard', [
             'forms' => $paginationData['forms'],
             'pages' => $paginationData['pages'],
             'currentPage' => $paginationData['currentPage'],

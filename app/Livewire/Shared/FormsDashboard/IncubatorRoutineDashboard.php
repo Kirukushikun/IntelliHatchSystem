@@ -128,6 +128,11 @@ class IncubatorRoutineDashboard extends Component
         $this->page = 1;
     }
 
+    public function updatingPerPage(): void
+    {
+        $this->page = 1;
+    }
+
     public function toggleFilterDropdown(): void
     {
         $this->showFilterDropdown = !$this->showFilterDropdown;

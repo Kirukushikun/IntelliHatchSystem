@@ -1,64 +1,13 @@
 @php
-    function getStatusPill($value) {
-        // Debug: Log the actual value being passed
-        \Log::info('getStatusPill called with value', [
-            'value' => $value,
-            'type' => gettype($value),
-            'length' => strlen($value ?? ''),
-            'trimmed' => trim($value),
-        ]);
-        
-        $value = trim($value);
-        $lowerValue = strtolower($value);
-        
-        switch($lowerValue) {
-            case 'pending':
-                return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #fef3c7; color: #92400e;">Pending</span>';
-            case 'done':
-            case 'operational':
-                return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #dcfce7; color: #166534;">' . ucfirst($lowerValue) . '</span>';
-            case 'n/a':
-            case 'na':
-                return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #f3f4f6; color: #374151;">N/A</span>';
-            case 'unoperational':
-                return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #fecaca; color: #991b1b;">Unoperational</span>';
-            default:
-                // For shift values and other text
-                if (in_array($lowerValue, ['1st shift', '2nd shift', '3rd shift'])) {
-                    return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #dbeafe; color: #1e40af;">' . $value . '</span>';
-                }
-                // For corrective_action field, just show as text
-                if ($value && strlen($value) > 10) {
-                    return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #f3e8ff; color: #6b21a8;">' . substr($value, 0, 15) . '...</span>';
-                }
-                // Debug: show the actual value if it doesn't match
-                return '<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #f3f4f6; color: #374151;" title="Original: \'' . $value . '\'">' . ($value ?: 'Empty') . '</span>';
+    function getSullairNumber($formData) {
+        if (isset($formData['sullair_number']) && is_string($formData['sullair_number']) && $formData['sullair_number'] !== '') {
+            return $formData['sullair_number'];
         }
-    }
-    
-    function getMachineName($formData) {
-        // Use machine_info structure for consistency with blower air forms
-        if (isset($formData['machine_info']['name'])) {
-            return $formData['machine_info']['name'];
-        }
-        
-        // Fallback to old incubator field for backward compatibility
-        if (isset($formData['incubator']) && !empty($formData['incubator'])) {
-            $incubatorId = $formData['incubator'];
-            $incubator = \Illuminate\Support\Facades\DB::table('incubator-machines')
-                ->where('id', $incubatorId)
-                ->first();
-            
-            if ($incubator) {
-                return $incubator->incubatorName;
-            }
-        }
-        
         return 'N/A';
     }
 @endphp
 
-<div wire:poll.30s wire:key="{{ now()->timestamp }}">
+<div wire:key="{{ now()->timestamp }}">
     <!-- Header with Title and Search -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
         <div class="text-center sm:text-left">
@@ -75,7 +24,7 @@
                 class="w-full pl-11 pr-20 py-3 text-sm bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-sm"
             />
             <a
-                href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('admin.print.forms.incubator-routine', now()->addMinutes(10), ['search' => $search, 'dateFrom' => $dateFrom, 'dateTo' => $dateTo, 'shiftFilter' => $shiftFilter, 'sortField' => $sortField, 'sortDirection' => $sortDirection]) }}"
+                href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('admin.print.forms.hatchery-sullair', now()->addMinutes(10), ['search' => $search, 'dateFrom' => $dateFrom, 'dateTo' => $dateTo, 'sullairNumberFilter' => $sullairNumberFilter, 'sortField' => $sortField, 'sortDirection' => $sortDirection]) }}"
                 target="_blank"
                 rel="noopener"
                 class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
@@ -90,43 +39,37 @@
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M15 2v1.67l-5 4.759V14H6V8.429l-5-4.76V2h14zM7 8v5h2V8l5-4.76V3H2v.24L7 8z"/>
                 </svg>
             </button>
-            
+
             <!-- Filter Dropdown -->
             @if ($showFilterDropdown)
                 <div class="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                     <div class="p-4">
                         <div class="grid grid-cols-2 gap-1">
-                            <!-- Shift Filter Column -->
+                            <!-- Sullair Number (Left Column) -->
                             <div>
-                                <h3 class="text-sm font-medium text-gray-900 mb-3">Shift</h3>
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Sullair Number</h3>
                                 <div class="space-y-2">
                                     <label class="flex items-center">
-                                        <input type="radio" wire:model="shiftFilter" value="all" class="mr-2">
-                                        <span class="text-sm text-gray-700">All Shifts</span>
+                                        <input type="radio" wire:model.live="sullairNumberFilter" value="" class="mr-2">
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">All</span>
                                     </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" wire:model="shiftFilter" value="1st Shift" class="mr-2">
-                                        <span class="text-sm text-gray-700">1st Shift</span>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" wire:model="shiftFilter" value="2nd Shift" class="mr-2">
-                                        <span class="text-sm text-gray-700">2nd Shift</span>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" wire:model="shiftFilter" value="3rd Shift" class="mr-2">
-                                        <span class="text-sm text-gray-700">3rd Shift</span>
-                                    </label>
+                                    @foreach($sullairNumbers as $sullair)
+                                        <label class="flex items-center">
+                                            <input type="radio" wire:model.live="sullairNumberFilter" value="{{ $sullair }}" class="mr-2">
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $sullair }}</span>
+                                        </label>
+                                    @endforeach
                                 </div>
                             </div>
-                            
-                            <!-- Date Filter Column -->
+
+                            <!-- Date Range (Right Column) -->
                             <div>
-                                <h3 class="text-sm font-medium text-gray-900 mb-3">Date Range</h3>
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Date Range</h3>
                                 <div class="space-y-2">
                                     <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">From</label>
-                                        <input 
-                                            type="date" 
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
+                                        <input
+                                            type="date"
                                             wire:model="dateFrom"
                                             class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                                             placeholder="YYYY-MM-DD"
@@ -137,9 +80,9 @@
                                         />
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">To</label>
-                                        <input 
-                                            type="date" 
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
+                                        <input
+                                            type="date"
                                             wire:model="dateTo"
                                             class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                                             placeholder="YYYY-MM-DD"
@@ -153,9 +96,9 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="flex justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                            <button type="button" wire:click="resetFilters" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">Reset</button>
+                            <button type="button" wire:click="clearFilters" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Reset</button>
                             <button type="button" wire:click="toggleFilterDropdown" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">Done</button>
                         </div>
                     </div>
@@ -164,32 +107,29 @@
         </div>
     </div>
 
-    <!-- Quick Filters for Today's Shifts -->
+    <!-- Quick Filters for Today -->
     <div class="flex flex-wrap gap-3 mb-6">
         <div class="text-sm font-medium text-gray-700 dark:text-gray-300 self-center">Today:</div>
-        @foreach (['1st Shift', '2nd Shift', '3rd Shift'] as $shift)
-            <button 
-                wire:click="quickFilterTodayShift('{{ $shift }}')"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
-                    {{ ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d')) 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:text-white dark:hover:bg-blue-800' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}
-                "
+        <button
+            wire:click="quickFilterToday"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                {{ ($dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:text-white dark:hover:bg-blue-800'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}"
+        >
+            Today
+            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                {{ ($dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
+                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-white'
+                    : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-200' }}"
             >
-                {{ $shift }}
-                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                    {{ ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d')) 
-                        ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-white' 
-                        : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-200' }}
-                ">
-                    {{ $todayShiftCounts[$shift] ?? 0 }}
-                </span>
-            </button>
-        @endforeach
+                {{ $todayFormCount ?? 0 }}
+            </span>
+        </button>
     </div>
 
     <!-- Table Section -->
-    <div class="relative flex flex-col w-full h-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-lg bg-clip-border">
+    <div wire:poll.30s wire:key="{{ now()->timestamp }}" class="relative flex flex-col w-full h-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-lg bg-clip-border">
         <!-- Desktop Table View -->
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left table-auto min-w-max">
@@ -210,33 +150,13 @@
                             </p>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">
-                                Hatchery Man
-                            </p>
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Hatchery Man</p>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">
-                                Incubator
-                            </p>
-                        </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-700" wire:click="sortBy('shift')">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1">
-                                Shift
-                                @if ($sortField === 'shift')
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        @if ($sortDirection === 'asc')
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                        @else
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        @endif
-                                    </svg>
-                                @endif
-                            </p>
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Sullair No.</p>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-center">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">
-                                Actions
-                            </p>
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Actions</p>
                         </th>
                     </tr>
                 </thead>
@@ -253,22 +173,19 @@
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
-                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ getMachineName($formData) }}</p>
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5 text-center">
-                                {!! getStatusPill($formData['shift'] ?? 'N/A') !!}
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ getSullairNumber($formData) }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
                                 <div class="flex items-center justify-center gap-2">
-                                    <button 
+                                    <button
                                         wire:click="viewDetails({{ $form->id }})"
-                                        class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                                        class="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors"
                                         title="View Details">
                                         View
                                     </button>
-                                    <button 
+                                    <button
                                         wire:click="deleteForm({{ $form->id }})"
-                                        class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                                        class="px-3 py-1 text-xs font-medium text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/40 rounded-md hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                                         title="Delete Form">
                                         Delete
                                     </button>
@@ -277,12 +194,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center">
-                                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <td colspan="4" class="p-8 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg class="w-12 h-12 text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">No forms submitted</h3>
+                                    <p class="text-sm text-slate-600 font-medium">No forms found</p>
                                 </div>
                             </td>
                         </tr>
@@ -292,40 +209,37 @@
         </div>
 
         <!-- Mobile Card View -->
-        <div class="md:hidden space-y-4 p-4">
-            @forelse ($forms as $form)
+        <div class="md:hidden">
+            @forelse($forms as $form)
                 @php
                     $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
                 @endphp
-                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-lg p-4 space-y-3">
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-lg p-4 space-y-3 mb-4">
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
                         </div>
-                        <div class="text-center">
-                            {!! getStatusPill($formData['shift'] ?? 'N/A') !!}
-                        </div>
                     </div>
-                    
+
                     <div class="space-y-2">
                         <div class="flex justify-between">
                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span>
                             <span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Incubator:</span>
-                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ getMachineName($formData) }}</span>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Sullair No.:</span>
+                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ getSullairNumber($formData) }}</span>
                         </div>
                     </div>
-                    
+
                     <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                        <button 
+                        <button
                             wire:click="viewDetails({{ $form->id }})"
                             class="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors"
                             title="View Details">
                             View
                         </button>
-                        <button 
+                        <button
                             wire:click="deleteForm({{ $form->id }})"
                             class="px-3 py-1 text-xs font-medium text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/40 rounded-md hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                             title="Delete Form">
@@ -339,17 +253,18 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">No forms found</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">Try adjusting your filters or search criteria</p>
                 </div>
             @endforelse
         </div>
-        
+
         @if (is_object($forms) && method_exists($forms, 'hasPages') && $forms->hasPages())
             <!-- Pagination -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center px-3 md:px-4 py-3 border-t border-slate-200 dark:border-gray-700 gap-3 sm:gap-0">
                 <div class="text-xs md:text-sm text-slate-500 dark:text-slate-400 text-center sm:text-left">
                     Showing <b>{{ $forms->firstItem() }}-{{ $forms->lastItem() }}</b> of {{ $forms->total() }}
                 </div>
-                <x-custom-pagination 
+                <x-custom-pagination
                     :current-page="$currentPage"
                     :last-page="$lastPage"
                     :pages="$pages"
@@ -358,48 +273,34 @@
             </div>
         @endif
     </div>
-    
-    <!-- Form Details Modal -->
-    @include('livewire.shared.forms-dashboard.modals.incubator-routine-view')
-    
+
+    <!-- Include Modal -->
+    @include('livewire.shared.forms-dashboard.modals.hatchery-sullair-view')
+
     <!-- Delete Confirmation Modal -->
     @if ($showDeleteModal)
         <div class="fixed inset-0 z-9999 flex items-center justify-center p-4" wire:ignore.self>
-            <!-- Background overlay -->
             <div class="fixed inset-0 bg-black/50" wire:click="cancelDelete"></div>
 
-            <!-- Modal panel -->
-            <div class="relative w-full max-w-md p-6 bg-white dark:bg-gray-800 shadow-xl dark:shadow-2xl rounded-lg">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Delete Form</h3>
-                    <button type="button" wire:click="cancelDelete" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
+            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Confirm Delete</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to delete this form? This action cannot be undone.</p>
 
-                <!-- Warning Icon and Message -->
-                <div class="flex items-center mb-4">
-                    <div class="shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-600 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">Are you sure you want to delete this form?</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone and all associated data will be permanently removed.</p>
-                    </div>
-                </div>
-
-                <!-- Actions -->
                 <div class="flex justify-end gap-3">
-                    <x-button variant="outline-secondary" type="button" wire:click="cancelDelete" class="cursor-pointer">
+                    <button
+                        type="button"
+                        wire:click="cancelDelete"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
                         Cancel
-                    </x-button>
-                    <x-button variant="danger" type="button" wire:click="confirmDelete" class="cursor-pointer">
-                        Delete Form
-                    </x-button>
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="confirmDelete"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                        Delete
+                    </button>
                 </div>
             </div>
         </div>
