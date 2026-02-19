@@ -21,7 +21,7 @@
                 return 'bg-red-100 text-red-800';
             case 'n/a':
             case 'na':
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100';
             default:
                 return 'bg-blue-100 text-blue-800';
         }
@@ -73,7 +73,7 @@
      x-transition:leave="transition ease-in duration-200"
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0"
-     class="fixed inset-0 z-50 overflow-y-auto bg-gray-500/75"
+     class="fixed inset-0 z-50 overflow-y-auto bg-black/50 dark:bg-black/80"
      style="display: none;"
      @click.self="showModal = false; $wire.closeModal()">    
     <div class="flex min-h-full items-center justify-center p-4 text-center">
@@ -159,10 +159,10 @@
             </div>
             
             <!-- Modal Footer -->
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="button" 
                         @click="showModal = false; $wire.closeModal()"
-                        class="w-full inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm cursor-pointer">
                     Close
                 </button>
             </div>
@@ -185,7 +185,7 @@
      x-transition:leave="transition ease-in duration-200"
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0"
-     class="fixed inset-0 z-50 overflow-y-auto bg-gray-500/75"
+     class="fixed inset-0 z-50 overflow-y-auto bg-black/50 dark:bg-black/80"
      style="display: none;">
     
     <div class="flex min-h-full items-center justify-center p-4 text-center">
@@ -197,17 +197,17 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-sm">
+             class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl dark:shadow-2xl transition-all w-full max-w-sm">
             
             <!-- Modal Header -->
-            <div class="bg-white px-4 py-3 border-b border-gray-200 sm:px-6">
+            <div class="bg-white dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sm:px-6">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                         Photos
                     </h3>
                     <button type="button" 
                             @click="showPhotoModal = false; $wire.closePhotoModal()"
-                            class="text-gray-400 hover:text-gray-600 shrink-0">
+                            class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shrink-0">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -216,7 +216,7 @@
             </div>
             
             <!-- Modal Body -->
-            <div class="bg-white px-4 py-4 sm:p-6 sm:pb-4">
+            <div class="bg-white dark:bg-gray-800 px-4 py-4 sm:p-6 sm:pb-4">
                 @if(count($selectedPhotos) > 0)
                     <div class="relative w-full max-w-sm aspect-square bg-gray-900 rounded-lg overflow-hidden">
                         <template x-if="selectedPhotos[currentPhotoIndex]">
@@ -240,25 +240,25 @@
                         @endif
                     </div>
 
-                    <div class="mt-3 text-center text-sm text-gray-600">
+                    <div class="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
                         <span x-text="currentPhotoIndex + 1"></span> / <span>{{ count($selectedPhotos) }}</span>
                     </div>
                 @else
                     <div class="text-center py-8">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">No photos available</h3>
-                        <p class="mt-1 text-sm text-gray-500">No photos have been uploaded for this field.</p>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No photos available</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No photos have been uploaded for this field.</p>
                     </div>
                 @endif
             </div>
             
             <!-- Modal Footer -->
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="button" 
                         @click="showPhotoModal = false; $wire.closePhotoModal()"
-                        class="w-full inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
                     Close
                 </button>
             </div>
