@@ -113,7 +113,7 @@
     <div x-show="view === 'charts'" x-transition class="mb-4">
     <!-- Chart Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
+        <div class="order-1 lg:order-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Week {{ now()->format('W') }} Statistics</h3>
                 <div class="flex items-center space-x-2">
@@ -126,7 +126,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
+        <div class="order-3 lg:order-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ now()->format('Y') }} Statistics</h3>
                 <div class="flex items-center space-x-2">
@@ -138,19 +138,19 @@
                 <canvas id="adminDashboardYearChart"></canvas>
             </div>
         </div>
-    </div>
 
-    <!-- Full Width Month Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300 mb-4">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Month of {{ now()->format('F') }} Statistics</h3>
-            <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span class="text-xs text-gray-500 dark:text-gray-400">Live</span>
+        <!-- Full Width Month Chart -->
+        <div class="order-2 lg:order-3 lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300 mb-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Month of {{ now()->format('F') }} Statistics</h3>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Live</span>
+                </div>
             </div>
-        </div>
-        <div class="relative h-80" wire:ignore>
-            <canvas id="adminDashboardMonthChart"></canvas>
+            <div class="relative h-80" wire:ignore>
+                <canvas id="adminDashboardMonthChart"></canvas>
+            </div>
         </div>
     </div>
     </div>
