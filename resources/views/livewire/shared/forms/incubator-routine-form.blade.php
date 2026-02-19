@@ -22,8 +22,9 @@
 
                 <div data-field="shift" @style(["display:none" => !$this->isFieldVisible('shift')])>
                     <x-dropdown label="Shift" name="shift" error-key="form.shift" placeholder="Select shift" wire:model.live="form.shift" required>
-                        <option value="Day">Day</option>
-                        <option value="Night">Night</option>
+                        <option value="1st Shift">1st Shift</option>
+                        <option value="2nd Shift">2nd Shift</option>
+                        <option value="3rd Shift">3rd Shift</option>
                     </x-dropdown>
                 </div>
 
