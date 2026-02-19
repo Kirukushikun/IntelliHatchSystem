@@ -120,7 +120,7 @@
                             </div>
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
                                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Incubator:</span>
-                                <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->machine_info['name'] ?? 'N/A' }}</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['machine_info']['name'] ?? ($this->machine_info['name'] ?? ($this->selectedForm->machine_info['name'] ?? 'N/A')) }}</span>
                             </div>
                         </div>
                         

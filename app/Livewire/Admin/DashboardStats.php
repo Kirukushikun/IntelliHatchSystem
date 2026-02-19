@@ -14,6 +14,10 @@ class DashboardStats extends Component
 
     public bool $showCharts = true;
 
+    public array $typeOptions = [];
+    public array $selectedTypes = [];
+    public bool $typesSelectionInitialized = false;
+
     public array $cards = [];
     public array $charts = [];
 
@@ -32,6 +36,27 @@ class DashboardStats extends Component
         }
     }
 
+    public function updatedSelectedTypes(): void
+    {
+        $this->loadData();
+        if ($this->showCharts) {
+            $this->dispatch('dashboardStatsUpdated', charts: $this->charts);
+        }
+    }
+
+    public function selectAllTypes(): void
+    {
+        $this->selectedTypes = array_map(static fn ($t) => (string) ($t['id'] ?? ''), $this->typeOptions);
+        $this->selectedTypes = array_values(array_filter($this->selectedTypes, static fn ($v) => $v !== ''));
+        $this->updatedSelectedTypes();
+    }
+
+    public function clearSelectedTypes(): void
+    {
+        $this->selectedTypes = [];
+        $this->updatedSelectedTypes();
+    }
+
     protected function loadData(): void
     {
         $formTypes = DB::table('form_types')
@@ -39,9 +64,24 @@ class DashboardStats extends Component
             ->get(['id', 'form_name']);
 
         $typeNamesById = [];
+        $typeOptions = [];
         foreach ($formTypes as $ft) {
-            $typeNamesById[(int) $ft->id] = (string) $ft->form_name;
+            $id = (int) $ft->id;
+            $name = (string) $ft->form_name;
+            $typeNamesById[$id] = $name;
+            $typeOptions[] = ['id' => $id, 'name' => $name];
         }
+
+        $this->typeOptions = $typeOptions;
+
+        if (!$this->typesSelectionInitialized && $this->selectedTypes === []) {
+            $this->selectedTypes = array_map('strval', array_keys($typeNamesById));
+            $this->typesSelectionInitialized = true;
+        }
+
+        $selectedIds = array_values(array_unique(array_map('intval', $this->selectedTypes)));
+        $selectedIdSet = array_flip($selectedIds);
+        $filteredTypeNamesById = array_intersect_key($typeNamesById, $selectedIdSet);
 
         $now = now();
         $weekStart = $now->copy()->subDays(6)->startOfDay();
@@ -51,12 +91,12 @@ class DashboardStats extends Component
         $yearStart = $now->copy()->subMonths(11)->startOfMonth();
         $yearEnd = $now->copy()->endOfDay();
 
-        $weekCounts = $this->countsByType($typeNamesById, $weekStart, $weekEnd);
-        $monthCounts = $this->countsByType($typeNamesById, $monthStart, $monthEnd);
-        $yearCounts = $this->countsByType($typeNamesById, $yearStart, $yearEnd);
+        $weekCounts = $this->countsByType($filteredTypeNamesById, $weekStart, $weekEnd);
+        $monthCounts = $this->countsByType($filteredTypeNamesById, $monthStart, $monthEnd);
+        $yearCounts = $this->countsByType($filteredTypeNamesById, $yearStart, $yearEnd);
 
         $cards = [];
-        foreach ($typeNamesById as $typeId => $typeName) {
+        foreach ($filteredTypeNamesById as $typeId => $typeName) {
             if ($this->onlyType !== null && $this->onlyType !== '') {
                 if ($this->onlyType !== $typeId && $this->onlyType !== $typeName) {
                     continue;
@@ -83,8 +123,8 @@ class DashboardStats extends Component
 
         if ($this->showCharts) {
             $this->charts = [
-                'week' => $this->stackedByDayChart($typeNamesById, $weekStart, 7), // 7 days
-                'month' => $this->lineByDayChart($typeNamesById, $monthStart, 30), // 30 days
+                'week' => $this->stackedByDayChart($filteredTypeNamesById, $weekStart, 7),
+                'month' => $this->lineByDayChart($filteredTypeNamesById, $monthStart, 30),
                 'year' => $this->doughnutByTypeChart($yearCounts), // 12 months
             ];
         } else {
@@ -94,6 +134,10 @@ class DashboardStats extends Component
 
     protected function countsByType(array $typeNamesById, Carbon $start, Carbon $end): array
     {
+        if ($typeNamesById === []) {
+            return [];
+        }
+
         $rows = DB::table('forms')
             ->select('form_type_id', DB::raw('COUNT(*) as total'))
             ->whereNotNull('date_submitted')

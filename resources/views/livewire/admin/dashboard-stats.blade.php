@@ -1,11 +1,21 @@
-<div x-data="{ query: '' }">
+<div x-data="{ query: '', view: 'charts' }" x-init="$watch('query', (q) => window.dispatchEvent(new CustomEvent('dashboardQueryChanged', { detail: { query: q, view: view } }))); $watch('view', (v) => window.dispatchEvent(new CustomEvent('dashboardQueryChanged', { detail: { query: query, view: v } })))">
     <!-- Header with Search -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <div class="text-center sm:text-left">
             <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Admin Dashboard</h1>
             <p class="text-gray-600 dark:text-gray-400">Welcome to admin dashboard.</p>
         </div>
-        <div class="relative w-full sm:w-auto sm:shrink-0">
+        <div class="flex w-full sm:w-auto sm:shrink-0 gap-2">
+            <div class="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+                <button type="button" @click="view = 'charts'" :class="view === 'charts' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'" class="px-3 py-2 text-xs font-medium transition-colors">
+                    Charts
+                </button>
+                <button type="button" @click="view = 'cards'" :class="view === 'cards' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'" class="px-3 py-2 text-xs font-medium transition-colors">
+                    Dashboards
+                </button>
+            </div>
+
+            <div class="relative w-full sm:w-80">
             <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
@@ -15,13 +25,77 @@
                 placeholder="Search form types..."
                 class="w-full pl-11 pr-4 py-3 text-sm bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-sm dark:shadow-md"
             />
+            </div>
+        </div>
+    </div>
+
+    <div x-data="{ open: false, typeQuery: '' }" x-show="view === 'charts'" x-transition class="mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+            <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="text-sm font-semibold text-gray-900 dark:text-white">Form types</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ count($selectedTypes) }} selected
+                    </div>
+                </div>
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            <div x-show="open" x-transition class="px-4 pb-4">
+                <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between mb-3">
+                    <div class="relative w-full sm:max-w-sm">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input
+                            type="text"
+                            x-model="typeQuery"
+                            placeholder="Filter types..."
+                            class="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                        />
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" wire:click="selectAllTypes" class="px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200">
+                            Select all
+                        </button>
+                        <button type="button" wire:click="clearSelectedTypes" class="px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <div class="max-h-56 overflow-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div class="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        @foreach($typeOptions as $opt)
+                            <label
+                                x-show="!typeQuery || '{{ strtolower($opt['name']) }}'.includes(typeQuery.toLowerCase())"
+                                class="flex items-start gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
+                            >
+                                <input
+                                    type="checkbox"
+                                    value="{{ $opt['id'] }}"
+                                    wire:model.live="selectedTypes"
+                                    class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                                />
+                                <span class="text-sm text-gray-900 dark:text-gray-100">
+                                    {{ $opt['name'] }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     @if($showCharts)
+    <div x-show="view === 'charts'" x-transition class="mb-4">
     <!-- Chart Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow duration-300">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Last 7 Days</h3>
                 <div class="flex items-center space-x-2">
@@ -34,7 +108,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Last 30 Days</h3>
                 <div class="flex items-center space-x-2">
@@ -49,7 +123,7 @@
     </div>
 
     <!-- Full Width Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-xl transition-shadow duration-300">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Last 12 Months</h3>
             <div class="flex items-center space-x-2">
@@ -61,12 +135,14 @@
             <canvas id="adminDashboardYearChart"></canvas>
         </div>
     </div>
+    </div>
     @endif
 
     <!-- Stats Cards -->
-    <div wire:poll.30s="refreshStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div x-show="view === 'cards'" x-transition>
+    <div wire:poll.30s="refreshStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($cards as $card)
-            <div x-show="!query || '{{ strtolower($card['type_name'] ?? '') }}'.includes(query.toLowerCase())" class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-xl dark:hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-l-4 border-gray-200 dark:border-gray-700 border-l-amber-500 cursor-pointer transform hover:scale-[1.02] hover:-translate-y-1">
+            <div x-show="(!query || '{{ strtolower($card['type_name'] ?? '') }}'.includes(query.toLowerCase()))" class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-xl dark:hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-l-4 border-gray-200 dark:border-gray-700 border-l-amber-500 cursor-pointer transform hover:scale-[1.02] hover:-translate-y-1">
                 <a href="{{ match($card['type_name']) {
                     'Incubator Routine Checklist Per Shift' => 'incubator-routine-dashboard',
                     'Hatcher Blower Air Speed Monitoring' => 'blower-air-hatcher-dashboard',
@@ -75,7 +151,7 @@
                     default => '#'
                 } }}" class="block h-full">
                 <!-- Card Header -->
-                <div class="px-6 py-4">
+                <div class="px-4 py-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3 mr-2">
                             <div>
@@ -86,7 +162,7 @@
                     </div>
                 </div>
                 <!-- Card Content -->
-                <div class="px-6 pb-4">
+                <div class="px-4 pb-3">
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">Week</div>
@@ -106,6 +182,7 @@
             </div>
         @endforeach
     </div>
+    </div>
 
     @once
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -113,6 +190,10 @@
 
     <script>
         (function () {
+            let currentQuery = '';
+            let currentView = 'charts';
+            let baseCharts = null;
+
             // Debug: Check if charts data exists
             const chartsData = @json($charts);
             console.log('Charts data:', chartsData);
@@ -131,6 +212,63 @@
             console.log('Week data:', initialWeek);
             console.log('Month data:', initialMonth);
             console.log('Year data:', initialYear);
+
+            function normalize(str) {
+                return String(str || '').toLowerCase();
+            }
+
+            function filterChartDataByQuery(charts, query, view) {
+                if (!charts) return charts;
+
+                if (view !== 'charts') {
+                    return charts;
+                }
+
+                const q = normalize(query).trim();
+                if (!q) {
+                    return charts;
+                }
+
+                const filtered = {
+                    week: { labels: charts.week?.labels || [], datasets: [] },
+                    month: { labels: charts.month?.labels || [], datasets: [] },
+                    year: { labels: [], datasets: [] },
+                };
+
+                const weekDatasets = (charts.week?.datasets || []).filter(ds => normalize(ds.label).includes(q));
+                const monthDatasets = (charts.month?.datasets || []).filter(ds => normalize(ds.label).includes(q));
+
+                filtered.week.datasets = weekDatasets;
+                filtered.month.datasets = monthDatasets;
+
+                const yearLabels = charts.year?.labels || [];
+                const yearDataset = (charts.year?.datasets || [])[0] || null;
+                if (yearDataset && Array.isArray(yearDataset.data)) {
+                    const kept = [];
+                    yearLabels.forEach((lbl, idx) => {
+                        if (normalize(lbl).includes(q)) {
+                            kept.push({
+                                label: lbl,
+                                value: yearDataset.data[idx],
+                                bg: Array.isArray(yearDataset.backgroundColor) ? yearDataset.backgroundColor[idx] : yearDataset.backgroundColor,
+                                border: Array.isArray(yearDataset.borderColor) ? yearDataset.borderColor[idx] : yearDataset.borderColor,
+                            });
+                        }
+                    });
+
+                    filtered.year.labels = kept.map(k => k.label);
+                    filtered.year.datasets = [{
+                        ...yearDataset,
+                        data: kept.map(k => k.value),
+                        backgroundColor: kept.map(k => k.bg),
+                        borderColor: kept.map(k => k.border),
+                    }];
+                } else {
+                    filtered.year = charts.year;
+                }
+
+                return filtered;
+            }
 
             // Chart configurations with Flowbite-inspired styling
             const chartDefaults = {
@@ -398,17 +536,19 @@
                     }];
                 }
 
-                console.log('Creating charts with data:', { initialWeek, initialMonth, initialYear });
+                baseCharts = { week: initialWeek, month: initialMonth, year: initialYear };
+                const chartsForView = filterChartDataByQuery(baseCharts, currentQuery, currentView);
+                console.log('Creating charts with data:', chartsForView);
 
                 try {
                     // Create new charts
-                    window.__adminDashboardCharts.week = buildStackedBar(weekEl.getContext('2d'), initialWeek);
+                    window.__adminDashboardCharts.week = buildStackedBar(weekEl.getContext('2d'), chartsForView.week);
                     console.log('Week chart created');
                     
-                    window.__adminDashboardCharts.month = buildLine(monthEl.getContext('2d'), initialMonth);
+                    window.__adminDashboardCharts.month = buildLine(monthEl.getContext('2d'), chartsForView.month);
                     console.log('Month chart created');
                     
-                    window.__adminDashboardCharts.year = buildDoughnut(yearEl.getContext('2d'), initialYear);
+                    window.__adminDashboardCharts.year = buildDoughnut(yearEl.getContext('2d'), chartsForView.year);
                     console.log('Year chart created');
                 } catch (error) {
                     console.error('Error creating charts:', error);
@@ -428,6 +568,23 @@
                 }
             });
 
+            window.addEventListener('dashboardQueryChanged', (event) => {
+                const q = event?.detail?.query ?? '';
+                const v = event?.detail?.view ?? 'charts';
+                currentQuery = q;
+                currentView = v;
+
+                if (!baseCharts || !window.__adminDashboardCharts) return;
+
+                const chartsForView = filterChartDataByQuery(baseCharts, currentQuery, currentView);
+                ['week', 'month', 'year'].forEach(period => {
+                    if (window.__adminDashboardCharts[period]) {
+                        window.__adminDashboardCharts[period].data = chartsForView[period];
+                        window.__adminDashboardCharts[period].update();
+                    }
+                });
+            });
+
             // Fallback: Also try to hook system
             if (typeof Livewire !== 'undefined') {
                 Livewire.hook('message.processed', (message, component) => {
@@ -439,17 +596,6 @@
                                 updateCharts(dispatch.params.charts);
                             }
                         }
-                    }
-                });
-            }
-
-            function updateCharts(charts) {
-                if (!charts || !window.__adminDashboardCharts) return;
-
-                ['week', 'month', 'year'].forEach(period => {
-                    if (window.__adminDashboardCharts[period] && charts[period]) {
-                        window.__adminDashboardCharts[period].data = charts[period];
-                        window.__adminDashboardCharts[period].update('none'); // Faster update without animation
                     }
                 });
             }
