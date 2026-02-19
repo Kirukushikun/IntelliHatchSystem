@@ -24,7 +24,7 @@
                 class="w-full pl-11 pr-20 py-3 text-sm bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-sm"
             />
             <a
-                href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('admin.print.forms.hatchery-sullair', now()->addMinutes(10), ['search' => $search, 'dateFrom' => $dateFrom, 'dateTo' => $dateTo, 'hatcheryManFilter' => $hatcheryManFilter, 'sullairNumberFilter' => $sullairNumberFilter, 'sortField' => $sortField, 'sortDirection' => $sortDirection]) }}"
+                href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('admin.print.forms.hatchery-sullair', now()->addMinutes(10), ['search' => $search, 'dateFrom' => $dateFrom, 'dateTo' => $dateTo, 'sullairNumberFilter' => $sullairNumberFilter, 'sortField' => $sortField, 'sortDirection' => $sortDirection]) }}"
                 target="_blank"
                 rel="noopener"
                 class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
@@ -43,70 +43,61 @@
             <!-- Filter Dropdown -->
             @if ($showFilterDropdown)
                 <div class="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                    <div class="p-4 space-y-4">
-                        <!-- Date Range -->
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Date Range</h3>
-                            <div class="space-y-2">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
-                                    <input
-                                        type="date"
-                                        wire:model="dateFrom"
-                                        class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="YYYY-MM-DD"
-                                        max="{{ $dateTo ?: now()->format('Y-m-d') }}"
-                                        wire:target="dateFrom"
-                                        wire:loading.attr="disabled"
-                                        x-on:change="$wire.set('dateTo', ($wire.get('dateTo') && $el.value > $wire.get('dateTo')) ? '' : $wire.get('dateTo'))"
-                                    />
+                    <div class="p-4">
+                        <div class="grid grid-cols-2 gap-1">
+                            <!-- Sullair Number (Left Column) -->
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Sullair Number</h3>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" wire:model.live="sullairNumberFilter" value="" class="mr-2">
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">All</span>
+                                    </label>
+                                    @foreach($sullairNumbers as $sullair)
+                                        <label class="flex items-center">
+                                            <input type="radio" wire:model.live="sullairNumberFilter" value="{{ $sullair }}" class="mr-2">
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $sullair }}</span>
+                                        </label>
+                                    @endforeach
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
-                                    <input
-                                        type="date"
-                                        wire:model="dateTo"
-                                        class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="YYYY-MM-DD"
-                                        max="{{ now()->format('Y-m-d') }}"
-                                        min="{{ $dateFrom ?: '' }}"
-                                        wire:target="dateTo"
-                                        wire:loading.attr="disabled"
-                                        x-on:change="($wire.get('dateFrom') && $el.value < $wire.get('dateFrom')) ? $wire.set('dateTo', '') : null"
-                                    />
+                            </div>
+
+                            <!-- Date Range (Right Column) -->
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Date Range</h3>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
+                                        <input
+                                            type="date"
+                                            wire:model="dateFrom"
+                                            class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="YYYY-MM-DD"
+                                            max="{{ $dateTo ?: now()->format('Y-m-d') }}"
+                                            wire:target="dateFrom"
+                                            wire:loading.attr="disabled"
+                                            x-on:change="$wire.set('dateTo', ($wire.get('dateTo') && $el.value > $wire.get('dateTo')) ? '' : $wire.get('dateTo'))"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
+                                        <input
+                                            type="date"
+                                            wire:model="dateTo"
+                                            class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="YYYY-MM-DD"
+                                            max="{{ now()->format('Y-m-d') }}"
+                                            min="{{ $dateFrom ?: '' }}"
+                                            wire:target="dateTo"
+                                            wire:loading.attr="disabled"
+                                            x-on:change="($wire.get('dateFrom') && $el.value < $wire.get('dateFrom')) ? $wire.set('dateTo', '') : null"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Hatchery Man -->
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Hatchery Man</h3>
-                            <select
-                                wire:model.live="hatcheryManFilter"
-                                class="w-full px-2 py-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                            >
-                                <option value="">All</option>
-                                @foreach($hatcheryMen as $id => $name)
-                                    <option value="{{ $id }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Sullair Number -->
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Sullair Number</h3>
-                            <select
-                                wire:model.live="sullairNumberFilter"
-                                class="w-full px-2 py-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                            >
-                                <option value="">All</option>
-                                @foreach($sullairNumbers as $sullair)
-                                    <option value="{{ $sullair }}">{{ $sullair }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                             <button type="button" wire:click="clearFilters" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Reset</button>
                             <button type="button" wire:click="toggleFilterDropdown" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">Done</button>
                         </div>
@@ -176,7 +167,7 @@
                         @endphp
                         <tr class="even:bg-slate-50 dark:even:bg-gray-700/50 hover:bg-slate-100 dark:hover:bg-gray-700">
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
-                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p>
@@ -226,7 +217,7 @@
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-lg p-4 space-y-3 mb-4">
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
                         </div>
                     </div>
 

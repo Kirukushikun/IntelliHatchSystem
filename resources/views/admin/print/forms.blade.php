@@ -25,7 +25,7 @@
     </div>
 
     <h1>{{ $title }}</h1>
-    <div class="meta">Generated: {{ now()->format('M d, Y H:i') }}</div>
+    <div class="meta">Generated: {{ now()->format('d M, Y g:i A') }}</div>
 
     <div style="border: 1px solid #e5e7eb; background: #f9fafb; padding: 10px 12px; border-radius: 6px; margin-bottom: 16px;">
         <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">Filters</div>

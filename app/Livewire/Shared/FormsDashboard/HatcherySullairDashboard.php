@@ -4,7 +4,6 @@ namespace App\Livewire\Shared\FormsDashboard;
 
 use App\Models\Form;
 use App\Models\FormType;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -18,8 +17,6 @@ class HatcherySullairDashboard extends Component
     public string $dateFrom = '';
     public string $dateTo = '';
     public bool $showFilterDropdown = false;
-
-    public string $hatcheryManFilter = '';
     public string $sullairNumberFilter = '';
 
     public ?int $selectedFormId = null;
@@ -44,16 +41,12 @@ class HatcherySullairDashboard extends Component
     public int $page = 1;
 
     /** @var array<int,string> */
-    public array $hatcheryMen = [];
-
-    /** @var array<int,string> */
     public array $sullairNumbers = [];
 
     protected $queryString = [
         'search' => ['except' => ''],
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
-        'hatcheryManFilter' => ['except' => ''],
         'sullairNumberFilter' => ['except' => ''],
         'page' => ['except' => 1],
         'sortField' => ['except' => 'date_submitted'],
@@ -65,16 +58,6 @@ class HatcherySullairDashboard extends Component
     {
         $this->formType = FormType::where('form_name', 'Hatchery Sullair Air Compressor Weekly PMS Checklist')->firstOrFail();
         $this->calculateTodayFormCount();
-
-        $this->hatcheryMen = User::where('user_type', 1)
-            ->where('is_disabled', false)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get()
-            ->mapWithKeys(function ($user) {
-                return [$user->id => $user->first_name . ' ' . $user->last_name];
-            })
-            ->toArray();
 
         $this->sullairNumbers = [
             'Sullair 1 (Inside Incubation Area)',
@@ -100,11 +83,6 @@ class HatcherySullairDashboard extends Component
     }
 
     public function updatedDateTo(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedHatcheryManFilter(): void
     {
         $this->resetPage();
     }
@@ -140,7 +118,7 @@ class HatcherySullairDashboard extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'dateFrom', 'dateTo', 'hatcheryManFilter', 'sullairNumberFilter']);
+        $this->reset(['search', 'dateFrom', 'dateTo', 'sullairNumberFilter']);
         $this->resetPage();
     }
 
@@ -184,10 +162,6 @@ class HatcherySullairDashboard extends Component
         }
         if ($this->dateTo) {
             $query->whereDate('date_submitted', '<=', $this->dateTo);
-        }
-
-        if ($this->hatcheryManFilter !== '') {
-            $query->where('uploaded_by', (int) $this->hatcheryManFilter);
         }
 
         if ($this->sullairNumberFilter !== '') {

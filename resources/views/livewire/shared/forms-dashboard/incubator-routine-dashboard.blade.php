@@ -247,7 +247,7 @@
                         @endphp
                         <tr class="even:bg-slate-50 dark:even:bg-gray-700/50 hover:bg-slate-100 dark:hover:bg-gray-700">
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
-                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-left">
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p>
@@ -300,7 +300,7 @@
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-lg p-4 space-y-3">
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
                         </div>
                         <div class="text-center">
                             {!! getStatusPill($formData['shift'] ?? 'N/A') !!}

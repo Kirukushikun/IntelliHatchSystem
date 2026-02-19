@@ -193,7 +193,7 @@
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $user->username }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
-                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $user->created_at ? $user->created_at->format('d M, Y') : 'N/A' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
                                 @if($user->is_disabled)
@@ -259,7 +259,7 @@
                         <div class="space-y-1">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $user->first_name }} {{ $user->last_name }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->username }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->created_at ? $user->created_at->format('d M, Y') : 'N/A' }}</p>
                         </div>
                         <div class="text-center">
                             @if($user->is_disabled)

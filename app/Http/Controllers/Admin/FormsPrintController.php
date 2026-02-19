@@ -59,7 +59,6 @@ class FormsPrintController extends Controller
         $search = (string) $request->query('search', '');
         $dateFrom = (string) $request->query('dateFrom', '');
         $dateTo = (string) $request->query('dateTo', '');
-        $hatcheryManFilter = (string) $request->query('hatcheryManFilter', '');
         $sullairNumberFilter = (string) $request->query('sullairNumberFilter', '');
         $sortField = (string) $request->query('sortField', 'date_submitted');
         $sortDirection = strtolower((string) $request->query('sortDirection', 'desc'));
@@ -99,10 +98,6 @@ class FormsPrintController extends Controller
             $query->whereDate('date_submitted', '<=', $dateTo);
         }
 
-        if ($hatcheryManFilter !== '') {
-            $query->where('uploaded_by', (int) $hatcheryManFilter);
-        }
-
         if ($sullairNumberFilter !== '') {
             $query->where('form_inputs', 'like', '%"sullair_number":"' . $sullairNumberFilter . '"%');
         }
@@ -120,7 +115,7 @@ class FormsPrintController extends Controller
             $sullairNumber = isset($inputs['sullair_number']) && $inputs['sullair_number'] !== '' ? (string) $inputs['sullair_number'] : 'N/A';
 
             return [
-                'date' => $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A',
+                'date' => $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A',
                 'hatchery_man' => $hatcheryMan,
                 'machine' => $sullairNumber,
             ];
@@ -133,7 +128,6 @@ class FormsPrintController extends Controller
             'date_from' => $dateFrom !== '' ? $dateFrom : '—',
             'date_to' => $dateTo !== '' ? $dateTo : '—',
             'sort' => 'Date Submitted (' . $sortDirectionLabel . ')',
-            'hatchery_man_filter' => $hatcheryManFilter !== '' ? $hatcheryManFilter : 'all',
             'sullair_number_filter' => $sullairNumberFilter !== '' ? $sullairNumberFilter : 'all',
         ];
 
@@ -233,7 +227,7 @@ class FormsPrintController extends Controller
             }
 
             $row = [
-                'date' => $form->date_submitted ? $form->date_submitted->format('M d, Y H:i') : 'N/A',
+                'date' => $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A',
                 'hatchery_man' => $hatcheryMan,
                 'machine' => $machineName,
             ];

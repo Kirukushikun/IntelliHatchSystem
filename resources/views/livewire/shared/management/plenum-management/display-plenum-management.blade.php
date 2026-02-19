@@ -136,7 +136,7 @@
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $plenum->plenumName }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
-                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $plenum->creationDate->format('M d, Y') }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $plenum->creationDate->format('d M, Y') }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5 text-center">
                                 @if(!$plenum->isActive)
@@ -200,7 +200,7 @@
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $plenum->plenumName }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $plenum->creationDate->format('M d, Y') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $plenum->creationDate->format('d M, Y') }}</p>
                         </div>
                         <div class="text-center">
                             @if(!$plenum->isActive)
