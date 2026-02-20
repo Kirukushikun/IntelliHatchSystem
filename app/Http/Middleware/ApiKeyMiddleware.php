@@ -23,12 +23,12 @@ class ApiKeyMiddleware
         // If API_KEY is not configured, deny all requests
         if (empty($requiredKey)) {
             return response()->json([
-                'error' => 'API key not configured',
-                'message' => 'Server configuration error: services.api.key is not set'
+                'error' => 'Internal server error',
+                'message' => 'Internal server error'
             ], 500, [], JSON_PRETTY_PRINT);
         }
         
-        if (empty($apiKey) || $apiKey !== $requiredKey) {
+        if (!is_string($apiKey) || $apiKey === '' || !hash_equals((string) $requiredKey, $apiKey)) {
             return response()->json([
                 'error' => 'Invalid or missing API key',
                 'message' => 'Please provide a valid API key in the x-api-key header'

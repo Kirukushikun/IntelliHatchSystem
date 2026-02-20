@@ -51,10 +51,15 @@ class WebhookController extends Controller
     {
         $request->validate([
             'form_id' => 'required|integer|exists:forms,id',
-            'webhook_url' => 'nullable|url',
         ]);
 
-        $webhookUrl = $request->webhook_url ?? config('services.webhook.url');
+        $webhookUrl = config('services.webhook.url');
+        if (!is_string($webhookUrl) || $webhookUrl === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+            ], 500, [], JSON_PRETTY_PRINT);
+        }
 
         try {
             $form = Form::with(['formType', 'user', 'incubator'])->findOrFail($request->form_id);
