@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
+use Illuminate\Database\Eloquent\Builder;
 
 class Display extends Component
 {
@@ -94,27 +95,8 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $hatchers = Hatcher::query()
-            ->where(function($query) {
-                $query->where('hatcherName', 'like', '%' . $this->search . '%');
-            });
-
-        // Apply status filter
-        if ($this->statusFilter === 'active') {
-            $hatchers->where('isActive', true);
-        } elseif ($this->statusFilter === 'inactive') {
-            $hatchers->where('isActive', false);
-        }
-
-        // Apply date range filter
-        if ($this->dateFrom) {
-            $hatchers->whereDate('creationDate', '>=', $this->dateFrom);
-        }
-        if ($this->dateTo) {
-            $hatchers->whereDate('creationDate', '<=', $this->dateTo);
-        }
-
-        $hatchers = $hatchers->orderBy($this->sortField, $this->sortDirection)
+        $hatchers = $this->baseQuery()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage, ['*'], 'page', $this->page);
             
         $currentPage = $hatchers->currentPage(); // Get from paginator
@@ -155,25 +137,7 @@ class Display extends Component
     {
         $page = (int) $page;
         
-        // Validate page number
-        $totalPages = Hatcher::query()
-            ->where(function($query) {
-                $query->where('hatcherName', 'like', '%' . $this->search . '%');
-            })
-            ->when($this->statusFilter === 'active', function($query) {
-                $query->where('isActive', true);
-            })
-            ->when($this->statusFilter === 'inactive', function($query) {
-                $query->where('isActive', false);
-            })
-            ->when($this->dateFrom, function($query) {
-                $query->whereDate('creationDate', '>=', $this->dateFrom);
-            })
-            ->when($this->dateTo, function($query) {
-                $query->whereDate('creationDate', '<=', $this->dateTo);
-            })
-            ->paginate($this->perPage)
-            ->lastPage();
+        $totalPages = $this->baseQuery()->paginate($this->perPage)->lastPage();
         
         if ($page < 1) {
             $page = 1;
@@ -182,6 +146,29 @@ class Display extends Component
         }
         
         $this->page = $page;
+    }
+
+    protected function baseQuery(): Builder
+    {
+        $hatchers = Hatcher::query()
+            ->where(function ($query) {
+                $query->where('hatcherName', 'like', '%' . $this->search . '%');
+            });
+
+        if ($this->statusFilter === 'active') {
+            $hatchers->where('isActive', true);
+        } elseif ($this->statusFilter === 'inactive') {
+            $hatchers->where('isActive', false);
+        }
+
+        if ($this->dateFrom) {
+            $hatchers->whereDate('creationDate', '>=', $this->dateFrom);
+        }
+        if ($this->dateTo) {
+            $hatchers->whereDate('creationDate', '<=', $this->dateTo);
+        }
+
+        return $hatchers;
     }
 
     public function render()

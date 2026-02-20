@@ -10,6 +10,7 @@ use Livewire\Component;
 use Livewire\Attributes\Computed;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 class BlowerAirIncubatorDashboard extends Component
 {
@@ -115,6 +116,19 @@ class BlowerAirIncubatorDashboard extends Component
     {
         $page = (int) $page;
 
+        $totalPages = $this->baseQuery()->paginate($this->perPage)->lastPage();
+
+        if ($page < 1) {
+            $page = 1;
+        } elseif ($page > $totalPages) {
+            $page = $totalPages;
+        }
+
+        $this->page = $page;
+    }
+
+    protected function baseQuery(): Builder
+    {
         $query = Form::where('form_type_id', $this->formType->id)
             ->with(['user']);
 
@@ -138,15 +152,7 @@ class BlowerAirIncubatorDashboard extends Component
             $query->whereDate('date_submitted', '<=', $this->dateTo);
         }
 
-        $totalPages = $query->paginate($this->perPage)->lastPage();
-
-        if ($page < 1) {
-            $page = 1;
-        } elseif ($page > $totalPages) {
-            $page = $totalPages;
-        }
-
-        $this->page = $page;
+        return $query;
     }
 
     // Computed property to get selectedForm freshly each time
@@ -167,12 +173,8 @@ class BlowerAirIncubatorDashboard extends Component
         if (!$this->selectedFormId) {
             return [];
         }
-        
-        // Get fresh data directly from database
-        $freshForm = DB::table('forms')
-            ->where('id', $this->selectedFormId)
-            ->first();
-        
+
+        $freshForm = $this->freshSelectedFormRow();
         if ($freshForm && $freshForm->form_inputs) {
             return is_array($freshForm->form_inputs) ? $freshForm->form_inputs : (json_decode($freshForm->form_inputs, true) ?: []);
         }
@@ -187,11 +189,8 @@ class BlowerAirIncubatorDashboard extends Component
         if (!$this->selectedFormId) {
             return [];
         }
-        
-        $freshForm = DB::table('forms')
-            ->where('id', $this->selectedFormId)
-            ->first();
-        
+
+        $freshForm = $this->freshSelectedFormRow();
         if ($freshForm && $freshForm->form_inputs) {
             $formData = is_array($freshForm->form_inputs) ? $freshForm->form_inputs : (json_decode($freshForm->form_inputs, true) ?: []);
             
@@ -217,6 +216,18 @@ class BlowerAirIncubatorDashboard extends Component
             'id' => null,
             'name' => null
         ];
+    }
+
+    #[Computed]
+    public function freshSelectedFormRow(): ?object
+    {
+        if (!$this->selectedFormId) {
+            return null;
+        }
+
+        return DB::table('forms')
+            ->where('id', $this->selectedFormId)
+            ->first();
     }
 
     public function viewDetails($formId): void
@@ -349,30 +360,7 @@ class BlowerAirIncubatorDashboard extends Component
 
     protected function getForms()
     {
-        $query = Form::where('form_type_id', $this->formType->id)
-            ->with(['user']);
-
-        // Search filter
-        if ($this->search !== '') {
-            $query->where(function ($q) {
-                $q->whereHas('user', function ($userQuery) {
-                    $userQuery->where('first_name', 'like', '%' . $this->search . '%')
-                           ->orWhere('last_name', 'like', '%' . $this->search . '%');
-                })
-                ->orWhere(function ($subQ) {
-                    $subQ->where('form_inputs', 'like', '%"machine_info":%')
-                          ->where('form_inputs', 'like', '%"name":%' . $this->search . '%');
-                });
-            });
-        }
-
-        // Date range filter
-        if ($this->dateFrom) {
-            $query->whereDate('date_submitted', '>=', $this->dateFrom);
-        }
-        if ($this->dateTo) {
-            $query->whereDate('date_submitted', '<=', $this->dateTo);
-        }
+        $query = $this->baseQuery();
 
         // Sorting
         $query->orderBy($this->sortField, $this->sortDirection);

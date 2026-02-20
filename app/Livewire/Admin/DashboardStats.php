@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
+use Carbon\Constants\UnitValue;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -84,22 +85,20 @@ class DashboardStats extends Component
         $filteredTypeNamesById = array_intersect_key($typeNamesById, $selectedIdSet);
 
         $now = now();
-        $weekStart = $now->copy()->startOfWeek(Carbon::SUNDAY)->startOfDay();
-        $weekEnd = $now->copy()->endOfWeek(Carbon::SATURDAY)->endOfDay();
+        $weekStart = $now->copy()->startOfWeek(UnitValue::SUNDAY)->startOfDay();
+        $weekEnd = $now->copy()->endOfWeek(UnitValue::SATURDAY)->endOfDay();
         $monthStart = $now->copy()->startOfMonth()->startOfDay();
         $monthEnd = $now->copy()->endOfMonth()->endOfDay();
         $yearStart = $now->copy()->startOfYear()->startOfDay();
         $yearEnd = $now->copy()->endOfYear()->endOfDay();
 
-        // Charts use filtered types
-        $weekCounts = $this->countsByType($filteredTypeNamesById, $weekStart, $weekEnd);
-        $monthCounts = $this->countsByType($filteredTypeNamesById, $monthStart, $monthEnd);
-        $yearCounts = $this->countsByType($filteredTypeNamesById, $yearStart, $yearEnd);
+        $allTypeIds = array_keys($typeNamesById);
 
-        // Cards always use all types (not filtered)
-        $allWeekCounts = $this->countsByType($typeNamesById, $weekStart, $weekEnd);
-        $allMonthCounts = $this->countsByType($typeNamesById, $monthStart, $monthEnd);
-        $allYearCounts = $this->countsByType($typeNamesById, $yearStart, $yearEnd);
+        $allWeekCountsById = $this->countsByTypeId($allTypeIds, $weekStart, $weekEnd);
+        $allMonthCountsById = $this->countsByTypeId($allTypeIds, $monthStart, $monthEnd);
+        $allYearCountsById = $this->countsByTypeId($allTypeIds, $yearStart, $yearEnd);
+
+        $yearCounts = $this->countsByNameFromCountsById($filteredTypeNamesById, $allYearCountsById);
 
         $cards = [];
         foreach ($typeNamesById as $typeId => $typeName) {
@@ -112,9 +111,9 @@ class DashboardStats extends Component
             $cards[] = [
                 'type_id' => $typeId,
                 'type_name' => $typeName,
-                'week' => (int) ($allWeekCounts[$typeName] ?? 0),
-                'month' => (int) ($allMonthCounts[$typeName] ?? 0),
-                'year' => (int) ($allYearCounts[$typeName] ?? 0),
+                'week' => (int) ($allWeekCountsById[$typeId] ?? 0),
+                'month' => (int) ($allMonthCountsById[$typeId] ?? 0),
+                'year' => (int) ($allYearCountsById[$typeId] ?? 0),
             ];
         }
 
@@ -137,6 +136,42 @@ class DashboardStats extends Component
         } else {
             $this->charts = [];
         }
+    }
+
+    protected function countsByTypeId(array $typeIds, Carbon $start, Carbon $end): array
+    {
+        $typeIds = array_values(array_unique(array_map('intval', $typeIds)));
+        if ($typeIds === []) {
+            return [];
+        }
+
+        $rows = DB::table('forms')
+            ->select('form_type_id', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('date_submitted')
+            ->whereBetween('date_submitted', [$start, $end])
+            ->whereIn('form_type_id', $typeIds)
+            ->groupBy('form_type_id')
+            ->get();
+
+        $counts = array_fill_keys($typeIds, 0);
+        foreach ($rows as $row) {
+            $typeId = (int) $row->form_type_id;
+            if (!array_key_exists($typeId, $counts)) {
+                continue;
+            }
+            $counts[$typeId] = (int) $row->total;
+        }
+
+        return $counts;
+    }
+
+    protected function countsByNameFromCountsById(array $typeNamesById, array $countsById): array
+    {
+        $countsByName = [];
+        foreach ($typeNamesById as $id => $name) {
+            $countsByName[$name] = (int) ($countsById[$id] ?? 0);
+        }
+        return $countsByName;
     }
 
     protected function countsByType(array $typeNamesById, Carbon $start, Carbon $end): array
@@ -176,10 +211,18 @@ class DashboardStats extends Component
             $labels[] = $start->copy()->addDays($i)->format('M d');
         }
 
-        $rows = DB::table('forms')
+        $typeIds = array_keys($typeNamesById);
+
+        $rowsQuery = DB::table('forms')
             ->select(DB::raw('DATE(date_submitted) as bucket'), 'form_type_id', DB::raw('COUNT(*) as total'))
             ->whereNotNull('date_submitted')
-            ->whereBetween('date_submitted', [$start->copy()->startOfDay(), $start->copy()->addDays($days - 1)->endOfDay()])
+            ->whereBetween('date_submitted', [$start->copy()->startOfDay(), $start->copy()->addDays($days - 1)->endOfDay()]);
+
+        if ($typeIds !== []) {
+            $rowsQuery->whereIn('form_type_id', $typeIds);
+        }
+
+        $rows = $rowsQuery
             ->groupBy(DB::raw('DATE(date_submitted)'), 'form_type_id')
             ->get();
 
@@ -231,10 +274,18 @@ class DashboardStats extends Component
             $labels[] = $start->copy()->addDays($i)->format('M d');
         }
 
-        $rows = DB::table('forms')
+        $typeIds = array_keys($typeNamesById);
+
+        $rowsQuery = DB::table('forms')
             ->select(DB::raw('DATE(date_submitted) as bucket'), 'form_type_id', DB::raw('COUNT(*) as total'))
             ->whereNotNull('date_submitted')
-            ->whereBetween('date_submitted', [$start->copy()->startOfDay(), $start->copy()->addDays($days - 1)->endOfDay()])
+            ->whereBetween('date_submitted', [$start->copy()->startOfDay(), $start->copy()->addDays($days - 1)->endOfDay()]);
+
+        if ($typeIds !== []) {
+            $rowsQuery->whereIn('form_type_id', $typeIds);
+        }
+
+        $rows = $rowsQuery
             ->groupBy(DB::raw('DATE(date_submitted)'), 'form_type_id')
             ->get();
 

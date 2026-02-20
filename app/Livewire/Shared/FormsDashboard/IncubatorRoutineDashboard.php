@@ -5,6 +5,7 @@ namespace App\Livewire\Shared\FormsDashboard;
 use App\Models\Form;
 use App\Models\FormType;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -172,40 +173,7 @@ class IncubatorRoutineDashboard extends Component
 
     public function getPaginationData()
     {
-        $query = Form::with(['user', 'formType'])
-            ->where('form_type_id', $this->typeId);
-
-        if ($this->search !== '') {
-            $query->where(function ($q) {
-                $q->whereHas('user', function ($subQ) {
-                    $subQ->where('first_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'like', '%' . $this->search . '%');
-                })
-                ->orWhere(function ($subQ) {
-                    $subQ->where('form_inputs', 'like', '%"machine_info":%')
-                          ->where('form_inputs', 'like', '%"name":%' . $this->search . '%');
-                });
-            });
-        }
-
-        // Apply date filter
-        if ($this->dateFrom || $this->dateTo) {
-            if ($this->dateFrom && $this->dateTo) {
-                $query->whereBetween('date_submitted', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-            } elseif ($this->dateFrom) {
-                $query->whereDate('date_submitted', '>=', $this->dateFrom);
-            } elseif ($this->dateTo) {
-                $query->whereDate('date_submitted', '<=', $this->dateTo);
-            }
-        }
-
-        // Apply shift filter
-        if ($this->shiftFilter !== 'all') {
-            $query->where(function ($q) {
-                $q->where('form_inputs', 'like', '%"' . $this->shiftFilter . '"%')
-                  ->orWhere('form_inputs', 'like', '%' . $this->shiftFilter . '%');
-            });
-        }
+        $query = $this->baseQuery();
 
         // Apply sorting
         if ($this->sortField === 'shift') {
@@ -266,7 +234,19 @@ class IncubatorRoutineDashboard extends Component
     {
         $page = (int) $page;
         
-        // Validate page number
+        $totalPages = $this->baseQuery()->paginate($this->perPage)->lastPage();
+        
+        if ($page < 1) {
+            $page = 1;
+        } elseif ($page > $totalPages) {
+            $page = $totalPages;
+        }
+        
+        $this->page = $page;
+    }
+
+    protected function baseQuery(): Builder
+    {
         $query = Form::with(['user', 'formType'])
             ->where('form_type_id', $this->typeId);
 
@@ -300,15 +280,7 @@ class IncubatorRoutineDashboard extends Component
             });
         }
 
-        $totalPages = $query->paginate($this->perPage)->lastPage();
-        
-        if ($page < 1) {
-            $page = 1;
-        } elseif ($page > $totalPages) {
-            $page = $totalPages;
-        }
-        
-        $this->page = $page;
+        return $query;
     }
 
     // Computed property to get selectedForm freshly each time
@@ -418,7 +390,7 @@ class IncubatorRoutineDashboard extends Component
         $this->selectedPhotos = [];
     }
 
-    private function getFormPhotos(int $formId, string $field = null): array
+    private function getFormPhotos(int $formId, ?string $field = null): array
     {
         // Get the form and its photos
         $form = Form::find($formId);
