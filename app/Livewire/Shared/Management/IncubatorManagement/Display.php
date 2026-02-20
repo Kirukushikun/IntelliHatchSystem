@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use Illuminate\Database\Eloquent\Builder;
 
 class Display extends Component
 {
@@ -91,27 +92,8 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $incubators = Incubator::query()
-            ->where(function($query) {
-                $query->where('incubatorName', 'like', '%' . $this->search . '%');
-            });
-
-        // Apply status filter
-        if ($this->statusFilter === 'active') {
-            $incubators->where('isActive', true);
-        } elseif ($this->statusFilter === 'inactive') {
-            $incubators->where('isActive', false);
-        }
-
-        // Apply date range filter
-        if ($this->dateFrom) {
-            $incubators->whereDate('creationDate', '>=', $this->dateFrom);
-        }
-        if ($this->dateTo) {
-            $incubators->whereDate('creationDate', '<=', $this->dateTo);
-        }
-
-        $incubators = $incubators->orderBy($this->sortField, $this->sortDirection)
+        $incubators = $this->baseQuery()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage, ['*'], 'page', $this->page);
             
         $currentPage = $incubators->currentPage(); // Get from paginator
@@ -152,25 +134,7 @@ class Display extends Component
     {
         $page = (int) $page;
         
-        // Validate page number
-        $totalPages = Incubator::query()
-            ->where(function($query) {
-                $query->where('incubatorName', 'like', '%' . $this->search . '%');
-            })
-            ->when($this->statusFilter === 'active', function($query) {
-                $query->where('isActive', true);
-            })
-            ->when($this->statusFilter === 'inactive', function($query) {
-                $query->where('isActive', false);
-            })
-            ->when($this->dateFrom, function($query) {
-                $query->whereDate('creationDate', '>=', $this->dateFrom);
-            })
-            ->when($this->dateTo, function($query) {
-                $query->whereDate('creationDate', '<=', $this->dateTo);
-            })
-            ->paginate($this->perPage)
-            ->lastPage();
+        $totalPages = $this->baseQuery()->paginate($this->perPage)->lastPage();
         
         if ($page < 1) {
             $page = 1;
@@ -179,6 +143,29 @@ class Display extends Component
         }
         
         $this->page = $page;
+    }
+
+    protected function baseQuery(): Builder
+    {
+        $incubators = Incubator::query()
+            ->where(function ($query) {
+                $query->where('incubatorName', 'like', '%' . $this->search . '%');
+            });
+
+        if ($this->statusFilter === 'active') {
+            $incubators->where('isActive', true);
+        } elseif ($this->statusFilter === 'inactive') {
+            $incubators->where('isActive', false);
+        }
+
+        if ($this->dateFrom) {
+            $incubators->whereDate('creationDate', '>=', $this->dateFrom);
+        }
+        if ($this->dateTo) {
+            $incubators->whereDate('creationDate', '<=', $this->dateTo);
+        }
+
+        return $incubators;
     }
 
     public function render()

@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use Illuminate\Database\Eloquent\Builder;
 
 class Display extends Component
 {
@@ -88,27 +89,8 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $plenums = Plenum::query()
-            ->where(function($query) {
-                $query->where('plenumName', 'like', '%' . $this->search . '%');
-            });
-
-        // Apply status filter
-        if ($this->statusFilter === 'active') {
-            $plenums->where('isActive', true);
-        } elseif ($this->statusFilter === 'inactive') {
-            $plenums->where('isActive', false);
-        }
-
-        // Apply date range filter
-        if ($this->dateFrom) {
-            $plenums->whereDate('creationDate', '>=', $this->dateFrom);
-        }
-        if ($this->dateTo) {
-            $plenums->whereDate('creationDate', '<=', $this->dateTo);
-        }
-
-        $plenums = $plenums->orderBy($this->sortField, $this->sortDirection)
+        $plenums = $this->baseQuery()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage, ['*'], 'page', $this->page);
             
         $currentPage = $plenums->currentPage(); // Get from paginator
@@ -149,26 +131,7 @@ class Display extends Component
     {
         $page = (int) $page;
         
-        // Validate page number
-        $totalPages = Plenum::query()
-            ->where(function($query) {
-                $query->where('plenumName', 'like', '%' . $this->search . '%');
-            })
-            ->when($this->statusFilter === 'active', function($query) {
-                $query->where('isActive', true);
-            })
-            ->when($this->statusFilter === 'inactive', function($query) {
-                $query->where('isActive', false);
-            })
-            ->when($this->dateFrom, function($query) {
-                $query->whereDate('creationDate', '>=', $this->dateFrom);
-            })
-            ->when($this->dateTo, function($query) {
-                $query->whereDate('creationDate', '<=', $this->dateTo);
-            })
-            ->count();
-            
-        $totalPages = ceil($totalPages / $this->perPage);
+        $totalPages = $this->baseQuery()->paginate($this->perPage)->lastPage();
         
         if ($page < 1) {
             $page = 1;
@@ -177,6 +140,29 @@ class Display extends Component
         }
         
         $this->page = $page;
+    }
+
+    protected function baseQuery(): Builder
+    {
+        $plenums = Plenum::query()
+            ->where(function ($query) {
+                $query->where('plenumName', 'like', '%' . $this->search . '%');
+            });
+
+        if ($this->statusFilter === 'active') {
+            $plenums->where('isActive', true);
+        } elseif ($this->statusFilter === 'inactive') {
+            $plenums->where('isActive', false);
+        }
+
+        if ($this->dateFrom) {
+            $plenums->whereDate('creationDate', '>=', $this->dateFrom);
+        }
+        if ($this->dateTo) {
+            $plenums->whereDate('creationDate', '<=', $this->dateTo);
+        }
+
+        return $plenums;
     }
 
     public function render()

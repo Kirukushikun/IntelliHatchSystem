@@ -228,7 +228,7 @@ class HatcherySullairDashboard extends Component
         $this->selectedPhotos = [];
     }
 
-    private function getFormPhotos(int $formId, string $field = null): array
+    private function getFormPhotos(int $formId, ?string $field = null): array
     {
         try {
             $form = Form::findOrFail($formId);

@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class Display extends Component
 {
@@ -118,32 +119,8 @@ class Display extends Component
 
     public function getPaginationData()
     {
-        $users = User::query()
-            ->where('user_type', 1) // Only show hatchery users (user_type = 1)
-            ->where(function($query) {
-                $query->where('first_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('last_name', 'like', '%' . $this->search . '%');
-            });
-
-        // Apply status filter
-        if ($this->statusFilter === 'disabled') {
-            $users->where('is_disabled', true);
-        } elseif ($this->statusFilter === 'enabled') {
-            $users->where('is_disabled', false);
-        }
-
-        // Apply date filter
-        if ($this->dateFrom || $this->dateTo) {
-            if ($this->dateFrom && $this->dateTo) {
-                $users->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-            } elseif ($this->dateFrom) {
-                $users->whereDate('created_at', '>=', $this->dateFrom);
-            } elseif ($this->dateTo) {
-                $users->whereDate('created_at', '<=', $this->dateTo);
-            }
-        }
-
-        $users = $users->orderBy($this->sortField, $this->sortDirection)
+        $users = $this->baseQuery()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage, ['*'], 'page', $this->page);
             
         $currentPage = $users->currentPage(); // Get from paginator
@@ -184,34 +161,7 @@ class Display extends Component
     {
         $page = (int) $page;
         
-        // Validate page number
-        $usersQuery = User::query()
-            ->where('user_type', 1); // Only show hatchery users (user_type = 1)
-
-        if ($this->search !== '') {
-            $usersQuery->where(function ($query) {
-                $query->where('first_name', 'like', '%' . $this->search . '%')
-                    ->orWhere('last_name', 'like', '%' . $this->search . '%');
-            });
-        }
-
-        if ($this->statusFilter === 'disabled') {
-            $usersQuery->where('is_disabled', true);
-        } elseif ($this->statusFilter === 'enabled') {
-            $usersQuery->where('is_disabled', false);
-        }
-
-        if ($this->dateFrom || $this->dateTo) {
-            if ($this->dateFrom && $this->dateTo) {
-                $usersQuery->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-            } elseif ($this->dateFrom) {
-                $usersQuery->whereDate('created_at', '>=', $this->dateFrom);
-            } elseif ($this->dateTo) {
-                $usersQuery->whereDate('created_at', '<=', $this->dateTo);
-            }
-        }
-
-        $totalPages = $usersQuery->paginate($this->perPage)->lastPage();
+        $totalPages = $this->baseQuery()->paginate($this->perPage)->lastPage();
         
         if ($page < 1) {
             $page = 1;
@@ -220,6 +170,34 @@ class Display extends Component
         }
         
         $this->page = $page;
+    }
+
+    protected function baseQuery(): Builder
+    {
+        $users = User::query()
+            ->where('user_type', 1)
+            ->where(function ($query) {
+                $query->where('first_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('last_name', 'like', '%' . $this->search . '%');
+            });
+
+        if ($this->statusFilter === 'disabled') {
+            $users->where('is_disabled', true);
+        } elseif ($this->statusFilter === 'enabled') {
+            $users->where('is_disabled', false);
+        }
+
+        if ($this->dateFrom || $this->dateTo) {
+            if ($this->dateFrom && $this->dateTo) {
+                $users->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+            } elseif ($this->dateFrom) {
+                $users->whereDate('created_at', '>=', $this->dateFrom);
+            } elseif ($this->dateTo) {
+                $users->whereDate('created_at', '<=', $this->dateTo);
+            }
+        }
+
+        return $users;
     }
 
     public function render()
