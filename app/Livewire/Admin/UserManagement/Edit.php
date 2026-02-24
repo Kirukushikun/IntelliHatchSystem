@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\UserManagement;
 use Livewire\Component;
 use App\Models\User;
 use App\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
 
 class Edit extends Component
 {
@@ -34,7 +35,8 @@ class Edit extends Component
     public function openModal($userId)
     {
         $this->userId = $userId;
-        $user = User::find($this->userId);
+        $cacheKey = 'management:users:' . (int) $this->userId;
+        $user = Cache::remember($cacheKey, 300, fn () => User::find($this->userId));
         
         if ($user) {
             $this->firstName = $user->first_name;
@@ -79,6 +81,9 @@ class Edit extends Component
                     'last_name' => $this->lastName,
                     'username' => $username,
                 ]);
+
+                Cache::forget('management:users:all');
+                Cache::forget('management:users:' . (int) $this->userId);
 
                 $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
                 $this->closeModal();

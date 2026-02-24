@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\UserManagement;
 use Livewire\Component;
 use App\Models\User;
 use App\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
 
 class Create extends Component
 {
@@ -72,6 +73,8 @@ class Create extends Component
                 'username' => $username,
                 'password' => bcrypt('brookside25'), // Default password
             ]);
+
+            Cache::forget('management:users:all');
 
             $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
             $this->closeModal();

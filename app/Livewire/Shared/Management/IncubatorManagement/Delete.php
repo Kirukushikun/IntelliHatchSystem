@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use Illuminate\Support\Facades\Cache;
 
 class Delete extends Component
 {
@@ -16,7 +17,8 @@ class Delete extends Component
     public function openModal($incubatorId)
     {
         $this->incubatorId = $incubatorId;
-        $incubator = Incubator::find($this->incubatorId);
+        $cacheKey = 'management:incubators:' . (int) $this->incubatorId;
+        $incubator = Cache::remember($cacheKey, 300, fn () => Incubator::find($this->incubatorId));
         
         if ($incubator) {
             $this->incubatorName = $incubator->incubatorName;
@@ -31,6 +33,9 @@ class Delete extends Component
             $incubatorName = $incubator->incubatorName;
             
             $incubator->delete();
+
+            Cache::forget('management:incubators:all');
+            Cache::forget('management:incubators:' . (int) $this->incubatorId);
 
             $this->closeModal();
             $this->dispatch('refreshIncubators');

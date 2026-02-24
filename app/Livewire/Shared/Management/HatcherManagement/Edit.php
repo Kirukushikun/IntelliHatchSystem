@@ -5,6 +5,7 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 use Livewire\Component;
 use App\Models\Hatcher;
 use App\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
 
 class Edit extends Component
 {
@@ -29,7 +30,8 @@ class Edit extends Component
     public function openModal($hatcherId)
     {
         $this->hatcherId = $hatcherId;
-        $hatcher = Hatcher::find($this->hatcherId);
+        $cacheKey = 'management:hatchers:' . (int) $this->hatcherId;
+        $hatcher = Cache::remember($cacheKey, 300, fn () => Hatcher::find($this->hatcherId));
         
         if ($hatcher) {
             $this->hatcherName = $hatcher->hatcherName;
@@ -63,6 +65,9 @@ class Edit extends Component
             $hatcher->update([
                 'hatcherName' => $this->hatcherName,
             ]);
+
+            Cache::forget('management:hatchers:all');
+            Cache::forget('management:hatchers:' . (int) $this->hatcherId);
 
             $hatcherName = $this->hatcherName; // Store name before closing modal
             $this->closeModal();

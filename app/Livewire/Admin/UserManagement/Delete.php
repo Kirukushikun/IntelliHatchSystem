@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class Delete extends Component
 {
@@ -16,7 +17,8 @@ class Delete extends Component
     public function openModal($userId)
     {
         $this->userId = $userId;
-        $user = User::find($userId);
+        $cacheKey = 'management:users:' . (int) $this->userId;
+        $user = Cache::remember($cacheKey, 300, fn () => User::find($userId));
         
         if ($user) {
             $this->userName = $user->first_name . ' ' . $user->last_name;
@@ -39,6 +41,9 @@ class Delete extends Component
             if ($user) {
                 $userName = $user->first_name . ' ' . $user->last_name;
                 $user->delete();
+
+                Cache::forget('management:users:all');
+                Cache::forget('management:users:' . (int) $this->userId);
 
                 $this->closeModal();
                 $this->dispatch('userDeleted');
