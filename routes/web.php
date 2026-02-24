@@ -90,6 +90,10 @@ Route::middleware('auth')->group(function () {
             ->middleware('signed')
             ->name('admin.print.forms.incubator-routine');
 
+        Route::get('/admin/print/performance/incubator-routine', [FormsPrintController::class, 'incubatorRoutinePerformance'])
+            ->middleware('signed')
+            ->name('admin.print.performance.incubator-routine');
+
         Route::get('/admin/change-password', [UserController::class, 'changePassword'])->name('admin.change-password');
     });
     

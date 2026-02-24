@@ -144,15 +144,23 @@ class HatcherySullairDashboard extends Component
         $query = Form::where('form_type_id', $this->formType->id)
             ->with(['user']);
 
-        if ($this->search !== '') {
-            $query->where(function ($q) {
-                $q->whereHas('user', function ($userQuery) {
-                    $userQuery->where('first_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'like', '%' . $this->search . '%');
+        $search = trim($this->search);
+        $terms = $search !== '' ? preg_split('/\s+/', $search) : [];
+        $terms = is_array($terms) ? array_values(array_filter($terms, static fn ($t) => is_string($t) && $t !== '')) : [];
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($terms, $search) {
+                $q->whereHas('user', function ($userQuery) use ($terms) {
+                    foreach ($terms as $term) {
+                        $userQuery->where(function ($nameQ) use ($term) {
+                            $nameQ->where('first_name', 'like', '%' . $term . '%')
+                                ->orWhere('last_name', 'like', '%' . $term . '%');
+                        });
+                    }
                 })
-                    ->orWhere(function ($subQ) {
+                    ->orWhere(function ($subQ) use ($search) {
                         $subQ->where('form_inputs', 'like', '%"sullair_number"%')
-                            ->where('form_inputs', 'like', '%' . $this->search . '%');
+                            ->where('form_inputs', 'like', '%' . $search . '%');
                     });
             });
         }
