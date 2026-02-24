@@ -109,21 +109,23 @@ class CleanupOrphanedPhotos extends Command
         $this->info("Found {$totalCleanup} orphaned/temporary photos:");
 
         foreach ($cleanupPhotos as $photo) {
-            $filePath = public_path($photo->public_path);
-            $fileExists = File::exists($filePath);
-            $fileSize = $fileExists ? File::size($filePath) : 0;
+            // Strip asset() prefix and domain to get relative storage path
+            $relativePath = $this->stripAssetPrefix($photo->public_path);
+            $fileExists = Storage::disk('public')->exists($relativePath);
+            $fileSize = $fileExists ? Storage::disk('public')->size($relativePath) : 0;
             $totalSize += $fileSize;
 
             $this->line("  - ID: {$photo->id} | Path: {$photo->public_path} | Created: {$photo->created_at} | Size: " . $this->formatBytes($fileSize) . " | Exists: " . ($fileExists ? 'Yes' : 'No'));
 
-            if (!$dryRun && $fileExists) {
+            if (!$dryRun) {
                 try {
-                    // Delete the file
-                    File::delete($filePath);
+                    // Delete the file if it exists
+                    if ($fileExists) {
+                        Storage::disk('public')->delete($relativePath);
+                    }
                     
-                    // Delete the database record
+                    // Always delete the database record to keep DB in sync
                     DB::table('photos')->where('id', $photo->id)->delete();
-                    
                     $deletedCount++;
                     $this->line("    ✅ Deleted");
                 } catch (\Exception $e) {
@@ -159,6 +161,33 @@ class CleanupOrphanedPhotos extends Command
         ]);
 
         return 0;
+    }
+
+    /**
+     * Strip asset() prefix or domain to get relative storage path
+     */
+    private function stripAssetPrefix(string $publicPath): string
+    {
+        // Remove asset('storage/') prefix if present
+        if (str_starts_with($publicPath, asset('storage/'))) {
+            return substr($publicPath, strlen(asset('storage/')));
+        }
+
+        // Remove common domain patterns
+        $patterns = [
+            'https://intellihatch.bfcgroup.ph/storage/',
+            'http://intellihatch.bfcgroup.ph/storage/',
+            'storage/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (str_starts_with($publicPath, $pattern)) {
+                return substr($publicPath, strlen($pattern));
+            }
+        }
+
+        // If no pattern matches, return as-is
+        return $publicPath;
     }
 
     /**
