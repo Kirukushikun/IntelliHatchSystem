@@ -5,6 +5,7 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 use Livewire\Component;
 use App\Models\Incubator;
 use App\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
 
 class Create extends Component
 {
@@ -44,6 +45,8 @@ class Create extends Component
                 'incubatorName' => $this->incubatorName,
                 'isActive' => false, // Default to inactive
             ]);
+
+            Cache::forget('management:incubators:all');
 
             $incubatorName = $this->incubatorName; // Store name before closing modal
             $this->closeModal();

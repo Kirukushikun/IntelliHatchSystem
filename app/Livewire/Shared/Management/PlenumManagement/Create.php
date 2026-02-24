@@ -5,6 +5,7 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 use Livewire\Component;
 use App\Models\Plenum;
 use App\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
 
 class Create extends Component
 {
@@ -45,6 +46,8 @@ class Create extends Component
                 'isActive' => false, // Default to inactive
                 'creationDate' => now(),
             ]);
+
+            Cache::forget('management:plenums:all');
 
             $plenumName = $this->plenumName; // Store name before closing modal
             $this->closeModal();

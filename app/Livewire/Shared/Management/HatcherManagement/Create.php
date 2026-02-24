@@ -5,6 +5,7 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 use Livewire\Component;
 use App\Models\Hatcher;
 use App\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
 
 class Create extends Component
 {
@@ -44,6 +45,8 @@ class Create extends Component
                 'hatcherName' => $this->hatcherName,
                 'isActive' => false, // Default to inactive
             ]);
+
+            Cache::forget('management:hatchers:all');
 
             $hatcherName = $this->hatcherName; // Store name before closing modal
             $this->closeModal();

@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use Illuminate\Support\Facades\Cache;
 
 class Disable extends Component
 {
@@ -18,7 +19,8 @@ class Disable extends Component
     public function openModal($plenumId)
     {
         $this->plenumId = $plenumId;
-        $plenum = Plenum::find($this->plenumId);
+        $cacheKey = 'management:plenums:' . (int) $this->plenumId;
+        $plenum = Cache::remember($cacheKey, 300, fn () => Plenum::find($this->plenumId));
         
         if ($plenum) {
             $this->plenumName = $plenum->plenumName;
@@ -37,6 +39,9 @@ class Disable extends Component
             $plenum->update([
                 'isActive' => !$this->isActive,
             ]);
+
+            Cache::forget('management:plenums:all');
+            Cache::forget('management:plenums:' . (int) $this->plenumId);
 
             $action = !$this->isActive ? 'activated' : 'deactivated';
             $plenumName = $this->plenumName; // Store name before closing modal

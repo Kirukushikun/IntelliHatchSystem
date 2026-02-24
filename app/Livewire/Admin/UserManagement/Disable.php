@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\UserManagement;
 use Livewire\Component;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class Disable extends Component
 {
@@ -18,7 +19,8 @@ class Disable extends Component
 
     public function openModal($userId)
     {
-        $user = User::find($userId);
+        $cacheKey = 'management:users:' . (int) $userId;
+        $user = Cache::remember($cacheKey, 300, fn () => User::find($userId));
         if (!$user) {
             return;
         }
@@ -49,6 +51,9 @@ class Disable extends Component
             $user->update([
                 'is_disabled' => !$this->isCurrentlyDisabled,
             ]);
+
+            Cache::forget('management:users:all');
+            Cache::forget('management:users:' . (int) $this->userId);
 
             $action = $this->isCurrentlyDisabled ? 'enabled' : 'disabled';
             $userName = $this->userName; // Store name before closing modal

@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
+use Illuminate\Support\Facades\Cache;
 
 class Disable extends Component
 {
@@ -18,7 +19,8 @@ class Disable extends Component
     public function openModal($hatcherId)
     {
         $this->hatcherId = $hatcherId;
-        $hatcher = Hatcher::find($this->hatcherId);
+        $cacheKey = 'management:hatchers:' . (int) $this->hatcherId;
+        $hatcher = Cache::remember($cacheKey, 300, fn () => Hatcher::find($this->hatcherId));
         
         if ($hatcher) {
             $this->hatcherName = $hatcher->hatcherName;
@@ -37,6 +39,9 @@ class Disable extends Component
             $hatcher->update([
                 'isActive' => !$this->isActive,
             ]);
+
+            Cache::forget('management:hatchers:all');
+            Cache::forget('management:hatchers:' . (int) $this->hatcherId);
 
             $action = !$this->isActive ? 'activated' : 'deactivated';
             $hatcherName = $this->hatcherName; // Store name before closing modal

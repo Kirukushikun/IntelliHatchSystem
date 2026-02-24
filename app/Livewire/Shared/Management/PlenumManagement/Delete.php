@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use Illuminate\Support\Facades\Cache;
 
 class Delete extends Component
 {
@@ -16,7 +17,8 @@ class Delete extends Component
     public function openModal($plenumId)
     {
         $this->plenumId = $plenumId;
-        $plenum = Plenum::find($this->plenumId);
+        $cacheKey = 'management:plenums:' . (int) $this->plenumId;
+        $plenum = Cache::remember($cacheKey, 300, fn () => Plenum::find($this->plenumId));
         
         if ($plenum) {
             $this->plenumName = $plenum->plenumName;
@@ -31,6 +33,9 @@ class Delete extends Component
             $plenumName = $plenum->plenumName;
             
             $plenum->delete();
+
+            Cache::forget('management:plenums:all');
+            Cache::forget('management:plenums:' . (int) $this->plenumId);
 
             $this->closeModal();
             $this->dispatch('refreshPlenums');

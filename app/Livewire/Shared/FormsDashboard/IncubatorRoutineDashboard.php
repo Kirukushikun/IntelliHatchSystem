@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
 
@@ -250,15 +251,23 @@ class IncubatorRoutineDashboard extends Component
         $query = Form::with(['user', 'formType'])
             ->where('form_type_id', $this->typeId);
 
-        if ($this->search !== '') {
-            $query->where(function ($q) {
-                $q->whereHas('user', function ($subQ) {
-                    $subQ->where('first_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'like', '%' . $this->search . '%');
+        $search = trim($this->search);
+        $terms = $search !== '' ? preg_split('/\s+/', $search) : [];
+        $terms = is_array($terms) ? array_values(array_filter($terms, static fn ($t) => is_string($t) && $t !== '')) : [];
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($terms, $search) {
+                $q->whereHas('user', function ($subQ) use ($terms) {
+                    foreach ($terms as $term) {
+                        $subQ->where(function ($nameQ) use ($term) {
+                            $nameQ->where('first_name', 'like', '%' . $term . '%')
+                                ->orWhere('last_name', 'like', '%' . $term . '%');
+                        });
+                    }
                 })
-                    ->orWhere(function ($subQ) {
+                    ->orWhere(function ($subQ) use ($search) {
                         $subQ->where('form_inputs', 'like', '%"machine_info":%')
-                            ->where('form_inputs', 'like', '%"name":%' . $this->search . '%');
+                            ->where('form_inputs', 'like', '%"name":%' . $search . '%');
                     });
             });
         }
@@ -425,6 +434,59 @@ class IncubatorRoutineDashboard extends Component
         $this->showModal = false;
         $this->selectedFormId = null;
         $this->formPhotos = [];
+    }
+
+    public function printPerformanceReport(): void
+    {
+        $search = trim($this->search);
+        if ($search === '') {
+            $this->dispatch('showToast', message: 'Please enter a name in the search bar to print the performance report.', type: 'error');
+            return;
+        }
+
+        $terms = preg_split('/\s+/', $search);
+        $terms = is_array($terms) ? array_values(array_filter($terms, static fn ($t) => is_string($t) && $t !== '')) : [];
+
+        $users = User::query()
+            ->where('user_type', 1)
+            ->where('is_disabled', false)
+            ->where(function ($q) use ($terms) {
+                foreach ($terms as $term) {
+                    $q->where(function ($nameQ) use ($term) {
+                        $nameQ->where('first_name', 'like', '%' . $term . '%')
+                            ->orWhere('last_name', 'like', '%' . $term . '%');
+                    });
+                }
+            })
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->limit(2)
+            ->get(['id']);
+
+        $count = $users->count();
+        if ($count === 0) {
+            $this->dispatch('showToast', message: 'No matching user found. Please refine the search to one user.', type: 'error');
+            return;
+        }
+        if ($count > 1) {
+            $this->dispatch('showToast', message: 'Multiple users match this search. Please refine it to one full name.', type: 'error');
+            return;
+        }
+
+        $userId = (int) $users->first()->id;
+
+        $url = URL::temporarySignedRoute(
+            'admin.print.performance.incubator-routine',
+            now()->addMinutes(10),
+            [
+                'user_id' => $userId,
+                'search' => $this->search,
+                'dateFrom' => $this->dateFrom,
+                'dateTo' => $this->dateTo,
+            ]
+        );
+
+        $this->dispatch('openNewTab', url: $url);
     }
 
     public function render()

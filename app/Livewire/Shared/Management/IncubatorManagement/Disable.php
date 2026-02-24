@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use Illuminate\Support\Facades\Cache;
 
 class Disable extends Component
 {
@@ -18,7 +19,8 @@ class Disable extends Component
     public function openModal($incubatorId)
     {
         $this->incubatorId = $incubatorId;
-        $incubator = Incubator::find($this->incubatorId);
+        $cacheKey = 'management:incubators:' . (int) $this->incubatorId;
+        $incubator = Cache::remember($cacheKey, 300, fn () => Incubator::find($this->incubatorId));
         
         if ($incubator) {
             $this->incubatorName = $incubator->incubatorName;
@@ -37,6 +39,9 @@ class Disable extends Component
             $incubator->update([
                 'isActive' => !$this->isActive,
             ]);
+
+            Cache::forget('management:incubators:all');
+            Cache::forget('management:incubators:' . (int) $this->incubatorId);
 
             $action = $this->isActive ? 'deactivated' : 'activated';
             $incubatorName = $this->incubatorName; // Store name before closing modal
