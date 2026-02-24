@@ -660,84 +660,189 @@ Each management module follows the same pattern:
 ### `resources/views/components/layout.blade.php`
 - **Purpose**: Base HTML layout wrapper (assets, main slots).
 - **How to use**: Use as `<x-layout>...</x-layout>`.
+- **Parameters**: none
+- **Slots**:
+  - `slot` (page HTML body/content)
+- **Render**: Wraps the entire page with HTML, head, and body tags, including CSS and JS assets.
 - **Related files**: `resources/css/app.css`, `resources/js/app.js`
 
 ### `resources/views/components/navbar.blade.php`
 - **Purpose**: Top navigation bar.
 - **How to use**: Use as `<x-navbar />`.
+- **Parameters**:
+  - `hideDate` (bool, default `false`)
+  - `includeSidebar` (bool, default `false`)
+  - `user` (User model, default `null`) - used to detect admin vs user + build links
+  - `title` (string|null, default `null`) - breadcrumb/title text
+- **Slots**:
+  - `slot` (page content)
+  - `slot:navbarActions` (optional) - extra actions area beside breadcrumbs (only shown when `includeSidebar` is true)
+- **Render**: Displays the top navigation bar with links and optional sidebar toggle.
 - **Related files**: `resources/views/components/layout.blade.php`
 
 ### `resources/views/components/sidebar.blade.php`
 - **Purpose**: Sidebar navigation (admin/user menus).
 - **How to use**: Use as `<x-sidebar />`.
+- **Parameters**:
+  - `user` (User model|null) - determines menu items
+  - `currentPage` (string|null) - optional external hint (component primarily uses `request()->is(...)`)
+- **Slots**: none
+- **Render**: Displays the sidebar navigation menu based on the user's role.
 - **Related files**: route names in `routes/web.php`
 
 ### `resources/views/components/title.blade.php`
 - **Purpose**: Standard page title/header component.
 - **How to use**: Use as `<x-title />` (pass props/slots as needed).
+- **Parameters**:
+  - `subtitle` (string, default `''`)
+- **Slots**:
+  - `slot` (required) - the main title text
+- **Render**: Displays a standard page title with optional subtitle.
 - **Related files**: pages under `resources/views/*`
 
 ### `resources/views/components/button.blade.php`
 - **Purpose**: Standard button component.
 - **How to use**: Use as `<x-button>...</x-button>`.
+- **Parameters**:
+  - `variant` (string, default `primary`) - e.g. `primary`, `secondary`, `success`, `warning`, `danger`, `outline-*`, `ghost`, `link`
+  - `size` (string, default `md`) - `xs|sm|md|lg|xl`
+  - `icon` (Blade SVG paths/string, default `null`)
+  - `iconPosition` (string, default `left`) - `left|right`
+  - `type` (string, default `button`) - HTML button type
+  - `disabled` (bool, default `false`)
+  - `fullWidth` (bool, default `false`)
+  - `loading` (bool, default `false`) - shows spinner
+- **Slots**:
+  - `slot` (button text/content)
+- **Render**: Displays a customizable button with various styles and options.
 - **Related files**: used by most forms/modals
 
 ### `resources/views/components/text-input.blade.php`
 - **Purpose**: Text input component.
 - **How to use**: Use as `<x-text-input />`.
+- **Parameters**:
+  - `label` (string, default `''`)
+  - `name` (string, default `''`)
+  - `errorKey` (string|null, default `null`) - defaults to `name`
+  - `value` (string, default `''`)
+  - `placeholder` (string, default `Enter text here`)
+  - `required` (bool, default `false`)
+  - `type` (string, default `text`) - supports `password` (adds show/hide toggle)
+  - `class` (string, default `''`) - wrapper class
+  - `icon` (string, default `''`) - supports `user|lock`
+  - `wireModel` (string|null, default `null`) - if set uses `wire:model="..."`
+  - `subtext` (string, default `''`) - rendered under label
+- **Slots**: none
+- **Render**: Displays a customizable text input field with label, error handling, and optional icon.
 - **Related files**: Livewire form views
 
 ### `resources/views/components/text-area.blade.php`
 - **Purpose**: Textarea component.
 - **How to use**: Use as `<x-text-area />`.
+- **Parameters**:
+  - `label` (string, default `''`)
+  - `name` (string, default `''`)
+  - `errorKey` (string|null, default `null`) - defaults to `name`
+  - `value` (string, default `''`)
+  - `placeholder` (string, default `Enter text here`)
+  - `required` (bool, default `false`)
+  - `subtext` (string, default `''`)
+- **Slots**: none
+- **Render**: Displays a customizable textarea field with label and error handling.
 - **Related files**: Livewire form views
 
 ### `resources/views/components/checkbox.blade.php`
 - **Purpose**: Checkbox component.
 - **How to use**: Use as `<x-checkbox />`.
+- **Parameters**:
+  - `label` (string)
+  - `name` (string) - will submit as `name[]`
+  - `errorKey` (string|null, default `null`) - defaults to `name`
+  - `options` (array, default `[]`) - `[value => label]`
+  - `required` (bool, default `false`) - enables client-side required validation when not using `wire:model`
+  - `columns` (int, default `5`) - grid columns
+  - `gridClass` (string, default `gap-2`)
+- **Slots**: none
+- **Render**: Displays a customizable checkbox group with label and error handling.
 - **Related files**: Livewire views
 
 ### `resources/views/components/dropdown.blade.php`
 - **Purpose**: Dropdown UI component.
 - **How to use**: Use as `<x-dropdown>...</x-dropdown>`.
+- **Parameters**:
+  - `label` (string, default `''`)
+  - `name` (string, default `''`)
+  - `errorKey` (string|null, default `null`) - defaults to `name`
+  - `required` (bool, default `false`)
+  - `placeholder` (string, default `Select an option`)
+  - `options` (array, default `[]`) - `[value => display]`
+- **Slots**:
+  - `slot` (optional) - append extra `<option>` items
+- **Render**: Displays a customizable dropdown select field with label and error handling.
 - **Related files**: dashboard toolbars and filters
 
 ### `resources/views/components/custom-pagination.blade.php`
 - **Purpose**: Shared pagination UI.
 - **How to use**: Use as `<x-custom-pagination />`.
+- **Parameters**:
+  - `currentPage` (int, default `1`)
+  - `lastPage` (int, default `1`)
+  - `pages` (array, default `[]`) - list of page numbers to render (max is determined by caller)
+  - `onPageChange` (string|null, default `null`) - Livewire method name; defaults to `gotoPage`
+- **Slots**: none
+- **Render**: Displays a customizable pagination component with links to navigate through pages.
 - **Related files**: management `Display` Livewire components
 
 ### `resources/views/components/photo-attach.blade.php`
 - **Purpose**: Photo upload/attach UI.
 - **How to use**: Use as `<x-photo-attach />`.
+- **Parameters**:
+  - `label` (string, default `''`)
+  - `name` (string, default `''`) - used as the photo key and input name (`name[]`)
+  - `required` (bool, default `false`)
+- **Slots**: none
+- **Render**: Displays a customizable photo upload field with label and error handling.
 - **Related files**: `app/Livewire/Shared/Forms/Traits/TempPhotoManager.php`
 
 ### `resources/views/components/progress-navigation.blade.php`
 - **Purpose**: Multi-step form progress navigation UI.
 - **How to use**: Use as `<x-progress-navigation />`.
+- **Parameters**:
+  - `currentStep` (int, default `1`)
+  - `visibleStepIds` (int[], default `[1]`)
+  - `canProceed` (bool, default `true`) - disables Next when false
+  - `isLastVisibleStep` (bool, default `false`) - shows Submit when true
+  - `showProgress` (bool, default `false`) - shows progress dots
+- **Slots**:
+  - `slot` (step content)
+- **Render**: Displays a customizable progress navigation component for multi-step forms.
 - **Related files**: `app/Livewire/Components/FormNavigation.php`
 
 ### `resources/views/components/toast.blade.php`
 - **Purpose**: Toast notification UI.
 - **How to use**: Use as `<x-toast />` (typically mounted once in the layout).
+- **Parameters**:
+  - `messages` (array, default `[]`) - if empty, reads `session('error'|'success'|'warning'|'info')`
+- **Slots**: none
+- **Render**: Displays a customizable toast notification component with messages.
 - **Related files**: Livewire components dispatching `showToast`
 
 ### `resources/views/components/dark-mode-toggle.blade.php`
 - **Purpose**: UI toggle for theme mode.
 - **How to use**: Use as `<x-dark-mode-toggle />`.
+- **Parameters**: none
+- **Slots**: none
+- **Render**: Displays a customizable dark mode toggle button.
 - **Related files**: `resources/views/components/navbar.blade.php`
 
 ### `resources/views/components/change-password.blade.php`
 - **Purpose**: Change password UI component.
 - **How to use**: Use as `<x-change-password />`.
+- **Parameters**:
+  - `class` (string, default `''`) - wrapper classes
+- **Slots**: none
+- **Render**: Displays a customizable change password form.
 - **Related files**: `resources/views/auth/change-password-page.blade.php`
-
-## `resources/views/`
-
-### `resources/views/landing.blade.php`
-- **Purpose**: Public landing page.
-- **How to use**: Visit `/`.
-- **Related files**: `routes/web.php`
 
 ## `resources/views/auth/`
 
