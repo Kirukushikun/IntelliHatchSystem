@@ -2,6 +2,11 @@
 
 @php
     $isAdmin = ($user && ((int) $user->user_type) === 0);
+    $displayName = $user
+        ? trim((string) ($user->first_name ?? '') . ' ' . (string) ($user->last_name ?? ''))
+        : '';
+    $displayName = $displayName !== '' ? $displayName : (string) ($user->username ?? '');
+    $displayUsername = (string) ($user->username ?? '');
 @endphp
 
 @auth
@@ -81,15 +86,20 @@
                                 >
                                     <div class="relative">
                                         <div class="w-10 h-10 bg-orange-500 dark:bg-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                                            {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                            {{ strtoupper(substr($user->first_name ?? '', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? '', 0, 1)) }}
                                         </div>
                                         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                                     </div>
                                     
                                     <div class="text-left">
                                         <div class="font-semibold text-gray-900 dark:text-gray-100 text-sm hidden sm:block">
-                                            {{ auth()->user()->full_name }}
+                                            {{ $displayName }}
                                         </div>
+                                        @if($displayUsername !== '')
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+                                                {{ $displayUsername }}
+                                            </div>
+                                        @endif
                                     </div>
                                     
                                     <svg 
@@ -118,12 +128,17 @@
                                     <div class="px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-12 h-12 bg-orange-500 dark:bg-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                                                {{ strtoupper(substr(auth()->user()->first_name ?? '', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? '', 0, 1)) }}
+                                                {{ strtoupper(substr($user->first_name ?? '', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? '', 0, 1)) }}
                                             </div>
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                                    {{ auth()->user()->full_name }}
+                                                    {{ $displayName }}
                                                 </p>
+                                                @if($displayUsername !== '')
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                        {{ $displayUsername }}
+                                                    </p>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -257,13 +272,18 @@
                         >
                             <div class="relative">
                                 <img src="{{ auth()->user()->profile_photo ? asset('storage/' . auth()->user()->profile_photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->first_name) . '+' . urlencode(auth()->user()->last_name) . '&background=' . urlencode(auth()->user()->profile_background ?? 'FFA07A') }}" 
-                                class="w-10 h-10 rounded-full object-cover" alt="{{ auth()->user()->full_name }}">
+                                class="w-10 h-10 rounded-full object-cover" alt="{{ $displayName }}">
                             </img>
                             
                             <div class="hidden sm:block text-left">
                                 <div class="font-semibold text-gray-900 text-sm">
-                                    {{ auth()->user()->full_name }}
+                                    {{ $displayName }}
                                 </div>
+                                @if($displayUsername !== '')
+                                    <div class="text-xs text-gray-500 truncate">
+                                        {{ $displayUsername }}
+                                    </div>
+                                @endif
                             </div>
                             
                             <svg 
@@ -292,12 +312,17 @@
                             <div class="px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex items-center space-x-3">
                                     <img src="{{ auth()->user()->profile_photo ? asset('storage/' . auth()->user()->profile_photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->first_name) . '&' . urlencode(auth()->user()->last_name) . '&background=' . urlencode(auth()->user()->profile_background ?? 'FFA07A') }}" 
-                                    class="w-12 h-12 rounded-full object-cover" alt="{{ auth()->user()->full_name }}">
+                                    class="w-12 h-12 rounded-full object-cover" alt="{{ $displayName }}">
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                        {{ auth()->user()->full_name }}
+                                        {{ $displayName }}
                                     </p>
+                                    @if($displayUsername !== '')
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                            {{ $displayUsername }}
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
 
