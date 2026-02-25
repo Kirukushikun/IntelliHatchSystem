@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FormController;
 use App\Http\Controllers\Admin\FormsPrintController;
+use App\Http\Controllers\Admin\InsightsController;
 
 Route::get('/', function () {
     return view('landing');
@@ -57,6 +58,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/forms/blower-air-incubator-routine', [FormController::class, 'blowerAirIncubator'])->name('admin.forms.blower-air-incubator-routine');
 
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+        Route::get('/admin/insights', [InsightsController::class, 'index'])->name('admin.insights');
 
         Route::get('/admin/incubator-routine-dashboard', [DashboardController::class, 'incubatorRoutine'])->name('admin.incubator-routine-dashboard');
 
