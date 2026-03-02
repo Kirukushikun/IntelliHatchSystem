@@ -43,5 +43,8 @@ return [
     'api' => [
         'key' => env('API_KEY'),
     ],
+    'openrouter' => [
+        'key' => env('OPENROUTER_API_KEY'),
+    ],
 
 ];

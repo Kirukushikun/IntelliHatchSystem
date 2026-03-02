@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::get('/admin/insights', [InsightsController::class, 'index'])->name('admin.insights');
+        Route::get('/admin/insights/{formTypeId}', [InsightsController::class, 'show'])->name('admin.insights.show');
 
         Route::get('/admin/incubator-routine-dashboard', [DashboardController::class, 'incubatorRoutine'])->name('admin.incubator-routine-dashboard');
 
