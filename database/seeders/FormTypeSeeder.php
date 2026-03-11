@@ -17,7 +17,10 @@ class FormTypeSeeder extends Seeder
             'Incubator Routine Checklist Per Shift',
             'Hatcher Blower Air Speed Monitoring',
             'Incubator Blower Air Speed Monitoring',
-            'Hatchery Sullair Air Compressor Weekly PMS Checklist'
+            'Hatchery Sullair Air Compressor Weekly PMS Checklist',
+            'Hatcher Machine Accuracy Temperature Checking',
+            'Plenum Temperature and Humidity Monitoring',
+            'Incubator Machine Accuracy Temperature Checking',
         ];
 
         foreach ($formTypes as $formName) {

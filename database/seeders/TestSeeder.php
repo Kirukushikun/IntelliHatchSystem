@@ -4,12 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Plenum;
 use App\Models\Incubator;
 use App\Models\Hatcher;
 use App\Models\Form;
 use App\Models\FormType;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class TestSeeder extends Seeder
@@ -17,51 +15,17 @@ class TestSeeder extends Seeder
     public function run(): void
     {
         echo "Creating test data...\n";
-        
-        // Create 10 plenums
-        echo "Creating 10 plenums...\n";
-        $plenums = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $plenums[] = Plenum::create([
-                'plenumName' => 'Plenum-' . $i,
-                'isActive' => true,
-                'creationDate' => Carbon::now()->subDays(rand(1, 90)),
-            ]);
-        }
-        
-        // Create 10 incubators
-        echo "Creating 10 incubators...\n";
-        $incubators = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $incubators[] = Incubator::create([
-                'incubatorName' => 'Incubator-' . $i,
-                'isActive' => true,
-                'creationDate' => Carbon::now()->subDays(rand(1, 90)),
-            ]);
-        }
-        
-        // Create 10 hatchers
-        echo "Creating 10 hatchers...\n";
-        $hatchers = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $hatchers[] = Hatcher::create([
-                'hatcherName' => 'Hatcher-' . $i,
-                'isActive' => true,
-                'creationDate' => Carbon::now()->subDays(rand(1, 90)),
-            ]);
-        }
-        
-        // Create 10 hatchery users using factory with user_type 1
-        echo "Creating 10 hatchery users...\n";
-        $users = User::factory()->count(10)->create([
-            'user_type' => 1,
-        ]);
-        
-        // Get hatchery users (user_type = 1)
+
+        // Load machines seeded by MachineSeeder
+        $plenums = \App\Models\Plenum::all()->all();
+        $incubators = Incubator::all()->all();
+        $hatchers = Hatcher::all()->all();
+
+        // Load hatchery users seeded by HatcheryUserSeeder
         $hatcheryUsers = User::where('user_type', 1)->get();
-        
+
         if ($hatcheryUsers->isEmpty()) {
-            echo "No hatchery users found. Please create users first.\n";
+            echo "No hatchery users found. Please run HatcheryUserSeeder first.\n";
             return;
         }
         
@@ -353,9 +317,6 @@ class TestSeeder extends Seeder
         
         echo "Test data creation completed!\n";
         echo "Created:\n";
-        echo "- 10 plenums\n";
-        echo "- 10 incubators\n";
-        echo "- 10 hatchers\n";
         echo "- 10 hatchery users\n";
         echo "- 500 hatcher blower air speed forms\n";
         echo "- 500 incubator blower air speed forms\n";

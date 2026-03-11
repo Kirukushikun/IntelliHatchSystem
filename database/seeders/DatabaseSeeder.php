@@ -50,5 +50,9 @@ class DatabaseSeeder extends Seeder
             'username' => 'JSantos',
             'user_type' => '0',
         ]);
+
+        $this->call(FormTypeSeeder::class);
+        $this->call(MachineSeeder::class);
+        $this->call(HatcheryUserSeeder::class);
     }
 }

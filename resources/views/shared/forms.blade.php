@@ -24,7 +24,25 @@
                 'description' => 'Lorem Ipsum',
                 'route' => '/forms/hatchery-sullair',
                 'color' => 'amber',
-            ]
+            ],
+            [
+                'title' => 'Hatcher Machine Accuracy Temperature Checking',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/hatcher-machine-accuracy',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Plenum Temperature and Humidity Monitoring',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/plenum-temp-humidity',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Incubator Machine Accuracy Temperature Checking',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/incubator-machine-accuracy',
+                'color' => 'amber',
+            ],
         ];
         
         $borderColors = [

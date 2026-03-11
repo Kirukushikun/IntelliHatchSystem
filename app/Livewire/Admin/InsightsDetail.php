@@ -489,7 +489,7 @@ TEXT;
         $icon       = $cfg['icon'];
         $safeTitle  = htmlspecialchars($title);
 
-        $h  = "<div class=\"rounded-xl overflow-hidden border {$border} shadow-sm mb-4\">";
+        $h  = "<div class=\"insight-section-card rounded-xl overflow-hidden border {$border} shadow-sm mb-4\">";
         $h .= "<div class=\"flex items-center gap-3 px-4 py-3 {$headerBg} border-b {$border}\">";
         $h .= "<div class=\"w-7 h-7 rounded-lg {$iconBg} flex items-center justify-center shrink-0\">{$icon}</div>";
         $h .= "<h3 class=\"text-sm font-semibold {$headerText}\">{$safeTitle}</h3>";

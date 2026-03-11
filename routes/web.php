@@ -33,6 +33,18 @@ Route::get('/forms/hatchery-sullair', function () {
     return view('shared.forms.hatchery-sullair');
 })->name('forms.hatchery-sullair');
 
+Route::get('/forms/hatcher-machine-accuracy', function () {
+    return view('shared.forms.hatcher-machine-accuracy');
+})->name('forms.hatcher-machine-accuracy');
+
+Route::get('/forms/plenum-temp-humidity', function () {
+    return view('shared.forms.plenum-temp-humidity');
+})->name('forms.plenum-temp-humidity');
+
+Route::get('/forms/incubator-machine-accuracy', function () {
+    return view('shared.forms.incubator-machine-accuracy');
+})->name('forms.incubator-machine-accuracy');
+
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
     // Unified login route
@@ -69,6 +81,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/blower-air-incubator-dashboard', [DashboardController::class, 'blowerAirIncubator'])->name('admin.blower-air-incubator-dashboard');
 
         Route::get('/admin/hatchery-sullair-dashboard', [DashboardController::class, 'hatcherySullair'])->name('admin.hatchery-sullair-dashboard');
+
+        Route::get('/admin/forms/hatcher-machine-accuracy', [FormController::class, 'hatcherMachineAccuracy'])->name('admin.forms.hatcher-machine-accuracy');
+
+        Route::get('/admin/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('admin.forms.plenum-temp-humidity');
+
+        Route::get('/admin/forms/incubator-machine-accuracy', [FormController::class, 'incubatorMachineAccuracy'])->name('admin.forms.incubator-machine-accuracy');
 
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
@@ -114,6 +132,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/forms/blower-air-incubator', [FormController::class, 'blowerAirIncubator'])->name('user.forms.blower-air-incubator');
         
         Route::get('/user/forms/hatchery-sullair', [FormController::class, 'hatcherySullair'])->name('user.forms.hatchery-sullair');
+
+        Route::get('/user/forms/hatcher-machine-accuracy', [FormController::class, 'hatcherMachineAccuracy'])->name('user.forms.hatcher-machine-accuracy');
+
+        Route::get('/user/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('user.forms.plenum-temp-humidity');
+
+        Route::get('/user/forms/incubator-machine-accuracy', [FormController::class, 'incubatorMachineAccuracy'])->name('user.forms.incubator-machine-accuracy');
         
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 

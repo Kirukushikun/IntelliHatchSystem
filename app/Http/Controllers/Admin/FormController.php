@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Form;
 use App\Models\FormType;
-use Illuminate\Http\Request;
 
 class FormController extends Controller
 {
@@ -53,6 +52,30 @@ class FormController extends Controller
     public function hatcherySullair()
     {
         return view('shared.forms.hatchery-sullair');
+    }
+
+    /**
+     * Display the hatcher machine accuracy temperature checking form page.
+     */
+    public function hatcherMachineAccuracy()
+    {
+        return view('shared.forms.hatcher-machine-accuracy');
+    }
+
+    /**
+     * Display the incubator machine accuracy temperature checking form page.
+     */
+    public function incubatorMachineAccuracy()
+    {
+        return view('shared.forms.incubator-machine-accuracy');
+    }
+
+    /**
+     * Display the plenum temperature and humidity monitoring form page.
+     */
+    public function plenumTempHumidity()
+    {
+        return view('shared.forms.plenum-temp-humidity');
     }
 
     /**
