@@ -61,6 +61,12 @@
                 'route' => '/forms/incubator-temp-calibration',
                 'color' => 'amber',
             ],
+            [
+                'title' => 'Hatcher Temperature Calibration',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/hatcher-temp-calibration',
+                'color' => 'amber',
+            ],
         ];
         
         $borderColors = [

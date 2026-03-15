@@ -24,6 +24,7 @@ class FormTypeSeeder extends Seeder
             'Entrance Damper Spacing Monitoring',
             'Incubator Entrance Temperature Monitoring',
             'Incubator Temperature Calibration',
+            'Hatcher Temperature Calibration',
         ];
 
         foreach ($formTypes as $formName) {

@@ -54,6 +54,16 @@
                         'label' => 'Plenum Machines',
                         'href' => '/admin/plenum-machines',
                         'active' => 'admin/plenum-machines*'
+                    ],
+                    [
+                        'label' => 'PS Numbers',
+                        'href' => '/admin/ps-numbers',
+                        'active' => 'admin/ps-numbers*'
+                    ],
+                    [
+                        'label' => 'House Numbers',
+                        'href' => '/admin/house-numbers',
+                        'active' => 'admin/house-numbers*'
                     ]
                 ]
             ],
@@ -86,6 +96,16 @@
                         'label' => 'Plenum Machines',
                         'href' => '/user/plenum-machines',
                         'active' => 'user/plenum-machines*'
+                    ],
+                    [
+                        'label' => 'PS Numbers',
+                        'href' => '/user/ps-numbers',
+                        'active' => 'user/ps-numbers*'
+                    ],
+                    [
+                        'label' => 'House Numbers',
+                        'href' => '/user/house-numbers',
+                        'active' => 'user/house-numbers*'
                     ]
                 ]
             ],

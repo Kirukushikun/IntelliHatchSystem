@@ -4,8 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Shared\Management\HatcherController;
+use App\Http\Controllers\Shared\Management\HouseNumberController;
 use App\Http\Controllers\Shared\Management\IncubatorController;
 use App\Http\Controllers\Shared\Management\PlenumController;
+use App\Http\Controllers\Shared\Management\PsNumberController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FormController;
@@ -57,6 +59,10 @@ Route::get('/forms/incubator-temp-calibration', function () {
     return view('shared.forms.incubator-temp-calibration');
 })->name('forms.incubator-temp-calibration');
 
+Route::get('/forms/hatcher-temp-calibration', function () {
+    return view('shared.forms.hatcher-temp-calibration');
+})->name('forms.hatcher-temp-calibration');
+
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
     // Unified login route
@@ -106,6 +112,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/forms/incubator-temp-calibration', [FormController::class, 'incubatorTempCalibration'])->name('admin.forms.incubator-temp-calibration');
 
+        Route::get('/admin/forms/hatcher-temp-calibration', [FormController::class, 'hatcherTempCalibration'])->name('admin.forms.hatcher-temp-calibration');
+
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
         Route::get('/admin/incubator-machines', [IncubatorController::class, 'index'])->name('admin.incubator-machines');
@@ -113,6 +121,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/hatcher-machines', [HatcherController::class, 'index'])->name('admin.hatcher-machines');
 
         Route::get('/admin/plenum-machines', [PlenumController::class, 'index'])->name('admin.plenum-machines');
+
+        Route::get('/admin/ps-numbers', [PsNumberController::class, 'index'])->name('admin.ps-numbers');
+
+        Route::get('/admin/house-numbers', [HouseNumberController::class, 'index'])->name('admin.house-numbers');
 
         Route::get('/admin/print/forms/blower-air-hatcher', [FormsPrintController::class, 'blowerAirHatcher'])
             ->middleware('signed')
@@ -163,11 +175,17 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/user/forms/incubator-temp-calibration', [FormController::class, 'incubatorTempCalibration'])->name('user.forms.incubator-temp-calibration');
 
+        Route::get('/user/forms/hatcher-temp-calibration', [FormController::class, 'hatcherTempCalibration'])->name('user.forms.hatcher-temp-calibration');
+
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 
         Route::get('/user/hatcher-machines', [HatcherController::class, 'index'])->name('user.hatcher-machines');
 
         Route::get('/user/plenum-machines', [PlenumController::class, 'index'])->name('user.plenum-machines');
+
+        Route::get('/user/ps-numbers', [PsNumberController::class, 'index'])->name('user.ps-numbers');
+
+        Route::get('/user/house-numbers', [HouseNumberController::class, 'index'])->name('user.house-numbers');
 
         Route::get('/user/change-password', [UserController::class, 'changePassword'])->name('user.change-password');
     });

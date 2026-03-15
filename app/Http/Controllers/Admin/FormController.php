@@ -103,6 +103,14 @@ class FormController extends Controller
     }
 
     /**
+     * Display the hatcher temperature calibration form page.
+     */
+    public function hatcherTempCalibration()
+    {
+        return view('shared.forms.hatcher-temp-calibration');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Form $form)
