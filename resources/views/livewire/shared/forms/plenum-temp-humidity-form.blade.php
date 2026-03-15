@@ -21,10 +21,6 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="date">
-                    <x-text-input label="Date" name="date" error-key="form.date" :required="true" placeholder="Select date..." wireModel="form.date" type="date" />
-                </div>
-
                 <div data-field="shift">
                     <x-dropdown label="Shift" name="shift" error-key="form.shift" placeholder="Choose one..." wire:model.live="form.shift" required>
                         <option value="1st Shift">1st Shift</option>
@@ -36,24 +32,10 @@
                 <div data-field="time">
                     <x-dropdown label="Time" name="time" error-key="form.time" placeholder="Choose one..." wire:model.live="form.time" required>
                         <option value="6:00 AM">6:00 AM</option>
-                        <option value="7:00 AM">7:00 AM</option>
-                        <option value="8:00 AM">8:00 AM</option>
-                        <option value="9:00 AM">9:00 AM</option>
-                        <option value="10:00 AM">10:00 AM</option>
                         <option value="11:00 AM">11:00 AM</option>
-                        <option value="12:00 PM">12:00 PM</option>
-                        <option value="1:00 PM">1:00 PM</option>
-                        <option value="2:00 PM">2:00 PM</option>
-                        <option value="3:00 PM">3:00 PM</option>
                         <option value="4:00 PM">4:00 PM</option>
-                        <option value="5:00 PM">5:00 PM</option>
-                        <option value="6:00 PM">6:00 PM</option>
-                        <option value="7:00 PM">7:00 PM</option>
-                        <option value="8:00 PM">8:00 PM</option>
                         <option value="9:00 PM">9:00 PM</option>
-                        <option value="10:00 PM">10:00 PM</option>
-                        <option value="11:00 PM">11:00 PM</option>
-                        <option value="12:00 AM">12:00 AM</option>
+                        <option value="2:00 AM">2:00 AM</option>
                     </x-dropdown>
                 </div>
             </div>

@@ -39,6 +39,7 @@ class HatcherMachineAccuracyForm extends FormNavigation
     public function mount($formType = 'hatcher_machine_accuracy'): void
     {
         $this->form = HatcherMachineAccuracyConfig::defaultFormState();
+        $this->form['date_submitted'] = now()->format('Y-m-d');
 
         parent::mount($formType);
         $this->schedule = $this->scheduleConfig();

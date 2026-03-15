@@ -45,6 +45,18 @@ Route::get('/forms/incubator-machine-accuracy', function () {
     return view('shared.forms.incubator-machine-accuracy');
 })->name('forms.incubator-machine-accuracy');
 
+Route::get('/forms/entrance-damper-spacing', function () {
+    return view('shared.forms.entrance-damper-spacing');
+})->name('forms.entrance-damper-spacing');
+
+Route::get('/forms/incubator-entrance-temp', function () {
+    return view('shared.forms.incubator-entrance-temp');
+})->name('forms.incubator-entrance-temp');
+
+Route::get('/forms/incubator-temp-calibration', function () {
+    return view('shared.forms.incubator-temp-calibration');
+})->name('forms.incubator-temp-calibration');
+
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
     // Unified login route
@@ -87,6 +99,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('admin.forms.plenum-temp-humidity');
 
         Route::get('/admin/forms/incubator-machine-accuracy', [FormController::class, 'incubatorMachineAccuracy'])->name('admin.forms.incubator-machine-accuracy');
+
+        Route::get('/admin/forms/entrance-damper-spacing', [FormController::class, 'entranceDamperSpacing'])->name('admin.forms.entrance-damper-spacing');
+
+        Route::get('/admin/forms/incubator-entrance-temp', [FormController::class, 'incubatorEntranceTemp'])->name('admin.forms.incubator-entrance-temp');
+
+        Route::get('/admin/forms/incubator-temp-calibration', [FormController::class, 'incubatorTempCalibration'])->name('admin.forms.incubator-temp-calibration');
 
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
@@ -138,7 +156,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('user.forms.plenum-temp-humidity');
 
         Route::get('/user/forms/incubator-machine-accuracy', [FormController::class, 'incubatorMachineAccuracy'])->name('user.forms.incubator-machine-accuracy');
-        
+
+        Route::get('/user/forms/entrance-damper-spacing', [FormController::class, 'entranceDamperSpacing'])->name('user.forms.entrance-damper-spacing');
+
+        Route::get('/user/forms/incubator-entrance-temp', [FormController::class, 'incubatorEntranceTemp'])->name('user.forms.incubator-entrance-temp');
+
+        Route::get('/user/forms/incubator-temp-calibration', [FormController::class, 'incubatorTempCalibration'])->name('user.forms.incubator-temp-calibration');
+
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 
         Route::get('/user/hatcher-machines', [HatcherController::class, 'index'])->name('user.hatcher-machines');

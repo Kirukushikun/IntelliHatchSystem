@@ -10,7 +10,7 @@
             :show-progress="$this->showProgress()"
         >
             <div data-step="1" class="space-y-4" @style(["display:none" => $currentStep !== 1])>
-                <x-title>INCUBATOR ACCURACY TEMPERATURE CHECKING</x-title>
+                <x-title>ENTRANCE DAMPER SPACING MONITORING</x-title>
 
                 <div data-field="hatchery_man">
                     <x-dropdown label="Hatchery Man" name="hatchery_man" error-key="form.hatchery_man" placeholder="Select hatchery man" wire:model.live="form.hatchery_man" required>
@@ -20,20 +20,16 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="mobile_number">
-                    <x-text-input label="Mobile Number" name="mobile_number" error-key="form.mobile_number" :required="true" placeholder="09XXXXXXXXX or +639XXXXXXXXX" wireModel="form.mobile_number" type="tel" />
-                </div>
-
-                <div data-field="time_of_reading">
-                    <x-text-input label="Time of Reading" name="time_of_reading" error-key="form.time_of_reading" :required="true" placeholder="Select time..." wireModel="form.time_of_reading" type="time" />
-                </div>
-
                 <div data-field="shift">
                     <x-dropdown label="Shift" name="shift" error-key="form.shift" placeholder="Select shift" wire:model.live="form.shift" required>
                         <option value="1st Shift">1st Shift</option>
                         <option value="2nd Shift">2nd Shift</option>
                         <option value="3rd Shift">3rd Shift</option>
                     </x-dropdown>
+                </div>
+
+                <div data-field="time_of_reading">
+                    <x-text-input label="Time of Reading" name="time_of_reading" error-key="form.time_of_reading" :required="true" placeholder="Select time..." wireModel="form.time_of_reading" type="time" />
                 </div>
 
                 <div data-field="incubator">
@@ -48,18 +44,14 @@
             </div>
 
             <div data-step="2" class="space-y-4" @style(["display:none" => $currentStep !== 2])>
-                <x-title>TEMPERATURE READINGS</x-title>
+                <x-title>DAMPER SPACING MEASUREMENT</x-title>
 
-                <div data-field="display_temp">
-                    <x-text-input label="Display Temp" name="display_temp" error-key="form.display_temp" :required="true" placeholder="Enter display temperature..." wireModel="form.display_temp" type="number" step="0.01" />
+                <div data-field="measurement">
+                    <x-text-input label="Measurement (cm)" name="measurement" error-key="form.measurement" :required="true" placeholder="Enter measurement in cm..." wireModel="form.measurement" type="number" step="0.01" />
                 </div>
 
-                <div data-field="calibrator">
-                    <x-text-input label="Calibrator" name="calibrator" error-key="form.calibrator" :required="true" placeholder="Enter calibrator reading..." wireModel="form.calibrator" type="number" step="0.01" />
-                </div>
-
-                <div data-field="accuracy_photos">
-                    <x-photo-attach label="Photo (Display next to Calibrator)" name="accuracy_photos" />
+                <div data-field="measurement_photo">
+                    <x-photo-attach label="Photo (Optional)" name="measurement_photo" />
                 </div>
             </div>
         </x-progress-navigation>

@@ -43,6 +43,24 @@
                 'route' => '/forms/incubator-machine-accuracy',
                 'color' => 'amber',
             ],
+            [
+                'title' => 'Entrance Damper Spacing Monitoring',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/entrance-damper-spacing',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Incubator Entrance Temperature Monitoring',
+                'description' => 'Every 24 hours after setting',
+                'route' => '/forms/incubator-entrance-temp',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Incubator Temperature Calibration',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/incubator-temp-calibration',
+                'color' => 'amber',
+            ],
         ];
         
         $borderColors = [

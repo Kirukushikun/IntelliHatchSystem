@@ -21,6 +21,9 @@ class FormTypeSeeder extends Seeder
             'Hatcher Machine Accuracy Temperature Checking',
             'Plenum Temperature and Humidity Monitoring',
             'Incubator Machine Accuracy Temperature Checking',
+            'Entrance Damper Spacing Monitoring',
+            'Incubator Entrance Temperature Monitoring',
+            'Incubator Temperature Calibration',
         ];
 
         foreach ($formTypes as $formName) {

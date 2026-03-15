@@ -10,7 +10,7 @@ class PlenumTempHumidityConfig
             'form.hatcheryman'                           => 'required|integer|exists:users,id',
             'form.date'                                  => 'required|date',
             'form.shift'                                 => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
-            'form.time'                                  => 'required|string',
+            'form.time'                                  => 'required|string|in:6:00 AM,11:00 AM,4:00 PM,9:00 PM,2:00 AM',
 
             'form.plenum_incubator_1_5'                  => 'required|string',
             'form.plenum_incubator_1_5_photos.*'         => 'image|max:1024',

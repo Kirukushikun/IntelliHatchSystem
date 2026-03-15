@@ -36,6 +36,7 @@ class IncubatorMachineAccuracyForm extends FormNavigation
     public function mount($formType = 'incubator_machine_accuracy'): void
     {
         $this->form = IncubatorMachineAccuracyConfig::defaultFormState();
+        $this->form['date_submitted'] = now()->format('Y-m-d');
 
         parent::mount($formType);
         $this->schedule = $this->scheduleConfig();

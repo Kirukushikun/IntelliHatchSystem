@@ -2,17 +2,17 @@
 
 namespace App\Livewire\Shared\Forms;
 
-use App\Livewire\Configs\PlenumTempHumidityConfig;
+use App\Livewire\Configs\EntranceDamperSpacingConfig;
 use App\Livewire\Components\FormNavigation;
 use App\Livewire\Shared\Forms\Traits\TempPhotoManager;
+use App\Models\Incubator;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Livewire\WithFileUploads;
 
-class PlenumTempHumidityForm extends FormNavigation
+class EntranceDamperSpacingForm extends FormNavigation
 {
     use WithFileUploads, TempPhotoManager;
 
@@ -24,19 +24,28 @@ class PlenumTempHumidityForm extends FormNavigation
 
     protected bool $disableShiftLogic = true;
 
-    public ?int $uploadedBy = null;
+    /** @var array */
+    public $incubators = [];
 
     /** @var array */
     public $hatcheryMen = [];
 
-    public function mount($formType = 'plenum_temp_humidity'): void
+    /** @var array */
+    public $completedIncubators = [];
+
+    public function mount($formType = 'entrance_damper_spacing'): void
     {
-        $this->form = PlenumTempHumidityConfig::defaultFormState();
-        $this->form['date'] = now()->format('Y-m-d');
+        $this->form = EntranceDamperSpacingConfig::defaultFormState();
 
         parent::mount($formType);
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
+
+        $this->incubators = Incubator::where('isActive', true)
+            ->orderBy('incubatorName')
+            ->get()
+            ->mapWithKeys(fn ($m) => [$m->id => $m->incubatorName])
+            ->toArray();
 
         $this->hatcheryMen = User::where('user_type', 1)
             ->where('is_disabled', false)
@@ -45,6 +54,8 @@ class PlenumTempHumidityForm extends FormNavigation
             ->get()
             ->mapWithKeys(fn ($u) => [$u->id => $u->first_name . ' ' . $u->last_name])
             ->toArray();
+
+        $this->updateCompletedIncubators();
     }
 
     public function updated($name, $value): void
@@ -66,27 +77,27 @@ class PlenumTempHumidityForm extends FormNavigation
 
     protected function formTypeKey(): string
     {
-        return 'plenum_temp_humidity';
+        return 'entrance_damper_spacing';
     }
 
     protected function scheduleConfig(): array
     {
-        return PlenumTempHumidityConfig::schedule();
+        return EntranceDamperSpacingConfig::schedule();
     }
 
     protected function stepFieldMap(): array
     {
-        return PlenumTempHumidityConfig::stepFieldMap();
+        return EntranceDamperSpacingConfig::stepFieldMap();
     }
 
     protected function formTypeName(): string
     {
-        return PlenumTempHumidityConfig::getFormTypeName();
+        return EntranceDamperSpacingConfig::getFormTypeName();
     }
 
     protected function messages(): array
     {
-        return PlenumTempHumidityConfig::getMessages();
+        return EntranceDamperSpacingConfig::getMessages();
     }
 
     public function submitForm()
@@ -94,7 +105,7 @@ class PlenumTempHumidityForm extends FormNavigation
         $this->formSubmitted = true;
 
         try {
-            $this->validate(PlenumTempHumidityConfig::getRules(), $this->messages());
+            $this->validate(EntranceDamperSpacingConfig::getRules(), $this->messages());
 
             if (!$this->ensureAllPhotosUploaded()) {
                 $this->dispatch('showToast', message: 'Photo uploads are still in progress. Please wait for all photos to finish uploading before submitting the form.', type: 'error');
@@ -106,14 +117,14 @@ class PlenumTempHumidityForm extends FormNavigation
 
             DB::table('forms')->where('id', $formId)->update([
                 'form_inputs' => json_encode($this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos())),
-                'updated_at' => now(),
+                'updated_at'  => now(),
             ]);
 
             $this->sendFormToWebhook($formId);
 
             session()->flash('success', 'Form submitted successfully!');
 
-            return redirect()->route('forms.plenum-temp-humidity');
+            return redirect()->route('forms.entrance-damper-spacing');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $firstKey = array_key_first($e->validator->errors()->messages());
             if ($firstKey) {
@@ -143,15 +154,15 @@ class PlenumTempHumidityForm extends FormNavigation
                 throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
-            $hatcheryman = $this->form['hatcheryman'] ?? null;
+            $hatcheryMan = $this->form['hatchery_man'] ?? null;
 
             $formId = (int) DB::table('forms')->insertGetId([
-                'form_type_id' => $formTypeId,
-                'form_inputs'  => json_encode($formInputs),
+                'form_type_id'   => $formTypeId,
+                'form_inputs'    => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by'  => $this->uploadedBy ?: $hatcheryman,
-                'created_at'   => now(),
-                'updated_at'   => now(),
+                'uploaded_by'    => $hatcheryMan,
+                'created_at'     => now(),
+                'updated_at'     => now(),
             ]);
 
             DB::commit();
@@ -166,8 +177,60 @@ class PlenumTempHumidityForm extends FormNavigation
     protected function formInputsForStorageWithoutPhotos(): array
     {
         $inputs = $this->form;
-        unset($inputs['hatcheryman']);
+
+        unset($inputs['hatchery_man']);
+        unset($inputs['incubator']);
+
+        $inputs['date_submitted'] = now()->format('Y-m-d');
+
+        if (!empty($this->form['incubator'])) {
+            $incubator = DB::table('incubator-machines')
+                ->where('id', $this->form['incubator'])
+                ->first();
+
+            if ($incubator) {
+                $inputs['machine_info'] = [
+                    'table' => 'incubator-machines',
+                    'id'    => $this->form['incubator'],
+                    'name'  => $incubator->incubatorName,
+                ];
+            }
+        }
+
         return $inputs;
+    }
+
+    protected function updateCompletedIncubators(): void
+    {
+        $today = now()->format('Y-m-d');
+        $formTypeName = $this->formTypeName();
+
+        $formTypeId = DB::table('form_types')
+            ->where('form_name', $formTypeName)
+            ->value('id');
+
+        if (!$formTypeId) {
+            $this->completedIncubators = [];
+            return;
+        }
+
+        $completedForms = DB::table('forms')
+            ->where('form_type_id', $formTypeId)
+            ->whereDate('date_submitted', $today)
+            ->whereNotNull('form_inputs')
+            ->get();
+
+        $this->completedIncubators = [];
+
+        foreach ($completedForms as $form) {
+            $formInputs = is_array($form->form_inputs)
+                ? $form->form_inputs
+                : json_decode($form->form_inputs, true);
+
+            if (isset($formInputs['machine_info']['id'])) {
+                $this->completedIncubators[] = $formInputs['machine_info']['id'];
+            }
+        }
     }
 
     protected function sendFormToWebhook(int $formId): void
@@ -195,6 +258,8 @@ class PlenumTempHumidityForm extends FormNavigation
                 : json_decode($form->form_inputs, true);
             $formInputs = (array) $formInputs;
 
+            $machineInfo = $formInputs['machine_info'] ?? null;
+
             $payload = [
                 'form' => [
                     'form_id'   => $form->id,
@@ -206,11 +271,11 @@ class PlenumTempHumidityForm extends FormNavigation
                     'id'   => $form->uploaded_by,
                     'name' => trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) ?: 'Unknown User',
                 ] : null,
-                'machine' => null,
-                'message' => [
+                'machine'  => $machineInfo,
+                'message'  => [
                     'form_name'    => $form->form_type_name ?: 'Unknown Form Type',
-                    'machine_name' => null,
-                    'submitted_by' => $formInputs['hatcheryman'] ?? null,
+                    'machine_name' => is_array($machineInfo) ? ($machineInfo['name'] ?? null) : null,
+                    'submitted_by' => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
                     'date_time'    => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
                     'photos'       => [],
                     'shift'        => $formInputs['shift'] ?? 'N/A',
@@ -229,6 +294,6 @@ class PlenumTempHumidityForm extends FormNavigation
 
     public function render()
     {
-        return view('livewire.shared.forms.plenum-temp-humidity-form');
+        return view('livewire.shared.forms.entrance-damper-spacing-form');
     }
 }

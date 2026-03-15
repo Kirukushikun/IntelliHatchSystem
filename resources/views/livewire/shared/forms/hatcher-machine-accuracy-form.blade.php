@@ -24,10 +24,6 @@
                     <x-text-input label="Cellphone Number" name="cellphone_number" error-key="form.cellphone_number" :required="true" placeholder="09XXXXXXXXX or +639XXXXXXXXX" wireModel="form.cellphone_number" type="tel" />
                 </div>
 
-                <div data-field="date_submitted">
-                    <x-text-input label="Date Submitted" name="date_submitted" error-key="form.date_submitted" :required="true" placeholder="Select date..." wireModel="form.date_submitted" type="date" />
-                </div>
-
                 <div data-field="time_of_reading">
                     <x-text-input label="Time of Reading" name="time_of_reading" error-key="form.time_of_reading" :required="true" placeholder="Select time..." wireModel="form.time_of_reading" type="time" />
                 </div>

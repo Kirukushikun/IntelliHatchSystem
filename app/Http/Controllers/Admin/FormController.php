@@ -79,6 +79,30 @@ class FormController extends Controller
     }
 
     /**
+     * Display the entrance damper spacing monitoring form page.
+     */
+    public function entranceDamperSpacing()
+    {
+        return view('shared.forms.entrance-damper-spacing');
+    }
+
+    /**
+     * Display the incubator entrance temperature monitoring form page.
+     */
+    public function incubatorEntranceTemp()
+    {
+        return view('shared.forms.incubator-entrance-temp');
+    }
+
+    /**
+     * Display the incubator temperature calibration form page.
+     */
+    public function incubatorTempCalibration()
+    {
+        return view('shared.forms.incubator-temp-calibration');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Form $form)
