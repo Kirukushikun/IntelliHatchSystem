@@ -67,6 +67,12 @@
                 'route' => '/forms/hatcher-temp-calibration',
                 'color' => 'amber',
             ],
+            [
+                'title' => 'PASGAR Score',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/pasgar-score',
+                'color' => 'amber',
+            ],
         ];
         
         $borderColors = [

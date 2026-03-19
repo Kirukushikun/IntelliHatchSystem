@@ -63,6 +63,10 @@ Route::get('/forms/hatcher-temp-calibration', function () {
     return view('shared.forms.hatcher-temp-calibration');
 })->name('forms.hatcher-temp-calibration');
 
+Route::get('/forms/pasgar-score', function () {
+    return view('shared.forms.pasgar-score');
+})->name('forms.pasgar-score');
+
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
     // Unified login route
@@ -113,6 +117,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/forms/incubator-temp-calibration', [FormController::class, 'incubatorTempCalibration'])->name('admin.forms.incubator-temp-calibration');
 
         Route::get('/admin/forms/hatcher-temp-calibration', [FormController::class, 'hatcherTempCalibration'])->name('admin.forms.hatcher-temp-calibration');
+
+        Route::get('/admin/forms/pasgar-score', [FormController::class, 'pasgarScore'])->name('admin.forms.pasgar-score');
 
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
@@ -176,6 +182,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/forms/incubator-temp-calibration', [FormController::class, 'incubatorTempCalibration'])->name('user.forms.incubator-temp-calibration');
 
         Route::get('/user/forms/hatcher-temp-calibration', [FormController::class, 'hatcherTempCalibration'])->name('user.forms.hatcher-temp-calibration');
+
+        Route::get('/user/forms/pasgar-score', [FormController::class, 'pasgarScore'])->name('user.forms.pasgar-score');
 
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 

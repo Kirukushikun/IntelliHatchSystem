@@ -43,6 +43,36 @@
                 'route' => '/forms/incubator-machine-accuracy',
                 'color' => 'amber',
             ],
+            [
+                'title' => 'Entrance Damper Spacing Monitoring',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/entrance-damper-spacing',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Incubator Entrance Temperature Monitoring',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/incubator-entrance-temp',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Incubator Temperature Calibration',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/incubator-temp-calibration',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Hatcher Temperature Calibration',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/hatcher-temp-calibration',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'PASGAR Score',
+                'description' => 'Lorem Ipsum',
+                'route' => '/forms/pasgar-score',
+                'color' => 'amber',
+            ],
         ];
         
         $borderColors = [

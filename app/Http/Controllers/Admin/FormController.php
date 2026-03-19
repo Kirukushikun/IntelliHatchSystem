@@ -111,6 +111,14 @@ class FormController extends Controller
     }
 
     /**
+     * Display the PASGAR score form page.
+     */
+    public function pasgarScore()
+    {
+        return view('shared.forms.pasgar-score');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Form $form)
