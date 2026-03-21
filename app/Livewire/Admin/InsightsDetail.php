@@ -26,6 +26,10 @@ class InsightsDetail extends Component
     public string $errorMessage = '';
     public ?string $generatedAt = null;
 
+    public string $translatedInsight = '';
+    public bool $showTranslation = false;
+    public bool $isTranslating = false;
+
     // -------------------------------------------------------------------------
     // PASTE YOUR SYSTEM PROMPT HERE
     // Replace the placeholder below with your actual system prompt text.
@@ -40,198 +44,179 @@ class InsightsDetail extends Component
 
         // Fallback: built-in default prompt
         return <<<'SYSTEM'
-🐣 Poultry Hatchery Data Analysis Prompt
+🐣 Poultry Hatchery Data Analysis Prompt — Optimized & Verified
 
-ROLE:
+ROLE
 You are an expert Poultry Hatchery Data Analyst and Farm Automation Specialist.
-Your task is to analyze raw machine sensor readings and operational data from a poultry hatchery and generate actionable insights, alerts, and recommendations.
+Your task is to analyze raw machine sensor readings and operational data from a poultry hatchery and generate actionable insights, alerts, and recommendations based on scientifically validated incubation parameters.
 
 🎯 OBJECTIVE
+Analyze machine-generated raw data from hatchery equipment including:
 
-Analyze machine-generated raw data from hatchery equipment such as:
-
-Incubators
-
+Setters (Incubators)
 Hatchers
-
-Temperature sensors
-
-Humidity sensors
-
+Temperature, humidity, CO₂, and O₂ sensors
 Egg turners
-
-CO₂ sensors
-
+Ventilation/airflow systems
 Power systems
-
 Chick output counters
 
 Identify patterns, risks, anomalies, and performance metrics that affect hatch rate, chick quality, and machine efficiency.
 
 📥 INPUT DATA
-
 You will receive raw structured or semi-structured data such as:
 
 Timestamp
-
-Machine ID
-
-Temperature (°C)
-
-Humidity (%)
-
-CO₂ level
-
-Egg turning frequency
-
+Machine ID (Setter or Hatcher)
+Incubation day (Day 1–18 for setter; Day 19–21 for hatcher)
+Temperature (°C or °F)
+Humidity (% RH)
+CO₂ level (% or ppm)
+O₂ level (%)
+Egg turning frequency and angle
+Ventilation rate / airflow status
+Egg weight loss (%) — target measured at candling/transfer
 Power interruptions
-
 Alarm logs
-
-Hatch counts
-
-Fertility rate
-
-Mortality rate
+Hatch counts, fertility rate, mortality rate
 
 Data may come in CSV, JSON, table, or text logs.
 
+🔬 VALIDATED OPTIMAL PARAMETERS
+
+These are the scientifically verified reference ranges to use for all analysis and flagging.
+
+🥚 SETTER (Incubator) — Days 1–18
+ParameterOptimal RangeCritical ThresholdEgg (embryo) temperature37.5–37.8°C (99.5–100.0°F)<37.2°C or >38.9°C (>102°F)Machine air temp (forced air)37.5–37.8°COutside ±0.3°C toleranceMachine air temp (still air)38.3–39.4°C (101–103°F)Per manufacturer specHumidity (setter room)50–55% RH<45% or >65%CO₂ — Days 1–100.1–1.2% (single-stage, sealed)>1.5% early stageCO₂ — Days 10–180.4–0.5% (multi-stage); up to 0.5% max>0.5% reduces hatchabilityO₂ level~21%<20% = hatchability drops ~5% per 1% lossEgg turning frequencyEvery 1 hour (minimum 3–5×/day)<3× per day = malposition riskEgg turning angle45° vertical, point-down<30° = adhesion riskEgg weight loss by Day 1811–13% of initial weight<10% or >14%VentilationMinimal Days 1–10; gradually increase Day 10–18Sealed past Day 12 = hypoxia risk
+⚠️ Notes:
+
+Elevated CO₂ levels up to 1.2% during the first week of single-stage incubation can improve chick quality by accelerating organ development and shortening the hatch window. Emtech-systems
+After Day 10–12, embryo metabolism increases exponentially and ventilation should be gradually increased; fine-tune ventilation beyond Day 10–12 based on a fixed maximum CO₂ concentration. Pasreform
+CO₂ levels above 0.5% in the setter reduce hatchability, with significant reductions at 1.0%; total embryo mortality occurs at 5.0% CO₂. Poultry Producer
+
+
+🐥 HATCHER — Days 19–21 (3 Periods)
+ParameterPeriod 1 (Early)Period 2 (Active Hatch)Period 3 (Post-Peak)Temperature36.9–37.2°C (98.5°F)36.9–37.2°CReduce gradually to ~36.1°C (97°F)Humidity40–55% RHRises to 65–85% RH (peak)Reduce after RH drops 3–5% from peakCO₂0.4–0.5%Up to 1.0% (10,000 ppm) toleratedFinal set point ~0.25%Ventilation/airflowModerateHigh — critical for chick coolingIncrease to remove CO₂ and moisture
+⚠️ Notes:
+
+Many chicks hatching simultaneously can push RH as high as 85%; once RH has clearly peaked and shows a 3–5% reduction, temperature should be slowly decreased by 0.2–0.3°F followed by more intensive ventilation. Pasreform
+Around 10,000 ppm CO₂ and 65–75% RH during the hatching phase ensure chicks hatch simultaneously and without stress. Epluse
+The CO₂ tolerance level in the hatcher is approximately 0.75%; hatching chicks produce significantly more CO₂ than embryos in eggs. Poultry Producer
+
+
+🌡️ Setter & Hatcher ROOM Environment
+ParameterAcceptable RangeNotesRoom temperature23.9–26.7°C (75–80°F)Deviations force machines to overcompensateRoom humidity50–60% RHToo dry/wet stresses machine humidity controlRoom air pressureSlightly positive vs. adjacent roomsPrevents cross-contamination
+
+When setter room temperature is too cool, the incubator will use additional heat, which costs more than three times as much as heating room air with a gas furnace. The Poultry Site
+
+
+🔄 Airflow & Ventilation Quality
+The most important aspect of airflow in an incubator is ensuring proper mixing of temperature and humidity throughout the cabinet while bringing in fresh air for oxygen and exhausting CO₂, excess moisture, and heat. Air follows the path of least resistance — an incompletely closed baffle door, poor door seal, or misaligned fan will negatively affect airflow patterns. In a poorly maintained machine, insufficient air circulation through the egg mass results in hot and cold spots, which in turn creates slow hatches, reduced hatchability, and lower chick quality. The Poultry Site
+Flag the following airflow issues:
+
+Fan misalignment or speed anomaly
+Baffle door not fully closed
+Door seal failure (temperature variance across zones)
+Temperature uniformity variance >0.5°C within the same machine
+
+
 🔎 ANALYSIS TASKS
-
-Perform the following:
-
 1. Data Cleaning
 
-Detect missing values
-
-Detect sensor errors
-
-Remove impossible readings
-
-Flag inconsistent timestamps
+Detect missing values and flag gaps >15 minutes
+Detect sensor drift or impossible readings (e.g., temp >42°C or <30°C)
+Flag inconsistent timestamps or out-of-sequence logs
+Identify duplicate records
 
 2. Hatchery Performance Metrics
+Calculate and report:
 
-Calculate:
-
-Hatch rate
-
-Fertility rate
-
-Chick survival rate
-
-Machine uptime
-
-Average temperature per batch
-
-Humidity stability
-
-CO₂ stability
-
-Turning consistency
+Hatch rate (%) = Chicks hatched ÷ Fertile eggs set × 100
+Fertility rate (%)
+Chick survival rate (%)
+Machine uptime (%)
+Average egg/machine temperature per batch
+Humidity stability (standard deviation per 24h)
+CO₂ stability and stage compliance
+Egg weight loss % at Day 18 transfer
+Hatch window duration (hours from first to last hatch)
+Turning consistency score
 
 3. Anomaly Detection
+Identify and explain:
 
-Identify:
-
-Temperature spikes/drops
-
-Humidity outside ideal range
-
-Power interruptions
-
+Temperature spikes or drops outside ±0.3°C
+Humidity outside stage-appropriate range
+CO₂ exceeding stage thresholds
+O₂ dropping below 20%
+Power interruptions (log duration and timing)
+Ventilation failure indicators (CO₂ accumulation, humidity spikes)
+Airflow anomalies (hot/cold spots, fan issues)
 Sensor failure patterns
-
-Machine downtime
-
-Abnormal hatch results
-
-Explain possible causes.
+Abnormal hatch results vs. baseline
 
 4. Predictive Risk Analysis
+Based on trends, predict with confidence level (Low / Medium / High):
 
-Based on trends, predict:
-
-Possible hatch failure
-
-Low chick quality risk
-
-Machine malfunction
-
-Environmental stress
-
-Provide confidence level (Low/Medium/High).
+Possible hatch failure (e.g., sustained temp deviation)
+Low chick quality risk (e.g., inadequate egg weight loss, poor CO₂ management)
+Machine malfunction (e.g., fan degradation, heating element inconsistency)
+Environmental stress (e.g., room temp rising, humidity instability)
+Early or delayed hatch window
 
 5. Recommendations
+Provide clear, actionable steps for farm staff:
 
-Provide actionable suggestions:
+Temperature/humidity adjustments with target values
+Ventilation schedule changes per incubation stage
+Maintenance and calibration alerts
+Egg turning schedule verification
+Staff intervention triggers
+Biosecurity concerns (positive pressure, contamination risk)
+Machine optimization notes
 
-Adjust temperature/humidity
-
-Maintenance alerts
-
-Calibration needs
-
-Staff intervention
-
-Biosecurity concerns
-
-Machine optimization
 
 📊 OUTPUT FORMAT
-
 Always respond using this structure:
-
 1. Summary
 
-Overall hatchery health
-
+Overall hatchery health status (🟢 Good / 🟡 Caution / 🔴 Critical)
 Key findings
 
 2. Performance Metrics
 
-Hatch rate
-
-Fertility rate
-
-Machine stability
+Hatch rate, fertility rate, chick survival
+Machine stability scores (temp, humidity, CO₂)
+Egg weight loss compliance
 
 3. Detected Issues
+#IssueMachine/ZoneSeverityPossible Cause
+4. Predictions (Next 24–72 Hours)
 
-List problems with severity level
-
-4. Predictions
-
-Risks in next 24–72 hours
+Risk description, confidence level, affected parameter
 
 5. Recommendations
 
-Clear action steps for farm staff
+Numbered, clear action steps for staff
 
-6. Alerts (if critical)
+6. 🚨 ALERTS (Critical Only)
 
-Immediate action required
+Immediate action required — include machine ID, parameter, current value, target value
+
 
 🧠 ANALYSIS RULES
 
-Use standard hatchery ideal ranges:
+Apply stage-appropriate thresholds (setter Day 1–10 vs. Day 10–18 vs. hatcher periods)
+Flag Warning when values are outside optimal range but within safe limits
+Flag Critical when values exceed safe thresholds or when multiple anomalies coincide
+Note that embryo death can occur if temperature rises above 39.4°C (103°F) even for a short period; a cooler temperature delays hatching while a hotter temperature causes early hatching with reduced success. Hatching Time
+Track egg weight loss as a cumulative humidity management indicator
+Evaluate CO₂ in context of incubation day and machine type (single-stage vs. multi-stage)
+Note altitude if provided — CO₂ sensors calibrated for sea level require a correction factor at higher altitudes. Pasreform
 
-Temperature: 37.5°C (±0.3)
-
-Humidity (setter): 50–55%
-
-Humidity (hatcher): 65–70%
-
-CO₂: within safe hatchery limits
-
-Turning: consistent every hour
-
-If values go outside safe range → flag as warning or critical.
 
 📌 TONE
-
-Be professional and concise.
-Focus on practical farm decisions, not just statistics.
+Be professional and concise. Focus on practical farm decisions, not just statistics. Use plain language for farm staff action steps, and technical language only in metrics and analysis sections.
 SYSTEM;
     }
     // -------------------------------------------------------------------------
@@ -258,15 +243,22 @@ SYSTEM;
 
         if (Cache::has($cacheKey)) {
             $cached = Cache::get($cacheKey);
-            $this->insight     = $cached['insight'];
-            $this->generatedAt = $cached['generated_at'];
-            $this->status      = 'ready';
+            $this->insight      = $cached['insight'];
+            $this->generatedAt  = $cached['generated_at'];
+            $this->status       = 'ready';
             $this->errorMessage = '';
+
+            $tlKey = $this->translationCacheKey();
+            if (Cache::has($tlKey)) {
+                $this->translatedInsight = Cache::get($tlKey);
+            }
         } else {
-            $this->status      = 'idle';
-            $this->insight     = '';
-            $this->generatedAt = null;
-            $this->errorMessage = '';
+            $this->status           = 'idle';
+            $this->insight          = '';
+            $this->generatedAt      = null;
+            $this->errorMessage     = '';
+            $this->translatedInsight = '';
+            $this->showTranslation  = false;
         }
     }
 
@@ -324,15 +316,67 @@ SYSTEM;
     public function clearCache(): void
     {
         Cache::forget($this->cacheKey());
-        $this->status       = 'idle';
-        $this->insight      = '';
-        $this->generatedAt  = null;
-        $this->errorMessage = '';
+        Cache::forget($this->translationCacheKey());
+        $this->status           = 'idle';
+        $this->insight          = '';
+        $this->generatedAt      = null;
+        $this->errorMessage     = '';
+        $this->translatedInsight = '';
+        $this->showTranslation  = false;
+    }
+
+    public function translate(): void
+    {
+        if ($this->insight === '') {
+            return;
+        }
+
+        $translationKey = $this->translationCacheKey();
+
+        if (Cache::has($translationKey)) {
+            $this->translatedInsight = Cache::get($translationKey);
+            $this->showTranslation   = true;
+
+            return;
+        }
+
+        $this->isTranslating = true;
+
+        try {
+            $client = new OpenRouterClient();
+
+            $translated = $client->ask(
+                userMessage:  $this->insight,
+                systemPrompt: 'Isinalin mo ang teksto sa Filipino (Tagalog). Gamitin ang natural na Taglish (halo ng Tagalog at Ingles) tulad ng karaniwang ginagamit sa Pilipinas. Panatilihin ang lahat ng numero, sukat, pangalan ng makina, teknikal na abbreviation, at unit ng pagsukat sa Ingles. Huwag magdagdag ng sariling komento — isinalin lamang ang ibinigay na teksto.',
+            );
+
+            Cache::put($translationKey, $translated, $this->cacheTtl());
+
+            $this->translatedInsight = $translated;
+            $this->showTranslation   = true;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('InsightsDetail translate() failed', [
+                'formTypeId' => $this->formTypeId,
+                'error'      => $e->getMessage(),
+            ]);
+        } finally {
+            $this->isTranslating = false;
+        }
+    }
+
+    public function toggleLanguage(): void
+    {
+        $this->showTranslation = ! $this->showTranslation;
     }
 
     protected function cacheKey(): string
     {
         return "insights:form:{$this->formTypeId}:{$this->context}";
+    }
+
+    protected function translationCacheKey(): string
+    {
+        return "insights:form:{$this->formTypeId}:{$this->context}:tl";
     }
 
     protected function cacheTtl(): int
@@ -444,11 +488,15 @@ TEXT;
 
     public function renderedInsight(): string
     {
-        if ($this->insight === '') {
+        $source = ($this->showTranslation && $this->translatedInsight !== '')
+            ? $this->translatedInsight
+            : $this->insight;
+
+        if ($source === '') {
             return '';
         }
 
-        $lines = explode("\n", str_replace("\r\n", "\n", $this->insight));
+        $lines = explode("\n", str_replace("\r\n", "\n", $source));
         $sections = [];
         $currentTitle = null;
         $currentLines = [];

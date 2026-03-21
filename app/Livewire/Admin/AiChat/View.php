@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\AiChat;
 
 use App\Models\AiChat;
+use App\Services\OpenRouterClient;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class View extends Component
@@ -10,6 +12,10 @@ class View extends Component
     public int $chatId;
     public ?AiChat $chat = null;
     public bool $isPending = false;
+
+    public string $translatedResponse = '';
+    public bool $showTranslation = false;
+    public bool $isTranslating = false;
 
     public function mount(int $chatId): void
     {
@@ -31,6 +37,60 @@ class View extends Component
 
         $this->chat      = $chat;
         $this->isPending = $chat->isPending();
+
+        $tlKey = $this->translationCacheKey();
+        if (Cache::has($tlKey)) {
+            $this->translatedResponse = Cache::get($tlKey);
+        }
+    }
+
+    public function translate(): void
+    {
+        if (! $this->chat?->response) {
+            return;
+        }
+
+        $tlKey = $this->translationCacheKey();
+
+        if (Cache::has($tlKey)) {
+            $this->translatedResponse = Cache::get($tlKey);
+            $this->showTranslation    = true;
+
+            return;
+        }
+
+        $this->isTranslating = true;
+
+        try {
+            $client = new OpenRouterClient();
+
+            $translated = $client->ask(
+                userMessage:  $this->chat->response,
+                systemPrompt: 'Isinalin mo ang teksto sa Filipino (Tagalog). Gamitin ang natural na Taglish (halo ng Tagalog at Ingles) tulad ng karaniwang ginagamit sa Pilipinas. Panatilihin ang lahat ng numero, sukat, pangalan ng makina, teknikal na abbreviation, at unit ng pagsukat sa Ingles. Huwag magdagdag ng sariling komento — isinalin lamang ang ibinigay na teksto.',
+            );
+
+            Cache::put($tlKey, $translated, now()->addHours(6));
+
+            $this->translatedResponse = $translated;
+            $this->showTranslation    = true;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('AiChat translate() failed', [
+                'chatId' => $this->chatId,
+                'error'  => $e->getMessage(),
+            ]);
+        } finally {
+            $this->isTranslating = false;
+        }
+    }
+
+    public function toggleLanguage(): void
+    {
+        $this->showTranslation = ! $this->showTranslation;
+    }
+
+    protected function translationCacheKey(): string
+    {
+        return "ai-chat:{$this->chatId}:tl";
     }
 
     public function renderedResponse(): string
@@ -39,7 +99,11 @@ class View extends Component
             return '';
         }
 
-        return $this->renderMarkdown($this->chat->response);
+        $source = ($this->showTranslation && $this->translatedResponse !== '')
+            ? $this->translatedResponse
+            : $this->chat->response;
+
+        return $this->renderMarkdown($source);
     }
 
     private function renderMarkdown(string $markdown): string

@@ -175,15 +175,29 @@
 
     {{-- ── CREATE MODAL ─────────────────────────────────────────────────────── --}}
     @if ($showCreateModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 dark:bg-gray-950/70" wire:click.self="$set('showCreateModal', false)">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div x-data="{ fs: false }"
+             class="fixed inset-0 z-50 flex bg-gray-900/60 dark:bg-gray-950/70"
+             :class="fs ? 'items-stretch p-0' : 'items-center justify-center p-4'"
+             wire:click.self="$set('showCreateModal', false)">
+            <div class="bg-white dark:bg-gray-800 shadow-2xl w-full flex flex-col transition-all duration-200"
+                 :class="fs ? 'h-full rounded-none' : 'rounded-2xl max-w-2xl max-h-[90vh]'">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">New System Prompt</h2>
-                    <button wire:click="$set('showCreateModal', false)" class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-1">
+                        <button @click="fs = !fs" :title="fs ? 'Exit Fullscreen' : 'Fullscreen'" class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                            <svg x-show="!fs" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"></path>
+                            </svg>
+                            <svg x-show="fs" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"></path>
+                            </svg>
+                        </button>
+                        <button wire:click="$set('showCreateModal', false)" class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
@@ -222,15 +236,29 @@
 
     {{-- ── EDIT MODAL ───────────────────────────────────────────────────────── --}}
     @if ($showEditModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 dark:bg-gray-950/70" wire:click.self="$set('showEditModal', false)">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div x-data="{ fs: false }"
+             class="fixed inset-0 z-50 flex bg-gray-900/60 dark:bg-gray-950/70"
+             :class="fs ? 'items-stretch p-0' : 'items-center justify-center p-4'"
+             wire:click.self="$set('showEditModal', false)">
+            <div class="bg-white dark:bg-gray-800 shadow-2xl w-full flex flex-col transition-all duration-200"
+                 :class="fs ? 'h-full rounded-none' : 'rounded-2xl max-w-2xl max-h-[90vh]'">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Edit System Prompt</h2>
-                    <button wire:click="$set('showEditModal', false)" class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-1">
+                        <button @click="fs = !fs" :title="fs ? 'Exit Fullscreen' : 'Fullscreen'" class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                            <svg x-show="!fs" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"></path>
+                            </svg>
+                            <svg x-show="fs" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"></path>
+                            </svg>
+                        </button>
+                        <button wire:click="$set('showEditModal', false)" class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">

@@ -44,7 +44,7 @@
                 'active' => 'admin/users*'
             ],
             [
-                'label' => 'Machine Management',
+                'label' => 'Management',
                 'icon' => 'folder',
                 'dropdown' => true,
                 'children' => [
@@ -96,7 +96,7 @@
         // Hatchery user sidebar items (limited access)
         $sidebarItems = [
             [
-                'label' => 'Machine Management',
+                'label' => 'Management',
                 'icon' => 'folder',
                 'dropdown' => true,
                 'children' => [

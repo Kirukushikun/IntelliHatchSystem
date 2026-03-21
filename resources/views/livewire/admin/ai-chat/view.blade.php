@@ -122,7 +122,56 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                 </svg>
                 <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">AI Response</span>
+
+                <!-- Translate button -->
+                <div class="ml-auto">
+                    @if($translatedResponse !== '')
+                        <button
+                            wire:click="toggleLanguage"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-800/40 transition-colors"
+                            title="{{ $showTranslation ? 'Show original English' : 'Show Filipino translation' }}"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                            </svg>
+                            {{ $showTranslation ? 'English' : 'Filipino' }}
+                        </button>
+                    @else
+                        <button
+                            wire:click="translate"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-60 cursor-not-allowed"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-purple-300 dark:border-purple-600 bg-white dark:bg-gray-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
+                            title="Translate to Filipino"
+                        >
+                            <span wire:loading.remove wire:target="translate">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                                </svg>
+                            </span>
+                            <span wire:loading wire:target="translate">
+                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                            </span>
+                            <span wire:loading.remove wire:target="translate">Isalin sa Filipino</span>
+                            <span wire:loading wire:target="translate">Nagsasalin…</span>
+                        </button>
+                    @endif
+                </div>
             </div>
+
+            @if($showTranslation)
+                <div class="flex items-center gap-2 mx-5 mt-4 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                    <svg class="w-3.5 h-3.5 text-purple-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                    </svg>
+                    <span class="text-xs text-purple-700 dark:text-purple-300 font-medium">Isinasalin sa Filipino (Taglish)</span>
+                    <button wire:click="toggleLanguage" class="ml-auto text-xs text-purple-500 hover:text-purple-700 dark:hover:text-purple-200 underline">Ipakita ang Ingles</button>
+                </div>
+            @endif
+
             <div class="px-5 py-5">
                 {!! $this->renderedResponse() !!}
             </div>

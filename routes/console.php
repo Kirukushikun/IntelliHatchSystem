@@ -9,6 +9,10 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Schedule daily database backups to Google Drive
+Schedule::command('backup:run --only-db')->dailyAt('02:00');
+Schedule::command('backup:clean')->dailyAt('02:30');
+
 // Schedule cleanup of orphaned photos every hour
 Schedule::command('app:cleanup-orphaned-photos')
     ->hourly()
