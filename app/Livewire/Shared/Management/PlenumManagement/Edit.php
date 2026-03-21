@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use App\Services\ActivityLogger;
 use App\Traits\SanitizesInput;
 use Illuminate\Support\Facades\Cache;
 
@@ -70,6 +71,7 @@ class Edit extends Component
             Cache::forget('management:plenums:' . (int) $this->plenumId);
 
             $plenumName = $this->plenumName; // Store name before closing modal
+            ActivityLogger::log('updated_plenum', "Updated plenum machine {$plenumName}", 'Plenum', (int) $this->plenumId);
             $this->closeModal();
             $this->dispatch('refreshPlenums');
             $this->dispatch('showToast', message: "{$plenumName} has been successfully updated!", type: 'success');

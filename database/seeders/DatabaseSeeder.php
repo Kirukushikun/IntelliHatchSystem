@@ -29,25 +29,10 @@ class DatabaseSeeder extends Seeder
             'user_type' => '1',
         ]);
 
-
         User::factory()->create([
             'first_name' => 'Iverson',
             'last_name' => 'Guno',
             'username' => 'IGuno',
-            'user_type' => '1',
-        ]);
-
-        User::factory()->create([
-            'first_name' => 'Raniel',
-            'last_name' => 'Roque',
-            'username' => 'RRoque',
-            'user_type' => '1',
-        ]);
-        
-        User::factory()->create([
-            'first_name' => 'Jenny',
-            'last_name' => 'Santos',
-            'username' => 'JSantos',
             'user_type' => '1',
         ]);
 

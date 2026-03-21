@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use App\Services\ActivityLogger;
 use App\Traits\SanitizesInput;
 use Illuminate\Support\Facades\Cache;
 
@@ -70,6 +71,7 @@ class Edit extends Component
             Cache::forget('management:incubators:' . (int) $this->incubatorId);
 
             $incubatorName = $this->incubatorName; // Store name before closing modal
+            ActivityLogger::log('updated_incubator', "Updated incubator machine {$incubatorName}", 'Incubator', (int) $this->incubatorId);
             $this->closeModal();
             $this->dispatch('refreshIncubators');
             $this->dispatch('showToast', message: "{$incubatorName} has been successfully updated!", type: 'success');

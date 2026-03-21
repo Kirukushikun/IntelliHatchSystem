@@ -22,8 +22,14 @@ class Index extends Component
     #[Validate('nullable|integer|exists:form_types,id')]
     public mixed $selectedFormTypeId = '';
 
-    #[Validate('required|in:week,month,all')]
+    #[Validate('required|in:week,month,all,custom')]
     public string $contextPeriod = 'week';
+
+    #[Validate('nullable|date|required_if:contextPeriod,custom')]
+    public string $dateFrom = '';
+
+    #[Validate('nullable|date|required_if:contextPeriod,custom|after_or_equal:dateFrom')]
+    public string $dateTo = '';
 
     public bool $hasPending = false;
     public array $formTypes = [];
@@ -58,12 +64,14 @@ class Index extends Component
             'system_prompt_snapshot' => $systemPrompt,
             'form_type_id'           => $formTypeId,
             'context_period'         => $this->contextPeriod,
+            'context_date_from'      => $this->contextPeriod === 'custom' ? $this->dateFrom : null,
+            'context_date_to'        => $this->contextPeriod === 'custom' ? $this->dateTo : null,
             'status'                 => 'pending',
         ]);
 
         ProcessAiChatRequest::dispatch($chat->id);
 
-        $this->reset(['prompt', 'selectedFormTypeId', 'showForm']);
+        $this->reset(['prompt', 'selectedFormTypeId', 'showForm', 'dateFrom', 'dateTo']);
         $this->contextPeriod = 'week';
         $this->resetPage();
     }
@@ -101,7 +109,7 @@ class Index extends Component
         $this->showForm = ! $this->showForm;
 
         if (! $this->showForm) {
-            $this->reset(['prompt', 'selectedFormTypeId']);
+            $this->reset(['prompt', 'selectedFormTypeId', 'dateFrom', 'dateTo']);
             $this->resetErrorBag();
             $this->contextPeriod = 'week';
         }

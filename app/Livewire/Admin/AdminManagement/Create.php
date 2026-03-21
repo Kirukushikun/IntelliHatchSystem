@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin\UserManagement;
+namespace App\Livewire\Admin\AdminManagement;
 
 use Livewire\Component;
 use App\Models\User;
@@ -11,17 +11,19 @@ use Illuminate\Support\Facades\Cache;
 class Create extends Component
 {
     use SanitizesInput;
-    
+
     public $firstName = '';
     public $lastName = '';
+    public $role = 1; // 0 = superadmin, 1 = admin
     public $showModal = false;
 
     protected $rules = [
         'firstName' => 'required|string|min:2|max:50',
         'lastName' => 'required|string|min:2|max:50',
+        'role' => 'required|in:0,1',
     ];
 
-    protected $listeners = ['openCreateModal' => 'openModal'];
+    protected $listeners = ['openCreateAdminModal' => 'openModal'];
 
     protected $messages = [
         'firstName.required' => 'First name is required',
@@ -30,11 +32,14 @@ class Create extends Component
         'lastName.required' => 'Last name is required',
         'lastName.min' => 'Last name must be at least 2 characters',
         'lastName.max' => 'Last name cannot exceed 50 characters',
+        'role.required' => 'Role is required',
+        'role.in' => 'Invalid role selected',
     ];
 
     public function openModal()
     {
-        $this->reset(['firstName', 'lastName']);
+        $this->reset(['firstName', 'lastName', 'role']);
+        $this->role = 1;
         $this->resetValidation();
         $this->showModal = true;
     }
@@ -42,58 +47,52 @@ class Create extends Component
     public function closeModal()
     {
         $this->showModal = false;
-        $this->reset(['firstName', 'lastName']);
+        $this->reset(['firstName', 'lastName', 'role']);
         $this->resetValidation();
     }
 
-    public function createUser()
+    public function createAdmin()
     {
-        // Sanitize inputs before validation
         $this->firstName = $this->sanitizeName($this->firstName);
         $this->lastName = $this->sanitizeName($this->lastName);
-        
+
         $this->validate();
 
         try {
-            // Generate unique username: first initial + last name + number if needed
             $baseUsername = strtoupper(substr($this->firstName, 0, 1)) . $this->lastName;
             $username = $baseUsername;
             $counter = 1;
-            
-            // Check if username exists and increment if needed
+
             while (User::where('username', $username)->exists()) {
                 $username = $baseUsername . $counter;
                 $counter++;
             }
-            
+
             User::create([
                 'first_name' => $this->firstName,
                 'last_name' => $this->lastName,
-                'user_type' => 2, // hatchery-user
+                'user_type' => (int) $this->role,
                 'is_disabled' => false,
                 'username' => $username,
-                'password' => bcrypt('brookside25'), // Default password
+                'password' => bcrypt('brookside25'),
             ]);
 
-            Cache::forget('management:users:all');
+            Cache::forget('admin_management:first_superadmin_id');
 
-            $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
-            ActivityLogger::log('created_user', "Created user {$fullName}", 'User', User::where('username', $username)->value('id'));
+            $fullName = $this->firstName . ' ' . $this->lastName;
+            ActivityLogger::log('created_admin', "Created admin {$fullName}", 'User', User::where('username', $username)->value('id'));
             $this->closeModal();
             $this->dispatch('showToast', message: "{$fullName} has been created successfully!", type: 'success');
-            $this->dispatch('refreshUsers'); // Refresh the user list
-            $this->reset(['firstName', 'lastName']);
+            $this->dispatch('refreshAdmins');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Validation errors will be displayed automatically
-            // Just re-throw to let Livewire handle validation display
             throw $e;
         } catch (\Exception $e) {
-            $this->dispatch('showToast', message: 'Failed to create user. Please try again.', type: 'error');
+            $this->dispatch('showToast', message: 'Failed to create account. Please try again.', type: 'error');
         }
     }
 
     public function render()
     {
-        return view('livewire.admin.user-management.create-user-management');
+        return view('livewire.admin.admin-management.create');
     }
 }

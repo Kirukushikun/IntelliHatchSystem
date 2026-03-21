@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Cache;
 
 class Delete extends Component
@@ -32,6 +33,7 @@ class Delete extends Component
             $plenum = Plenum::findOrFail($this->plenumId);
             $plenumName = $plenum->plenumName;
             
+            ActivityLogger::log('deleted_plenum', "Deleted plenum machine {$plenumName}", 'Plenum', (int) $this->plenumId);
             $plenum->delete();
 
             Cache::forget('management:plenums:all');

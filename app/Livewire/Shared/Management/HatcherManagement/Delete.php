@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Cache;
 
 class Delete extends Component
@@ -32,6 +33,7 @@ class Delete extends Component
             $hatcher = Hatcher::findOrFail($this->hatcherId);
             $hatcherName = $hatcher->hatcherName;
             
+            ActivityLogger::log('deleted_hatcher', "Deleted hatcher machine {$hatcherName}", 'Hatcher', (int) $this->hatcherId);
             $hatcher->delete();
 
             Cache::forget('management:hatchers:all');

@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Cache;
 
 class Disable extends Component
@@ -45,6 +46,7 @@ class Disable extends Component
 
             $action = !$this->isActive ? 'activated' : 'deactivated';
             $plenumName = $this->plenumName; // Store name before closing modal
+            ActivityLogger::log("{$action}_plenum", ucfirst($action) . " plenum machine {$plenumName}", 'Plenum', (int) $this->plenumId);
             $this->closeModal();
             $this->dispatch('refreshPlenums');
             $this->dispatch('showToast', message: "{$plenumName} has been successfully {$action}!", type: 'success');

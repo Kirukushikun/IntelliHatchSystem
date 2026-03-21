@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Cache;
 
 class Delete extends Component
@@ -32,6 +33,7 @@ class Delete extends Component
             $incubator = Incubator::findOrFail($this->incubatorId);
             $incubatorName = $incubator->incubatorName;
             
+            ActivityLogger::log('deleted_incubator', "Deleted incubator machine {$incubatorName}", 'Incubator', (int) $this->incubatorId);
             $incubator->delete();
 
             Cache::forget('management:incubators:all');

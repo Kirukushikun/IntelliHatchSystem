@@ -1,4 +1,4 @@
-<div>
+<div x-on:open-print-window.window="window.open($event.detail.url, '_blank')">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div class="flex items-center gap-3">
@@ -60,6 +60,18 @@
                         <span wire:loading wire:target="translate" class="hidden sm:inline">Nagsasalin…</span>
                     </button>
                 @endif
+
+                <!-- Print / Export PDF -->
+                <button
+                    wire:click="openPrint"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-800/40 transition-colors shadow-sm"
+                    title="Print or export as PDF"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Print / PDF</span>
+                </button>
 
                 <!-- Refresh / Re-generate -->
                 <button

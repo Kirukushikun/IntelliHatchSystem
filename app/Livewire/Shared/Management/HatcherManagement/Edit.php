@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
+use App\Services\ActivityLogger;
 use App\Traits\SanitizesInput;
 use Illuminate\Support\Facades\Cache;
 
@@ -70,6 +71,7 @@ class Edit extends Component
             Cache::forget('management:hatchers:' . (int) $this->hatcherId);
 
             $hatcherName = $this->hatcherName; // Store name before closing modal
+            ActivityLogger::log('updated_hatcher', "Updated hatcher machine {$hatcherName}", 'Hatcher', (int) $this->hatcherId);
             $this->closeModal();
             $this->dispatch('refreshHatchers');
             $this->dispatch('showToast', message: "{$hatcherName} has been successfully updated!", type: 'success');

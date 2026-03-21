@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
@@ -57,6 +58,7 @@ class Disable extends Component
 
             $action = $this->isCurrentlyDisabled ? 'enabled' : 'disabled';
             $userName = $this->userName; // Store name before closing modal
+            ActivityLogger::log("{$action}_user", ucfirst($action) . " user {$userName}", 'User', (int) $this->userId);
             $this->closeModal();
             $this->dispatch('refreshUsers');
             $this->dispatch('showToast', message: "{$userName} has been successfully {$action}!", type: 'success');

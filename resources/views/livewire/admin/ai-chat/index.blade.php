@@ -70,30 +70,75 @@
                 </div>
 
                 {{-- Options Row --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Data Scope</label>
-                        <select
-                            wire:model="selectedFormTypeId"
-                            class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                        >
-                            <option value="">All Form Types</option>
-                            @foreach($formTypes as $ft)
-                                <option value="{{ $ft['id'] }}">{{ $ft['form_name'] }}</option>
-                            @endforeach
-                        </select>
+                <div
+                    x-data="{ period: @entangle('contextPeriod') }"
+                    class="space-y-4"
+                >
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Data Scope</label>
+                            <select
+                                wire:model="selectedFormTypeId"
+                                class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
+                            >
+                                <option value="">All Form Types</option>
+                                @foreach($formTypes as $ft)
+                                    <option value="{{ $ft['id'] }}">{{ $ft['form_name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Time Period</label>
+                            <select
+                                wire:model="contextPeriod"
+                                x-model="period"
+                                class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
+                            >
+                                <option value="week">Current Week</option>
+                                <option value="month">Current Month</option>
+                                <option value="all">Last 90 Days</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Time Period</label>
-                        <select
-                            wire:model="contextPeriod"
-                            class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                        >
-                            <option value="week">Current Week</option>
-                            <option value="month">Current Month</option>
-                            <option value="all">Last 90 Days</option>
-                        </select>
+                    {{-- Custom date range pickers --}}
+                    <div
+                        x-show="period === 'custom'"
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 -translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800"
+                    >
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                From
+                                <span class="text-red-500 ml-0.5">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                wire:model="dateFrom"
+                                class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
+                            />
+                            @error('dateFrom')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                To
+                                <span class="text-red-500 ml-0.5">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                wire:model="dateTo"
+                                class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
+                            />
+                            @error('dateTo')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 

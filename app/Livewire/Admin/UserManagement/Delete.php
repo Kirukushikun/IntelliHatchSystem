@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Cache;
 
 class Delete extends Component
@@ -40,6 +41,7 @@ class Delete extends Component
             
             if ($user) {
                 $userName = $user->first_name . ' ' . $user->last_name;
+                ActivityLogger::log('deleted_user', "Deleted user {$userName}", 'User', (int) $this->userId);
                 $user->delete();
 
                 Cache::forget('management:users:all');

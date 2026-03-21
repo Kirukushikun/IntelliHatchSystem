@@ -14,9 +14,16 @@ class AiChat extends Model
         'context_data',
         'form_type_id',
         'context_period',
+        'context_date_from',
+        'context_date_to',
         'status',
         'response',
         'error_message',
+    ];
+
+    protected $casts = [
+        'context_date_from' => 'date',
+        'context_date_to'   => 'date',
     ];
 
     public function user(): BelongsTo
@@ -41,6 +48,10 @@ class AiChat extends Model
 
     public function contextPeriodLabel(): string
     {
+        if ($this->context_period === 'custom' && $this->context_date_from && $this->context_date_to) {
+            return $this->context_date_from->format('M d, Y') . ' – ' . $this->context_date_to->format('M d, Y');
+        }
+
         return match ($this->context_period) {
             'week'  => 'Current Week',
             'month' => 'Current Month',

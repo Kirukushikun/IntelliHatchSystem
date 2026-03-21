@@ -369,6 +369,20 @@ SYSTEM;
         $this->showTranslation = ! $this->showTranslation;
     }
 
+    public function openPrint(): void
+    {
+        if ($this->status !== 'ready') {
+            return;
+        }
+
+        $url = \Illuminate\Support\Facades\URL::signedRoute('admin.print.insights', [
+            'formTypeId' => $this->formTypeId,
+            'context'    => $this->context,
+        ]);
+
+        $this->dispatch('open-print-window', url: $url);
+    }
+
     protected function cacheKey(): string
     {
         return "insights:form:{$this->formTypeId}:{$this->context}";

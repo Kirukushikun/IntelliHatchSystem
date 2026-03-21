@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\PlenumManagement;
 
 use Livewire\Component;
 use App\Models\Plenum;
+use App\Services\ActivityLogger;
 use App\Traits\SanitizesInput;
 use Illuminate\Support\Facades\Cache;
 
@@ -50,6 +51,7 @@ class Create extends Component
             Cache::forget('management:plenums:all');
 
             $plenumName = $this->plenumName; // Store name before closing modal
+            ActivityLogger::log('created_plenum', "Created plenum machine {$plenumName}", 'Plenum');
             $this->closeModal();
             $this->dispatch('refreshPlenums');
             $this->dispatch('showToast', message: "{$plenumName} has been successfully added!", type: 'success');

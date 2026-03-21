@@ -88,6 +88,19 @@ class View extends Component
         $this->showTranslation = ! $this->showTranslation;
     }
 
+    public function openPrint(): void
+    {
+        if ($this->chat?->status !== 'done') {
+            return;
+        }
+
+        $url = \Illuminate\Support\Facades\URL::signedRoute('admin.print.ai-chat', [
+            'id' => $this->chatId,
+        ]);
+
+        $this->dispatch('open-print-window', url: $url);
+    }
+
     protected function translationCacheKey(): string
     {
         return "ai-chat:{$this->chatId}:tl";

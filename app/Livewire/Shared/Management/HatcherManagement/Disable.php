@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Cache;
 
 class Disable extends Component
@@ -45,6 +46,7 @@ class Disable extends Component
 
             $action = !$this->isActive ? 'activated' : 'deactivated';
             $hatcherName = $this->hatcherName; // Store name before closing modal
+            ActivityLogger::log("{$action}_hatcher", ucfirst($action) . " hatcher machine {$hatcherName}", 'Hatcher', (int) $this->hatcherId);
             $this->closeModal();
             $this->dispatch('refreshHatchers');
             $this->dispatch('showToast', message: "{$hatcherName} has been successfully {$action}!", type: 'success');

@@ -65,7 +65,7 @@ class ProcessAiChatRequest implements ShouldQueue
 
     private function buildContextData(AiChat $chat): string
     {
-        [$start, $end, $label] = $this->dateRange($chat->context_period);
+        [$start, $end, $label] = $this->dateRange($chat);
 
         $formTypeIds = $chat->form_type_id
             ? [$chat->form_type_id]
@@ -155,9 +155,18 @@ class ProcessAiChatRequest implements ShouldQueue
         return implode("\n\n---\n\n", $sections);
     }
 
-    private function dateRange(string $period): array
+    private function dateRange(AiChat $chat): array
     {
-        $now = now();
+        $period = $chat->context_period;
+        $now    = now();
+
+        if ($period === 'custom') {
+            $from  = Carbon::parse($chat->context_date_from)->startOfDay();
+            $to    = Carbon::parse($chat->context_date_to)->endOfDay();
+            $label = 'Custom Range (' . $from->format('M d, Y') . ' – ' . $to->format('M d, Y') . ')';
+
+            return [$from, $to, $label];
+        }
 
         return match ($period) {
             'week'  => [

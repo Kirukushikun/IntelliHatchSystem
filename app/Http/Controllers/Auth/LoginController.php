@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -87,6 +88,8 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        ActivityLogger::log('login', "User logged in", 'User', $user->id);
+
         return redirect()->intended($this->landingPathForAuthenticatedUser())
             ->with('success', 'Welcome back!');
     }
@@ -96,6 +99,9 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        $userId = Auth::id();
+        ActivityLogger::log('logout', "User logged out", 'User', $userId);
+
         Auth::logout();
 
         $request->session()->invalidate();

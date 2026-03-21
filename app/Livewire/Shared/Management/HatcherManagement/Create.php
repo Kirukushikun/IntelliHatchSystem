@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\HatcherManagement;
 
 use Livewire\Component;
 use App\Models\Hatcher;
+use App\Services\ActivityLogger;
 use App\Traits\SanitizesInput;
 use Illuminate\Support\Facades\Cache;
 
@@ -49,6 +50,7 @@ class Create extends Component
             Cache::forget('management:hatchers:all');
 
             $hatcherName = $this->hatcherName; // Store name before closing modal
+            ActivityLogger::log('created_hatcher', "Created hatcher machine {$hatcherName}", 'Hatcher');
             $this->closeModal();
             $this->dispatch('refreshHatchers');
             $this->dispatch('showToast', message: "{$hatcherName} has been successfully created!", type: 'success');

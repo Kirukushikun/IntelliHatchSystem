@@ -152,6 +152,18 @@ Route::middleware('auth')->group(function () {
             ->middleware('signed')
             ->name('admin.print.performance.incubator-routine');
 
+        Route::get('/admin/print/insights/{formTypeId}', [InsightsController::class, 'printView'])
+            ->middleware('signed')
+            ->name('admin.print.insights');
+
+        Route::get('/admin/print/ai-chat/{id}', function (int $id) {
+            $chat = \App\Models\AiChat::with('formType')->find($id);
+            abort_if(! $chat, 404);
+            abort_if($chat->user_id !== auth()->id(), 403);
+            abort_if($chat->status !== 'done', 404);
+            return view('admin.ai-chat-print', ['chat' => $chat]);
+        })->middleware('signed')->name('admin.print.ai-chat');
+
         Route::get('/admin/change-password', [UserController::class, 'changePassword'])->name('admin.change-password');
 
         Route::get('/admin/ai-chat', function () {
@@ -168,6 +180,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/system-prompts', function () {
             return view('admin.system-prompts');
         })->name('admin.system-prompts');
+
+        Route::get('/admin/admin-management', function () {
+            return view('admin.admin-management');
+        })->name('admin.admin-management');
+
+        Route::get('/admin/activity-logs', function () {
+            return view('admin.activity-logs');
+        })->name('admin.activity-logs');
+
+        Route::get('/admin/activity-logs/export/csv', [\App\Http\Controllers\Admin\ActivityLogExportController::class, 'csv'])->name('admin.activity-logs.export.csv');
+        Route::get('/admin/activity-logs/export/pdf', [\App\Http\Controllers\Admin\ActivityLogExportController::class, 'pdf'])->name('admin.activity-logs.export.pdf');
     });
     
     // User routes

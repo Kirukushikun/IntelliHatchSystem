@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Cache;
 
 class Disable extends Component
@@ -45,6 +46,7 @@ class Disable extends Component
 
             $action = $this->isActive ? 'deactivated' : 'activated';
             $incubatorName = $this->incubatorName; // Store name before closing modal
+            ActivityLogger::log("{$action}_incubator", ucfirst($action) . " incubator machine {$incubatorName}", 'Incubator', (int) $this->incubatorId);
             $this->closeModal();
             $this->dispatch('refreshIncubators');
             $this->dispatch('showToast', message: "{$incubatorName} has been successfully {$action}!", type: 'success');

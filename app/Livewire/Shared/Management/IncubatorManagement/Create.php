@@ -4,6 +4,7 @@ namespace App\Livewire\Shared\Management\IncubatorManagement;
 
 use Livewire\Component;
 use App\Models\Incubator;
+use App\Services\ActivityLogger;
 use App\Traits\SanitizesInput;
 use Illuminate\Support\Facades\Cache;
 
@@ -49,6 +50,7 @@ class Create extends Component
             Cache::forget('management:incubators:all');
 
             $incubatorName = $this->incubatorName; // Store name before closing modal
+            ActivityLogger::log('created_incubator', "Created incubator machine {$incubatorName}", 'Incubator');
             $this->closeModal();
             $this->dispatch('refreshIncubators');
             $this->dispatch('showToast', message: "{$incubatorName} has been successfully added", type: 'success');

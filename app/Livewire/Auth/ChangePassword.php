@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth;
 
 use Livewire\Component;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
@@ -100,6 +101,8 @@ class ChangePassword extends Component
         // Update password
         $user->password = Hash::make($this->newPassword);
         $user->save();
+
+        ActivityLogger::log('changed_own_password', "User changed their own password", 'User', $user->id);
 
         // Reset form
         $this->reset(['currentPassword', 'newPassword', 'newPassword_confirmation']);
