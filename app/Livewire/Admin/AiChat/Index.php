@@ -19,8 +19,8 @@ class Index extends Component
     #[Validate('required|string|min:10|max:2000')]
     public string $prompt = '';
 
-    #[Validate('nullable|integer|exists:form_types,id')]
-    public mixed $selectedFormTypeId = '';
+    #[Validate(['selectedFormTypeIds' => 'array', 'selectedFormTypeIds.*' => 'integer|exists:form_types,id'])]
+    public array $selectedFormTypeIds = [];
 
     #[Validate('required|in:week,month,all,custom')]
     public string $contextPeriod = 'week';
@@ -32,6 +32,7 @@ class Index extends Component
     public string $dateTo = '';
 
     public bool $hasPending = false;
+
     public array $formTypes = [];
 
     public function mount(): void
@@ -52,26 +53,27 @@ class Index extends Component
 
         if ($recentCount >= 10) {
             $this->addError('prompt', 'Rate limit reached: max 10 requests per hour.');
+
             return;
         }
 
-        $systemPrompt  = SystemPrompt::active()->first()?->prompt;
-        $formTypeId    = $this->selectedFormTypeId !== '' ? (int) $this->selectedFormTypeId : null;
+        $systemPrompt = SystemPrompt::active()->first()?->prompt;
+        $formTypeIds = array_values(array_map('intval', $this->selectedFormTypeIds));
 
         $chat = AiChat::create([
-            'user_id'                => auth()->id(),
-            'prompt'                 => $this->prompt,
+            'user_id' => auth()->id(),
+            'prompt' => $this->prompt,
             'system_prompt_snapshot' => $systemPrompt,
-            'form_type_id'           => $formTypeId,
-            'context_period'         => $this->contextPeriod,
-            'context_date_from'      => $this->contextPeriod === 'custom' ? $this->dateFrom : null,
-            'context_date_to'        => $this->contextPeriod === 'custom' ? $this->dateTo : null,
-            'status'                 => 'pending',
+            'form_type_ids' => empty($formTypeIds) ? null : $formTypeIds,
+            'context_period' => $this->contextPeriod,
+            'context_date_from' => $this->contextPeriod === 'custom' ? $this->dateFrom : null,
+            'context_date_to' => $this->contextPeriod === 'custom' ? $this->dateTo : null,
+            'status' => 'pending',
         ]);
 
         ProcessAiChatRequest::dispatch($chat->id);
 
-        $this->reset(['prompt', 'selectedFormTypeId', 'showForm', 'dateFrom', 'dateTo']);
+        $this->reset(['prompt', 'selectedFormTypeIds', 'showForm', 'dateFrom', 'dateTo']);
         $this->contextPeriod = 'week';
         $this->resetPage();
     }
@@ -88,8 +90,8 @@ class Index extends Component
         }
 
         $chat->update([
-            'status'        => 'pending',
-            'response'      => null,
+            'status' => 'pending',
+            'response' => null,
             'error_message' => null,
         ]);
 
@@ -109,7 +111,7 @@ class Index extends Component
         $this->showForm = ! $this->showForm;
 
         if (! $this->showForm) {
-            $this->reset(['prompt', 'selectedFormTypeId', 'dateFrom', 'dateTo']);
+            $this->reset(['prompt', 'selectedFormTypeIds', 'dateFrom', 'dateTo']);
             $this->resetErrorBag();
             $this->contextPeriod = 'week';
         }

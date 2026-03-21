@@ -40,9 +40,9 @@
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 -translate-y-2"
             x-transition:enter-end="opacity-100 translate-y-0"
-            class="bg-white dark:bg-gray-800 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm mb-6 overflow-hidden"
+            class="bg-white dark:bg-gray-800 rounded-xl border border-orange-200 dark:border-orange-800 shadow-sm mb-6"
         >
-            <div class="flex items-center gap-3 px-5 py-4 bg-orange-50 dark:bg-orange-900/20 border-b border-orange-200 dark:border-orange-800">
+            <div class="flex items-center gap-3 px-5 py-4 bg-orange-50 dark:bg-orange-900/20 border-b border-orange-200 dark:border-orange-800 rounded-t-xl">
                 <div class="w-7 h-7 rounded-lg bg-orange-500 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
@@ -71,21 +71,81 @@
 
                 {{-- Options Row --}}
                 <div
-                    x-data="{ period: @entangle('contextPeriod') }"
+                    x-data="{
+                        period: @entangle('contextPeriod'),
+                        selected: @entangle('selectedFormTypeIds'),
+                        open: false,
+                        get label() {
+                            if (this.selected.length === 0) return 'All Form Types';
+                            if (this.selected.length === 1) {
+                                const ft = @js($formTypes).find(f => f.id == this.selected[0]);
+                                return ft ? ft.form_name : '1 selected';
+                            }
+                            return this.selected.length + ' form types selected';
+                        }
+                    }"
                     class="space-y-4"
                 >
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Data Scope</label>
-                            <select
-                                wire:model="selectedFormTypeId"
-                                class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
-                            >
-                                <option value="">All Form Types</option>
-                                @foreach($formTypes as $ft)
-                                    <option value="{{ $ft['id'] }}">{{ $ft['form_name'] }}</option>
-                                @endforeach
-                            </select>
+
+                            {{-- Multi-select dropdown --}}
+                            <div class="relative" @click.outside="open = false">
+                                <button
+                                    type="button"
+                                    @click="open = !open"
+                                    class="w-full text-sm text-left rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent flex items-center justify-between gap-2"
+                                >
+                                    <span x-text="label" class="truncate"></span>
+                                    <svg class="w-4 h-4 shrink-0 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+
+                                <div
+                                    x-show="open"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 scale-95"
+                                    x-transition:enter-end="opacity-100 scale-100"
+                                    x-transition:leave="transition ease-in duration-75"
+                                    x-transition:leave-start="opacity-100 scale-100"
+                                    x-transition:leave-end="opacity-0 scale-95"
+                                    class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-lg overflow-hidden"
+                                    style="display: none;"
+                                >
+                                    {{-- Clear all --}}
+                                    <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-600 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            <span x-text="selected.length === 0 ? 'None selected (all types)' : selected.length + ' selected'"></span>
+                                        </span>
+                                        <button
+                                            type="button"
+                                            @click="selected = []"
+                                            class="text-xs text-orange-500 hover:text-orange-600 font-medium"
+                                            x-show="selected.length > 0"
+                                        >Clear all</button>
+                                    </div>
+
+                                    {{-- Options --}}
+                                    <div class="max-h-36 sm:max-h-52 overflow-y-scroll overscroll-contain">
+                                        @foreach($formTypes as $ft)
+                                            <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    wire:model="selectedFormTypeIds"
+                                                    value="{{ $ft['id'] }}"
+                                                    class="w-4 h-4 rounded border-gray-300 dark:border-gray-500 text-orange-500 focus:ring-orange-400 focus:ring-offset-0 bg-white dark:bg-gray-800"
+                                                />
+                                                <span class="text-sm text-gray-900 dark:text-white leading-snug">{{ $ft['form_name'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                            @error('selectedFormTypeIds')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div>
@@ -249,11 +309,9 @@
                                     {{ $chat->created_at->diffForHumans() }}
                                 </span>
 
-                                @if($chat->formType)
-                                    <span class="text-xs text-gray-400 dark:text-gray-500">
-                                        · {{ $chat->formType->form_name }}
-                                    </span>
-                                @endif
+                                <span class="text-xs text-gray-400 dark:text-gray-500">
+                                    · {{ $chat->formScopeLabel() }}
+                                </span>
 
                                 <span class="text-xs text-gray-400 dark:text-gray-500">
                                     · {{ $chat->contextPeriodLabel() }}

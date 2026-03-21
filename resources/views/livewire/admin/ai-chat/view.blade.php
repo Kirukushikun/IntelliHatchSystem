@@ -62,7 +62,7 @@
             {{-- Form Scope --}}
             <span class="text-xs text-gray-500 dark:text-gray-400">
                 <span class="font-medium">Scope:</span>
-                {{ $chat->formType ? $chat->formType->form_name : 'All Form Types' }}
+                {{ $chat->formScopeLabel() }}
             </span>
 
             {{-- Period --}}

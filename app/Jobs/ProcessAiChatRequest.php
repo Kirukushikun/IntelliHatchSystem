@@ -20,6 +20,7 @@ class ProcessAiChatRequest implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $timeout = 120;
+
     public int $tries = 1;
 
     public function __construct(public readonly int $aiChatId) {}
@@ -43,21 +44,21 @@ class ProcessAiChatRequest implements ShouldQueue
 
             $userMessage = "User Question:\n{$chat->prompt}\n\n--- Hatchery Data Context ---\n{$contextData}";
 
-            $client  = new OpenRouterClient();
+            $client = new OpenRouterClient;
             $response = $client->ask($userMessage, $systemPrompt);
 
             $chat->update([
-                'status'   => 'done',
+                'status' => 'done',
                 'response' => $response,
             ]);
         } catch (\Throwable $e) {
             Log::error('ProcessAiChatRequest failed', [
                 'aiChatId' => $this->aiChatId,
-                'error'    => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             $chat->update([
-                'status'        => 'failed',
+                'status' => 'failed',
                 'error_message' => 'Failed to generate a response. Please try again.',
             ]);
         }
@@ -67,9 +68,16 @@ class ProcessAiChatRequest implements ShouldQueue
     {
         [$start, $end, $label] = $this->dateRange($chat);
 
-        $formTypeIds = $chat->form_type_id
-            ? [$chat->form_type_id]
-            : DB::table('form_types')->pluck('id')->toArray();
+        // Use multi-select form_type_ids if present; fall back to legacy single form_type_id
+        $selectedIds = $chat->form_type_ids ?? [];
+
+        if (empty($selectedIds) && $chat->form_type_id) {
+            $selectedIds = [$chat->form_type_id];
+        }
+
+        $formTypeIds = empty($selectedIds)
+            ? DB::table('form_types')->pluck('id')->toArray()
+            : $selectedIds;
 
         $sections = [];
 
@@ -89,18 +97,19 @@ class ProcessAiChatRequest implements ShouldQueue
 
             if ($total === 0) {
                 $sections[] = "## {$formType->form_name}\nPeriod: {$label}\nSubmissions: 0 — No data for this period.";
+
                 continue;
             }
 
             // Daily breakdown
             $byDay = [];
             foreach ($forms as $form) {
-                $day           = Carbon::parse($form->date_submitted)->format('Y-m-d');
-                $byDay[$day]   = ($byDay[$day] ?? 0) + 1;
+                $day = Carbon::parse($form->date_submitted)->format('Y-m-d');
+                $byDay[$day] = ($byDay[$day] ?? 0) + 1;
             }
 
             // Field value aggregation (sample up to 50)
-            $sample          = $forms->take(50);
+            $sample = $forms->take(50);
             $fieldAggregates = [];
 
             foreach ($sample as $form) {
@@ -124,12 +133,12 @@ class ProcessAiChatRequest implements ShouldQueue
             foreach ($fieldAggregates as $field => $values) {
                 $counts = array_count_values($values);
                 arsort($counts);
-                $top   = array_slice($counts, 0, 5, true);
+                $top = array_slice($counts, 0, 5, true);
                 $parts = [];
                 foreach ($top as $val => $cnt) {
                     $parts[] = "{$val} ({$cnt}x)";
                 }
-                $fieldLines[] = "  {$field}: " . implode(', ', $parts);
+                $fieldLines[] = "  {$field}: ".implode(', ', $parts);
             }
 
             $byDayText = '';
@@ -141,7 +150,7 @@ class ProcessAiChatRequest implements ShouldQueue
                 "## {$formType->form_name}",
                 "Period: {$label}",
                 "Total Submissions: {$total}",
-                "Daily Breakdown:",
+                'Daily Breakdown:',
                 rtrim($byDayText),
                 "Field Value Summary (top values from {$sample->count()} sampled records):",
                 implode("\n", $fieldLines),
@@ -149,7 +158,7 @@ class ProcessAiChatRequest implements ShouldQueue
         }
 
         if (empty($sections)) {
-            return "No hatchery data found for the selected scope and period.";
+            return 'No hatchery data found for the selected scope and period.';
         }
 
         return implode("\n\n---\n\n", $sections);
@@ -158,27 +167,27 @@ class ProcessAiChatRequest implements ShouldQueue
     private function dateRange(AiChat $chat): array
     {
         $period = $chat->context_period;
-        $now    = now();
+        $now = now();
 
         if ($period === 'custom') {
-            $from  = Carbon::parse($chat->context_date_from)->startOfDay();
-            $to    = Carbon::parse($chat->context_date_to)->endOfDay();
-            $label = 'Custom Range (' . $from->format('M d, Y') . ' – ' . $to->format('M d, Y') . ')';
+            $from = Carbon::parse($chat->context_date_from)->startOfDay();
+            $to = Carbon::parse($chat->context_date_to)->endOfDay();
+            $label = 'Custom Range ('.$from->format('M d, Y').' – '.$to->format('M d, Y').')';
 
             return [$from, $to, $label];
         }
 
         return match ($period) {
-            'week'  => [
+            'week' => [
                 $now->copy()->startOfWeek(UnitValue::SUNDAY)->startOfDay(),
                 $now->copy()->endOfWeek(UnitValue::SATURDAY)->endOfDay(),
-                'Current Week (' . $now->copy()->startOfWeek(UnitValue::SUNDAY)->format('M d')
-                    . ' – ' . $now->copy()->endOfWeek(UnitValue::SATURDAY)->format('M d, Y') . ')',
+                'Current Week ('.$now->copy()->startOfWeek(UnitValue::SUNDAY)->format('M d')
+                    .' – '.$now->copy()->endOfWeek(UnitValue::SATURDAY)->format('M d, Y').')',
             ],
             'month' => [
                 $now->copy()->startOfMonth()->startOfDay(),
                 $now->copy()->endOfMonth()->endOfDay(),
-                'Current Month (' . $now->format('F Y') . ')',
+                'Current Month ('.$now->format('F Y').')',
             ],
             default => [
                 $now->copy()->subDays(90)->startOfDay(),
