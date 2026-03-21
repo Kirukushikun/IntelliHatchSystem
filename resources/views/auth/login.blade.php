@@ -80,8 +80,12 @@
             @guest
                 <div class="mt-4 text-center">
                     <p class="text-sm text-gray-600 dark:text-gray-400">
-                        @if(request('type', 'user') === 'admin')
+                        @if(request('type', 'user') === 'superadmin')
+                            Not a superadmin? <a href="/login?type=admin" class="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 underline">Click here</a> for admin login
+                        @elseif(request('type', 'user') === 'admin')
                             Not an admin? <a href="/login?type=user" class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 underline">Click here</a> for user login
+                            &nbsp;&middot;&nbsp;
+                            <a href="/login?type=superadmin" class="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 underline">Superadmin login</a>
                         @else
                             Not a user? <a href="/login?type=admin" class="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 underline">Click here</a> for admin login
                         @endif

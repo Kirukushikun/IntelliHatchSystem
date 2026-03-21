@@ -153,6 +153,21 @@ Route::middleware('auth')->group(function () {
             ->name('admin.print.performance.incubator-routine');
 
         Route::get('/admin/change-password', [UserController::class, 'changePassword'])->name('admin.change-password');
+
+        Route::get('/admin/ai-chat', function () {
+            return view('admin.ai-chat');
+        })->name('admin.ai-chat');
+
+        Route::get('/admin/ai-chat/{id}', function (int $id) {
+            return view('admin.ai-chat-view', ['chatId' => $id]);
+        })->name('admin.ai-chat.view');
+    });
+
+    // Superadmin-only routes
+    Route::middleware('superadmin')->group(function () {
+        Route::get('/admin/system-prompts', function () {
+            return view('admin.system-prompts');
+        })->name('admin.system-prompts');
     });
     
     // User routes

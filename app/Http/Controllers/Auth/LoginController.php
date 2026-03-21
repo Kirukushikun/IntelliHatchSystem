@@ -11,7 +11,7 @@ class LoginController extends Controller
     private function landingPathForAuthenticatedUser(): string
     {
         $user = Auth::user();
-        if (((int) $user->user_type) === 0) {
+        if (in_array((int) $user->user_type, [0, 1])) {
             return '/admin/dashboard';
         } else {
             return '/user/forms';
@@ -39,7 +39,7 @@ class LoginController extends Controller
         $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
-            'user_type' => 'required|in:admin,user',
+            'user_type' => 'required|in:superadmin,admin,user',
         ]);
 
         // Trim whitespace from username
@@ -78,11 +78,11 @@ class LoginController extends Controller
         $user = Auth::user();
         
         // Verify user type matches selected login type
-        $isAdmin = ((int) $user->user_type) === 0;
-        if (($credentials['user_type'] === 'admin' && !$isAdmin) || ($credentials['user_type'] === 'user' && $isAdmin)) {
+        $typeMap = ['superadmin' => 0, 'admin' => 1, 'user' => 2];
+        $expectedType = $typeMap[$credentials['user_type']];
+        if ((int) $user->user_type !== $expectedType) {
             Auth::logout();
-            $loginType = $credentials['user_type'] === 'admin' ? 'admin' : 'user';
-            return back()->with('error', "The account does not belong to an {$loginType}.");
+            return back()->with('error', "The account does not belong to a {$credentials['user_type']}.");
         }
 
         $request->session()->regenerate();

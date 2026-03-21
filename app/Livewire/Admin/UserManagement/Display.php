@@ -175,7 +175,7 @@ class Display extends Component
     protected function baseQuery(): Builder
     {
         $users = User::query()
-            ->where('user_type', 1)
+            ->where('user_type', 2)
             ->where(function ($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
                     ->orWhere('last_name', 'like', '%' . $this->search . '%');

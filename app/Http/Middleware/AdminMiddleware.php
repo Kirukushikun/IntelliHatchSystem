@@ -21,8 +21,8 @@ class AdminMiddleware
             return redirect('/admin/login')->with('error', 'Please login to access the admin panel.');
         }
 
-        // Check if authenticated user is admin (user_type === 0)
-        if (((int) Auth::user()->user_type) !== 0) {
+        // Check if authenticated user is superadmin (0) or admin (1)
+        if (!in_array((int) Auth::user()->user_type, [0, 1])) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

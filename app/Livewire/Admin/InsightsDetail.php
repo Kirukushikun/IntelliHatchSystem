@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\FormType;
+use App\Models\SystemPrompt;
 use App\Services\OpenRouterClient;
 use Carbon\Carbon;
 use Carbon\Constants\UnitValue;
@@ -31,6 +32,13 @@ class InsightsDetail extends Component
     // -------------------------------------------------------------------------
     private function getSystemPrompt(): string
     {
+        // Use active system prompt from database if one is set
+        $dbPrompt = SystemPrompt::active()->first();
+        if ($dbPrompt) {
+            return $dbPrompt->prompt;
+        }
+
+        // Fallback: built-in default prompt
         return <<<'SYSTEM'
 🐣 Poultry Hatchery Data Analysis Prompt
 

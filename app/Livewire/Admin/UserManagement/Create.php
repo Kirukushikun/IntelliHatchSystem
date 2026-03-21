@@ -68,7 +68,7 @@ class Create extends Component
             User::create([
                 'first_name' => $this->firstName,
                 'last_name' => $this->lastName,
-                'user_type' => 1, // hatchery-user
+                'user_type' => 2, // hatchery-user
                 'is_disabled' => false,
                 'username' => $username,
                 'password' => bcrypt('brookside25'), // Default password

@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'user' => \App\Http\Middleware\UserMiddleware::class,
             'api.key' => \App\Http\Middleware\ApiKeyMiddleware::class,
+            'superadmin' => \App\Http\Middleware\SuperadminMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

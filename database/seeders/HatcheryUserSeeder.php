@@ -12,7 +12,7 @@ class HatcheryUserSeeder extends Seeder
         echo "Creating 10 hatchery users...\n";
 
         User::factory()->count(10)->create([
-            'user_type' => 1,
+            'user_type' => 2,
         ]);
 
         echo "Hatchery users created!\n";

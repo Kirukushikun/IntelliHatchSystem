@@ -21,8 +21,8 @@ class UserMiddleware
             return redirect('/login')->with('error', 'Please login to access user panel.');
         }
 
-        // Check if authenticated user is hatchery user (user_type === 1)
-        if (((int) Auth::user()->user_type) !== 1) {
+        // Check if authenticated user is hatchery user (user_type === 2)
+        if (((int) Auth::user()->user_type) !== 2) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

@@ -43,7 +43,7 @@ class UserFactory extends Factory
             'first_name' => $firstName,
             'last_name' => $lastName,
             'username' => $username,
-            'user_type' => 0,
+            'user_type' => 2,
             'password' => static::$password ??= Hash::make('brookside25'),
             'remember_token' => Str::random(10),
         ];

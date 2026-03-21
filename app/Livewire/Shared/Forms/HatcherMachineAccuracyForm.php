@@ -51,7 +51,7 @@ class HatcherMachineAccuracyForm extends FormNavigation
             ->mapWithKeys(fn ($h) => [$h->id => $h->hatcherName])
             ->toArray();
 
-        $this->hatcheryMen = User::where('user_type', 1)
+        $this->hatcheryMen = User::where('user_type', 2)
             ->where('is_disabled', false)
             ->orderBy('first_name')
             ->orderBy('last_name')

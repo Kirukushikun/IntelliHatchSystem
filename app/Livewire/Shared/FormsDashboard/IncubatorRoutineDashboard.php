@@ -448,7 +448,7 @@ class IncubatorRoutineDashboard extends Component
         $terms = is_array($terms) ? array_values(array_filter($terms, static fn ($t) => is_string($t) && $t !== '')) : [];
 
         $users = User::query()
-            ->where('user_type', 1)
+            ->where('user_type', 2)
             ->where('is_disabled', false)
             ->where(function ($q) use ($terms) {
                 foreach ($terms as $term) {

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
-            $table->integer('user_type')->default(1); // 0 = admin, 1 = hatchery-user
+            $table->integer('user_type')->default(2); // 0 = superadmin, 1 = admin, 2 = user
             $table->boolean('is_disabled')->default(false);
             $table->string('username')->unique();
             $table->string('password');

@@ -47,7 +47,7 @@ class EntranceDamperSpacingForm extends FormNavigation
             ->mapWithKeys(fn ($m) => [$m->id => $m->incubatorName])
             ->toArray();
 
-        $this->hatcheryMen = User::where('user_type', 1)
+        $this->hatcheryMen = User::where('user_type', 2)
             ->where('is_disabled', false)
             ->orderBy('first_name')
             ->orderBy('last_name')
