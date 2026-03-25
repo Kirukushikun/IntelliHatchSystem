@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Shared\Management\HatcherController;
+use App\Http\Controllers\Shared\Management\GetSetController;
 use App\Http\Controllers\Shared\Management\HouseNumberController;
 use App\Http\Controllers\Shared\Management\IncubatorController;
 use App\Http\Controllers\Shared\Management\PlenumController;
@@ -67,6 +68,18 @@ Route::get('/forms/pasgar-score', function () {
     return view('shared.forms.pasgar-score');
 })->name('forms.pasgar-score');
 
+Route::get('/forms/incubator-rack-pm', function () {
+    return view('shared.forms.incubator-rack-pm');
+})->name('forms.incubator-rack-pm');
+
+Route::get('/forms/weekly-volt-ampere', function () {
+    return view('shared.forms.weekly-volt-ampere');
+})->name('forms.weekly-volt-ampere');
+
+Route::get('/forms/diesel-generator-weekly', function () {
+    return view('shared.forms.diesel-generator-weekly');
+})->name('forms.diesel-generator-weekly');
+
 // Guest routes (no authentication required)
 Route::middleware('guest')->group(function () {
     // Unified login route
@@ -120,6 +133,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/forms/pasgar-score', [FormController::class, 'pasgarScore'])->name('admin.forms.pasgar-score');
 
+        Route::get('/admin/forms/incubator-rack-pm', [FormController::class, 'incubatorRackPm'])->name('admin.forms.incubator-rack-pm');
+
+        Route::get('/admin/forms/weekly-volt-ampere', [FormController::class, 'weeklyVoltAmpere'])->name('admin.forms.weekly-volt-ampere');
+
+        Route::get('/admin/forms/diesel-generator-weekly', [FormController::class, 'dieselGeneratorWeekly'])->name('admin.forms.diesel-generator-weekly');
+
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
         Route::get('/admin/incubator-machines', [IncubatorController::class, 'index'])->name('admin.incubator-machines');
@@ -131,6 +150,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/ps-numbers', [PsNumberController::class, 'index'])->name('admin.ps-numbers');
 
         Route::get('/admin/house-numbers', [HouseNumberController::class, 'index'])->name('admin.house-numbers');
+
+        Route::get('/admin/get-sets', [GetSetController::class, 'index'])->name('admin.get-sets');
 
         Route::get('/admin/print/forms/blower-air-hatcher', [FormsPrintController::class, 'blowerAirHatcher'])
             ->middleware('signed')
@@ -223,6 +244,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/user/forms/pasgar-score', [FormController::class, 'pasgarScore'])->name('user.forms.pasgar-score');
 
+        Route::get('/user/forms/incubator-rack-pm', [FormController::class, 'incubatorRackPm'])->name('user.forms.incubator-rack-pm');
+
+        Route::get('/user/forms/weekly-volt-ampere', [FormController::class, 'weeklyVoltAmpere'])->name('user.forms.weekly-volt-ampere');
+
+        Route::get('/user/forms/diesel-generator-weekly', [FormController::class, 'dieselGeneratorWeekly'])->name('user.forms.diesel-generator-weekly');
+
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 
         Route::get('/user/hatcher-machines', [HatcherController::class, 'index'])->name('user.hatcher-machines');
@@ -232,6 +259,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/ps-numbers', [PsNumberController::class, 'index'])->name('user.ps-numbers');
 
         Route::get('/user/house-numbers', [HouseNumberController::class, 'index'])->name('user.house-numbers');
+
+        Route::get('/user/get-sets', [GetSetController::class, 'index'])->name('user.get-sets');
 
         Route::get('/user/change-password', [UserController::class, 'changePassword'])->name('user.change-password');
     });

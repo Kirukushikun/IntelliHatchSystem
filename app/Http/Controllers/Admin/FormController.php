@@ -119,6 +119,30 @@ class FormController extends Controller
     }
 
     /**
+     * Display the incubator rack preventive maintenance checklist form page.
+     */
+    public function incubatorRackPm()
+    {
+        return view('shared.forms.incubator-rack-pm');
+    }
+
+    /**
+     * Display the weekly voltage and ampere monitoring form page.
+     */
+    public function weeklyVoltAmpere()
+    {
+        return view('shared.forms.weekly-volt-ampere');
+    }
+
+    /**
+     * Display the hatchery diesel generator weekly maintenance checklist form page.
+     */
+    public function dieselGeneratorWeekly()
+    {
+        return view('shared.forms.diesel-generator-weekly');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Form $form)

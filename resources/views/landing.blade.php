@@ -73,8 +73,26 @@
                 'route' => '/forms/pasgar-score',
                 'color' => 'amber',
             ],
+            [
+                'title' => 'Incubator Rack Preventive Maintenance Checklist',
+                'description' => 'Every Tuesday and Sunday',
+                'route' => '/forms/incubator-rack-pm',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Weekly Voltage and Ampere Monitoring',
+                'description' => 'Weekly monitoring',
+                'route' => '/forms/weekly-volt-ampere',
+                'color' => 'amber',
+            ],
+            [
+                'title' => 'Hatchery Diesel Generator Weekly Maintenance Checklist',
+                'description' => 'Weekly maintenance',
+                'route' => '/forms/diesel-generator-weekly',
+                'color' => 'amber',
+            ],
         ];
-        
+
         $borderColors = [
             'amber' => 'border-amber-500',
             'blue' => 'border-blue-500',

@@ -41,28 +41,20 @@
             @endif
         </div>
 
-        <!-- Progress circles in the center -->
+        <!-- Progress bar in the center -->
         @if($showProgress)
-            <div class="flex items-center">
-                @foreach($visibleStepIds as $index => $stepId)
-                    @php
-                        $stepId = (int) $stepId;
-                        $isActiveOrComplete = $currentIndex >= $index;
-                        $isNext = ($currentIndex + 1) === $index;
-
-                        $dotClass = $isActiveOrComplete
-                            ? 'bg-orange-500'
-                            : ($isNext ? 'bg-gray-300' : 'bg-white border-2 border-gray-300');
-
-                        $lineClass = ($currentIndex > $index) ? 'bg-orange-500' : 'bg-gray-300';
-                    @endphp
-                    <div class="flex items-center">
-                        <div class="w-3 h-3 rounded-full {{ $dotClass }}"></div>
-                        @if($index < (count($visibleStepIds) - 1))
-                            <div class="w-4 h-0.5 {{ $lineClass }}"></div>
-                        @endif
-                    </div>
-                @endforeach
+            @php
+                $totalSteps = count($visibleStepIds);
+                $progressPct = $totalSteps > 1 ? round(($currentIndex / ($totalSteps - 1)) * 100) : 100;
+            @endphp
+            <div class="flex flex-col items-center gap-1 flex-1 mx-3">
+                <span class="text-xs text-gray-400 dark:text-gray-500 tabular-nums">
+                    {{ $currentIndex + 1 }} / {{ $totalSteps }}
+                </span>
+                <div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-orange-500 rounded-full transition-all duration-300"
+                         style="width: {{ $progressPct }}%"></div>
+                </div>
             </div>
         @endif
 

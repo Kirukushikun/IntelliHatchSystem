@@ -72,6 +72,11 @@
                         'label' => 'House Numbers',
                         'href' => '/admin/house-numbers',
                         'active' => 'admin/house-numbers*'
+                    ],
+                    [
+                        'label' => 'GenSet',
+                        'href' => '/admin/get-sets',
+                        'active' => 'admin/get-sets*'
                     ]
                 ]
             ],
@@ -136,6 +141,11 @@
                         'label' => 'House Numbers',
                         'href' => '/user/house-numbers',
                         'active' => 'user/house-numbers*'
+                    ],
+                    [
+                        'label' => 'GenSet',
+                        'href' => '/user/get-sets',
+                        'active' => 'user/get-sets*'
                     ]
                 ]
             ],
