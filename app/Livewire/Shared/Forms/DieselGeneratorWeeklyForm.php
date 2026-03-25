@@ -43,8 +43,7 @@ class DieselGeneratorWeeklyForm extends FormNavigation
             ->mapWithKeys(fn ($u) => [$u->id => $u->full_name])
             ->toArray();
 
-        $this->genSetList = GetSet::where('isActive', true)
-            ->orderBy('getSetName')
+        $this->genSetList = GetSet::orderBy('getSetName')
             ->get()
             ->mapWithKeys(fn ($g) => [$g->id => $g->getSetName])
             ->toArray();

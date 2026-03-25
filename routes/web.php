@@ -117,6 +117,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/hatchery-sullair-dashboard', [DashboardController::class, 'hatcherySullair'])->name('admin.hatchery-sullair-dashboard');
 
+        Route::get('/admin/plenum-temp-humidity-dashboard', [DashboardController::class, 'plenumTempHumidity'])->name('admin.plenum-temp-humidity-dashboard');
+
         Route::get('/admin/forms/hatcher-machine-accuracy', [FormController::class, 'hatcherMachineAccuracy'])->name('admin.forms.hatcher-machine-accuracy');
 
         Route::get('/admin/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('admin.forms.plenum-temp-humidity');

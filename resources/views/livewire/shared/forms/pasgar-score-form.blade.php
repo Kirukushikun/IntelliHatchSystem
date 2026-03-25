@@ -16,14 +16,18 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 -mt-2">50 samples per PS</p>
 
                 <div data-field="personnel_name">
-                    <x-text-input
+                    <x-dropdown
                         label="Personnel Performed PASGAR Scoring"
                         name="personnel_name"
                         error-key="form.personnel_name"
-                        :required="true"
-                        placeholder="Enter your name"
-                        wireModel="form.personnel_name"
-                    />
+                        placeholder="Select personnel"
+                        wire:model.live="form.personnel_name"
+                        required
+                    >
+                        @foreach($users as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </x-dropdown>
                 </div>
 
                 <div data-field="hatch_date">

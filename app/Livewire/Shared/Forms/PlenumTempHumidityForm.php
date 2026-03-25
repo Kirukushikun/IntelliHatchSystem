@@ -5,6 +5,8 @@ namespace App\Livewire\Shared\Forms;
 use App\Livewire\Configs\PlenumTempHumidityConfig;
 use App\Livewire\Components\FormNavigation;
 use App\Livewire\Shared\Forms\Traits\TempPhotoManager;
+use App\Models\Hatcher;
+use App\Models\Incubator;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +29,12 @@ class PlenumTempHumidityForm extends FormNavigation
     public ?int $uploadedBy = null;
 
     /** @var array */
+    public $incubators = [];
+
+    /** @var array */
+    public $hatchers = [];
+
+    /** @var array */
     public $hatcheryMen = [];
 
     public function mount($formType = 'plenum_temp_humidity'): void
@@ -37,6 +45,18 @@ class PlenumTempHumidityForm extends FormNavigation
         parent::mount($formType);
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
+
+        $this->incubators = Incubator::where('isActive', true)
+            ->orderBy('incubatorName')
+            ->get()
+            ->mapWithKeys(fn ($m) => [$m->id => $m->incubatorName])
+            ->toArray();
+
+        $this->hatchers = Hatcher::where('isActive', true)
+            ->orderBy('hatcherName')
+            ->get()
+            ->mapWithKeys(fn ($m) => [$m->id => $m->hatcherName])
+            ->toArray();
 
         $this->hatcheryMen = User::where('user_type', 2)
             ->where('is_disabled', false)
@@ -62,6 +82,44 @@ class PlenumTempHumidityForm extends FormNavigation
         }
 
         $this->handleTempPhotoUpload($photoKey, $files, $this->formTypeKey());
+    }
+
+    public function addIncubatorReading(): void
+    {
+        if (count($this->form['incubator_readings']) >= count($this->incubators)) {
+            return;
+        }
+
+        $this->form['incubator_readings'][] = ['incubator_id' => '', 'temperature' => '', 'humidity' => ''];
+    }
+
+    public function removeIncubatorReading(int $index): void
+    {
+        if (count($this->form['incubator_readings']) <= 1) {
+            return;
+        }
+
+        array_splice($this->form['incubator_readings'], $index, 1);
+        $this->form['incubator_readings'] = array_values($this->form['incubator_readings']);
+    }
+
+    public function addHatcherReading(): void
+    {
+        if (count($this->form['hatcher_readings']) >= count($this->hatchers)) {
+            return;
+        }
+
+        $this->form['hatcher_readings'][] = ['hatcher_id' => '', 'temperature' => '', 'humidity' => ''];
+    }
+
+    public function removeHatcherReading(int $index): void
+    {
+        if (count($this->form['hatcher_readings']) <= 1) {
+            return;
+        }
+
+        array_splice($this->form['hatcher_readings'], $index, 1);
+        $this->form['hatcher_readings'] = array_values($this->form['hatcher_readings']);
     }
 
     protected function formTypeKey(): string
@@ -118,6 +176,8 @@ class PlenumTempHumidityForm extends FormNavigation
             $firstKey = array_key_first($e->validator->errors()->messages());
             if ($firstKey) {
                 $fieldName = str_replace('form.', '', $firstKey);
+                // For array fields like "incubator_readings.0.temperature", extract the base key
+                $fieldName = explode('.', $fieldName)[0];
                 $this->goToStepWithField($fieldName);
             }
             throw $e;
@@ -146,12 +206,12 @@ class PlenumTempHumidityForm extends FormNavigation
             $hatcheryman = $this->form['hatcheryman'] ?? null;
 
             $formId = (int) DB::table('forms')->insertGetId([
-                'form_type_id' => $formTypeId,
-                'form_inputs'  => json_encode($formInputs),
+                'form_type_id'   => $formTypeId,
+                'form_inputs'    => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by'  => $this->uploadedBy ?: $hatcheryman,
-                'created_at'   => now(),
-                'updated_at'   => now(),
+                'uploaded_by'    => $this->uploadedBy ?: $hatcheryman,
+                'created_at'     => now(),
+                'updated_at'     => now(),
             ]);
 
             DB::commit();
@@ -167,6 +227,38 @@ class PlenumTempHumidityForm extends FormNavigation
     {
         $inputs = $this->form;
         unset($inputs['hatcheryman']);
+
+        $incubatorReadings = [];
+        foreach ($this->form['incubator_readings'] as $reading) {
+            if (empty($reading['incubator_id'])) {
+                continue;
+            }
+            $machine = DB::table('incubator-machines')->where('id', $reading['incubator_id'])->first();
+            $incubatorReadings[] = [
+                'incubator_id'   => (int) $reading['incubator_id'],
+                'incubator_name' => $machine ? $machine->incubatorName : null,
+                'temperature'    => $reading['temperature'],
+                'humidity'       => $reading['humidity'],
+            ];
+        }
+
+        $hatcherReadings = [];
+        foreach ($this->form['hatcher_readings'] as $reading) {
+            if (empty($reading['hatcher_id'])) {
+                continue;
+            }
+            $machine = DB::table('hatcher-machines')->where('id', $reading['hatcher_id'])->first();
+            $hatcherReadings[] = [
+                'hatcher_id'   => (int) $reading['hatcher_id'],
+                'hatcher_name' => $machine ? $machine->hatcherName : null,
+                'temperature'  => $reading['temperature'],
+                'humidity'     => $reading['humidity'],
+            ];
+        }
+
+        $inputs['incubator_readings'] = $incubatorReadings;
+        $inputs['hatcher_readings']   = $hatcherReadings;
+
         return $inputs;
     }
 
@@ -195,6 +287,15 @@ class PlenumTempHumidityForm extends FormNavigation
                 : json_decode($form->form_inputs, true);
             $formInputs = (array) $formInputs;
 
+            $incubatorReadings = $formInputs['incubator_readings'] ?? [];
+            $hatcherReadings   = $formInputs['hatcher_readings'] ?? [];
+
+            $machineNames = array_merge(
+                array_column((array) $incubatorReadings, 'incubator_name'),
+                array_column((array) $hatcherReadings, 'hatcher_name'),
+            );
+            $machineNamesStr = implode(', ', array_filter($machineNames));
+
             $payload = [
                 'form' => [
                     'form_id'   => $form->id,
@@ -206,11 +307,10 @@ class PlenumTempHumidityForm extends FormNavigation
                     'id'   => $form->uploaded_by,
                     'name' => trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) ?: 'Unknown User',
                 ] : null,
-                'machine' => null,
                 'message' => [
                     'form_name'    => $form->form_type_name ?: 'Unknown Form Type',
-                    'machine_name' => null,
-                    'submitted_by' => $formInputs['hatcheryman'] ?? null,
+                    'machine_name' => $machineNamesStr ?: null,
+                    'submitted_by' => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
                     'date_time'    => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
                     'photos'       => [],
                     'shift'        => $formInputs['shift'] ?? 'N/A',

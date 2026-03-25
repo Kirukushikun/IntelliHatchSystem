@@ -51,4 +51,9 @@ class DashboardController extends Controller
     {
         return view('admin.hatchery-sullair-dashboard');
     }
+
+    public function plenumTempHumidity()
+    {
+        return view('admin.plenum-temp-humidity-dashboard');
+    }
 }

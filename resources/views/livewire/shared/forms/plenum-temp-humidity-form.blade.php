@@ -41,39 +41,195 @@
             </div>
 
             {{-- Step 2: Plenum Readings --}}
-            <div data-step="2" class="space-y-4" @style(["display:none" => $currentStep !== 2])>
+            <div data-step="2" class="space-y-6" @style(["display:none" => $currentStep !== 2])>
                 <x-title>PLENUM READINGS</x-title>
 
-                <div data-field="plenum_incubator_1_5">
-                    <x-text-input label="Plenum for Incubator 1 - 5 temperature and humidity reading" name="plenum_incubator_1_5" error-key="form.plenum_incubator_1_5" :required="true" placeholder="Enter your answer" wireModel="form.plenum_incubator_1_5" />
+                {{-- Incubator Readings --}}
+                <div data-field="incubator_readings">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Incubator Readings <span class="text-red-500">*</span>
+                        </h3>
+                        <button
+                            type="button"
+                            wire:click="addIncubatorReading"
+                            @if(count($form['incubator_readings']) >= count($incubators)) disabled @endif
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Incubator
+                        </button>
+                    </div>
+
+                    @error('form.incubator_readings')
+                        <p class="text-red-500 text-sm mb-2">{{ $message }}</p>
+                    @enderror
+
+                    <div class="space-y-3">
+                        @foreach($form['incubator_readings'] as $index => $reading)
+                            @php
+                                $otherIncubatorReadings = $form['incubator_readings'];
+                                array_splice($otherIncubatorReadings, $index, 1);
+                                $usedIncubatorIds = collect($otherIncubatorReadings)
+                                    ->pluck('incubator_id')
+                                    ->filter(fn($id) => $id !== '' && $id !== null)
+                                    ->map(fn($id) => (int) $id)
+                                    ->toArray();
+                                $availableIncubators = array_diff_key($incubators, array_flip($usedIncubatorIds));
+                            @endphp
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 relative">
+                                @if(count($form['incubator_readings']) > 1)
+                                    <button
+                                        type="button"
+                                        wire:click="removeIncubatorReading({{ $index }})"
+                                        class="absolute top-2 right-2 text-red-400 hover:text-red-600 transition"
+                                        title="Remove"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                @endif
+
+                                <div class="grid grid-cols-1 gap-0 sm:grid-cols-3 sm:gap-3">
+                                    <div>
+                                        <x-dropdown
+                                            label="Incubator"
+                                            name="incubator_id_{{ $index }}"
+                                            error-key="form.incubator_readings.{{ $index }}.incubator_id"
+                                            placeholder="Select incubator"
+                                            wire:model.live="form.incubator_readings.{{ $index }}.incubator_id"
+                                            required
+                                        >
+                                            @foreach($availableIncubators as $id => $name)
+                                                <option value="{{ $id }}">{{ $name }}</option>
+                                            @endforeach
+                                        </x-dropdown>
+                                    </div>
+                                    <div>
+                                        <x-text-input
+                                            label="Temperature"
+                                            name="incubator_temperature_{{ $index }}"
+                                            error-key="form.incubator_readings.{{ $index }}.temperature"
+                                            :required="true"
+                                            placeholder="Enter temperature"
+                                            wireModel="form.incubator_readings.{{ $index }}.temperature"
+                                            type="number"
+                                        />
+                                    </div>
+                                    <div>
+                                        <x-text-input
+                                            label="Humidity"
+                                            name="incubator_humidity_{{ $index }}"
+                                            error-key="form.incubator_readings.{{ $index }}.humidity"
+                                            :required="true"
+                                            placeholder="Enter humidity"
+                                            wireModel="form.incubator_readings.{{ $index }}.humidity"
+                                            type="number"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
 
-                <div data-field="plenum_incubator_1_5_photos">
-                    <x-photo-attach label="Attach pictures" name="plenum_incubator_1_5_photos" />
+                {{-- Hatcher Readings --}}
+                <div data-field="hatcher_readings">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Hatcher Readings <span class="text-red-500">*</span>
+                        </h3>
+                        <button
+                            type="button"
+                            wire:click="addHatcherReading"
+                            @if(count($form['hatcher_readings']) >= count($hatchers)) disabled @endif
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Hatcher
+                        </button>
+                    </div>
+
+                    @error('form.hatcher_readings')
+                        <p class="text-red-500 text-sm mb-2">{{ $message }}</p>
+                    @enderror
+
+                    <div class="space-y-3">
+                        @foreach($form['hatcher_readings'] as $index => $reading)
+                            @php
+                                $otherHatcherReadings = $form['hatcher_readings'];
+                                array_splice($otherHatcherReadings, $index, 1);
+                                $usedHatcherIds = collect($otherHatcherReadings)
+                                    ->pluck('hatcher_id')
+                                    ->filter(fn($id) => $id !== '' && $id !== null)
+                                    ->map(fn($id) => (int) $id)
+                                    ->toArray();
+                                $availableHatchers = array_diff_key($hatchers, array_flip($usedHatcherIds));
+                            @endphp
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 relative">
+                                @if(count($form['hatcher_readings']) > 1)
+                                    <button
+                                        type="button"
+                                        wire:click="removeHatcherReading({{ $index }})"
+                                        class="absolute top-2 right-2 text-red-400 hover:text-red-600 transition"
+                                        title="Remove"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                @endif
+
+                                <div class="grid grid-cols-1 gap-0 sm:grid-cols-3 sm:gap-3">
+                                    <div>
+                                        <x-dropdown
+                                            label="Hatcher Machine"
+                                            name="hatcher_id_{{ $index }}"
+                                            error-key="form.hatcher_readings.{{ $index }}.hatcher_id"
+                                            placeholder="Select hatcher machine"
+                                            wire:model.live="form.hatcher_readings.{{ $index }}.hatcher_id"
+                                            required
+                                        >
+                                            @foreach($availableHatchers as $id => $name)
+                                                <option value="{{ $id }}">{{ $name }}</option>
+                                            @endforeach
+                                        </x-dropdown>
+                                    </div>
+                                    <div>
+                                        <x-text-input
+                                            label="Temperature"
+                                            name="hatcher_temperature_{{ $index }}"
+                                            error-key="form.hatcher_readings.{{ $index }}.temperature"
+                                            :required="true"
+                                            placeholder="Enter temperature"
+                                            wireModel="form.hatcher_readings.{{ $index }}.temperature"
+                                            type="number"
+                                        />
+                                    </div>
+                                    <div>
+                                        <x-text-input
+                                            label="Humidity"
+                                            name="hatcher_humidity_{{ $index }}"
+                                            error-key="form.hatcher_readings.{{ $index }}.humidity"
+                                            :required="true"
+                                            placeholder="Enter humidity"
+                                            wireModel="form.hatcher_readings.{{ $index }}.humidity"
+                                            type="number"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
 
-                <div data-field="plenum_incubator_6_10">
-                    <x-text-input label="Plenum for Incubator 6 - 10 temperature and humidity reading" name="plenum_incubator_6_10" error-key="form.plenum_incubator_6_10" :required="true" placeholder="Enter your answer" wireModel="form.plenum_incubator_6_10" />
-                </div>
-
-                <div data-field="plenum_incubator_6_10_photos">
-                    <x-photo-attach label="Attach pictures" name="plenum_incubator_6_10_photos" />
-                </div>
-
-                <div data-field="plenum_hatcher_1_5">
-                    <x-text-input label="Plenum for Hatcher 1 - 5 temperature and humidity reading" name="plenum_hatcher_1_5" error-key="form.plenum_hatcher_1_5" :required="true" placeholder="Enter your answer" wireModel="form.plenum_hatcher_1_5" />
-                </div>
-
-                <div data-field="plenum_hatcher_1_5_photos">
-                    <x-photo-attach label="Attach pictures" name="plenum_hatcher_1_5_photos" />
-                </div>
-
-                <div data-field="plenum_hatcher_6_10">
-                    <x-text-input label="Plenum for Hatcher 6 - 10 temperature and humidity reading" name="plenum_hatcher_6_10" error-key="form.plenum_hatcher_6_10" :required="true" placeholder="Enter your answer" wireModel="form.plenum_hatcher_6_10" />
-                </div>
-
-                <div data-field="plenum_hatcher_6_10_photos">
-                    <x-photo-attach label="Attach pictures" name="plenum_hatcher_6_10_photos" />
+                <div data-field="plenum_photos">
+                    <x-photo-attach label="Attach pictures" name="plenum_photos" />
                 </div>
             </div>
 

@@ -9,6 +9,7 @@ use App\Models\Hatcher;
 use App\Models\HouseNumber;
 use App\Models\Incubator;
 use App\Models\PsNumber;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -26,6 +27,8 @@ class PasgarScoreForm extends FormNavigation
 
     protected bool $disableShiftLogic = true;
 
+    public array $users = [];
+
     public array $psNumbers = [];
 
     public array $houseNumbers = [];
@@ -41,6 +44,14 @@ class PasgarScoreForm extends FormNavigation
         parent::mount($formType);
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
+
+        $this->users = User::where('user_type', 2)
+            ->where('is_disabled', false)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get()
+            ->mapWithKeys(fn ($u) => [$u->id => $u->first_name . ' ' . $u->last_name])
+            ->toArray();
 
         $this->psNumbers = PsNumber::where('isActive', true)
             ->orderBy('psNumber')
@@ -195,6 +206,11 @@ class PasgarScoreForm extends FormNavigation
     {
         $inputs = $this->form;
 
+        // Resolve personnel name from user ID
+        if (!empty($inputs['personnel_name']) && isset($this->users[$inputs['personnel_name']])) {
+            $inputs['personnel_name'] = $this->users[$inputs['personnel_name']];
+        }
+
         // Resolve PS number label
         if (!empty($inputs['ps_number']) && isset($this->psNumbers[$inputs['ps_number']])) {
             $inputs['machine_info'] = [
@@ -243,7 +259,9 @@ class PasgarScoreForm extends FormNavigation
                 'message'        => [
                     'form_name'    => $form->form_type_name ?: 'Unknown Form Type',
                     'machine_name' => is_array($machineInfo) ? ($machineInfo['name'] ?? null) : null,
-                    'submitted_by' => $this->form['personnel_name'] ?? null,
+                    'submitted_by' => isset($this->form['personnel_name'])
+                        ? ($this->users[$this->form['personnel_name']] ?? $this->form['personnel_name'])
+                        : null,
                     'date_time'    => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
                     'photos'       => [],
                     'shift'        => 'N/A',

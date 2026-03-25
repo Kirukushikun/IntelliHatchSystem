@@ -7,7 +7,7 @@ class PasgarScoreConfig
     public static function getRules(): array
     {
         return [
-            'form.personnel_name'          => 'required|string|max:255',
+            'form.personnel_name'          => 'required|integer|exists:users,id',
             'form.hatch_date'              => 'required|date',
             'form.time_started'            => 'required|string',
             'form.ps_number'               => 'required|integer|exists:ps-numbers,id',
