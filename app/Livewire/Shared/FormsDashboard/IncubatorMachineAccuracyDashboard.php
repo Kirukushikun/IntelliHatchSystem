@@ -1,0 +1,353 @@
+<?php
+
+namespace App\Livewire\Shared\FormsDashboard;
+
+use App\Models\Form;
+use App\Models\FormType;
+use Livewire\Component;
+use Livewire\Attributes\Computed;
+use Livewire\WithPagination;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
+
+class IncubatorMachineAccuracyDashboard extends Component
+{
+    use WithPagination;
+
+    public string $search = '';
+    public string $dateFrom = '';
+    public string $dateTo = '';
+    public string $shiftFilter = 'all';
+    public bool $showFilterDropdown = false;
+
+    public ?int $selectedFormId = null;
+    public FormType $formType;
+    public int $todayFormCount = 0;
+    public array $todayShiftCounts = [];
+
+    public bool $showModal = false;
+    public bool $showPhotoModal = false;
+    public array $selectedPhotos = [];
+    public string $selectedPhotoField = '';
+    public array $formPhotos = [];
+    public int $currentPhotoIndex = 0;
+
+    public bool $showDeleteModal = false;
+    public ?int $formToDelete = null;
+
+    public int $perPage = 10;
+    public string $sortField = 'date_submitted';
+    public string $sortDirection = 'desc';
+    public int $page = 1;
+
+    protected $queryString = [
+        'search'        => ['except' => ''],
+        'dateFrom'      => ['except' => ''],
+        'dateTo'        => ['except' => ''],
+        'shiftFilter'   => ['except' => 'all'],
+        'page'          => ['except' => 1],
+        'sortField'     => ['except' => 'date_submitted'],
+        'sortDirection' => ['except' => 'desc'],
+        'perPage'       => ['except' => 10],
+    ];
+
+    public function mount(): void
+    {
+        $this->formType = FormType::where('form_name', 'Incubator Machine Accuracy Temperature Checking')->firstOrFail();
+        $this->calculateTodayFormCount();
+        $this->loadTodayShiftCounts();
+    }
+
+    protected function calculateTodayFormCount(): void
+    {
+        $this->todayFormCount = Form::where('form_type_id', $this->formType->id)
+            ->whereDate('date_submitted', now()->format('Y-m-d'))
+            ->count();
+    }
+
+    protected function loadTodayShiftCounts(): void
+    {
+        $today = now()->format('Y-m-d');
+        $this->todayShiftCounts = [
+            '1st Shift' => $this->getTodayShiftCount($today, '1st Shift'),
+            '2nd Shift' => $this->getTodayShiftCount($today, '2nd Shift'),
+            '3rd Shift' => $this->getTodayShiftCount($today, '3rd Shift'),
+        ];
+    }
+
+    protected function getTodayShiftCount(string $today, string $shift): int
+    {
+        return Form::where('form_type_id', $this->formType->id)
+            ->whereDate('date_submitted', $today)
+            ->where('form_inputs', 'like', '%"' . $shift . '"%')
+            ->count();
+    }
+
+    public function updatedSearch(): void { $this->resetPage(); }
+    public function updatedDateFrom(): void { $this->resetPage(); }
+    public function updatedDateTo(): void { $this->resetPage(); }
+    public function updatedPerPage(): void { $this->resetPage(); }
+    public function updatedShiftFilter(): void { $this->resetPage(); }
+
+    public function quickFilterToday(): void
+    {
+        $today = now()->format('Y-m-d');
+        if ($this->dateFrom === $today && $this->dateTo === $today && $this->shiftFilter === 'all') {
+            $this->reset(['dateFrom', 'dateTo']);
+        } else {
+            $this->dateFrom    = $today;
+            $this->dateTo      = $today;
+            $this->shiftFilter = 'all';
+        }
+        $this->resetPage();
+    }
+
+    public function quickFilterShift(string $shift): void
+    {
+        $today = now()->format('Y-m-d');
+        if ($this->shiftFilter === $shift && $this->dateFrom === $today && $this->dateTo === $today) {
+            $this->reset(['shiftFilter', 'dateFrom', 'dateTo']);
+        } else {
+            $this->shiftFilter = $shift;
+            $this->dateFrom    = $today;
+            $this->dateTo      = $today;
+        }
+        $this->resetPage();
+    }
+
+    public function toggleFilterDropdown(): void
+    {
+        $this->showFilterDropdown = !$this->showFilterDropdown;
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'dateFrom', 'dateTo', 'shiftFilter']);
+        $this->resetPage();
+    }
+
+    public function gotoPage($page): void
+    {
+        $page       = (int) $page;
+        $totalPages = $this->baseQuery()->paginate($this->perPage)->lastPage();
+        $this->page = max(1, min($page, $totalPages));
+    }
+
+    protected function baseQuery(): Builder
+    {
+        $query = Form::where('form_type_id', $this->formType->id)->with(['user']);
+
+        $search = trim($this->search);
+        $terms  = $search !== '' ? preg_split('/\s+/', $search) : [];
+        $terms  = is_array($terms) ? array_values(array_filter($terms, static fn ($t) => is_string($t) && $t !== '')) : [];
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($terms, $search) {
+                $q->whereHas('user', function ($userQuery) use ($terms) {
+                    foreach ($terms as $term) {
+                        $userQuery->where(function ($nameQ) use ($term) {
+                            $nameQ->where('first_name', 'like', '%' . $term . '%')
+                                ->orWhere('last_name', 'like', '%' . $term . '%');
+                        });
+                    }
+                })->orWhere(function ($subQ) use ($search) {
+                    $subQ->where('form_inputs', 'like', '%"machine_info":%')
+                        ->where('form_inputs', 'like', '%"name":%' . $search . '%');
+                });
+            });
+        }
+
+        if ($this->dateFrom) {
+            $query->whereDate('date_submitted', '>=', $this->dateFrom);
+        }
+        if ($this->dateTo) {
+            $query->whereDate('date_submitted', '<=', $this->dateTo);
+        }
+        if ($this->shiftFilter !== 'all') {
+            $query->where('form_inputs', 'like', '%"' . $this->shiftFilter . '"%');
+        }
+
+        return $query;
+    }
+
+    #[Computed]
+    public function selectedForm()
+    {
+        return $this->selectedFormId
+            ? Form::with(['user', 'formType'])->find($this->selectedFormId)
+            : null;
+    }
+
+    #[Computed]
+    public function formData(): array
+    {
+        if (!$this->selectedFormId) {
+            return [];
+        }
+        $row = $this->freshSelectedFormRow();
+        if ($row && $row->form_inputs) {
+            return is_array($row->form_inputs)
+                ? $row->form_inputs
+                : (json_decode($row->form_inputs, true) ?: []);
+        }
+        return [];
+    }
+
+    #[Computed]
+    public function freshSelectedFormRow(): ?object
+    {
+        return $this->selectedFormId
+            ? DB::table('forms')->where('id', $this->selectedFormId)->first()
+            : null;
+    }
+
+    public function viewDetails($formId): void
+    {
+        $this->selectedFormId    = $formId;
+        $this->formPhotos        = $this->getFormPhotos($formId);
+        $this->currentPhotoIndex = 0;
+        $this->showModal         = true;
+    }
+
+    public function closeModal(): void
+    {
+        $this->showModal      = false;
+        $this->selectedFormId = null;
+        $this->formPhotos     = [];
+    }
+
+    public function viewPhotos(string $field): void
+    {
+        $this->selectedPhotoField = $field;
+        $this->selectedPhotos     = $this->getFormPhotos($this->selectedFormId, $field);
+        $this->showPhotoModal     = true;
+    }
+
+    public function closePhotoModal(): void
+    {
+        $this->showPhotoModal     = false;
+        $this->selectedPhotoField = '';
+        $this->selectedPhotos     = [];
+    }
+
+    private function getFormPhotos(int $formId, string $field = null): array
+    {
+        try {
+            $form     = Form::findOrFail($formId);
+            $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
+            $photos   = [];
+
+            $photoFields = ['accuracy_photos'];
+
+            foreach ($photoFields as $photoField) {
+                if ($field !== null && $photoField !== $field) {
+                    continue;
+                }
+                if (!isset($formData[$photoField])) {
+                    continue;
+                }
+                $raw = $formData[$photoField];
+                if (is_string($raw)) {
+                    $raw = json_decode($raw, true) ?: [];
+                }
+                foreach ((array) $raw as $photo) {
+                    if (is_array($photo) && isset($photo['url'])) {
+                        $photos[] = ['url' => $photo['url'], 'name' => $photo['name'] ?? 'Photo'];
+                    } elseif (is_string($photo)) {
+                        $photos[] = ['url' => $photo, 'name' => 'Photo'];
+                    }
+                }
+            }
+
+            return $photos;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    public function getPhotoCount(string $field): int
+    {
+        return $this->selectedFormId ? count($this->getFormPhotos($this->selectedFormId, $field)) : 0;
+    }
+
+    public function deleteForm($formId): void
+    {
+        $this->formToDelete    = $formId;
+        $this->showDeleteModal = true;
+    }
+
+    public function confirmDelete(): void
+    {
+        if ($this->formToDelete) {
+            $form     = Form::findOrFail($this->formToDelete);
+            $formName = $form->formType->form_name ?? 'Unknown form';
+            $form->delete();
+            session()->flash('success', "Form '{$formName}' deleted successfully.");
+            $this->cancelDelete();
+        }
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteModal = false;
+        $this->formToDelete    = null;
+    }
+
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField     = $field;
+            $this->sortDirection = 'asc';
+        }
+        $this->resetPage();
+    }
+
+    protected function getForms()
+    {
+        return $this->baseQuery()
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
+    }
+
+    protected function getPaginationData(): array
+    {
+        $forms       = $this->getForms();
+        $currentPage = $forms->currentPage();
+        $lastPage    = $forms->lastPage();
+
+        if ($lastPage <= 3) {
+            $startPage = 1;
+            $endPage   = $lastPage;
+        } else {
+            $startPage = max(1, $currentPage - 1);
+            $endPage   = min($lastPage, $currentPage + 1);
+        }
+
+        $pages = [];
+        for ($i = $startPage; $i <= $endPage; $i++) {
+            $pages[] = $i;
+        }
+
+        return [
+            'forms'       => $forms,
+            'pages'       => $pages,
+            'currentPage' => $currentPage,
+            'lastPage'    => $lastPage,
+        ];
+    }
+
+    public function render()
+    {
+        $paginationData = $this->getPaginationData();
+
+        return view('livewire.shared.forms-dashboard.incubator-machine-accuracy-dashboard', [
+            'forms'       => $paginationData['forms'],
+            'pages'       => $paginationData['pages'],
+            'currentPage' => $paginationData['currentPage'],
+            'lastPage'    => $paginationData['lastPage'],
+            'formType'    => $this->formType,
+        ]);
+    }
+}

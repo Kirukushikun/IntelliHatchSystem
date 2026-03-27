@@ -22,7 +22,14 @@
                            request()->is('admin/incubator-routine-dashboard*') ||
                            request()->is('admin/blower-air-hatcher-dashboard*') ||
                            request()->is('admin/blower-air-incubator-dashboard*') ||
-                           request()->is('admin/hatchery-sullair-dashboard*');
+                           request()->is('admin/hatchery-sullair-dashboard*') ||
+                           request()->is('admin/plenum-temp-humidity-dashboard*') ||
+                           request()->is('admin/hatcher-machine-accuracy-dashboard*') ||
+                           request()->is('admin/incubator-machine-accuracy-dashboard*') ||
+                           request()->is('admin/entrance-damper-spacing-dashboard*') ||
+                           request()->is('admin/incubator-entrance-temp-dashboard*') ||
+                           request()->is('admin/incubator-temp-calibration-dashboard*') ||
+                           request()->is('admin/hatcher-temp-calibration-dashboard*');
                 }
             ],
             [

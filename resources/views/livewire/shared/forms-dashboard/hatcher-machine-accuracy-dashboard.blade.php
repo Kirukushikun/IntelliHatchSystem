@@ -1,18 +1,3 @@
-@php
-    function getPlenumMachineName($formData) {
-        if (isset($formData['machine_info']['name'])) {
-            return $formData['machine_info']['name'];
-        }
-        return 'N/A';
-    }
-    function getPlenumMachineType($formData) {
-        if (isset($formData['machine_info']['type'])) {
-            return $formData['machine_info']['type'];
-        }
-        return 'N/A';
-    }
-@endphp
-
 <div wire:key="{{ now()->timestamp }}">
     <!-- Header with Title and Search -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
@@ -30,7 +15,7 @@
                 class="w-full pl-11 pr-20 py-3 text-sm bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-sm"
             />
             <a
-                href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('admin.print.forms.plenum-temp-humidity', now()->addMinutes(10), ['search' => $search, 'dateFrom' => $dateFrom, 'dateTo' => $dateTo, 'sortField' => $sortField, 'sortDirection' => $sortDirection]) }}"
+                href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('admin.print.forms.hatcher-machine-accuracy', now()->addMinutes(10), ['search' => $search, 'dateFrom' => $dateFrom, 'dateTo' => $dateTo, 'shiftFilter' => $shiftFilter, 'sortField' => $sortField, 'sortDirection' => $sortDirection]) }}"
                 target="_blank"
                 rel="noopener"
                 class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
@@ -50,31 +35,27 @@
             @if ($showFilterDropdown)
                 <div class="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                     <div class="p-4">
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-900 mb-3">Date Range</h3>
+                        <div class="mb-4">
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Date Range</h3>
                             <div class="space-y-2">
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">From</label>
-                                    <input
-                                        type="date"
-                                        wire:model="dateFrom"
-                                        class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                        max="{{ $dateTo ?: now()->format('Y-m-d') }}"
-                                        wire:loading.attr="disabled"
-                                    />
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
+                                    <input type="date" wire:model="dateFrom" class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent" max="{{ $dateTo ?: now()->format('Y-m-d') }}" wire:loading.attr="disabled" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">To</label>
-                                    <input
-                                        type="date"
-                                        wire:model="dateTo"
-                                        class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                        max="{{ now()->format('Y-m-d') }}"
-                                        min="{{ $dateFrom ?: '' }}"
-                                        wire:loading.attr="disabled"
-                                    />
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
+                                    <input type="date" wire:model="dateTo" class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent" max="{{ now()->format('Y-m-d') }}" min="{{ $dateFrom ?: '' }}" wire:loading.attr="disabled" />
                                 </div>
                             </div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Shift</h3>
+                            <select wire:model.live="shiftFilter" class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent">
+                                <option value="all">All Shifts</option>
+                                <option value="1st Shift">1st Shift</option>
+                                <option value="2nd Shift">2nd Shift</option>
+                                <option value="3rd Shift">3rd Shift</option>
+                            </select>
                         </div>
                         <div class="flex justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
                             <button type="button" wire:click="clearFilters" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Reset</button>
@@ -89,25 +70,20 @@
     <!-- Quick Filters -->
     <div class="flex flex-wrap gap-3 mb-6">
         <div class="text-sm font-medium text-gray-700 dark:text-gray-300 self-center">Today:</div>
-        <button
-            wire:click="quickFilterToday"
-            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
-                {{ ($dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:text-white dark:hover:bg-blue-800'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}"
-        >
+        <button wire:click="quickFilterToday" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors {{ ($dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d') && $shiftFilter === 'all') ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}">
             Today
-            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                {{ ($dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-200' }}">
-                {{ $todayFormCount ?? 0 }}
-            </span>
+            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ ($dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d') && $shiftFilter === 'all') ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-200' }}">{{ $todayFormCount ?? 0 }}</span>
         </button>
+        @foreach(['1st Shift', '2nd Shift', '3rd Shift'] as $shift)
+            <button wire:click="quickFilterShift('{{ $shift }}')" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors {{ ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d')) ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}">
+                {{ $shift }}
+                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ ($shiftFilter === $shift && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d')) ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-200' }}">{{ $todayShiftCounts[$shift] ?? 0 }}</span>
+            </button>
+        @endforeach
     </div>
 
     <!-- Table Section -->
-    <div wire:poll.30s wire:key="{{ now()->timestamp }}" class="relative flex flex-col w-full h-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-lg bg-clip-border">
+    <div wire:poll.30s class="relative flex flex-col w-full h-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-lg bg-clip-border">
         <!-- Desktop Table -->
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left table-auto min-w-max">
@@ -127,42 +103,28 @@
                                 @endif
                             </p>
                         </th>
-                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
-                            <p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Hatchery Man</p>
-                        </th>
-                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
-                            <p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Machine Type</p>
-                        </th>
-                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
-                            <p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Machine</p>
-                        </th>
-                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-center">
-                            <p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Actions</p>
-                        </th>
+                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700"><p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Hatchery Man</p></th>
+                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700"><p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Hatcher</p></th>
+                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700"><p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Shift</p></th>
+                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-center"><p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Actions</p></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($forms as $form)
                         @php
                             $formData = is_array($form->form_inputs) ? $form->form_inputs : (json_decode($form->form_inputs ?? '{}', true) ?: []);
+                            $machineName = $formData['machine_info']['name'] ?? 'N/A';
+                            $shift = $formData['shift'] ?? 'N/A';
                         @endphp
                         <tr class="even:bg-slate-50 dark:even:bg-gray-700/50 hover:bg-slate-100 dark:hover:bg-gray-700">
-                            <td class="p-4 py-5">
-                                <p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
-                            </td>
-                            <td class="p-4 py-5">
-                                <p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p>
-                            </td>
-                            <td class="p-4 py-5">
-                                <p class="text-sm text-slate-800 dark:text-slate-200">{{ getPlenumMachineType($formData) }}</p>
-                            </td>
-                            <td class="p-4 py-5">
-                                <p class="text-sm text-slate-800 dark:text-slate-200">{{ getPlenumMachineName($formData) }}</p>
-                            </td>
+                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p></td>
+                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p></td>
+                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $machineName }}</p></td>
+                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $shift }}</p></td>
                             <td class="p-4 py-5 text-center">
                                 <div class="flex items-center justify-center gap-2">
-                                    <button wire:click="viewDetails({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors" title="View Details">View</button>
-                                    <button wire:click="deleteForm({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors" title="Delete Form">Delete</button>
+                                    <button wire:click="viewDetails({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors">View</button>
+                                    <button wire:click="deleteForm({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -170,9 +132,7 @@
                         <tr>
                             <td colspan="5" class="p-8 text-center">
                                 <div class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
+                                    <svg class="w-12 h-12 text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                     <p class="text-sm text-slate-600 font-medium">No forms found</p>
                                 </div>
                             </td>
@@ -187,22 +147,15 @@
             @forelse($forms as $form)
                 @php
                     $formData = is_array($form->form_inputs) ? $form->form_inputs : (json_decode($form->form_inputs ?? '{}', true) ?: []);
+                    $machineName = $formData['machine_info']['name'] ?? 'N/A';
+                    $shift = $formData['shift'] ?? 'N/A';
                 @endphp
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4 space-y-3 mb-4">
                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
                     <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span>
-                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Machine Type:</span>
-                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ getPlenumMachineType($formData) }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Machine:</span>
-                            <span class="text-xs text-gray-900 dark:text-gray-200">{{ getPlenumMachineName($formData) }}</span>
-                        </div>
+                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span></div>
+                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatcher:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $machineName }}</span></div>
+                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Shift:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $shift }}</span></div>
                     </div>
                     <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                         <button wire:click="viewDetails({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 rounded-md hover:bg-blue-100 transition-colors">View</button>
@@ -211,9 +164,7 @@
                 </div>
             @empty
                 <div class="flex flex-col items-center py-12">
-                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
+                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     <p class="text-gray-500 dark:text-gray-400 mt-1">No forms found</p>
                 </div>
             @endforelse
@@ -221,20 +172,13 @@
 
         @if (is_object($forms) && method_exists($forms, 'hasPages') && $forms->hasPages())
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center px-4 py-3 border-t border-slate-200 dark:border-gray-700 gap-3 sm:gap-0">
-                <div class="text-sm text-slate-500 dark:text-slate-400 text-center sm:text-left">
-                    Showing <b>{{ $forms->firstItem() }}-{{ $forms->lastItem() }}</b> of {{ $forms->total() }}
-                </div>
-                <x-custom-pagination
-                    :current-page="$currentPage"
-                    :last-page="$lastPage"
-                    :pages="$pages"
-                    on-page-change="gotoPage"
-                />
+                <div class="text-sm text-slate-500 dark:text-slate-400 text-center sm:text-left">Showing <b>{{ $forms->firstItem() }}-{{ $forms->lastItem() }}</b> of {{ $forms->total() }}</div>
+                <x-custom-pagination :current-page="$currentPage" :last-page="$lastPage" :pages="$pages" on-page-change="gotoPage" />
             </div>
         @endif
     </div>
 
-    @include('livewire.shared.forms-dashboard.modals.plenum-temp-humidity-view')
+    @include('livewire.shared.forms-dashboard.modals.hatcher-machine-accuracy-view')
 
     <!-- Delete Confirmation Modal -->
     @if ($showDeleteModal)
@@ -243,18 +187,10 @@
             <div class="relative w-full max-w-md p-6 bg-white dark:bg-gray-800 shadow-xl rounded-lg">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">Delete Form</h3>
-                    <button type="button" wire:click="cancelDelete" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+                    <button type="button" wire:click="cancelDelete" class="text-gray-400 hover:text-gray-600 cursor-pointer"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
                 <div class="flex items-center mb-4">
-                    <div class="shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </div>
+                    <div class="shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center"><svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">Are you sure you want to delete this form?</p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone.</p>

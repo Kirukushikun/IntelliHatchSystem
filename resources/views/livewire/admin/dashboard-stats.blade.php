@@ -166,6 +166,13 @@
                     'Hatcher Blower Air Speed Monitoring' => 'blower-air-hatcher-dashboard',
                     'Incubator Blower Air Speed Monitoring' => 'blower-air-incubator-dashboard',
                     'Hatchery Sullair Air Compressor Weekly PMS Checklist' => 'hatchery-sullair-dashboard',
+                    'Plenum Temperature and Humidity Monitoring' => 'plenum-temp-humidity-dashboard',
+                    'Hatcher Machine Accuracy Temperature Checking' => 'hatcher-machine-accuracy-dashboard',
+                    'Incubator Machine Accuracy Temperature Checking' => 'incubator-machine-accuracy-dashboard',
+                    'Entrance Damper Spacing Monitoring' => 'entrance-damper-spacing-dashboard',
+                    'Incubator Entrance Temperature Monitoring' => 'incubator-entrance-temp-dashboard',
+                    'Incubator Temperature Calibration' => 'incubator-temp-calibration-dashboard',
+                    'Hatcher Temperature Calibration' => 'hatcher-temp-calibration-dashboard',
                     default => '#'
                 } }}" class="block h-full">
                 <!-- Card Header -->

@@ -119,6 +119,18 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/plenum-temp-humidity-dashboard', [DashboardController::class, 'plenumTempHumidity'])->name('admin.plenum-temp-humidity-dashboard');
 
+        Route::get('/admin/hatcher-machine-accuracy-dashboard', [DashboardController::class, 'hatcherMachineAccuracy'])->name('admin.hatcher-machine-accuracy-dashboard');
+
+        Route::get('/admin/incubator-machine-accuracy-dashboard', [DashboardController::class, 'incubatorMachineAccuracy'])->name('admin.incubator-machine-accuracy-dashboard');
+
+        Route::get('/admin/entrance-damper-spacing-dashboard', [DashboardController::class, 'entranceDamperSpacing'])->name('admin.entrance-damper-spacing-dashboard');
+
+        Route::get('/admin/incubator-entrance-temp-dashboard', [DashboardController::class, 'incubatorEntranceTemp'])->name('admin.incubator-entrance-temp-dashboard');
+
+        Route::get('/admin/incubator-temp-calibration-dashboard', [DashboardController::class, 'incubatorTempCalibration'])->name('admin.incubator-temp-calibration-dashboard');
+
+        Route::get('/admin/hatcher-temp-calibration-dashboard', [DashboardController::class, 'hatcherTempCalibration'])->name('admin.hatcher-temp-calibration-dashboard');
+
         Route::get('/admin/forms/hatcher-machine-accuracy', [FormController::class, 'hatcherMachineAccuracy'])->name('admin.forms.hatcher-machine-accuracy');
 
         Route::get('/admin/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('admin.forms.plenum-temp-humidity');
@@ -174,6 +186,34 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/print/performance/incubator-routine', [FormsPrintController::class, 'incubatorRoutinePerformance'])
             ->middleware('signed')
             ->name('admin.print.performance.incubator-routine');
+
+        Route::get('/admin/print/forms/plenum-temp-humidity', [FormsPrintController::class, 'plenumTempHumidity'])
+            ->middleware('signed')
+            ->name('admin.print.forms.plenum-temp-humidity');
+
+        Route::get('/admin/print/forms/hatcher-machine-accuracy', [FormsPrintController::class, 'hatcherMachineAccuracy'])
+            ->middleware('signed')
+            ->name('admin.print.forms.hatcher-machine-accuracy');
+
+        Route::get('/admin/print/forms/incubator-machine-accuracy', [FormsPrintController::class, 'incubatorMachineAccuracy'])
+            ->middleware('signed')
+            ->name('admin.print.forms.incubator-machine-accuracy');
+
+        Route::get('/admin/print/forms/entrance-damper-spacing', [FormsPrintController::class, 'entranceDamperSpacing'])
+            ->middleware('signed')
+            ->name('admin.print.forms.entrance-damper-spacing');
+
+        Route::get('/admin/print/forms/incubator-entrance-temp', [FormsPrintController::class, 'incubatorEntranceTemp'])
+            ->middleware('signed')
+            ->name('admin.print.forms.incubator-entrance-temp');
+
+        Route::get('/admin/print/forms/incubator-temp-calibration', [FormsPrintController::class, 'incubatorTempCalibration'])
+            ->middleware('signed')
+            ->name('admin.print.forms.incubator-temp-calibration');
+
+        Route::get('/admin/print/forms/hatcher-temp-calibration', [FormsPrintController::class, 'hatcherTempCalibration'])
+            ->middleware('signed')
+            ->name('admin.print.forms.hatcher-temp-calibration');
 
         Route::get('/admin/print/insights/{formTypeId}', [InsightsController::class, 'printView'])
             ->middleware('signed')

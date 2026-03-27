@@ -342,6 +342,104 @@ class FormsPrintController extends Controller
         ]);
     }
 
+    public function plenumTempHumidity(Request $request)
+    {
+        $formType = FormType::where('form_name', 'Plenum Temperature and Humidity Monitoring')->firstOrFail();
+
+        return $this->printForms(
+            $request,
+            $formType,
+            'plenum',
+            'plenum-machines',
+            'plenumName',
+            false
+        );
+    }
+
+    public function hatcherMachineAccuracy(Request $request)
+    {
+        $formType = FormType::where('form_name', 'Hatcher Machine Accuracy Temperature Checking')->firstOrFail();
+
+        return $this->printForms(
+            $request,
+            $formType,
+            'hatcher',
+            'hatcher-machines',
+            'hatcherName',
+            true
+        );
+    }
+
+    public function incubatorMachineAccuracy(Request $request)
+    {
+        $formType = FormType::where('form_name', 'Incubator Machine Accuracy Temperature Checking')->firstOrFail();
+
+        return $this->printForms(
+            $request,
+            $formType,
+            'incubator',
+            'incubator-machines',
+            'incubatorName',
+            true
+        );
+    }
+
+    public function entranceDamperSpacing(Request $request)
+    {
+        $formType = FormType::where('form_name', 'Entrance Damper Spacing Monitoring')->firstOrFail();
+
+        return $this->printForms(
+            $request,
+            $formType,
+            'incubator',
+            'incubator-machines',
+            'incubatorName',
+            true
+        );
+    }
+
+    public function incubatorEntranceTemp(Request $request)
+    {
+        $formType = FormType::where('form_name', 'Incubator Entrance Temperature Monitoring')->firstOrFail();
+
+        return $this->printForms(
+            $request,
+            $formType,
+            'incubator',
+            'incubator-machines',
+            'incubatorName',
+            false
+        );
+    }
+
+    public function incubatorTempCalibration(Request $request)
+    {
+        $formType = FormType::where('form_name', 'Incubator Temperature Calibration')->firstOrFail();
+
+        return $this->printForms(
+            $request,
+            $formType,
+            'incubator',
+            'incubator-machines',
+            'incubatorName',
+            true
+        );
+    }
+
+    public function hatcherTempCalibration(Request $request)
+    {
+        $formType = FormType::where('form_name', 'Hatcher Temperature Calibration')->firstOrFail();
+
+        return $this->printForms(
+            $request,
+            $formType,
+            'hatcher',
+            'hatcher-machines',
+            'hatcherName',
+            true
+        );
+    }
+
     private function printForms(
         Request $request,
         FormType $formType,

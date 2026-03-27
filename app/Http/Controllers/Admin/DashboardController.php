@@ -56,4 +56,34 @@ class DashboardController extends Controller
     {
         return view('admin.plenum-temp-humidity-dashboard');
     }
+
+    public function hatcherMachineAccuracy()
+    {
+        return view('admin.hatcher-machine-accuracy-dashboard');
+    }
+
+    public function incubatorMachineAccuracy()
+    {
+        return view('admin.incubator-machine-accuracy-dashboard');
+    }
+
+    public function entranceDamperSpacing()
+    {
+        return view('admin.entrance-damper-spacing-dashboard');
+    }
+
+    public function incubatorEntranceTemp()
+    {
+        return view('admin.incubator-entrance-temp-dashboard');
+    }
+
+    public function incubatorTempCalibration()
+    {
+        return view('admin.incubator-temp-calibration-dashboard');
+    }
+
+    public function hatcherTempCalibration()
+    {
+        return view('admin.hatcher-temp-calibration-dashboard');
+    }
 }
