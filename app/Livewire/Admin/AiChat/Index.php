@@ -38,7 +38,7 @@ class Index extends Component
     public function mount(): void
     {
         $this->formTypes = FormType::orderBy('form_name')
-            ->get(['id', 'form_name'])
+            ->get(['id', 'form_name', 'impact_level'])
             ->toArray();
     }
 

@@ -82,6 +82,26 @@
                                 return ft ? ft.form_name : '1 selected';
                             }
                             return this.selected.length + ' form types selected';
+                        },
+                        get directIds() {
+                            return @js($formTypes)
+                                .filter(f => f.impact_level === 'direct' || f.impact_level === 'direct_indirect')
+                                .map(f => f.id);
+                        },
+                        get allDirectSelected() {
+                            const ids = this.directIds;
+                            if (ids.length === 0) return false;
+                            return ids.every(id => this.selected.map(Number).includes(Number(id)));
+                        },
+                        toggleDirectAll() {
+                            const ids = this.directIds;
+                            if (this.allDirectSelected) {
+                                this.selected = this.selected.filter(id => !ids.map(Number).includes(Number(id)));
+                            } else {
+                                const existing = this.selected.map(Number);
+                                const toAdd = ids.filter(id => !existing.includes(Number(id)));
+                                this.selected = [...existing, ...toAdd];
+                            }
                         }
                     }"
                     class="space-y-4"
@@ -127,9 +147,30 @@
                                         >Clear all</button>
                                     </div>
 
+                                    {{-- Direct impact quick-select --}}
+                                    <label class="flex items-center gap-2.5 px-3 py-2 border-b border-gray-100 dark:border-gray-600 cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/10">
+                                        <input
+                                            type="checkbox"
+                                            :checked="allDirectSelected"
+                                            @change="toggleDirectAll"
+                                            class="w-4 h-4 rounded border-gray-300 dark:border-gray-500 text-orange-500 focus:ring-orange-400 focus:ring-offset-0 bg-white dark:bg-gray-800"
+                                        />
+                                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300 flex-1">All direct impact forms</span>
+                                        <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">D / D+I</span>
+                                    </label>
+
                                     {{-- Options --}}
                                     <div class="max-h-36 sm:max-h-52 overflow-y-scroll overscroll-contain">
                                         @foreach($formTypes as $ft)
+                                            @php
+                                                [$badgeClass, $badgeLabel] = match($ft['impact_level'] ?? null) {
+                                                    'direct'          => ['bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200', 'Direct'],
+                                                    'direct_indirect' => ['bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200', 'D+I'],
+                                                    'indirect'        => ['bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200', 'Indirect'],
+                                                    'support'         => ['bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200', 'Support'],
+                                                    default           => [null, null],
+                                                };
+                                            @endphp
                                             <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
                                                 <input
                                                     type="checkbox"
@@ -137,7 +178,10 @@
                                                     value="{{ $ft['id'] }}"
                                                     class="w-4 h-4 rounded border-gray-300 dark:border-gray-500 text-orange-500 focus:ring-orange-400 focus:ring-offset-0 bg-white dark:bg-gray-800"
                                                 />
-                                                <span class="text-sm text-gray-900 dark:text-white leading-snug">{{ $ft['form_name'] }}</span>
+                                                <span class="text-sm text-gray-900 dark:text-white leading-snug flex-1">{{ $ft['form_name'] }}</span>
+                                                @if($badgeClass)
+                                                    <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded {{ $badgeClass }}">{{ $badgeLabel }}</span>
+                                                @endif
                                             </label>
                                         @endforeach
                                     </div>

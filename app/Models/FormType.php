@@ -12,6 +12,7 @@ class FormType extends Model
 
     protected $fillable = [
         'form_name',
+        'impact_level',
     ];
 
     protected $casts = [

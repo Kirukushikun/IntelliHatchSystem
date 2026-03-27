@@ -214,6 +214,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/activity-logs/export/csv', [\App\Http\Controllers\Admin\ActivityLogExportController::class, 'csv'])->name('admin.activity-logs.export.csv');
         Route::get('/admin/activity-logs/export/pdf', [\App\Http\Controllers\Admin\ActivityLogExportController::class, 'pdf'])->name('admin.activity-logs.export.pdf');
+
+        Route::get('/admin/form-types', function () {
+            return view('admin.form-types');
+        })->name('admin.form-types');
     });
     
     // User routes
