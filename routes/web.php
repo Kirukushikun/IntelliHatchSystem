@@ -266,6 +266,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/import/hatcher-temp-calibration', function () {
             return view('admin.import-hatcher-temp-calibration');
         })->name('admin.import.hatcher-temp-calibration');
+
+        Route::get('/admin/import/incubator-temp-calibration', function () {
+            return view('admin.import-incubator-temp-calibration');
+        })->name('admin.import.incubator-temp-calibration');
+
+        Route::get('/admin/import/diesel-generator-weekly', function () {
+            return view('admin.import-diesel-generator-weekly');
+        })->name('admin.import.diesel-generator-weekly');
     });
     
     // User routes

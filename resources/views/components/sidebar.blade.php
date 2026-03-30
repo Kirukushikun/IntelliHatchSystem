@@ -136,6 +136,16 @@
                         'href' => '/admin/import/hatcher-temp-calibration',
                         'active' => 'admin/import/hatcher-temp-calibration*'
                     ],
+                    [
+                        'label' => 'Incubator Temp Calibration',
+                        'href' => '/admin/import/incubator-temp-calibration',
+                        'active' => 'admin/import/incubator-temp-calibration*'
+                    ],
+                    [
+                        'label' => 'Diesel Generator Weekly',
+                        'href' => '/admin/import/diesel-generator-weekly',
+                        'active' => 'admin/import/diesel-generator-weekly*'
+                    ],
                 ],
             ];
         }
