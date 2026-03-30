@@ -17,10 +17,20 @@
         </div>
     @endif
 
+    {{-- Validation errors --}}
+    @if($errors->any())
+        <div class="mb-4 flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 text-sm">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ $errors->first() }}
+        </div>
+    @endif
+
     {{-- Header --}}
     <div class="mb-6">
         <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Form Types</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage production impact tags for each form type.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage form type names, descriptions, and production impact tags.</p>
     </div>
 
     {{-- Legend --}}
@@ -52,26 +62,91 @@
                         default           => [null, null],
                     };
                 @endphp
-                <li class="flex items-center justify-between gap-4 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
-                    {{-- Name + current badge --}}
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <span class="text-sm text-gray-900 dark:text-white truncate">{{ $ft->form_name }}</span>
-                        @if($badgeClass)
-                            <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded {{ $badgeClass }}">{{ $badgeLabel }}</span>
-                        @endif
-                    </div>
+                <li class="px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
+                    @if($editingId === $ft->id)
+                        {{-- Edit mode --}}
+                        <form wire:submit="saveEdit" class="space-y-3">
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Form Name</label>
+                                    <input
+                                        type="text"
+                                        wire:model="editName"
+                                        class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                                        placeholder="Form name"
+                                    />
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Description</label>
+                                    <input
+                                        type="text"
+                                        wire:model="editDescription"
+                                        class="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                                        placeholder="Short description (optional)"
+                                    />
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition-colors"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Save
+                                </button>
+                                <button
+                                    type="button"
+                                    wire:click="cancelEditing"
+                                    class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    @else
+                        {{-- Display mode --}}
+                        <div class="flex items-center justify-between gap-4">
+                            {{-- Name + description + badge --}}
+                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div class="min-w-0">
+                                    <span class="text-sm text-gray-900 dark:text-white truncate block">{{ $ft->form_name }}</span>
+                                    @if($ft->description)
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 truncate block">{{ $ft->description }}</span>
+                                    @endif
+                                </div>
+                                @if($badgeClass)
+                                    <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded {{ $badgeClass }}">{{ $badgeLabel }}</span>
+                                @endif
+                            </div>
 
-                    {{-- Impact level dropdown --}}
-                    <select
-                        wire:change="updateImpactLevel({{ $ft->id }}, $event.target.value)"
-                        class="shrink-0 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
-                    >
-                        <option value="" @selected(!$ft->impact_level)>— None —</option>
-                        <option value="direct" @selected($ft->impact_level === 'direct')>Direct</option>
-                        <option value="direct_indirect" @selected($ft->impact_level === 'direct_indirect')>Direct + Indirect</option>
-                        <option value="indirect" @selected($ft->impact_level === 'indirect')>Indirect</option>
-                        <option value="support" @selected($ft->impact_level === 'support')>Support</option>
-                    </select>
+                            <div class="flex items-center gap-3 shrink-0">
+                                {{-- Edit button --}}
+                                <button
+                                    wire:click="startEditing({{ $ft->id }})"
+                                    class="text-gray-400 hover:text-orange-500 dark:text-gray-500 dark:hover:text-orange-400 transition-colors"
+                                    title="Edit name & description"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+
+                                {{-- Impact level dropdown --}}
+                                <select
+                                    wire:change="updateImpactLevel({{ $ft->id }}, $event.target.value)"
+                                    class="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
+                                >
+                                    <option value="" @selected(!$ft->impact_level)>— None —</option>
+                                    <option value="direct" @selected($ft->impact_level === 'direct')>Direct</option>
+                                    <option value="direct_indirect" @selected($ft->impact_level === 'direct_indirect')>Direct + Indirect</option>
+                                    <option value="indirect" @selected($ft->impact_level === 'indirect')>Indirect</option>
+                                    <option value="support" @selected($ft->impact_level === 'support')>Support</option>
+                                </select>
+                            </div>
+                        </div>
+                    @endif
                 </li>
             @endforeach
         </ul>

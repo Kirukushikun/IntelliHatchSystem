@@ -1,108 +1,36 @@
 <x-layout>
     @php
-        $forms = [
-            [
-                'title' => 'Incubator Routine Checklist Per Shift',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/incubator-routine',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Hatcher Blower Air Speed Monitoring',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/blower-air-hatcher',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Incubator Blower Air Speed Monitoring',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/blower-air-incubator',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Hatchery Sullair Air Compressor Weekly PMS Checklist',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/hatchery-sullair',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Hatcher Machine Accuracy Temperature Checking',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/hatcher-machine-accuracy',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Plenum Temperature and Humidity Monitoring',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/plenum-temp-humidity',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Incubator Machine Accuracy Temperature Checking',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/incubator-machine-accuracy',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Entrance Damper Spacing Monitoring',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/entrance-damper-spacing',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Incubator Entrance Temperature Monitoring',
-                'description' => 'Every 24 hours after setting',
-                'route' => '/forms/incubator-entrance-temp',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Incubator Temperature Calibration',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/incubator-temp-calibration',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Hatcher Temperature Calibration',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/hatcher-temp-calibration',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'PASGAR Score',
-                'description' => 'Lorem Ipsum',
-                'route' => '/forms/pasgar-score',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Incubator Rack Preventive Maintenance Checklist',
-                'description' => 'Every Tuesday and Sunday',
-                'route' => '/forms/incubator-rack-pm',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Weekly Voltage and Ampere Monitoring',
-                'description' => 'Weekly monitoring',
-                'route' => '/forms/weekly-volt-ampere',
-                'color' => 'amber',
-            ],
-            [
-                'title' => 'Hatchery Diesel Generator Weekly Maintenance Checklist',
-                'description' => 'Weekly maintenance',
-                'route' => '/forms/diesel-generator-weekly',
-                'color' => 'amber',
-            ],
+        // Route mapping keyed by form_type ID — routes are defined in web.php
+        $routeMap = [
+            'Incubator Routine Checklist Per Shift' => '/forms/incubator-routine',
+            'Hatcher Blower Air Speed Monitoring' => '/forms/blower-air-hatcher',
+            'Incubator Blower Air Speed Monitoring' => '/forms/blower-air-incubator',
+            'Hatchery Sullair Air Compressor Weekly PMS Checklist' => '/forms/hatchery-sullair',
+            'Hatcher Machine Accuracy Temperature Checking' => '/forms/hatcher-machine-accuracy',
+            'Plenum Temperature and Humidity Monitoring' => '/forms/plenum-temp-humidity',
+            'Incubator Machine Accuracy Temperature Checking' => '/forms/incubator-machine-accuracy',
+            'Entrance Damper Spacing Monitoring' => '/forms/entrance-damper-spacing',
+            'Incubator Entrance Temperature Monitoring' => '/forms/incubator-entrance-temp',
+            'Incubator Temperature Calibration' => '/forms/incubator-temp-calibration',
+            'Hatcher Temperature Calibration' => '/forms/hatcher-temp-calibration',
+            'PASGAR Score' => '/forms/pasgar-score',
+            'Incubator Rack Preventive Maintenance Checklist' => '/forms/incubator-rack-pm',
+            'Weekly Voltage and Ampere Monitoring' => '/forms/weekly-volt-ampere',
+            'Hatchery Diesel Generator Weekly Maintenance Checklist' => '/forms/diesel-generator-weekly',
         ];
 
-        $borderColors = [
-            'amber' => 'border-amber-500',
-            'blue' => 'border-blue-500',
-            'green' => 'border-green-500',
-            'red' => 'border-red-500',
-            'purple' => 'border-purple-500',
-            'gray' => 'border-gray-500',
-        ];
+        $formTypes = \App\Models\FormType::orderBy('id')->get();
+
+        $forms = $formTypes->map(function ($ft) use ($routeMap) {
+            return [
+                'title' => $ft->form_name,
+                'description' => $ft->description ?? '',
+                'route' => $routeMap[$ft->form_name] ?? '#',
+                'color' => 'amber',
+            ];
+        })->toArray();
     @endphp
-    
+
     <x-navbar title="Forms" :includeSidebar="Auth::check()" :user="Auth::user()">
         <div class="min-h-screen bg-linear-to-br from-orange-50 dark:from-gray-900 via-white dark:via-gray-800 to-orange-100 dark:to-gray-900" x-data="{ query: '' }">
             <!-- Hero Section -->
@@ -144,7 +72,7 @@
                         </a>
                     @endforeach
                 </div>
-                
+
                 <!-- Empty State (when no forms are available) -->
                 @if(empty($forms))
                     <div class="text-center py-12">

@@ -12,6 +12,7 @@ class FormType extends Model
 
     protected $fillable = [
         'form_name',
+        'description',
         'impact_level',
     ];
 

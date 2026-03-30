@@ -8,6 +8,60 @@ use Livewire\Component;
 
 class Display extends Component
 {
+    public ?int $editingId = null;
+
+    public string $editName = '';
+
+    public string $editDescription = '';
+
+    public function startEditing(int $id): void
+    {
+        $formType = FormType::findOrFail($id);
+        $this->editingId = $id;
+        $this->editName = $formType->form_name;
+        $this->editDescription = $formType->description ?? '';
+    }
+
+    public function cancelEditing(): void
+    {
+        $this->editingId = null;
+        $this->editName = '';
+        $this->editDescription = '';
+    }
+
+    public function saveEdit(): void
+    {
+        $this->validate([
+            'editName' => 'required|string|max:255|unique:form_types,form_name,' . $this->editingId,
+            'editDescription' => 'nullable|string|max:500',
+        ]);
+
+        $formType = FormType::findOrFail($this->editingId);
+        $oldName = $formType->form_name;
+        $oldDescription = $formType->description;
+
+        $formType->update([
+            'form_name' => $this->editName,
+            'description' => $this->editDescription ?: null,
+        ]);
+
+        ActivityLogger::log(
+            action: 'form_type_updated',
+            description: "Form type \"{$oldName}\" updated",
+            subjectType: FormType::class,
+            subjectId: $formType->id,
+            properties: [
+                'old_name' => $oldName,
+                'new_name' => $this->editName,
+                'old_description' => $oldDescription,
+                'new_description' => $this->editDescription ?: null,
+            ]
+        );
+
+        $this->cancelEditing();
+        session()->flash('success', "Form type updated successfully.");
+    }
+
     public function updateImpactLevel(int $id, ?string $level): void
     {
         $formType = FormType::findOrFail($id);
