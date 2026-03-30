@@ -1,7 +1,9 @@
 @props([
-    'label' => '', 
-    'name' => '', 
-    'required' => false
+    'label' => '',
+    'name' => '',
+    'required' => false,
+    'maxFiles' => 20,
+    'maxSizeMb' => 50,
 ])
 
 <div class="mb-6" x-data="{ 
@@ -11,6 +13,8 @@
     showRemoveConfirmation: false,
     attachMode: 'camera',
     photoKey: '{{ $name }}',
+    maxFiles: {{ (int) $maxFiles }},
+    maxSizeMb: {{ (int) $maxSizeMb }},
     stream: null,
     photos: [],
     attachedPhotos: [],
@@ -26,7 +30,37 @@
             detail: { type, message }
         }));
     },
+    get totalPhotoCount() {
+        return this.attachedPhotos.length + this.photos.length;
+    },
+    get remainingSlots() {
+        return Math.max(0, this.maxFiles - this.totalPhotoCount);
+    },
+    get isAtLimit() {
+        return this.totalPhotoCount >= this.maxFiles;
+    },
+    checkFileSize(file) {
+        const maxBytes = this.maxSizeMb * 1024 * 1024;
+        if (file.size > maxBytes) {
+            this.toast('error', `File "${file.name}" exceeds ${this.maxSizeMb}MB limit (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+            return false;
+        }
+        return true;
+    },
+    checkCanAddPhotos(count = 1) {
+        if (this.totalPhotoCount + count > this.maxFiles) {
+            const remaining = this.remainingSlots;
+            this.toast('error', `Maximum ${this.maxFiles} photos allowed. ${remaining > 0 ? `You can add ${remaining} more.` : 'Limit reached.'}`);
+            return false;
+        }
+        return true;
+    },
     init() {
+        window.addEventListener('photoLimitReached', (event) => {
+            if (!event || !event.detail || event.detail.photoKey !== this.photoKey) return;
+            this.toast('error', `Maximum ${event.detail.max} photos allowed per field.`);
+        });
+
         window.addEventListener('photoStored', (event) => {
             if (!event || !event.detail) {
                 return;
@@ -143,10 +177,20 @@
             return;
         }
 
+        if (!this.checkCanAddPhotos(selected.length)) {
+            e.target.value = '';
+            return;
+        }
+
         this.processingGallery = true;
         try {
             const processed = [];
             for (const file of selected) {
+                if (!this.checkFileSize(file)) continue;
+                if (this.attachedPhotos.length + processed.length >= this.maxFiles) {
+                    this.toast('warning', `Maximum ${this.maxFiles} photos reached. Remaining files skipped.`);
+                    break;
+                }
                 const result = await this.processUploadFile(file);
                 if (result) {
                     processed.push(result);
@@ -245,6 +289,8 @@
         }
     },
     capturePhoto() {
+        if (!this.checkCanAddPhotos(1)) return;
+
         const video = this.$refs.video;
         const canvas = this.$refs.canvas;
         canvas.width = video.videoWidth;
@@ -317,13 +363,20 @@
         input.onchange = async (e) => {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
-            
+
+            if (!this.checkCanAddPhotos(files.length)) return;
+
             this.processingGallery = true;
-            
+
             for (const file of files) {
+                if (!this.checkFileSize(file)) continue;
+                if (this.isAtLimit) {
+                    this.toast('warning', `Maximum ${this.maxFiles} photos reached. Remaining files skipped.`);
+                    break;
+                }
                 await this.processGalleryImage(file);
             }
-            
+
             this.processingGallery = false;
         };
         
@@ -371,8 +424,8 @@
                     const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2);
                     
                     // Check if still too large
-                    if (sizeInBytes > 15 * 1024 * 1024) {
-                        this.toast('error', 'Photo \'' + file.name + '\' is too large even after resizing');
+                    if (sizeInBytes > this.maxSizeMb * 1024 * 1024) {
+                        this.toast('error', `Photo "${file.name}" exceeds ${this.maxSizeMb}MB limit even after resizing`);
                         resolve();
                         return;
                     }
@@ -508,7 +561,19 @@
             this.toast('warning', 'No photos to upload!');
             return;
         }
-        
+
+        // Check if adding these photos would exceed the limit
+        const wouldBeTotal = this.attachedPhotos.length + this.photos.length;
+        if (wouldBeTotal > this.maxFiles) {
+            const canAdd = this.maxFiles - this.attachedPhotos.length;
+            if (canAdd <= 0) {
+                this.toast('error', `Maximum ${this.maxFiles} photos already attached.`);
+                return;
+            }
+            this.toast('warning', `Only uploading first ${canAdd} of ${this.photos.length} photos to stay within the ${this.maxFiles} photo limit.`);
+            this.photos = this.photos.slice(0, canAdd);
+        }
+
         this.uploading = true;
         console.log('[photo-attach] Preparing upload', { count: this.photos.length });
         
@@ -562,6 +627,9 @@
                 @if($required)
                     <span class="text-red-500">*</span>
                 @endif
+                <span class="text-xs text-gray-400 font-normal ml-1"
+                      :class="isAtLimit ? 'text-red-500 font-medium' : 'text-gray-400'"
+                      x-text="`(${attachedPhotos.length}/${maxFiles})`"></span>
             </label>
             <button type="button"
                     @click="attachMode = (attachMode === 'camera' ? 'upload' : 'camera')"
@@ -574,12 +642,21 @@
         </div>
     @endif
 
+    <!-- Limit reached warning -->
+    <div x-show="isAtLimit" x-cloak class="mb-2 px-3 py-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg">
+        <p class="text-xs text-amber-700 dark:text-amber-300 font-medium">
+            Maximum <span x-text="maxFiles"></span> photos reached. Remove existing photos to add new ones.
+        </p>
+    </div>
+
     <template x-if="attachedPhotos.length === 0">
         <div class="flex items-center gap-2 mb-6">
-            <button 
-                @click="openAttachAction(); $event.preventDefault()"
+            <button
+                @click="if(!isAtLimit) { openAttachAction(); } $event.preventDefault()"
                 type="button"
-                class="flex-1 flex items-center justify-center px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition border-gray-300 bg-blue-50 hover:bg-blue-100"
+                :disabled="isAtLimit"
+                class="flex-1 flex items-center justify-center px-4 py-6 border-2 border-dashed rounded-lg transition"
+                :class="isAtLimit ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-blue-500 border-gray-300 bg-blue-50 hover:bg-blue-100'"
             >
                 <template x-if="attachMode === 'camera'">
                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -610,10 +687,12 @@
                 </svg>
                 See Photos (<span x-text="attachedPhotos.length"></span>)
             </button>
-            <button 
-                @click="openAttachAction(); $event.preventDefault()"
+            <button
+                @click="if(!isAtLimit) { openAttachAction(); } $event.preventDefault()"
                 type="button"
-                class="flex-1 flex items-center justify-center px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition border-gray-300 bg-blue-50 hover:bg-blue-100"
+                :disabled="isAtLimit"
+                class="flex-1 flex items-center justify-center px-4 py-2 border-2 border-dashed rounded-lg transition"
+                :class="isAtLimit ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-blue-500 border-gray-300 bg-blue-50 hover:bg-blue-100'"
             >
                 <template x-if="attachMode === 'camera'">
                     <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -626,7 +705,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                 </template>
-                <span class="text-blue-600" x-text="attachMode === 'upload' ? 'Upload Photo' : 'Take Photo'"></span>
+                <span class="text-blue-600" x-text="isAtLimit ? `Limit reached (${maxFiles})` : (attachMode === 'upload' ? 'Upload Photo' : 'Take Photo')"></span>
             </button>
         </div>
     </template>
@@ -655,7 +734,11 @@
         <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-4 sm:p-6 my-4 sm:my-8 max-h-[95vh] overflow-y-auto">
             
             <div class="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10 pb-2">
-                <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Add Photos</h3>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                    Add Photos
+                    <span class="text-xs font-normal text-gray-400" :class="isAtLimit ? 'text-red-500' : ''"
+                          x-text="`(${totalPhotoCount}/${maxFiles})`"></span>
+                </h3>
                 <button @click="tryCancel()" type="button" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shrink-0">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -666,8 +749,8 @@
             <div class="flex flex-col items-center space-y-3 sm:space-y-4">
                 {{-- Status --}}
                 <div class="w-full text-center py-2 px-3 sm:px-4 rounded-lg font-medium text-xs sm:text-sm"
-                    :class="uploading ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : (processingGallery ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : (cameraActive ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'))">
-                    <span x-text="uploading ? 'Uploading...' : (processingGallery ? 'Processing images...' : (cameraActive ? 'Camera is active' : 'Capture or select photos'))"></span>
+                    :class="isAtLimit ? 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300' : (uploading ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : (processingGallery ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : (cameraActive ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300')))">
+                    <span x-text="isAtLimit ? `Photo limit reached (${maxFiles}/${maxFiles})` : (uploading ? 'Uploading...' : (processingGallery ? 'Processing images...' : (cameraActive ? 'Camera is active' : `Max ${maxSizeMb}MB per file · ${remainingSlots} slots remaining`)))"></span>
                 </div>
                 
                 {{-- Camera Preview --}}
@@ -710,8 +793,10 @@
                 
                 <button @click="capturePhoto()" type="button"
                         x-show="cameraActive && !uploading && !processingGallery"
-                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-green-500 text-white rounded-md hover:bg-green-600">
-                    Capture Photo
+                        :disabled="isAtLimit"
+                        :class="isAtLimit ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
+                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base text-white rounded-md">
+                    <span x-text="isAtLimit ? 'Limit reached' : 'Capture Photo'"></span>
                 </button>
                 
                 <button @click="stopCamera()" type="button"

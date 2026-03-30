@@ -10,6 +10,12 @@ use Illuminate\Support\Str;
 
 trait TempPhotoManager
 {
+    /** Maximum file size per photo in KB (50MB) */
+    public const MAX_PHOTO_SIZE_KB = 51200;
+
+    /** Maximum number of photos per upload field */
+    public const MAX_PHOTOS_PER_FIELD = 20;
+
     /** @var array<string, int[]> Track uploaded photo IDs per field */
     public array $uploadedPhotoIds = [];
 
@@ -25,8 +31,23 @@ trait TempPhotoManager
             return;
         }
 
+        // Check max photos per field limit
+        $currentCount = count($this->uploadedPhotoIds[$photoKey] ?? []);
+        $incomingCount = count($files);
+
+        if ($currentCount + $incomingCount > self::MAX_PHOTOS_PER_FIELD) {
+            $remaining = self::MAX_PHOTOS_PER_FIELD - $currentCount;
+            $this->addError("photoUploads.{$photoKey}",
+                "Maximum " . self::MAX_PHOTOS_PER_FIELD . " photos allowed per field. " .
+                ($remaining > 0 ? "You can add {$remaining} more." : "Limit reached.")
+            );
+            $this->dispatch('photoLimitReached', photoKey: $photoKey, max: self::MAX_PHOTOS_PER_FIELD, current: $currentCount);
+            return;
+        }
+
+        $maxSizeKb = self::MAX_PHOTO_SIZE_KB;
         $this->validateOnly("photoUploads.{$photoKey}.*", [
-            "photoUploads.{$photoKey}.*" => ['image', 'max:15360'],
+            "photoUploads.{$photoKey}.*" => ['image', "max:{$maxSizeKb}"],
         ]);
 
         $timestamp = now()->format('Ymd_His');
