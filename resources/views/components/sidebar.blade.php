@@ -121,6 +121,18 @@
                 'icon' => 'form-types',
                 'active' => 'admin/form-types*'
             ];
+            $sidebarItems[] = [
+                'label' => 'Import',
+                'icon' => 'import',
+                'dropdown' => true,
+                'children' => [
+                    [
+                        'label' => 'Incubator Routine',
+                        'href' => '/admin/import/incubator-routine',
+                        'active' => 'admin/import/incubator-routine*'
+                    ],
+                ],
+            ];
         }
     } else {
         // Hatchery user sidebar items (limited access)
@@ -324,10 +336,16 @@ x-cloak>
                             <!-- Icon -->
                             <div class="shrink-0 w-6 h-6 flex items-center justify-center"
                                  :class="isCollapsed ? 'lg:mx-auto' : ''">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M33.18,26.11,20.35,13.28A9.28,9.28,0,0,0,7.54,2.79l-1.34.59,5.38,5.38L8.76,11.59,3.38,6.21,2.79,7.54A9.27,9.27,0,0,0,13.28,20.35L26.11,33.18a2,2,0,0,0,2.83,0l4.24-4.24A2,2,0,0,0,33.18,26.11Zm-5.66,5.66L13.88,18.12l-.57.16a7.27,7.27,0,0,1-9.31-7,7.2,7.2,0,0,1,.15-1.48l4.61,4.61l5.66-5.66L9.81,4.15a7.27,7.27,0,0,1,8.47,9.16l-.16.57L31.77,27.53Z"></path>
-                                    <circle cx="27.13" cy="27.09" r="1.3" transform="translate(-11.21 27.12) rotate(-45)"></circle>
-                                </svg>
+                                @if($item['icon'] === 'import')
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                    </svg>
+                                @else
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M33.18,26.11,20.35,13.28A9.28,9.28,0,0,0,7.54,2.79l-1.34.59,5.38,5.38L8.76,11.59,3.38,6.21,2.79,7.54A9.27,9.27,0,0,0,13.28,20.35L26.11,33.18a2,2,0,0,0,2.83,0l4.24-4.24A2,2,0,0,0,33.18,26.11Zm-5.66,5.66L13.88,18.12l-.57.16a7.27,7.27,0,0,1-9.31-7,7.2,7.2,0,0,1,.15-1.48l4.61,4.61l5.66-5.66L9.81,4.15a7.27,7.27,0,0,1,8.47,9.16l-.16.57L31.77,27.53Z"></path>
+                                        <circle cx="27.13" cy="27.09" r="1.3" transform="translate(-11.21 27.12) rotate(-45)"></circle>
+                                    </svg>
+                                @endif
                             </div>
                             
                             <!-- Text - Always visible on mobile, conditional on desktop -->
@@ -492,6 +510,10 @@ x-cloak>
                             @elseif($item['icon'] === 'form-types')
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                </svg>
+                            @elseif($item['icon'] === 'import')
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                                 </svg>
                             @endif
                         </div>

@@ -258,6 +258,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/form-types', function () {
             return view('admin.form-types');
         })->name('admin.form-types');
+
+        Route::get('/admin/import/incubator-routine', function () {
+            return view('admin.import-incubator-routine');
+        })->name('admin.import.incubator-routine');
     });
     
     // User routes
