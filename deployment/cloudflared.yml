@@ -1,0 +1,27 @@
+# Cloudflared tunnel configuration for IntelliHatch (IHS)
+# Path: ~/.cloudflared/config.yml  (or /etc/cloudflared/config.yml for system service)
+#
+# Prerequisites:
+#   cloudflared tunnel login
+#   cloudflared tunnel create intellihatch
+#   cloudflared tunnel route dns intellihatch your-domain.com
+#
+# Then run as a service:
+#   cloudflared service install
+#   systemctl enable cloudflared
+#   systemctl start cloudflared
+
+tunnel: <YOUR_TUNNEL_ID>        # replace with output of `cloudflared tunnel create`
+credentials-file: /root/.cloudflared/<YOUR_TUNNEL_ID>.json
+
+ingress:
+  # Primary domain → local nginx
+  - hostname: your-domain.com   # replace with your domain
+    service: http://localhost:80
+
+  # Optional: wildcard subdomain
+  # - hostname: "*.your-domain.com"
+  #   service: http://localhost:80
+
+  # Catch-all (required by cloudflared)
+  - service: http_status:404

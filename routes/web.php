@@ -313,3 +313,29 @@ Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
+
+// Google Drive OAuth — used once to obtain the refresh token, then can be removed
+Route::get('/refresh-token', function () {
+    $client = new \Google\Client();
+    $client->setClientId(config('filesystems.disks.google.clientId'));
+    $client->setClientSecret(config('filesystems.disks.google.clientSecret'));
+    $client->setRedirectUri(rtrim(config('app.url'), '/') . '/oauth2callback');
+    $client->addScope(\Google\Service\Drive::DRIVE);
+    $client->setAccessType('offline');
+    $client->setPrompt('consent');
+
+    if (!request()->has('code')) {
+        return redirect($client->createAuthUrl());
+    }
+
+    $token = $client->fetchAccessTokenWithAuthCode(request('code'));
+    return response()->json($token);
+});
+
+Route::get('/oauth2callback', function () {
+    $code = request('code');
+    if ($code) {
+        return redirect('/refresh-token?code=' . $code);
+    }
+    return response()->json(['error' => 'No authorization code received']);
+});
