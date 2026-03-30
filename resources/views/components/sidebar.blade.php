@@ -131,6 +131,11 @@
                         'href' => '/admin/import/incubator-routine',
                         'active' => 'admin/import/incubator-routine*'
                     ],
+                    [
+                        'label' => 'Hatcher Temp Calibration',
+                        'href' => '/admin/import/hatcher-temp-calibration',
+                        'active' => 'admin/import/hatcher-temp-calibration*'
+                    ],
                 ],
             ];
         }

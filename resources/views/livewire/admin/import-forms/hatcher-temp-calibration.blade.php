@@ -3,8 +3,8 @@
     @if ($step === 1)
         <div class="flex flex-col gap-4 mb-6">
             <div class="text-center md:text-left">
-                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Import Incubator Routine Forms</h1>
-                <p class="text-gray-600 dark:text-gray-400">Upload a CSV file to bulk import Incubator Routine Checklist submissions</p>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Import Hatcher Temperature Calibration</h1>
+                <p class="text-gray-600 dark:text-gray-400">Upload a CSV file to bulk import Hatcher Temperature Calibration submissions</p>
             </div>
         </div>
 
@@ -57,12 +57,12 @@
 
                     {{-- Expected Format Info --}}
                     <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                        <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Expected CSV Format</h3>
+                        <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Expected CSV Format (Asana Export)</h3>
                         <ul class="text-xs text-blue-700 dark:text-blue-400 space-y-1 list-disc list-inside">
-                            <li>Required columns: <strong>Hatcheryman</strong>, <strong>Date Submitted</strong>, <strong>SHIFT FROM FORM</strong>, <strong>Notes</strong></li>
-                            <li>Checklist columns: GM-INCUBATOR DOOR, GM-BAGGY/GASKET CHECK, CLEANING-*, OTHER-*, etc.</li>
-                            <li>Notes column must contain "Incubator Machine Inspected:" with machine numbers</li>
-                            <li>Checklist values: DONE, PENDING, N/A, or empty</li>
+                            <li>Required columns: <strong>Hatcheryman</strong>, <strong>Date Submitted</strong>, <strong>Shift</strong>, <strong>Time Started</strong>, <strong>Time finished</strong></li>
+                            <li>Hatcher columns: Hatcher 1-10 Machine Temp / Calibrator Temp readings and Humidity readings</li>
+                            <li>Temp formats supported: "99.2 / 99.2", "Temp reading 99.3/ calibrator 99.6", etc.</li>
+                            <li>Hatchers with "0" or empty values are skipped (no reading taken)</li>
                         </ul>
                     </div>
 
@@ -129,7 +129,7 @@
             <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
                 <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($totalFormRecords) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Form Records to Create</p>
-                <p class="text-xs text-gray-400 dark:text-gray-500">(1 per incubator machine per row)</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500">(1 per hatcher machine per row)</p>
             </div>
             <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
                 <p class="text-2xl font-bold {{ $unmatchedCount > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400' }}">{{ count($csvNames) }}</p>
@@ -182,8 +182,9 @@
                             <th class="p-3 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-xs font-semibold text-slate-700 dark:text-slate-200">Hatcheryman</th>
                             <th class="p-3 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-xs font-semibold text-slate-700 dark:text-slate-200">Date</th>
                             <th class="p-3 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-xs font-semibold text-slate-700 dark:text-slate-200">Shift</th>
-                            <th class="p-3 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-xs font-semibold text-slate-700 dark:text-slate-200">Machines</th>
-                            <th class="p-3 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-xs font-semibold text-slate-700 dark:text-slate-200">Alarm</th>
+                            <th class="p-3 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-xs font-semibold text-slate-700 dark:text-slate-200">Time</th>
+                            <th class="p-3 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-xs font-semibold text-slate-700 dark:text-slate-200">Hatchers</th>
+                            <th class="p-3 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-xs font-semibold text-slate-700 dark:text-slate-200">Approver</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -193,8 +194,15 @@
                                 <td class="p-3 text-xs text-slate-800 dark:text-slate-200">{{ $row['hatcheryman'] }}</td>
                                 <td class="p-3 text-xs text-slate-800 dark:text-slate-200 whitespace-nowrap">{{ \Carbon\Carbon::parse($row['date_submitted'])->format('d M Y') }}</td>
                                 <td class="p-3 text-xs text-slate-800 dark:text-slate-200">{{ $row['shift'] }}</td>
-                                <td class="p-3 text-xs text-slate-800 dark:text-slate-200">{{ implode(', ', $row['machines']) }}</td>
-                                <td class="p-3 text-xs text-slate-800 dark:text-slate-200">{{ $row['alarm_system_condition'] }}</td>
+                                <td class="p-3 text-xs text-slate-800 dark:text-slate-200 whitespace-nowrap">{{ $row['time_started'] }} - {{ $row['time_finished'] }}</td>
+                                <td class="p-3 text-xs text-slate-800 dark:text-slate-200">
+                                    @foreach ($row['hatchers'] as $h)
+                                        <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded px-1.5 py-0.5 text-xs mr-1 mb-1">
+                                            H{{ $h['hatcher_num'] }}: {{ $h['machine_temp'] }}/{{ $h['calibrator_temp'] }}
+                                        </span>
+                                    @endforeach
+                                </td>
+                                <td class="p-3 text-xs text-slate-800 dark:text-slate-200">{{ $row['approver'] }}</td>
                             </tr>
                         @endforeach
                     </tbody>

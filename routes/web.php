@@ -262,6 +262,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/import/incubator-routine', function () {
             return view('admin.import-incubator-routine');
         })->name('admin.import.incubator-routine');
+
+        Route::get('/admin/import/hatcher-temp-calibration', function () {
+            return view('admin.import-hatcher-temp-calibration');
+        })->name('admin.import.hatcher-temp-calibration');
     });
     
     // User routes

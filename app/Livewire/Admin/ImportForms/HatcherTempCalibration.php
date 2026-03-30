@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class IncubatorRoutine extends Component
+class HatcherTempCalibration extends Component
 {
     use WithFileUploads;
 
@@ -35,26 +35,24 @@ class IncubatorRoutine extends Component
     public int $skippedCount = 0;
     public array $importErrors = [];
 
-    // CSV column to form field mapping
-    protected const FIELD_MAP = [
-        'PLENUM-INCUBATOR ROOF/PLENUM' => 'cleaning_incubator_roof_and_plenum',
-        'GM-INCUBATOR DOOR' => 'check_incubator_doors_for_air_leakage',
-        'GM-BAGGY/GASKET CHECK' => 'checking_of_baggy_against_the_gaskets',
-        'GM-CURTAIN CHECK' => 'check_curtain_position_and_condition',
-        'GM-WICK CHECK' => 'check_wick_for_replacement_washing',
-        'GM-SPRAY NOZZLE CHECK' => 'check_spray_nozzle_and_water_pan',
-        'GM-INCUBATOR FAN CHECK' => 'check_incubator_fans_for_vibration',
-        'GM-RACK BAFFLE CHECK' => 'check_rack_baffle_condition',
-        'GM-DRAIN WATER' => 'drain_water_out_from_air_compressor_tank',
-        'CLEANING-CHECK WATER LEVEL' => 'check_water_level_of_blue_tank',
-        'CLEANING-CLEAN INCUBATOR' => 'cleaning_of_incubator_floor_area',
-        'CLEANING-CLEAN ENTRANCE FLOOR' => 'cleaning_of_entrance_and_exit_area_flooring',
-        'CLEANING-REFILL WATER RESERVOIR' => 'clean_and_refill_water_reservoir',
-        'OTHER-EGG SETTING PREP' => 'egg_setting_preparation',
-        'OTHER-EGG SETTING ' => 'egg_setting',
-        'OTHER-RECORD EGG SETTING' => 'record_egg_setting_on_board',
-        'OTHER-RECORD EGG SETTING TIME' => 'record_egg_setting_time',
-        'OTHER-ASSIST RANDOM CANDLING' => 'assist_in_random_candling',
+    /**
+     * Hatcher column definitions by index position.
+     * Column 30 (index 29) is Hatcher 5 Humidity but CSV has a duplicate header name,
+     * so we map by column index instead.
+     *
+     * Each entry: [hatcher_number, temp_col_index, humidity_col_index]
+     */
+    protected const HATCHER_COLUMNS = [
+        [1,  20, 21],
+        [2,  22, 23],
+        [3,  24, 25],
+        [4,  26, 27],
+        [5,  28, 29],
+        [6,  30, 31],
+        [7,  32, 33],
+        [8,  34, 35],
+        [9,  36, 37],
+        [10, 38, 39],
     ];
 
     protected function rules(): array
@@ -105,11 +103,9 @@ class IncubatorRoutine extends Component
             return trim(preg_replace('/^\x{FEFF}/u', '', $h));
         }, $header);
 
-        $requiredColumns = ['Hatcheryman', 'Date Submitted', 'SHIFT FROM FORM', 'Notes'];
-        $missingColumns = array_diff($requiredColumns, $header);
-        if (! empty($missingColumns)) {
+        if (count($header) < 43) {
             fclose($handle);
-            $this->parseErrors[] = 'Missing required columns: ' . implode(', ', $missingColumns);
+            $this->parseErrors[] = 'CSV has ' . count($header) . ' columns, expected at least 43.';
             return;
         }
 
@@ -131,25 +127,23 @@ class IncubatorRoutine extends Component
                 continue;
             }
 
-            $data = [];
-            foreach ($header as $i => $col) {
-                $data[$col] = $row[$i] ?? '';
-            }
+            $hatcheryman = trim($row[16] ?? '');
+            $dateSubmitted = trim($row[17] ?? '');
+            $shift = trim($row[18] ?? '');
+            $timeStarted = trim($row[19] ?? '');
+            $correctiveAction = trim($row[40] ?? '');
+            $approver = trim($row[41] ?? '');
+            $timeFinished = trim($row[42] ?? '');
 
-            $hatcheryman = trim($data['Hatcheryman'] ?? '');
-            $dateSubmitted = trim($data['Date Submitted'] ?? '');
-            $shiftFromForm = trim($data['SHIFT FROM FORM'] ?? '');
-            $notes = $data['Notes'] ?? '';
-
-            if (empty($hatcheryman)) {
+            if (empty($hatcheryman) || is_numeric($hatcheryman)) {
                 continue;
             }
 
             $allNames[$hatcheryman] = true;
 
-            $shift = $this->normalizeShift($shiftFromForm);
-            if (! $shift) {
-                $this->parseErrors[] = "Row {$rowNum}: Invalid shift value '{$shiftFromForm}'";
+            $normalizedShift = $this->normalizeShift($shift);
+            if (! $normalizedShift) {
+                $this->parseErrors[] = "Row {$rowNum}: Invalid shift '{$shift}'";
                 continue;
             }
 
@@ -159,42 +153,60 @@ class IncubatorRoutine extends Component
                 continue;
             }
 
-            $alarm = $this->extractFromNotes($notes, 'Alarm system condition');
-            $correctiveAction = $this->extractFromNotes($notes, 'Corrective Action');
+            $parsedTimeStarted = $this->normalizeTime($timeStarted);
+            $parsedTimeFinished = $this->normalizeTime($timeFinished);
 
-            $machineNumbers = $this->extractMachineNumbers($notes);
-            if (empty($machineNumbers)) {
-                $this->parseErrors[] = "Row {$rowNum}: No incubator machines found in Notes";
-                continue;
+            $hatcherReadings = [];
+            foreach (self::HATCHER_COLUMNS as [$hatcherNum, $tempColIdx, $humidityColIdx]) {
+                $tempRaw = trim($row[$tempColIdx] ?? '');
+                $humidityRaw = trim($row[$humidityColIdx] ?? '');
+
+                if (($tempRaw === '' || $tempRaw === '0') && ($humidityRaw === '' || $humidityRaw === '0')) {
+                    continue;
+                }
+
+                $temps = $this->parseTemperatureReading($tempRaw);
+                $humidity = $this->parseNumericValue($humidityRaw);
+
+                if ($temps === null && $humidity === null) {
+                    continue;
+                }
+
+                $hatcherReadings[] = [
+                    'hatcher_num' => $hatcherNum,
+                    'machine_temp' => $temps['machine'] ?? 0,
+                    'calibrator_temp' => $temps['calibrator'] ?? 0,
+                    'humidity_reading' => $humidity ?? 0,
+                ];
             }
 
-            $checklist = [];
-            foreach (self::FIELD_MAP as $csvCol => $formField) {
-                $value = trim($data[$csvCol] ?? '');
-                $checklist[$formField] = $this->normalizeChecklistValue($value);
+            if (empty($hatcherReadings)) {
+                $this->parseErrors[] = "Row {$rowNum}: No valid hatcher readings found";
+                continue;
             }
 
             $rows[] = [
                 'csv_row' => $rowNum,
                 'hatcheryman' => $hatcheryman,
                 'date_submitted' => $parsedDate,
-                'shift' => $shift,
-                'alarm_system_condition' => $alarm ?: 'Operational',
+                'shift' => $normalizedShift,
+                'time_started' => $parsedTimeStarted ?: '',
+                'time_finished' => $parsedTimeFinished ?: '',
                 'corrective_action' => $correctiveAction ?: 'N/A',
-                'machines' => $machineNumbers,
-                'checklist' => $checklist,
+                'approver' => $approver ?: 'N/A',
+                'hatchers' => $hatcherReadings,
             ];
         }
 
         fclose($handle);
 
         // Store full data in cache, keep only preview in Livewire state
-        $this->cacheKey = 'import_incubator_routine_' . auth()->id() . '_' . now()->timestamp;
+        $this->cacheKey = 'import_hatcher_temp_' . auth()->id() . '_' . now()->timestamp;
         Cache::put($this->cacheKey, $rows, now()->addHour());
 
         $this->previewRows = array_slice($rows, 0, 5);
         $this->totalCsvRows = count($rows);
-        $this->totalFormRecords = array_sum(array_map(fn ($r) => count($r['machines']), $rows));
+        $this->totalFormRecords = array_sum(array_map(fn ($r) => count($r['hatchers']), $rows));
 
         $index = 0;
         foreach (array_keys($allNames) as $name) {
@@ -234,16 +246,16 @@ class IncubatorRoutine extends Component
         }
 
         $formTypeId = DB::table('form_types')
-            ->where('form_name', 'Incubator Routine Checklist Per Shift')
+            ->where('form_name', 'Hatcher Temperature Calibration')
             ->value('id');
 
         if (! $formTypeId) {
-            $this->importErrors[] = 'Form type "Incubator Routine Checklist Per Shift" not found in database.';
+            $this->importErrors[] = 'Form type "Hatcher Temperature Calibration" not found in database.';
             $this->step = 3;
             return;
         }
 
-        $incubators = DB::table('incubator-machines')->get()->keyBy('id');
+        $hatchers = DB::table('hatcher-machines')->get()->keyBy('id');
 
         $this->importedCount = 0;
         $this->skippedCount = 0;
@@ -256,31 +268,36 @@ class IncubatorRoutine extends Component
             foreach ($parsedRows as $row) {
                 $userId = $nameToUser[$row['hatcheryman']] ?? null;
                 if (! $userId) {
-                    $this->skippedCount += count($row['machines']);
+                    $this->skippedCount += count($row['hatchers']);
                     continue;
                 }
 
-                foreach ($row['machines'] as $machineNum) {
-                    $machineId = (int) $machineNum;
-                    $incubator = $incubators->get($machineId);
+                foreach ($row['hatchers'] as $reading) {
+                    $machineId = (int) $reading['hatcher_num'];
+                    $hatcher = $hatchers->get($machineId);
 
-                    if (! $incubator) {
-                        $this->importErrors[] = "Row {$row['csv_row']}: Incubator machine #{$machineNum} not found in database, skipped.";
+                    if (! $hatcher) {
+                        $this->importErrors[] = "Row {$row['csv_row']}: Hatcher #{$reading['hatcher_num']} not found in database, skipped.";
                         $this->skippedCount++;
                         continue;
                     }
 
-                    $formInputs = array_merge($row['checklist'], [
+                    $formInputs = [
                         'shift' => $row['shift'],
-                        'alarm_system_condition' => $row['alarm_system_condition'],
+                        'time_started' => $row['time_started'],
+                        'machine_temp' => $reading['machine_temp'],
+                        'calibrator_temp' => $reading['calibrator_temp'],
+                        'humidity_reading' => $reading['humidity_reading'],
+                        'approver' => $row['approver'],
+                        'time_finished' => $row['time_finished'],
                         'corrective_action' => $row['corrective_action'],
-                        'incubator' => $machineId,
+                        'date_submitted' => $row['date_submitted'],
                         'machine_info' => [
-                            'table' => 'incubator-machines',
+                            'table' => 'hatcher-machines',
                             'id' => $machineId,
-                            'name' => $incubator->incubatorName,
+                            'name' => $hatcher->hatcherName,
                         ],
-                    ]);
+                    ];
 
                     $batch[] = [
                         'form_type_id' => $formTypeId,
@@ -311,11 +328,11 @@ class IncubatorRoutine extends Component
 
             ActivityLogger::log(
                 'csv_import',
-                "Imported {$this->importedCount} Incubator Routine form records from CSV ({$this->totalCsvRows} CSV rows)",
+                "Imported {$this->importedCount} Hatcher Temperature Calibration form records from CSV ({$this->totalCsvRows} CSV rows)",
                 Form::class,
                 null,
                 [
-                    'form_type' => 'Incubator Routine Checklist Per Shift',
+                    'form_type' => 'Hatcher Temperature Calibration',
                     'csv_rows' => $this->totalCsvRows,
                     'records_imported' => $this->importedCount,
                     'records_skipped' => $this->skippedCount,
@@ -340,6 +357,9 @@ class IncubatorRoutine extends Component
     protected function normalizeShift(string $value): ?string
     {
         $map = [
+            '1ST' => '1st Shift',
+            '2ND' => '2nd Shift',
+            '3RD' => '3rd Shift',
             '1ST SHIFT' => '1st Shift',
             '2ND SHIFT' => '2nd Shift',
             '3RD SHIFT' => '3rd Shift',
@@ -371,42 +391,67 @@ class IncubatorRoutine extends Component
         return null;
     }
 
-    protected function normalizeChecklistValue(string $value): string
+    protected function normalizeTime(string $timeStr): ?string
     {
-        $upper = strtoupper(trim($value));
+        $timeStr = trim($timeStr);
+        if (empty($timeStr)) {
+            return null;
+        }
 
-        return match ($upper) {
-            'DONE' => 'Done',
-            'PENDING' => 'Pending',
-            'N/A', '' => 'N/A',
-            default => $value,
-        };
+        $ts = strtotime($timeStr);
+        if ($ts !== false) {
+            return date('H:i', $ts);
+        }
+
+        return $timeStr;
     }
 
-    protected function extractFromNotes(string $notes, string $field): ?string
+    protected function parseTemperatureReading(string $raw): ?array
     {
-        $pattern = '/' . preg_quote($field, '/') . ':\s*(.+)/i';
-        if (preg_match($pattern, $notes, $matches)) {
-            return trim($matches[1]);
+        $raw = trim($raw);
+        if ($raw === '' || $raw === '0') {
+            return null;
+        }
+
+        if (preg_match_all('/(\d+\.?\d*)/', $raw, $matches)) {
+            $numbers = $matches[1];
+            if (count($numbers) >= 2) {
+                return [
+                    'machine' => (float) $numbers[0],
+                    'calibrator' => (float) $numbers[1],
+                ];
+            }
+            if (count($numbers) === 1) {
+                return [
+                    'machine' => (float) $numbers[0],
+                    'calibrator' => (float) $numbers[0],
+                ];
+            }
         }
 
         return null;
     }
 
-    protected function extractMachineNumbers(string $notes): array
+    protected function parseNumericValue(string $raw): ?float
     {
-        if (preg_match('/Incubator Machine Inspected:\s*([\d\s\n,]+?)(?:\n\n|———|$)/s', $notes, $matches)) {
-            return array_values(array_filter(
-                array_map('trim', preg_split('/[\s,]+/', $matches[1])),
-                fn ($v) => $v !== '' && is_numeric($v)
-            ));
+        $raw = trim($raw);
+        if ($raw === '' || $raw === '0') {
+            return null;
         }
 
-        return [];
+        if (is_numeric($raw)) {
+            return (float) $raw;
+        }
+
+        if (preg_match('/(\d+\.?\d*)/', $raw, $matches)) {
+            return (float) $matches[1];
+        }
+
+        return null;
     }
 
     public function render()
     {
-        return view('livewire.admin.import-forms.incubator-routine');
+        return view('livewire.admin.import-forms.hatcher-temp-calibration');
     }
 }
