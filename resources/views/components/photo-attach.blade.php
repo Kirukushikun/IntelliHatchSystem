@@ -42,7 +42,7 @@
     checkFileSize(file) {
         const maxBytes = this.maxSizeMb * 1024 * 1024;
         if (file.size > maxBytes) {
-            this.toast('error', `File "${file.name}" exceeds ${this.maxSizeMb}MB limit (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+            this.toast('error', `File '${file.name}' exceeds ${this.maxSizeMb}MB limit (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
             return false;
         }
         return true;
@@ -425,7 +425,7 @@
                     
                     // Check if still too large
                     if (sizeInBytes > this.maxSizeMb * 1024 * 1024) {
-                        this.toast('error', `Photo "${file.name}" exceeds ${this.maxSizeMb}MB limit even after resizing`);
+                        this.toast('error', `Photo '${file.name}' exceeds ${this.maxSizeMb}MB limit even after resizing`);
                         resolve();
                         return;
                     }

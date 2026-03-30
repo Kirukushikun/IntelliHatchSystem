@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,9 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-    //    if(env('APP_ENV') !== 'local'){
-    //        URL::forceScheme('https');
-    //    }
+       if(config('app.env') !== 'local'){
+           URL::forceScheme('https');
+       }
 
         try {
             Storage::extend('google', function ($app, $config) {
