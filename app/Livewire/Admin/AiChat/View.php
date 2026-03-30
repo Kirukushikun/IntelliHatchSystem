@@ -121,25 +121,71 @@ class View extends Component
 
     private function renderMarkdown(string $markdown): string
     {
-        $lines   = explode("\n", str_replace("\r\n", "\n", $markdown));
-        $html    = '';
-        $inList  = false;
-        $listTag = '';
+        $lines       = explode("\n", str_replace("\r\n", "\n", $markdown));
+        $html        = '';
+        $inList      = false;
+        $listTag     = '';
+        $inCode      = false;
+        $codeBuffer  = '';
+        $inTable     = false;
+        $tableBuffer = [];
+
+        $closeList  = function () use (&$html, &$inList, &$listTag) {
+            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+        };
+        $closeTable = function () use (&$html, &$inTable, &$tableBuffer) {
+            if ($inTable) { $html .= $this->renderTable($tableBuffer); $inTable = false; $tableBuffer = []; }
+        };
 
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
-            if ($trimmed === '') {
-                if ($inList) {
-                    $html   .= "</{$listTag}>";
-                    $inList  = false;
+            // Fenced code block toggle
+            if (preg_match('/^```/', $trimmed)) {
+                if (! $inCode) {
+                    $closeList();
+                    $closeTable();
+                    $inCode     = true;
+                    $codeBuffer = '';
+                } else {
+                    $escaped = htmlspecialchars($codeBuffer);
+                    $html   .= "<pre class=\"bg-gray-100 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto my-3 text-xs font-mono text-gray-800 dark:text-gray-200\">{$escaped}</pre>";
+                    $inCode     = false;
+                    $codeBuffer = '';
                 }
+                continue;
+            }
+
+            if ($inCode) {
+                $codeBuffer .= $line . "\n";
+                continue;
+            }
+
+            // Table row (starts and ends with |)
+            if (preg_match('/^\|.*\|$/', $trimmed)) {
+                // Separator row — skip but don't end the table
+                if (preg_match('/^[\|\-\:\s]+$/', $trimmed)) {
+                    continue;
+                }
+                if (! $inTable) {
+                    $closeList();
+                    $inTable     = true;
+                    $tableBuffer = [];
+                }
+                $tableBuffer[] = $trimmed;
+                continue;
+            } elseif ($inTable) {
+                $closeTable();
+            }
+
+            if ($trimmed === '') {
+                $closeList();
                 continue;
             }
 
             // h1 (single #)
             if (preg_match('/^#(?!#)\s+(.+)$/', $trimmed, $m)) {
-                if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                $closeList();
                 $out   = $this->inline($m[1]);
                 $html .= "<h2 class=\"text-lg font-bold text-gray-900 dark:text-white mt-6 mb-2\">{$out}</h2>";
                 continue;
@@ -147,7 +193,7 @@ class View extends Component
 
             // h2 (##)
             if (preg_match('/^##(?!#)\s+(.+)$/', $trimmed, $m)) {
-                if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                $closeList();
                 $out   = $this->inline($m[1]);
                 $html .= "<h3 class=\"text-base font-semibold text-gray-900 dark:text-white mt-5 mb-1.5\">{$out}</h3>";
                 continue;
@@ -155,7 +201,7 @@ class View extends Component
 
             // h3 (###)
             if (preg_match('/^###\s+(.+)$/', $trimmed, $m)) {
-                if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                $closeList();
                 $out   = $this->inline($m[1]);
                 $html .= "<h4 class=\"text-sm font-semibold text-gray-800 dark:text-gray-200 mt-4 mb-1\">{$out}</h4>";
                 continue;
@@ -163,7 +209,7 @@ class View extends Component
 
             // Bold-only line → sub-heading
             if (preg_match('/^\*\*(.+?)\*\*:?\s*$/', $trimmed, $m)) {
-                if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                $closeList();
                 $sub   = htmlspecialchars($m[1]);
                 $html .= "<p class=\"text-sm font-semibold text-gray-900 dark:text-white mt-3 mb-0.5\">{$sub}</p>";
                 continue;
@@ -202,20 +248,61 @@ class View extends Component
 
             // Horizontal rule
             if (preg_match('/^(-{3,}|\*{3,}|_{3,})$/', $trimmed)) {
-                if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                $closeList();
                 $html .= '<hr class="my-4 border-gray-200 dark:border-gray-700">';
                 continue;
             }
 
             // Regular paragraph
-            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+            $closeList();
             $para  = $this->inline($trimmed);
             $html .= "<p class=\"text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2\">{$para}</p>";
         }
 
+        // Close any open blocks
+        if ($inCode) {
+            $escaped = htmlspecialchars($codeBuffer);
+            $html   .= "<pre class=\"bg-gray-100 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto my-3 text-xs font-mono text-gray-800 dark:text-gray-200\">{$escaped}</pre>";
+        }
+        if ($inTable) {
+            $html .= $this->renderTable($tableBuffer);
+        }
         if ($inList) {
             $html .= "</{$listTag}>";
         }
+
+        return $html;
+    }
+
+    private function renderTable(array $rows): string
+    {
+        if (empty($rows)) {
+            return '';
+        }
+
+        $html = '<div class="overflow-x-auto my-3"><table class="w-full text-sm border-collapse">';
+
+        foreach ($rows as $i => $row) {
+            $cells = array_map('trim', explode('|', trim($row, '|')));
+
+            if ($i === 0) {
+                $html .= '<thead><tr>';
+                foreach ($cells as $cell) {
+                    $html .= '<th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700">'
+                        . $this->inline($cell) . '</th>';
+                }
+                $html .= '</tr></thead><tbody>';
+            } else {
+                $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">';
+                foreach ($cells as $cell) {
+                    $html .= '<td class="px-3 py-2 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">'
+                        . $this->inline($cell) . '</td>';
+                }
+                $html .= '</tr>';
+            }
+        }
+
+        $html .= '</tbody></table></div>';
 
         return $html;
     }
@@ -225,6 +312,8 @@ class View extends Component
         $text = htmlspecialchars($text);
         // Bold
         $text = preg_replace('/\*\*(.+?)\*\*/', '<strong class="font-semibold text-gray-900 dark:text-white">$1</strong>', $text);
+        // Strip leftover unmatched **
+        $text = str_replace('**', '', $text);
         // Italic
         $text = preg_replace('/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/', '<em class="italic">$1</em>', $text);
         // Inline code

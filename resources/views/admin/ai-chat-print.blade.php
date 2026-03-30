@@ -141,7 +141,8 @@
             margin-bottom: 4px;
         }
 
-        .md-content ul {
+        .md-content ul,
+        .md-content ol {
             padding-left: 16px;
             margin: 4px 0;
         }
@@ -160,17 +161,50 @@
             margin: 6px 0 2px;
         }
 
-        .md-content .numbered {
-            display: flex;
-            gap: 6px;
-            font-size: 11px;
-            color: #222;
-            margin-bottom: 3px;
+        .md-content code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10px;
+            background: #f3f3f3;
+            padding: 1px 4px;
+            border-radius: 3px;
+            color: #333;
         }
 
-        .md-content .numbered .num {
+        .md-content pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin: 6px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #222;
+            line-height: 1.5;
+        }
+
+        .md-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 6px 0;
+            font-size: 10px;
+        }
+
+        .md-content table th {
+            background: #f5f5f5;
             font-weight: 700;
-            min-width: 18px;
+            text-align: left;
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .md-content table td {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            color: #222;
         }
 
         hr.md-hr {
@@ -219,7 +253,7 @@
         @media print {
             .print-btn { display: none; }
             body { padding: 8px; max-width: none; }
-            .question-block, .response-block { page-break-inside: avoid; }
+            .question-block { page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -262,42 +296,112 @@
                 function aichat_inline(string $text): string {
                     $text = htmlspecialchars($text);
                     $text = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $text);
+                    $text = str_replace('**', '', $text);
                     $text = preg_replace('/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/', '<em>$1</em>', $text);
+                    $text = preg_replace('/`(.+?)`/', '<code>$1</code>', $text);
                     return $text;
                 }
 
+                function aichat_render_table(array $rows): string {
+                    if (empty($rows)) return '';
+                    $html = '<table>';
+                    foreach ($rows as $i => $row) {
+                        $cells = array_map('trim', explode('|', trim($row, '|')));
+                        if ($i === 0) {
+                            $html .= '<thead><tr>';
+                            foreach ($cells as $cell) {
+                                $html .= '<th>' . aichat_inline($cell) . '</th>';
+                            }
+                            $html .= '</tr></thead><tbody>';
+                        } else {
+                            $html .= '<tr>';
+                            foreach ($cells as $cell) {
+                                $html .= '<td>' . aichat_inline($cell) . '</td>';
+                            }
+                            $html .= '</tr>';
+                        }
+                    }
+                    $html .= '</tbody></table>';
+                    return $html;
+                }
+
                 function aichat_render(string $markdown): string {
-                    $lines   = explode("\n", str_replace("\r\n", "\n", $markdown));
-                    $html    = '';
-                    $inList  = false;
-                    $listTag = '';
+                    $lines       = explode("\n", str_replace("\r\n", "\n", $markdown));
+                    $html        = '';
+                    $inList      = false;
+                    $listTag     = '';
+                    $inCode      = false;
+                    $codeBuffer  = '';
+                    $inTable     = false;
+                    $tableBuffer = [];
+
+                    $closeList  = function () use (&$html, &$inList, &$listTag) {
+                        if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                    };
+                    $closeTable = function () use (&$html, &$inTable, &$tableBuffer) {
+                        if ($inTable) { $html .= aichat_render_table($tableBuffer); $inTable = false; $tableBuffer = []; }
+                    };
 
                     foreach ($lines as $line) {
                         $t = trim($line);
 
+                        // Fenced code block toggle
+                        if (preg_match('/^```/', $t)) {
+                            if (!$inCode) {
+                                $closeList();
+                                $closeTable();
+                                $inCode = true;
+                                $codeBuffer = '';
+                            } else {
+                                $html .= '<pre>' . htmlspecialchars($codeBuffer) . '</pre>';
+                                $inCode = false;
+                                $codeBuffer = '';
+                            }
+                            continue;
+                        }
+
+                        if ($inCode) {
+                            $codeBuffer .= $line . "\n";
+                            continue;
+                        }
+
+                        // Table row
+                        if (preg_match('/^\|.*\|$/', $t)) {
+                            if (preg_match('/^[\|\-\:\s]+$/', $t)) continue;
+                            if (!$inTable) {
+                                $closeList();
+                                $inTable = true;
+                                $tableBuffer = [];
+                            }
+                            $tableBuffer[] = $t;
+                            continue;
+                        } elseif ($inTable) {
+                            $closeTable();
+                        }
+
                         if ($t === '') {
-                            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                            $closeList();
                             continue;
                         }
 
                         if (preg_match('/^#(?!#)\s+(.+)$/', $t, $m)) {
-                            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                            $closeList();
                             $html .= '<h2>' . aichat_inline($m[1]) . '</h2>';
                             continue;
                         }
                         if (preg_match('/^##(?!#)\s+(.+)$/', $t, $m)) {
-                            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                            $closeList();
                             $html .= '<h3>' . aichat_inline($m[1]) . '</h3>';
                             continue;
                         }
                         if (preg_match('/^###\s+(.+)$/', $t, $m)) {
-                            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                            $closeList();
                             $html .= '<h4>' . aichat_inline($m[1]) . '</h4>';
                             continue;
                         }
 
                         if (preg_match('/^\*\*(.+?)\*\*:?\s*$/', $t, $m)) {
-                            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                            $closeList();
                             $html .= '<p class="subh">' . htmlspecialchars($m[1]) . '</p>';
                             continue;
                         }
@@ -312,21 +416,30 @@
                         }
 
                         if (preg_match('/^(\d+)\.\s+(.+)$/', $t, $m)) {
-                            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
-                            $html .= '<div class="numbered"><span class="num">' . $m[1] . '.</span><span>' . aichat_inline($m[2]) . '</span></div>';
+                            if (!$inList || $listTag !== 'ol') {
+                                if ($inList) $html .= "</{$listTag}>";
+                                $html .= '<ol>'; $inList = true; $listTag = 'ol';
+                            }
+                            $html .= '<li>' . aichat_inline($m[2]) . '</li>';
                             continue;
                         }
 
                         if (preg_match('/^(-{3,}|\*{3,}|_{3,})$/', $t)) {
-                            if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                            $closeList();
                             $html .= '<hr class="md-hr">';
                             continue;
                         }
 
-                        if ($inList) { $html .= "</{$listTag}>"; $inList = false; }
+                        $closeList();
                         $html .= '<p>' . aichat_inline($t) . '</p>';
                     }
 
+                    if ($inCode) {
+                        $html .= '<pre>' . htmlspecialchars($codeBuffer) . '</pre>';
+                    }
+                    if ($inTable) {
+                        $html .= aichat_render_table($tableBuffer);
+                    }
                     if ($inList) $html .= "</{$listTag}>";
                     return $html;
                 }
