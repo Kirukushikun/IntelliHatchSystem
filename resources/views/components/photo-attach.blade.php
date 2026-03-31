@@ -16,6 +16,8 @@
     maxFiles: {{ (int) $maxFiles }},
     maxSizeMb: {{ (int) $maxSizeMb }},
     stream: null,
+    flashOn: false,
+    flashSupported: false,
     photos: [],
     attachedPhotos: [],
     attachedFiles: [],
@@ -276,16 +278,36 @@
             this.toast('error', 'Camera not supported! You need HTTPS or localhost.');
             return;
         }
-        
+
         try {
-            this.stream = await navigator.mediaDevices.getUserMedia({ 
+            this.stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 640 } },
-                audio: false 
+                audio: false
             });
             this.$refs.video.srcObject = this.stream;
             this.cameraActive = true;
+
+            // Check if torch/flash is supported
+            const track = this.stream.getVideoTracks()[0];
+            if (track) {
+                const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+                this.flashSupported = !!(capabilities.torch);
+            }
+            this.flashOn = false;
         } catch(err) {
             this.toast('error', 'Camera error: ' + err.message);
+        }
+    },
+    async toggleFlash() {
+        if (!this.stream || !this.flashSupported) return;
+        const track = this.stream.getVideoTracks()[0];
+        if (!track) return;
+        try {
+            this.flashOn = !this.flashOn;
+            await track.applyConstraints({ advanced: [{ torch: this.flashOn }] });
+        } catch(err) {
+            this.flashOn = false;
+            this.toast('error', 'Flash not available');
         }
     },
     capturePhoto() {
@@ -457,6 +479,8 @@
         }
         this.$refs.video.srcObject = null;
         this.cameraActive = false;
+        this.flashOn = false;
+        this.flashSupported = false;
     },
     tryCancel() {
         if (this.photos.length > 0 || this.cameraActive) {
@@ -778,44 +802,79 @@
             </div>
 
             {{-- Footer Buttons --}}
-            <div class="flex flex-wrap justify-center sm:justify-end gap-2 mt-4 sm:mt-6 sticky bottom-0 bg-white dark:bg-gray-800 pt-2 pb-1 border-t border-gray-100 dark:border-gray-700">
-                <button @click="tryCancel()" type="button"
+            <div class="flex flex-wrap justify-center sm:justify-end items-center gap-2 mt-4 sm:mt-6 sticky bottom-0 bg-white dark:bg-gray-800 pt-2 pb-1 border-t border-gray-100 dark:border-gray-700">
+                {{-- Cancel --}}
+                <button @click="tryCancel()" type="button" title="Cancel"
                         :disabled="uploading || processingGallery"
-                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                    Cancel
+                        class="p-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
-                
-                <button @click="startCamera()" type="button"
+
+                {{-- Start Camera --}}
+                <button @click="startCamera()" type="button" title="Start Camera"
                         x-show="!cameraActive && !uploading && !processingGallery"
-                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                    Start Camera
+                        class="p-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
                 </button>
-                
-                <button @click="capturePhoto()" type="button"
+
+                {{-- Flash Toggle --}}
+                <button @click="toggleFlash()" type="button"
+                        x-show="cameraActive && flashSupported && !uploading && !processingGallery"
+                        :title="flashOn ? 'Turn Flash Off' : 'Turn Flash On'"
+                        :class="flashOn ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500' : 'bg-gray-600 text-white hover:bg-gray-700'"
+                        class="p-2.5 rounded-full transition-colors">
+                    {{-- Flash On icon --}}
+                    <svg x-show="flashOn" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13.01 3h1l-1 7h3.51c.4 0 .62.19.4.66C12.97 17.55 11 21 11 21z"></path>
+                    </svg>
+                    {{-- Flash Off icon --}}
+                    <svg x-show="!flashOn" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </button>
+
+                {{-- Capture Photo --}}
+                <button @click="capturePhoto()" type="button" title="Capture Photo"
                         x-show="cameraActive && !uploading && !processingGallery"
                         :disabled="isAtLimit"
                         :class="isAtLimit ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
-                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base text-white rounded-md">
-                    <span x-text="isAtLimit ? 'Limit reached' : 'Capture Photo'"></span>
+                        class="p-2.5 text-white rounded-full">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
                 </button>
-                
-                <button @click="stopCamera()" type="button"
+
+                {{-- Stop Camera --}}
+                <button @click="stopCamera()" type="button" title="Stop Camera"
                         x-show="cameraActive && !uploading && !processingGallery"
-                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-orange-500 text-white rounded-md hover:bg-orange-600">
-                    Stop Camera
+                        class="p-2.5 bg-orange-500 text-white rounded-full hover:bg-orange-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                    </svg>
                 </button>
-                
-                <button @click="uploadPhotos()" type="button"
+
+                {{-- Upload Photos --}}
+                <button @click="uploadPhotos()" type="button" title="Upload Photos"
                         x-show="photos.length > 0 && !uploading && !processingGallery"
                         :disabled="uploading || processingGallery"
-                        class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span x-show="!uploading">Upload <span x-text="photos.length"></span> Photo<span x-show="photos.length > 1">s</span></span>
-                    <span x-show="uploading" class="inline-flex items-center gap-2">
-                        <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        class="p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed relative">
+                    <span x-show="!uploading">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" x-text="photos.length"></span>
+                    </span>
+                    <span x-show="uploading">
+                        <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Uploading...
                     </span>
                 </button>
             </div>
