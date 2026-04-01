@@ -252,6 +252,10 @@ Route::middleware('auth')->group(function () {
             return view('admin.activity-logs');
         })->name('admin.activity-logs');
 
+        Route::get('/admin/user-activity-dashboard', function () {
+            return view('admin.user-activity-dashboard');
+        })->name('admin.user-activity-dashboard');
+
         Route::get('/admin/activity-logs/export/csv', [\App\Http\Controllers\Admin\ActivityLogExportController::class, 'csv'])->name('admin.activity-logs.export.csv');
         Route::get('/admin/activity-logs/export/pdf', [\App\Http\Controllers\Admin\ActivityLogExportController::class, 'pdf'])->name('admin.activity-logs.export.pdf');
 
