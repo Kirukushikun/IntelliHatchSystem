@@ -46,9 +46,9 @@ class Display extends Component
         ]);
 
         ActivityLogger::log(
-            action: 'form_type_updated',
+            action: 'update',
             description: "Form type \"{$oldName}\" updated",
-            subjectType: FormType::class,
+            module: 'FormType',
             subjectId: $formType->id,
             properties: [
                 'old_name' => $oldName,
@@ -73,9 +73,9 @@ class Display extends Component
         $formType->update(['impact_level' => $normalizedLevel]);
 
         ActivityLogger::log(
-            action: 'form_type_tag_updated',
+            action: 'update',
             description: "Impact level for \"{$formType->form_name}\" set to " . ($normalizedLevel ?? 'none'),
-            subjectType: FormType::class,
+            module: 'FormType',
             subjectId: $formType->id,
             properties: ['impact_level' => $normalizedLevel]
         );

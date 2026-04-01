@@ -78,7 +78,7 @@ class Create extends Component
             Cache::forget('management:users:all');
 
             $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
-            ActivityLogger::log('created_user', "Created user {$fullName}", 'User', User::where('username', $username)->value('id'));
+            ActivityLogger::log('create', "Created user {$fullName}", module: 'User', subjectId: User::where('username', $username)->value('id'));
             $this->closeModal();
             $this->dispatch('showToast', message: "{$fullName} has been created successfully!", type: 'success');
             $this->dispatch('refreshUsers'); // Refresh the user list

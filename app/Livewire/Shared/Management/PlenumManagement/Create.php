@@ -51,7 +51,7 @@ class Create extends Component
             Cache::forget('management:plenums:all');
 
             $plenumName = $this->plenumName; // Store name before closing modal
-            ActivityLogger::log('created_plenum', "Created plenum machine {$plenumName}", 'Plenum');
+            ActivityLogger::log('create', "Created plenum machine {$plenumName}", module: 'Plenum');
             $this->closeModal();
             $this->dispatch('refreshPlenums');
             $this->dispatch('showToast', message: "{$plenumName} has been successfully added!", type: 'success');

@@ -318,11 +318,10 @@ class IncubatorTempCalibration extends Component
             Cache::forget($this->cacheKey);
 
             ActivityLogger::log(
-                'csv_import',
+                'import',
                 "Imported {$this->importedCount} Incubator Temperature Calibration form records from CSV ({$this->totalCsvRows} CSV rows)",
-                Form::class,
-                null,
-                [
+                module: 'Form',
+                properties: [
                     'form_type' => 'Incubator Temperature Calibration',
                     'csv_rows' => $this->totalCsvRows,
                     'records_imported' => $this->importedCount,

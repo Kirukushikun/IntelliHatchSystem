@@ -50,7 +50,7 @@ class Create extends Component
             Cache::forget('management:incubators:all');
 
             $incubatorName = $this->incubatorName; // Store name before closing modal
-            ActivityLogger::log('created_incubator', "Created incubator machine {$incubatorName}", 'Incubator');
+            ActivityLogger::log('create', "Created incubator machine {$incubatorName}", module: 'Incubator');
             $this->closeModal();
             $this->dispatch('refreshIncubators');
             $this->dispatch('showToast', message: "{$incubatorName} has been successfully added", type: 'success');

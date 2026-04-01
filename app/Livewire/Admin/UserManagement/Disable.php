@@ -56,12 +56,12 @@ class Disable extends Component
             Cache::forget('management:users:all');
             Cache::forget('management:users:' . (int) $this->userId);
 
-            $action = $this->isCurrentlyDisabled ? 'enabled' : 'disabled';
+            $action = $this->isCurrentlyDisabled ? 'enable' : 'disable';
             $userName = $this->userName; // Store name before closing modal
-            ActivityLogger::log("{$action}_user", ucfirst($action) . " user {$userName}", 'User', (int) $this->userId);
+            ActivityLogger::log($action, ucfirst($action) . "d user {$userName}", module: 'User', subjectId: (int) $this->userId);
             $this->closeModal();
             $this->dispatch('refreshUsers');
-            $this->dispatch('showToast', message: "{$userName} has been successfully {$action}!", type: 'success');
+            $this->dispatch('showToast', message: "{$userName} has been successfully {$action}d!", type: 'success');
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to update user status. Please try again.', type: 'error');
         } finally {

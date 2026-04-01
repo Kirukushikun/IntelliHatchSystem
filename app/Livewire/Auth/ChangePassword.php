@@ -102,7 +102,7 @@ class ChangePassword extends Component
         $user->password = Hash::make($this->newPassword);
         $user->save();
 
-        ActivityLogger::log('changed_own_password', "User changed their own password", 'User', $user->id);
+        ActivityLogger::log('change_password', "User changed their own password", module: 'Auth', subjectId: $user->id);
 
         // Reset form
         $this->reset(['currentPassword', 'newPassword', 'newPassword_confirmation']);

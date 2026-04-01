@@ -41,7 +41,7 @@ class Delete extends Component
             
             if ($user) {
                 $userName = $user->first_name . ' ' . $user->last_name;
-                ActivityLogger::log('deleted_user', "Deleted user {$userName}", 'User', (int) $this->userId);
+                ActivityLogger::log('delete', "Deleted user {$userName}", module: 'User', subjectId: (int) $this->userId);
                 $user->delete();
 
                 Cache::forget('management:users:all');

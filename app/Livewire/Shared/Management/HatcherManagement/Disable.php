@@ -44,12 +44,12 @@ class Disable extends Component
             Cache::forget('management:hatchers:all');
             Cache::forget('management:hatchers:' . (int) $this->hatcherId);
 
-            $action = !$this->isActive ? 'activated' : 'deactivated';
+            $action = !$this->isActive ? 'enable' : 'disable';
             $hatcherName = $this->hatcherName; // Store name before closing modal
-            ActivityLogger::log("{$action}_hatcher", ucfirst($action) . " hatcher machine {$hatcherName}", 'Hatcher', (int) $this->hatcherId);
+            ActivityLogger::log($action, ucfirst($action) . "d hatcher machine {$hatcherName}", module: 'Hatcher', subjectId: (int) $this->hatcherId);
             $this->closeModal();
             $this->dispatch('refreshHatchers');
-            $this->dispatch('showToast', message: "{$hatcherName} has been successfully {$action}!", type: 'success');
+            $this->dispatch('showToast', message: "{$hatcherName} has been successfully {$action}d!", type: 'success');
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to update hatcher status. Please try again.', type: 'error');
         } finally {

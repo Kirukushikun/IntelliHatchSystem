@@ -17,6 +17,7 @@ class Display extends Component
     public string $dateFrom = '';
     public string $dateTo = '';
     public string $actionFilter = '';
+    public string $moduleFilter = '';
     public string $userFilter = '';
     public bool $showFilterDropdown = false;
 
@@ -29,6 +30,7 @@ class Display extends Component
         'dateFrom'     => ['except' => ''],
         'dateTo'       => ['except' => ''],
         'actionFilter' => ['except' => ''],
+        'moduleFilter' => ['except' => ''],
         'userFilter'   => ['except' => ''],
     ];
 
@@ -37,6 +39,7 @@ class Display extends Component
         $this->search       = request()->get('search', '');
         $this->page         = (int) request()->get('page', 1);
         $this->actionFilter = request()->get('actionFilter', '');
+        $this->moduleFilter = request()->get('moduleFilter', '');
         $this->userFilter   = request()->get('userFilter', '');
         $this->dateFrom     = request()->get('dateFrom', '');
         $this->dateTo       = request()->get('dateTo', '');
@@ -44,6 +47,7 @@ class Display extends Component
 
     public function updatingSearch(): void  { $this->page = 1; }
     public function updatingActionFilter(): void { $this->page = 1; }
+    public function updatingModuleFilter(): void { $this->page = 1; }
     public function updatingUserFilter(): void   { $this->page = 1; }
     public function updatingPerPage(): void      { $this->page = 1; }
 
@@ -71,6 +75,7 @@ class Display extends Component
     public function resetFilters(): void
     {
         $this->actionFilter      = '';
+        $this->moduleFilter      = '';
         $this->userFilter        = '';
         $this->dateFrom          = '';
         $this->dateTo            = '';
@@ -107,6 +112,10 @@ class Display extends Component
 
         if ($this->actionFilter) {
             $query->where('action', $this->actionFilter);
+        }
+
+        if ($this->moduleFilter) {
+            $query->where('subject_type', $this->moduleFilter);
         }
 
         if ($this->userFilter) {
@@ -164,6 +173,7 @@ class Display extends Component
         $params = array_filter([
             'search'        => $this->search,
             'actionFilter'  => $this->actionFilter,
+            'moduleFilter'  => $this->moduleFilter,
             'userFilter'    => $this->userFilter,
             'dateFrom'      => $this->dateFrom,
             'dateTo'        => $this->dateTo,
@@ -186,6 +196,16 @@ class Display extends Component
             ->toArray();
     }
 
+    public function getDistinctModulesProperty(): array
+    {
+        return ActivityLog::query()
+            ->whereNotNull('subject_type')
+            ->distinct()
+            ->orderBy('subject_type')
+            ->pluck('subject_type')
+            ->toArray();
+    }
+
     public function getAdminUsersProperty(): \Illuminate\Support\Collection
     {
         return User::query()
@@ -200,6 +220,7 @@ class Display extends Component
             $this->getPaginationData(),
             [
                 'distinctActions' => $this->distinctActions,
+                'distinctModules' => $this->distinctModules,
                 'adminUsers'      => $this->adminUsers,
                 'exportUrls'      => $this->exportUrls,
             ]

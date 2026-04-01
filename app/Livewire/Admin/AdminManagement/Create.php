@@ -80,7 +80,7 @@ class Create extends Component
             Cache::forget('admin_management:first_superadmin_id');
 
             $fullName = $this->firstName . ' ' . $this->lastName;
-            ActivityLogger::log('created_admin', "Created admin {$fullName}", 'User', User::where('username', $username)->value('id'));
+            ActivityLogger::log('create', "Created admin {$fullName}", module: 'Admin', subjectId: User::where('username', $username)->value('id'));
             $this->closeModal();
             $this->dispatch('showToast', message: "{$fullName} has been created successfully!", type: 'success');
             $this->dispatch('refreshAdmins');

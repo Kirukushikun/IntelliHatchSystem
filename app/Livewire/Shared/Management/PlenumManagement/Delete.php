@@ -33,7 +33,7 @@ class Delete extends Component
             $plenum = Plenum::findOrFail($this->plenumId);
             $plenumName = $plenum->plenumName;
             
-            ActivityLogger::log('deleted_plenum', "Deleted plenum machine {$plenumName}", 'Plenum', (int) $this->plenumId);
+            ActivityLogger::log('delete', "Deleted plenum machine {$plenumName}", module: 'Plenum', subjectId: (int) $this->plenumId);
             $plenum->delete();
 
             Cache::forget('management:plenums:all');

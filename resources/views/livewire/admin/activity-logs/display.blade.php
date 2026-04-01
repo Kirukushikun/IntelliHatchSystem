@@ -27,13 +27,21 @@
                         <div class="absolute top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-700 z-50 left-0 right-0 md:left-auto md:right-0 md:w-80">
                             <div class="p-4">
                                 <div class="grid grid-cols-2 gap-3">
-                                    <!-- Action Filter -->
+                                    <!-- Action & Module Filters -->
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Action</h3>
                                         <select wire:model.live="actionFilter" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                                             <option value="">All Actions</option>
                                             @foreach ($distinctActions as $action)
                                                 <option value="{{ $action }}">{{ str_replace('_', ' ', ucfirst($action)) }}</option>
+                                            @endforeach
+                                        </select>
+
+                                        <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-2 mt-3">Module</h3>
+                                        <select wire:model.live="moduleFilter" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                                            <option value="">All Modules</option>
+                                            @foreach ($distinctModules as $module)
+                                                <option value="{{ $module }}">{{ $module }}</option>
                                             @endforeach
                                         </select>
 
@@ -170,6 +178,9 @@
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">User</p>
                         </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Module</p>
+                        </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('action')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
                                 Action
@@ -218,19 +229,29 @@
                                 @endif
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
+                                @if ($log->subject_type)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300">
+                                        {{ $log->subject_type }}
+                                    </span>
+                                @else
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">—</span>
+                                @endif
+                            </td>
+                            <td class="p-3 md:p-4 py-4 md:py-5">
                                 @php
-                                    $actionColors = [
-                                        'login'  => 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
-                                        'logout' => 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-                                    ];
-                                    $isDestructive = str_contains($log->action, 'deleted') || str_contains($log->action, 'disabled');
-                                    $isCreate      = str_contains($log->action, 'created');
-                                    $isUpdate      = str_contains($log->action, 'updated') || str_contains($log->action, 'changed') || str_contains($log->action, 'reset') || str_contains($log->action, 'enabled');
-                                    $colorClass = $actionColors[$log->action]
-                                        ?? ($isDestructive ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                                        : ($isCreate ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300'
-                                        : ($isUpdate ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300')));
+                                    $colorClass = match($log->action) {
+                                        'login'          => 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+                                        'logout'         => 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+                                        'create'         => 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300',
+                                        'update'         => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+                                        'delete'         => 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+                                        'enable'         => 'bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300',
+                                        'disable'        => 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300',
+                                        'import'         => 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-300',
+                                        'export'         => 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-300',
+                                        'reset_password', 'change_password' => 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
+                                        default          => 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+                                    };
                                 @endphp
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $colorClass }}">
                                     {{ str_replace('_', ' ', ucfirst($log->action)) }}
@@ -245,7 +266,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -277,18 +298,24 @@
                             {{ $log->created_at->format('d M, Y') }}<br>{{ $log->created_at->format('H:i:s') }}
                         </p>
                     </div>
-                    <div>
+                    <div class="flex flex-wrap gap-1.5">
+                        @if ($log->subject_type)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300">
+                                {{ $log->subject_type }}
+                            </span>
+                        @endif
                         @php
-                            $isDestructive = str_contains($log->action, 'deleted') || str_contains($log->action, 'disabled');
-                            $isCreate      = str_contains($log->action, 'created');
-                            $isUpdate      = str_contains($log->action, 'updated') || str_contains($log->action, 'changed') || str_contains($log->action, 'reset') || str_contains($log->action, 'enabled');
-                            $colorClass    = match(true) {
-                                $log->action === 'login'  => 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
-                                $log->action === 'logout' => 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-                                $isDestructive            => 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
-                                $isCreate                 => 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300',
-                                $isUpdate                 => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
-                                default                   => 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+                            $colorClass = match($log->action) {
+                                'login'          => 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+                                'logout'         => 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+                                'create'         => 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300',
+                                'update'         => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+                                'delete'         => 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+                                'enable'         => 'bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300',
+                                'disable'        => 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300',
+                                'import', 'export' => 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-300',
+                                'reset_password', 'change_password' => 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
+                                default          => 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
                             };
                         @endphp
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $colorClass }}">
