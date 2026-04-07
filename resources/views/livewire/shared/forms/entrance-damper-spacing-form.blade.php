@@ -51,7 +51,7 @@
                 </div>
 
                 <div data-field="measurement_photo">
-                    <x-photo-attach label="Photo (Optional)" name="measurement_photo" />
+                    <x-photo-attach label="Photo (Required)" name="measurement_photo" :required="true" />
                 </div>
             </div>
         </x-progress-navigation>

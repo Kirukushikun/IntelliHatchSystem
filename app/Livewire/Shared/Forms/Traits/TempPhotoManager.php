@@ -7,14 +7,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Encoders\JpegEncoder;
 
 trait TempPhotoManager
 {
-    /** Maximum file size per photo in KB (50MB) */
-    public const MAX_PHOTO_SIZE_KB = 51200;
+    /** Maximum file size per photo in KB (10MB) */
+    public const MAX_PHOTO_SIZE_KB = 10240;
 
     /** Maximum number of photos per upload field */
     public const MAX_PHOTOS_PER_FIELD = 20;
+
+    /** Maximum image dimension (width or height) in pixels for server-side compression */
+    public const MAX_IMAGE_DIMENSION = 1920;
+
+    /** JPEG compression quality (0-100) */
+    public const JPEG_QUALITY = 80;
 
     /** @var array<string, int[]> Track uploaded photo IDs per field */
     public array $uploadedPhotoIds = [];
@@ -59,8 +67,7 @@ trait TempPhotoManager
 
             try {
                 $uuid = Str::uuid()->getHex();
-                $ext = method_exists($file, 'getClientOriginalExtension') ? $file->getClientOriginalExtension() : 'jpg';
-                
+
                 $originalName = method_exists($file, 'getClientOriginalName') ? (string) $file->getClientOriginalName() : 'photo';
                 $baseName = pathinfo($originalName, PATHINFO_FILENAME);
                 $safePhotoName = Str::slug($baseName);
@@ -68,9 +75,19 @@ trait TempPhotoManager
                     $safePhotoName = 'photo';
                 }
 
-                // Use pending prefix instead of FORMID placeholder
-                $filename = "{$formType}_pending_{$timestamp}_{$photoKey}_{$safePhotoName}-{$uuid}.{$ext}";
-                $path = $file->storeAs('forms', $filename, 'public');
+                // Always save as JPEG after compression
+                $filename = "{$formType}_pending_{$timestamp}_{$photoKey}_{$safePhotoName}-{$uuid}.jpg";
+
+                // Compress and resize the image before storing
+                $compressedImage = $this->compressImage($file->getRealPath());
+
+                if ($compressedImage !== null) {
+                    Storage::disk('public')->put("forms/{$filename}", $compressedImage);
+                    $path = "forms/{$filename}";
+                } else {
+                    // Fallback: store original if compression fails
+                    $path = $file->storeAs('forms', $filename, 'public');
+                }
 
                 if (!$path) {
                     continue;
@@ -402,5 +419,32 @@ trait TempPhotoManager
         }
         
         return true;
+    }
+
+    /**
+     * Compress and resize an image using Intervention Image.
+     * Returns the encoded image string, or null on failure.
+     */
+    protected function compressImage(string $filePath): ?string
+    {
+        try {
+            $image = Image::decodePath($filePath);
+
+            $width = $image->width();
+            $height = $image->height();
+
+            // Scale down if either dimension exceeds the max
+            if ($width > self::MAX_IMAGE_DIMENSION || $height > self::MAX_IMAGE_DIMENSION) {
+                $image->scaleDown(self::MAX_IMAGE_DIMENSION, self::MAX_IMAGE_DIMENSION);
+            }
+
+            // Encode as JPEG with configured quality
+            $encoded = $image->encode(new JpegEncoder(quality: self::JPEG_QUALITY));
+
+            return (string) $encoded;
+        } catch (\Exception $e) {
+            Log::warning("Image compression failed, will store original: {$e->getMessage()}");
+            return null;
+        }
     }
 }

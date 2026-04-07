@@ -3,7 +3,7 @@
     'name' => '',
     'required' => false,
     'maxFiles' => 20,
-    'maxSizeMb' => 50,
+    'maxSizeMb' => 10,
 ])
 
 <div class="mb-6" x-data="{ 
@@ -235,7 +235,7 @@
                     const canvas = this.$refs.canvas;
                     const ctx = canvas.getContext('2d');
 
-                    const maxDimension = 640;
+                    const maxDimension = 1920;
                     let targetWidth = img.width;
                     let targetHeight = img.height;
 
@@ -281,7 +281,7 @@
 
         try {
             this.stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 640 } },
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1920 } },
                 audio: false
             });
             this.$refs.video.srcObject = this.stream;
@@ -415,8 +415,7 @@
                     const canvas = this.$refs.canvas;
                     const ctx = canvas.getContext('2d');
                     
-                    // Match camera capture size (640x640 or maintain aspect ratio)
-                    const maxDimension = 640;
+                    const maxDimension = 1920;
                     let targetWidth = img.width;
                     let targetHeight = img.height;
                     

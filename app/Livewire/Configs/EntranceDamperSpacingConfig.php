@@ -13,7 +13,7 @@ class EntranceDamperSpacingConfig
             'form.incubator'       => 'required|integer|exists:incubator-machines,id',
 
             'form.measurement'       => 'required|numeric',
-            'form.measurement_photo' => 'nullable',
+            'form.measurement_photo' => 'required|array|min:1',
         ];
     }
 
@@ -27,6 +27,8 @@ class EntranceDamperSpacingConfig
             'form.incubator.required'          => 'Please select an incubator.',
             'form.incubator.exists'            => 'Please select a valid incubator.',
             'form.measurement.numeric'         => 'Measurement must be a number.',
+            'form.measurement_photo.required'  => 'Please upload a photo.',
+            'form.measurement_photo.min'       => 'Please upload at least one photo.',
             'in'                               => 'Please select a valid option.',
             'integer'                          => 'Please enter a valid number.',
             'date'                             => 'Please enter a valid date.',
