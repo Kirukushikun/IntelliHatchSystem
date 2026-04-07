@@ -46,12 +46,22 @@
     color: white !important;
 }
 
-[data-theme=dark] input,
+[data-theme=dark] input:not([type="checkbox"]):not([type="radio"]),
 [data-theme=dark] textarea,
 [data-theme=dark] select {
     color: white !important;
     background-color: rgb(31, 41, 55) !important;
     border-color: rgb(75, 85, 99) !important;
+}
+
+[data-theme=dark] input[type="checkbox"] {
+    background-color: rgb(55, 65, 81) !important;
+    border-color: rgb(107, 114, 128) !important;
+}
+
+[data-theme=dark] input[type="checkbox"]:checked {
+    background-color: rgb(239, 68, 68) !important;
+    border-color: rgb(239, 68, 68) !important;
 }
 
 [data-theme=dark] input::placeholder,
@@ -62,6 +72,21 @@
 [data-theme=dark] select option {
     color: white !important;
     background-color: rgb(31, 41, 55) !important;
+}
+
+/* Dark mode for checklist labels and form text inside accordion */
+[data-theme=dark] label span.text-sm {
+    color: rgb(229, 231, 235) !important;
+}
+
+[data-theme=dark] label .text-xs,
+[data-theme=dark] .text-xs.font-medium {
+    color: rgb(209, 213, 219) !important;
+}
+
+/* Chick weight input border in dark mode */
+[data-theme=dark] .chick-weight-input {
+    border-color: rgb(156, 163, 175) !important;
 }
 
 /* Prevent transitions during initial page load */

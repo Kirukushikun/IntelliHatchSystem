@@ -11,13 +11,16 @@ class HatcherTempCalibrationConfig
             'form.shift'              => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
             'form.time_started'       => ['required', 'date_format:H:i'],
             'form.hatcher'            => 'required|integer|exists:hatcher-machines,id',
+            'form.machine_temp_set_point' => 'required|numeric',
 
             'form.machine_temp'       => 'required|numeric',
             'form.calibrator_temp'    => 'required|numeric',
             'form.reading_photos.*'   => 'nullable|image|max:1024',
+            'form.machine_humidity_set_point' => 'required|numeric',
             'form.humidity_reading'   => 'required|numeric',
             'form.humidity_photos.*'  => 'nullable|image|max:1024',
 
+            'form.corrective_action'  => 'nullable|string|max:1000',
             'form.approver'           => 'required|string|max:255',
             'form.time_finished'      => ['required', 'date_format:H:i'],
         ];
@@ -33,8 +36,10 @@ class HatcherTempCalibrationConfig
             'form.hatchery_man.exists'          => 'Please select a valid hatchery man.',
             'form.hatcher.required'             => 'Please select a hatcher.',
             'form.hatcher.exists'               => 'Please select a valid hatcher.',
+            'form.machine_temp_set_point.numeric' => 'Machine temperature set point must be a number.',
             'form.machine_temp.numeric'         => 'Machine temperature must be a number.',
             'form.calibrator_temp.numeric'      => 'Calibrator temperature must be a number.',
+            'form.machine_humidity_set_point.numeric' => 'Machine humidity set point must be a number.',
             'form.humidity_reading.numeric'     => 'Humidity reading must be a number.',
             'in'                                => 'Please select a valid option.',
             'integer'                           => 'Please enter a valid number.',
@@ -56,13 +61,16 @@ class HatcherTempCalibrationConfig
             'shift'            => '',
             'time_started'     => '',
             'hatcher'          => '',
+            'machine_temp_set_point' => '',
 
             'machine_temp'     => '',
             'calibrator_temp'  => '',
             'reading_photos'   => [],
+            'machine_humidity_set_point' => '',
             'humidity_reading' => '',
             'humidity_photos'  => [],
 
+            'corrective_action' => '',
             'approver'         => '',
             'time_finished'    => '',
         ];
@@ -71,9 +79,9 @@ class HatcherTempCalibrationConfig
     public static function stepFieldMap(): array
     {
         return [
-            1 => ['hatchery_man', 'shift', 'time_started', 'hatcher'],
-            2 => ['machine_temp', 'calibrator_temp', 'reading_photos', 'humidity_reading', 'humidity_photos'],
-            3 => ['approver', 'time_finished'],
+            1 => ['hatchery_man', 'shift', 'time_started', 'hatcher', 'machine_temp_set_point'],
+            2 => ['machine_temp', 'calibrator_temp', 'reading_photos', 'machine_humidity_set_point', 'humidity_reading', 'humidity_photos'],
+            3 => ['corrective_action', 'approver', 'time_finished'],
         ];
     }
 

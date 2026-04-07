@@ -37,9 +37,13 @@ class PasgarScoreForm extends FormNavigation
 
     public array $hatchers = [];
 
+    public int $expandedSample = 0;
+
     public function mount($formType = 'pasgar_score'): void
     {
         $this->form = PasgarScoreConfig::defaultFormState();
+        // Start with one empty sample
+        $this->form['samples'] = [PasgarScoreConfig::defaultSample()];
 
         parent::mount($formType);
         $this->schedule = $this->scheduleConfig();
@@ -94,6 +98,98 @@ class PasgarScoreForm extends FormNavigation
 
         $formType = $this->formTypeKey();
         $this->handleTempPhotoUpload($photoKey, $files, $formType);
+    }
+
+    public function addSample(): void
+    {
+        $lastIndex = count($this->form['samples']) - 1;
+        $lastSample = $this->form['samples'][$lastIndex] ?? null;
+
+        if ($lastSample && (!is_numeric($lastSample['chick_weight']) || $lastSample['chick_weight'] <= 0)) {
+            $this->dispatch('showToast', message: 'Please enter the Chick Weight for DOP #' . ($lastIndex + 1) . ' before adding a new sample.', type: 'error');
+            return;
+        }
+
+        $this->form['samples'][] = PasgarScoreConfig::defaultSample();
+        $this->expandedSample = count($this->form['samples']) - 1;
+    }
+
+    public function toggleSample(int $index): void
+    {
+        $this->expandedSample = $this->expandedSample === $index ? -1 : $index;
+    }
+
+    public function removeSample(int $index): void
+    {
+        if (count($this->form['samples']) <= 1) {
+            return;
+        }
+
+        unset($this->form['samples'][$index]);
+        $this->form['samples'] = array_values($this->form['samples']);
+
+        $lastIndex = count($this->form['samples']) - 1;
+        if ($this->expandedSample >= count($this->form['samples'])) {
+            $this->expandedSample = $lastIndex;
+        }
+    }
+
+    public function getSampleScore(int $index): int
+    {
+        $sample = $this->form['samples'][$index] ?? [];
+        $issues = collect([
+            $sample['low_reflex_alertness'] ?? false,
+            $sample['navel_issue'] ?? false,
+            $sample['leg_issue'] ?? false,
+            $sample['beak_issue'] ?? false,
+            $sample['belly_bloated'] ?? false,
+            $sample['vaccination_issue'] ?? false,
+        ])->filter()->count();
+
+        return 10 - ($issues * 2);
+    }
+
+    public function getPasgarAverageProperty(): string
+    {
+        $samples = $this->form['samples'] ?? [];
+        if (empty($samples)) {
+            return '0.00';
+        }
+
+        $total = 0;
+        foreach ($samples as $index => $sample) {
+            $total += $this->getSampleScore($index);
+        }
+
+        return number_format($total / count($samples), 2);
+    }
+
+    public function getAverageChickWeight(): string
+    {
+        $samples = $this->form['samples'] ?? [];
+        $weights = collect($samples)
+            ->pluck('chick_weight')
+            ->filter(fn ($w) => is_numeric($w) && $w > 0);
+
+        if ($weights->isEmpty()) {
+            return '0.00';
+        }
+
+        return number_format($weights->avg(), 2);
+    }
+
+    public function getIssueTotals(): array
+    {
+        $samples = $this->form['samples'] ?? [];
+
+        return [
+            'low_reflex_alertness' => collect($samples)->where('low_reflex_alertness', true)->count(),
+            'navel_issue'          => collect($samples)->where('navel_issue', true)->count(),
+            'leg_issue'            => collect($samples)->where('leg_issue', true)->count(),
+            'beak_issue'           => collect($samples)->where('beak_issue', true)->count(),
+            'belly_bloated'        => collect($samples)->where('belly_bloated', true)->count(),
+            'vaccination_issue'    => collect($samples)->where('vaccination_issue', true)->count(),
+        ];
     }
 
     protected function formTypeKey(): string
@@ -219,6 +315,18 @@ class PasgarScoreForm extends FormNavigation
                 'name'  => $this->psNumbers[$inputs['ps_number']],
             ];
         }
+
+        // Compute average chick weight and issue totals from samples
+        $inputs['average_chick_weight']     = $this->getAverageChickWeight();
+        $totals = $this->getIssueTotals();
+        $inputs['low_reflex_alertness_qty'] = $totals['low_reflex_alertness'];
+        $inputs['navel_issue_qty']          = $totals['navel_issue'];
+        $inputs['leg_issue_qty']            = $totals['leg_issue'];
+        $inputs['beak_issue_qty']           = $totals['beak_issue'];
+        $inputs['belly_bloated_qty']        = $totals['belly_bloated'];
+        $inputs['vaccination_issue_qty']    = $totals['vaccination_issue'];
+        $inputs['pasgar_average_scoring']   = $this->getPasgarAverageProperty();
+        $inputs['total_samples']            = count($inputs['samples'] ?? []);
 
         return $inputs;
     }

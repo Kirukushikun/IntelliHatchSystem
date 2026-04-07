@@ -45,17 +45,26 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="time_of_check">
-                    <x-text-input
-                        label="Time of Checking"
-                        name="time_of_check"
-                        error-key="form.time_of_check"
-                        :required="true"
-                        placeholder="Select time..."
-                        wireModel="form.time_of_check"
-                        type="time"
-                        subtext="Enter the time this check was performed"
-                    />
+                <div data-field="time_of_check" x-data>
+                    <div class="flex items-end gap-2">
+                        <div class="flex-1">
+                            <x-text-input
+                                label="Time of Checking"
+                                name="time_of_check"
+                                error-key="form.time_of_check"
+                                :required="true"
+                                placeholder="Select time..."
+                                wireModel="form.time_of_check"
+                                type="time"
+                                subtext="Enter the time this check was performed"
+                            />
+                        </div>
+                        <button type="button"
+                            class="mb-6 inline-flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors whitespace-nowrap"
+                            x-on:click="$wire.set('form.time_of_check', new Date().toTimeString().slice(0,5))">
+                            Now
+                        </button>
+                    </div>
                 </div>
 
 <div data-field="incubator">
@@ -164,17 +173,26 @@
                     />
                 </div>
 
-                <div data-field="time_finished">
-                    <x-text-input
-                        label="Time Finished"
-                        name="time_finished"
-                        error-key="form.time_finished"
-                        :required="true"
-                        placeholder="Select time..."
-                        wireModel="form.time_finished"
-                        type="time"
-                        subtext="Enter the time you completed this monitoring check"
-                    />
+                <div data-field="time_finished" x-data>
+                    <div class="flex items-end gap-2">
+                        <div class="flex-1">
+                            <x-text-input
+                                label="Time Finished"
+                                name="time_finished"
+                                error-key="form.time_finished"
+                                :required="true"
+                                placeholder="Select time..."
+                                wireModel="form.time_finished"
+                                type="time"
+                                subtext="Enter the time you completed this monitoring check"
+                            />
+                        </div>
+                        <button type="button"
+                            class="mb-6 inline-flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors whitespace-nowrap"
+                            x-on:click="$wire.set('form.time_finished', new Date().toTimeString().slice(0,5))">
+                            Now
+                        </button>
+                    </div>
                 </div>
             </div>
         </x-progress-navigation>

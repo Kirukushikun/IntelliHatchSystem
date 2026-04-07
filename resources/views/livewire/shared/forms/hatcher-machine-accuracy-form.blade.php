@@ -24,8 +24,17 @@
                     <x-text-input label="Cellphone Number" name="cellphone_number" error-key="form.cellphone_number" :required="true" placeholder="09XXXXXXXXX or +639XXXXXXXXX" wireModel="form.cellphone_number" type="tel" />
                 </div>
 
-                <div data-field="time_of_reading">
-                    <x-text-input label="Time of Reading" name="time_of_reading" error-key="form.time_of_reading" :required="true" placeholder="Select time..." wireModel="form.time_of_reading" type="time" />
+                <div data-field="time_of_reading" x-data>
+                    <div class="flex items-end gap-2">
+                        <div class="flex-1">
+                            <x-text-input label="Time of Reading" name="time_of_reading" error-key="form.time_of_reading" :required="true" placeholder="Select time..." wireModel="form.time_of_reading" type="time" />
+                        </div>
+                        <button type="button"
+                            class="mb-6 inline-flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors whitespace-nowrap"
+                            x-on:click="$wire.set('form.time_of_reading', new Date().toTimeString().slice(0,5))">
+                            Now
+                        </button>
+                    </div>
                 </div>
 
                 <div data-field="shift">
