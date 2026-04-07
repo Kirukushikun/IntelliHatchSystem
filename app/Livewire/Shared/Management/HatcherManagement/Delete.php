@@ -33,7 +33,7 @@ class Delete extends Component
             $hatcher = Hatcher::findOrFail($this->hatcherId);
             $hatcherName = $hatcher->hatcherName;
             
-            ActivityLogger::log('deleted_hatcher', "Deleted hatcher machine {$hatcherName}", 'Hatcher', (int) $this->hatcherId);
+            ActivityLogger::log('delete', "Deleted hatcher machine {$hatcherName}", module: 'Hatcher', subjectId: (int) $this->hatcherId);
             $hatcher->delete();
 
             Cache::forget('management:hatchers:all');

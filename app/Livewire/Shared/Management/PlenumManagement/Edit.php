@@ -71,7 +71,7 @@ class Edit extends Component
             Cache::forget('management:plenums:' . (int) $this->plenumId);
 
             $plenumName = $this->plenumName; // Store name before closing modal
-            ActivityLogger::log('updated_plenum', "Updated plenum machine {$plenumName}", 'Plenum', (int) $this->plenumId);
+            ActivityLogger::log('update', "Updated plenum machine {$plenumName}", module: 'Plenum', subjectId: (int) $this->plenumId);
             $this->closeModal();
             $this->dispatch('refreshPlenums');
             $this->dispatch('showToast', message: "{$plenumName} has been successfully updated!", type: 'success');

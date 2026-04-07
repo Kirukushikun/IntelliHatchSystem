@@ -111,7 +111,7 @@ class Edit extends Component
             Cache::forget('management:admins:' . (int) $this->userId);
 
             $fullName = $this->firstName . ' ' . $this->lastName;
-            ActivityLogger::log('updated_admin', "Updated admin {$fullName}", 'User', (int) $this->userId);
+            ActivityLogger::log('update', "Updated admin {$fullName}", module: 'Admin', subjectId: (int) $this->userId);
             $this->closeModal();
             $this->dispatch('showToast', message: "{$fullName} has been updated successfully!", type: 'success');
             $this->dispatch('refreshAdmins');

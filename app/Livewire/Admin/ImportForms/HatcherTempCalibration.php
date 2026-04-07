@@ -327,11 +327,10 @@ class HatcherTempCalibration extends Component
             Cache::forget($this->cacheKey);
 
             ActivityLogger::log(
-                'csv_import',
+                'import',
                 "Imported {$this->importedCount} Hatcher Temperature Calibration form records from CSV ({$this->totalCsvRows} CSV rows)",
-                Form::class,
-                null,
-                [
+                module: 'Form',
+                properties: [
                     'form_type' => 'Hatcher Temperature Calibration',
                     'csv_rows' => $this->totalCsvRows,
                     'records_imported' => $this->importedCount,

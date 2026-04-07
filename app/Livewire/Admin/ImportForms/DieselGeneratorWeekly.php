@@ -345,11 +345,10 @@ class DieselGeneratorWeekly extends Component
             Cache::forget($this->cacheKey);
 
             ActivityLogger::log(
-                'csv_import',
+                'import',
                 "Imported {$this->importedCount} Diesel Generator Weekly form records from CSV ({$this->totalCsvRows} CSV rows)",
-                Form::class,
-                null,
-                [
+                module: 'Form',
+                properties: [
                     'form_type' => 'Hatchery Diesel Generator Weekly Maintenance Checklist',
                     'csv_rows' => $this->totalCsvRows,
                     'records_imported' => $this->importedCount,

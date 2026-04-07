@@ -23,7 +23,7 @@ class ActivityLogExportController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            fputcsv($handle, ['Date', 'Time', 'User', 'Username', 'Role', 'Action', 'Description', 'IP Address']);
+            fputcsv($handle, ['Date', 'Time', 'User', 'Username', 'Role', 'Module', 'Action', 'Description', 'IP Address']);
 
             $query->chunk(500, function ($logs) use ($handle) {
                 foreach ($logs as $log) {
@@ -36,6 +36,7 @@ class ActivityLogExportController extends Controller
                         $log->user ? $log->user->full_name : 'Deleted user',
                         $log->user ? $log->user->username : '—',
                         $role,
+                        $log->subject_type ?? '—',
                         str_replace('_', ' ', ucfirst($log->action)),
                         $log->description,
                         $log->ip_address ?? '—',
@@ -60,6 +61,7 @@ class ActivityLogExportController extends Controller
             'dateFrom'     => $request->get('dateFrom', ''),
             'dateTo'       => $request->get('dateTo', ''),
             'actionFilter' => $request->get('actionFilter', ''),
+            'moduleFilter' => $request->get('moduleFilter', ''),
         ];
 
         return view('admin.activity-logs-print', compact('logs', 'filters'));
@@ -69,6 +71,7 @@ class ActivityLogExportController extends Controller
     {
         $search       = trim($request->get('search', ''));
         $actionFilter = $request->get('actionFilter', '');
+        $moduleFilter = $request->get('moduleFilter', '');
         $userFilter   = $request->get('userFilter', '');
         $dateFrom     = $request->get('dateFrom', '');
         $dateTo       = $request->get('dateTo', '');
@@ -93,6 +96,10 @@ class ActivityLogExportController extends Controller
 
         if ($actionFilter) {
             $query->where('action', $actionFilter);
+        }
+
+        if ($moduleFilter) {
+            $query->where('subject_type', $moduleFilter);
         }
 
         if ($userFilter) {

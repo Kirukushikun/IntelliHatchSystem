@@ -88,7 +88,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        ActivityLogger::log('login', "User logged in", 'User', $user->id);
+        ActivityLogger::log('login', "User logged in", module: 'Auth', subjectId: $user->id);
 
         return redirect()->intended($this->landingPathForAuthenticatedUser())
             ->with('success', 'Welcome back!');
@@ -100,7 +100,7 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $userId = Auth::id();
-        ActivityLogger::log('logout', "User logged out", 'User', $userId);
+        ActivityLogger::log('logout', "User logged out", module: 'Auth', subjectId: $userId);
 
         Auth::logout();
 

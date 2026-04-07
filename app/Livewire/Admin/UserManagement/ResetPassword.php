@@ -46,7 +46,7 @@ class ResetPassword extends Component
                 $user->password = Hash::make($defaultPassword);
                 $user->save();
 
-                ActivityLogger::log('reset_user_password', "Reset password for user {$userName}", 'User', (int) $this->userId);
+                ActivityLogger::log('reset_password', "Reset password for user {$userName}", module: 'User', subjectId: (int) $this->userId);
                 $this->closeModal();
                 $this->dispatch('passwordReset');
                 $this->dispatch('showToast', message: "Password for {$userName} has been reset successfully!", type: 'success');

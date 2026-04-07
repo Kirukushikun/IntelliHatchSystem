@@ -33,7 +33,7 @@ class Delete extends Component
             $incubator = Incubator::findOrFail($this->incubatorId);
             $incubatorName = $incubator->incubatorName;
             
-            ActivityLogger::log('deleted_incubator', "Deleted incubator machine {$incubatorName}", 'Incubator', (int) $this->incubatorId);
+            ActivityLogger::log('delete', "Deleted incubator machine {$incubatorName}", module: 'Incubator', subjectId: (int) $this->incubatorId);
             $incubator->delete();
 
             Cache::forget('management:incubators:all');

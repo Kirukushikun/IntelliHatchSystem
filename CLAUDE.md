@@ -208,10 +208,42 @@ Header required: `x-api-key: {API_KEY from .env}`
 
 ## Activity Logging
 
-- **Service:** `app/Services/ActivityLogger.php` — static, call `ActivityLogger::log(action, description, ...)`
-- **Model:** `ActivityLog` — tracks user_id, action, description, subject_type, subject_id, properties (JSON), ip_address
+- **Service:** `app/Services/ActivityLogger.php` — static, call `ActivityLogger::log(action, description, module:, subjectId:, properties:)`
+- **Helper:** `audit(module, action, label, subject, meta)` — global shorthand in `app/helpers.php`
+- **Model:** `ActivityLog` — tracks user_id, action, description, subject_type (module), subject_id, properties (JSON), ip_address
 - **Viewer:** `/admin/activity-logs` (superadmin) — search, filter by action/user/date, sort
 - **Export:** CSV (UTF-8 BOM for Excel) and PDF with active filters displayed
+
+### Standardized Action Names
+Use these consistent action names — never use past tense or compound names:
+
+| Action | When to use |
+|--------|-------------|
+| `login` | User login |
+| `logout` | User logout |
+| `create` | New record created |
+| `update` | Record modified |
+| `delete` | Record removed |
+| `enable` | Record activated |
+| `disable` | Record deactivated |
+| `import` | CSV/bulk import |
+| `export` | Data export |
+| `reset_password` | Admin resets another user's password |
+| `change_password` | User changes own password |
+
+### Standardized Module Names
+Always tag logs with a module (stored in `subject_type` column):
+
+| Module | Scope |
+|--------|-------|
+| `Auth` | Login, logout, own password change |
+| `User` | Hatchery user management |
+| `Admin` | Admin/superadmin management |
+| `Hatcher` | Hatcher machine management |
+| `Incubator` | Incubator machine management |
+| `Plenum` | Plenum machine management |
+| `Form` | Form submissions and imports |
+| `FormType` | Form type configuration |
 
 ## Key .env Variables
 
@@ -269,7 +301,7 @@ Proxy trust level set to `*` in `bootstrap/app.php`.
 - **Config classes:** `Configs/*Config` define field configs for each form type
 - Forms with JSON inputs — always use `form_inputs` JSON column, not separate columns
 - Machine/registry tables use camelCase column names (incubatorName, isActive, creationDate) — follow for all new registries
-- Activity logging — call `ActivityLogger::log()` for significant user actions
+- Activity logging — use `audit(module, action, label, subject, meta)` or `ActivityLogger::log()` with standardized action/module names (see Activity Logging section)
 
 ## Testing
 

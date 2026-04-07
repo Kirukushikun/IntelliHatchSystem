@@ -44,12 +44,12 @@ class Disable extends Component
             Cache::forget('management:plenums:all');
             Cache::forget('management:plenums:' . (int) $this->plenumId);
 
-            $action = !$this->isActive ? 'activated' : 'deactivated';
+            $action = !$this->isActive ? 'enable' : 'disable';
             $plenumName = $this->plenumName; // Store name before closing modal
-            ActivityLogger::log("{$action}_plenum", ucfirst($action) . " plenum machine {$plenumName}", 'Plenum', (int) $this->plenumId);
+            ActivityLogger::log($action, ucfirst($action) . "d plenum machine {$plenumName}", module: 'Plenum', subjectId: (int) $this->plenumId);
             $this->closeModal();
             $this->dispatch('refreshPlenums');
-            $this->dispatch('showToast', message: "{$plenumName} has been successfully {$action}!", type: 'success');
+            $this->dispatch('showToast', message: "{$plenumName} has been successfully {$action}d!", type: 'success');
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to update plenum status. Please try again.', type: 'error');
         } finally {

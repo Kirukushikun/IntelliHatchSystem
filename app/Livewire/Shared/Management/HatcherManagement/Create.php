@@ -50,7 +50,7 @@ class Create extends Component
             Cache::forget('management:hatchers:all');
 
             $hatcherName = $this->hatcherName; // Store name before closing modal
-            ActivityLogger::log('created_hatcher', "Created hatcher machine {$hatcherName}", 'Hatcher');
+            ActivityLogger::log('create', "Created hatcher machine {$hatcherName}", module: 'Hatcher');
             $this->closeModal();
             $this->dispatch('refreshHatchers');
             $this->dispatch('showToast', message: "{$hatcherName} has been successfully created!", type: 'success');

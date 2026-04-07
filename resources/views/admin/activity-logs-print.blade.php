@@ -155,7 +155,7 @@
         </div>
     </div>
 
-    @if ($filters['search'] || $filters['dateFrom'] || $filters['dateTo'] || $filters['actionFilter'])
+    @if ($filters['search'] || $filters['dateFrom'] || $filters['dateTo'] || $filters['actionFilter'] || ($filters['moduleFilter'] ?? ''))
         <div class="filters">
             <strong>Active Filters:</strong>
             @if ($filters['search'])
@@ -163,6 +163,9 @@
             @endif
             @if ($filters['actionFilter'])
                 <span>Action: {{ str_replace('_', ' ', ucfirst($filters['actionFilter'])) }}</span>
+            @endif
+            @if ($filters['moduleFilter'] ?? '')
+                <span>Module: {{ $filters['moduleFilter'] }}</span>
             @endif
             @if ($filters['dateFrom'] || $filters['dateTo'])
                 <span>
@@ -185,6 +188,7 @@
                 <th>Time</th>
                 <th>User</th>
                 <th>Role</th>
+                <th>Module</th>
                 <th>Action</th>
                 <th>Description</th>
                 <th>IP Address</th>
@@ -193,16 +197,17 @@
         <tbody>
             @forelse ($logs as $index => $log)
                 @php
-                    $isDestructive = str_contains($log->action, 'deleted') || str_contains($log->action, 'disabled') || str_contains($log->action, 'deactivated');
-                    $isCreate      = str_contains($log->action, 'created');
-                    $isUpdate      = str_contains($log->action, 'updated') || str_contains($log->action, 'changed') || str_contains($log->action, 'reset') || str_contains($log->action, 'enabled') || str_contains($log->action, 'activated');
-                    $badgeClass    = match(true) {
-                        $log->action === 'login'  => 'badge-green',
-                        $log->action === 'logout' => 'badge-gray',
-                        $isDestructive            => 'badge-red',
-                        $isCreate                 => 'badge-emerald',
-                        $isUpdate                 => 'badge-yellow',
-                        default                   => 'badge-blue',
+                    $badgeClass = match($log->action) {
+                        'login'          => 'badge-green',
+                        'logout'         => 'badge-gray',
+                        'create'         => 'badge-emerald',
+                        'update'         => 'badge-yellow',
+                        'delete'         => 'badge-red',
+                        'enable'         => 'badge-green',
+                        'disable'        => 'badge-red',
+                        'import', 'export' => 'badge-blue',
+                        'reset_password', 'change_password' => 'badge-yellow',
+                        default          => 'badge-blue',
                     };
                     $roleMap = [0 => 'Superadmin', 1 => 'Admin', 2 => 'User'];
                     $role    = $log->user ? ($roleMap[(int) $log->user->user_type] ?? '—') : '—';
@@ -220,6 +225,7 @@
                         @endif
                     </td>
                     <td>{{ $role }}</td>
+                    <td>{{ $log->subject_type ?? '—' }}</td>
                     <td>
                         <span class="action-badge {{ $badgeClass }}">
                             {{ str_replace('_', ' ', ucfirst($log->action)) }}
@@ -230,11 +236,15 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" style="text-align:center;padding:20px;color:#999">No activity logs found</td>
+                    <td colspan="9" style="text-align:center;padding:20px;color:#999">No activity logs found</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
+
+    <p style="text-align:center; font-size:10px; color:#888; margin-top:20px;">
+        This is a system-generated report. No signature is required.
+    </p>
 
     <div class="footer">
         <span>IntelliHatch System — Confidential</span>

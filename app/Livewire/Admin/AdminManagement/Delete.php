@@ -67,7 +67,7 @@ class Delete extends Component
             }
 
             $userName = $user->first_name . ' ' . $user->last_name;
-            ActivityLogger::log('deleted_admin', "Deleted admin {$userName}", 'User', (int) $this->userId);
+            ActivityLogger::log('delete', "Deleted admin {$userName}", module: 'Admin', subjectId: (int) $this->userId);
             $user->delete();
 
             Cache::forget('management:admins:' . (int) $this->userId);

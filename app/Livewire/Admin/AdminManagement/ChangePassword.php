@@ -90,7 +90,7 @@ class ChangePassword extends Component
             $user->save();
 
             $userName = $this->userName;
-            ActivityLogger::log('changed_admin_password', "Changed password for admin {$userName}", 'User', (int) $this->userId);
+            ActivityLogger::log('change_password', "Changed password for admin {$userName}", module: 'Admin', subjectId: (int) $this->userId);
             $this->closeModal();
             $this->dispatch('showToast', message: "Password for {$userName} has been changed successfully!", type: 'success');
         } catch (\Illuminate\Validation\ValidationException $e) {

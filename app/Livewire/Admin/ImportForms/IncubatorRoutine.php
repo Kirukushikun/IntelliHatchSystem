@@ -310,11 +310,10 @@ class IncubatorRoutine extends Component
             Cache::forget($this->cacheKey);
 
             ActivityLogger::log(
-                'csv_import',
+                'import',
                 "Imported {$this->importedCount} Incubator Routine form records from CSV ({$this->totalCsvRows} CSV rows)",
-                Form::class,
-                null,
-                [
+                module: 'Form',
+                properties: [
                     'form_type' => 'Incubator Routine Checklist Per Shift',
                     'csv_rows' => $this->totalCsvRows,
                     'records_imported' => $this->importedCount,

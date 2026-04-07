@@ -44,12 +44,12 @@ class Disable extends Component
             Cache::forget('management:incubators:all');
             Cache::forget('management:incubators:' . (int) $this->incubatorId);
 
-            $action = $this->isActive ? 'deactivated' : 'activated';
+            $action = $this->isActive ? 'disable' : 'enable';
             $incubatorName = $this->incubatorName; // Store name before closing modal
-            ActivityLogger::log("{$action}_incubator", ucfirst($action) . " incubator machine {$incubatorName}", 'Incubator', (int) $this->incubatorId);
+            ActivityLogger::log($action, ucfirst($action) . "d incubator machine {$incubatorName}", module: 'Incubator', subjectId: (int) $this->incubatorId);
             $this->closeModal();
             $this->dispatch('refreshIncubators');
-            $this->dispatch('showToast', message: "{$incubatorName} has been successfully {$action}!", type: 'success');
+            $this->dispatch('showToast', message: "{$incubatorName} has been successfully {$action}d!", type: 'success');
         } catch (\Exception $e) {
             $this->dispatch('showToast', message: 'Failed to update incubator status. Please try again.', type: 'error');
         } finally {

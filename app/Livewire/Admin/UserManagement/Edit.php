@@ -87,7 +87,7 @@ class Edit extends Component
                 Cache::forget('management:users:' . (int) $this->userId);
 
                 $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
-                ActivityLogger::log('updated_user', "Updated user {$fullName}", 'User', (int) $this->userId);
+                ActivityLogger::log('update', "Updated user {$fullName}", module: 'User', subjectId: (int) $this->userId);
                 $this->closeModal();
                 $this->dispatch('showToast', message: "{$fullName} has been updated successfully!", type: 'success');
             }

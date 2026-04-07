@@ -71,7 +71,7 @@ class Edit extends Component
             Cache::forget('management:hatchers:' . (int) $this->hatcherId);
 
             $hatcherName = $this->hatcherName; // Store name before closing modal
-            ActivityLogger::log('updated_hatcher', "Updated hatcher machine {$hatcherName}", 'Hatcher', (int) $this->hatcherId);
+            ActivityLogger::log('update', "Updated hatcher machine {$hatcherName}", module: 'Hatcher', subjectId: (int) $this->hatcherId);
             $this->closeModal();
             $this->dispatch('refreshHatchers');
             $this->dispatch('showToast', message: "{$hatcherName} has been successfully updated!", type: 'success');
