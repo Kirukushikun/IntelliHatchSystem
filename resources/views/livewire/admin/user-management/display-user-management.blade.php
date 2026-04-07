@@ -227,7 +227,7 @@
                                         {{ $user->is_disabled ? 'Enable' : 'Disable' }}
                                     </button>
                                     <button 
-                                        wire:click="$dispatch('openDeleteModal', '{{ $user->id }}')"
+                                        wire:click="$dispatch('openDeleteModal', { userId: {{ $user->id }} })"
                                         class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors cursor-pointer"
                                         title="Delete User">
                                         Delete
@@ -294,7 +294,7 @@
                             {{ $user->is_disabled ? 'Enable' : 'Disable' }}
                         </button>
                         <button 
-                            wire:click="$dispatch('openDeleteModal', '{{ $user->id }}')"
+                            wire:click="$dispatch('openDeleteModal', { userId: {{ $user->id }} })"
                             class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
                             title="Delete User">
                             Delete

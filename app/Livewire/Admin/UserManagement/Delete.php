@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Cache;
@@ -13,8 +14,7 @@ class Delete extends Component
     public $userName = '';
     public $showModal = false;
 
-    protected $listeners = ['openDeleteModal' => 'openModal'];
-
+    #[On('openDeleteModal')]
     public function openModal($userId)
     {
         $this->userId = $userId;

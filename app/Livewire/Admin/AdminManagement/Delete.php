@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\AdminManagement;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Auth;
@@ -14,8 +15,7 @@ class Delete extends Component
     public $userName = '';
     public $showModal = false;
 
-    protected $listeners = ['openDeleteAdminModal' => 'openModal'];
-
+    #[On('openDeleteAdminModal')]
     public function openModal($userId)
     {
         $cacheKey = 'management:admins:' . (int) $userId;
