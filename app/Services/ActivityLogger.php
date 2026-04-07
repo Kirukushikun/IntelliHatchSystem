@@ -45,4 +45,30 @@ class ActivityLogger
             // Never let logging break the application
         }
     }
+
+    /**
+     * Log an activity on behalf of a specific user (for queued jobs).
+     */
+    public static function logForUser(
+        int $userId,
+        string $action,
+        string $description,
+        ?string $module = null,
+        ?int $subjectId = null,
+        array $properties = [],
+    ): void {
+        try {
+            ActivityLog::create([
+                'user_id'      => $userId,
+                'action'       => $action,
+                'description'  => $description,
+                'subject_type' => $module,
+                'subject_id'   => $subjectId,
+                'properties'   => empty($properties) ? null : $properties,
+                'ip_address'   => null,
+            ]);
+        } catch (\Throwable) {
+            // Never let logging break the application
+        }
+    }
 }

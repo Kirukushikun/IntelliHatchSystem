@@ -2,11 +2,10 @@
 
 namespace App\Livewire\Admin\DangerZone;
 
+use App\Jobs\PurgeActivityLogs;
+use App\Jobs\WipeFormSubmissions;
 use App\Models\ActivityLog;
 use App\Models\Form;
-use App\Services\ActivityLogger;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class Display extends Component
@@ -19,7 +18,6 @@ class Display extends Component
     public string $confirmationText = '';
     public bool $showConfirmModal = false;
     public int $affectedCount = 0;
-    public bool $isProcessing = false;
 
     // Activity log purge properties
     public string $logWipeMode = 'all';
@@ -29,7 +27,6 @@ class Display extends Component
     public string $logConfirmationText = '';
     public bool $showLogConfirmModal = false;
     public int $logAffectedCount = 0;
-    public bool $isLogProcessing = false;
 
     public function updatedWipeMode(): void
     {
@@ -111,41 +108,21 @@ class Display extends Component
             return;
         }
 
-        $this->isProcessing = true;
+        WipeFormSubmissions::dispatch(
+            wipeMode: $this->wipeMode,
+            dateFrom: $this->dateFrom ?: null,
+            dateTo: $this->dateTo ?: null,
+            selectedYear: $this->selectedYear ?: null,
+            userId: auth()->id(),
+        );
 
-        try {
-            $query = $this->buildQuery();
-            $totalDeleted = 0;
-            $photosDeleted = 0;
+        $count = $this->affectedCount;
 
-            $query->chunkById(100, function ($forms) use (&$totalDeleted, &$photosDeleted) {
-                foreach ($forms as $form) {
-                    $photosDeleted += $this->deleteFormPhotos($form);
-                    $form->delete();
-                    $totalDeleted++;
-                }
-            });
+        $this->showConfirmModal = false;
+        $this->reset(['confirmationText', 'dateFrom', 'dateTo', 'selectedYear']);
+        $this->affectedCount = 0;
 
-            $description = $this->buildFormLogDescription($totalDeleted, $photosDeleted);
-            ActivityLogger::log('bulk_deleted_forms', $description, 'Form', null, [
-                'mode' => $this->wipeMode,
-                'forms_deleted' => $totalDeleted,
-                'photos_deleted' => $photosDeleted,
-                'date_from' => $this->dateFrom ?: null,
-                'date_to' => $this->dateTo ?: null,
-                'year' => $this->selectedYear ?: null,
-            ]);
-
-            $this->showConfirmModal = false;
-            $this->reset(['confirmationText', 'dateFrom', 'dateTo', 'selectedYear']);
-            $this->affectedCount = 0;
-
-            $this->dispatch('showToast', message: "Successfully deleted {$totalDeleted} form submissions and {$photosDeleted} associated photos.", type: 'success');
-        } catch (\Throwable $e) {
-            $this->dispatch('showToast', message: 'An error occurred while deleting forms: ' . $e->getMessage(), type: 'error');
-        } finally {
-            $this->isProcessing = false;
-        }
+        $this->dispatch('showToast', message: "Wipe of {$count} form submissions has been queued and will be processed in the background.", type: 'success');
     }
 
     public function confirmLogWipe(): void
@@ -154,36 +131,22 @@ class Display extends Component
             return;
         }
 
-        $this->isLogProcessing = true;
+        PurgeActivityLogs::dispatch(
+            logWipeMode: $this->logWipeMode,
+            dateFrom: $this->logDateFrom ?: null,
+            dateTo: $this->logDateTo ?: null,
+            selectedYear: $this->logSelectedYear ?: null,
+            expectedCount: $this->logAffectedCount,
+            userId: auth()->id(),
+        );
 
-        try {
-            $count = $this->logAffectedCount;
-            $this->buildLogQuery()->delete();
+        $count = $this->logAffectedCount;
 
-            $modeDesc = match ($this->logWipeMode) {
-                'date_range' => "by date range ({$this->logDateFrom} to {$this->logDateTo})",
-                'year' => "for year {$this->logSelectedYear}",
-                default => '(all logs)',
-            };
+        $this->showLogConfirmModal = false;
+        $this->reset(['logConfirmationText', 'logDateFrom', 'logDateTo', 'logSelectedYear']);
+        $this->logAffectedCount = 0;
 
-            ActivityLogger::log('bulk_deleted_activity_logs', "Purged {$count} activity logs {$modeDesc}.", 'ActivityLog', null, [
-                'mode' => $this->logWipeMode,
-                'logs_deleted' => $count,
-                'date_from' => $this->logDateFrom ?: null,
-                'date_to' => $this->logDateTo ?: null,
-                'year' => $this->logSelectedYear ?: null,
-            ]);
-
-            $this->showLogConfirmModal = false;
-            $this->reset(['logConfirmationText', 'logDateFrom', 'logDateTo', 'logSelectedYear']);
-            $this->logAffectedCount = 0;
-
-            $this->dispatch('showToast', message: "Successfully purged {$count} activity log entries.", type: 'success');
-        } catch (\Throwable $e) {
-            $this->dispatch('showToast', message: 'An error occurred while purging logs: ' . $e->getMessage(), type: 'error');
-        } finally {
-            $this->isLogProcessing = false;
-        }
+        $this->dispatch('showToast', message: "Purge of {$count} activity log entries has been queued and will be processed in the background.", type: 'success');
     }
 
     public function closeModal(): void
@@ -230,86 +193,5 @@ class Display extends Component
             'year' => $query->whereYear('created_at', $this->logSelectedYear),
             default => $query,
         };
-    }
-
-    private function deleteFormPhotos(Form $form): int
-    {
-        $photoUrls = $this->extractPhotoUrls($form->form_inputs ?? []);
-        $count = 0;
-
-        foreach ($photoUrls as $url) {
-            $relativePath = $this->stripStoragePrefix($url);
-
-            if ($relativePath && Storage::disk('public')->exists($relativePath)) {
-                Storage::disk('public')->delete($relativePath);
-            }
-
-            DB::table('photos')->where('public_path', $url)->delete();
-            $count++;
-        }
-
-        return $count;
-    }
-
-    private function extractPhotoUrls(array $inputs): array
-    {
-        $urls = [];
-
-        foreach ($inputs as $value) {
-            if (is_array($value)) {
-                foreach ($value as $nested) {
-                    if (is_array($nested)) {
-                        foreach ($nested as $item) {
-                            if (is_string($item) && $this->looksLikePhotoUrl($item)) {
-                                $urls[] = $item;
-                            }
-                        }
-                    } elseif (is_string($nested) && $this->looksLikePhotoUrl($nested)) {
-                        $urls[] = $nested;
-                    }
-                }
-            } elseif (is_string($value) && $this->looksLikePhotoUrl($value)) {
-                $urls[] = $value;
-            }
-        }
-
-        return array_unique($urls);
-    }
-
-    private function looksLikePhotoUrl(string $value): bool
-    {
-        return str_contains($value, '/storage/forms/');
-    }
-
-    private function stripStoragePrefix(string $publicPath): string
-    {
-        if (str_starts_with($publicPath, asset('storage/'))) {
-            return substr($publicPath, strlen(asset('storage/')));
-        }
-
-        $patterns = [
-            'https://intellihatch.bfcgroup.ph/storage/',
-            'http://intellihatch.bfcgroup.ph/storage/',
-            'storage/',
-        ];
-
-        foreach ($patterns as $pattern) {
-            if (str_starts_with($publicPath, $pattern)) {
-                return substr($publicPath, strlen($pattern));
-            }
-        }
-
-        return $publicPath;
-    }
-
-    private function buildFormLogDescription(int $totalDeleted, int $photosDeleted): string
-    {
-        $modeDesc = match ($this->wipeMode) {
-            'date_range' => "by date range ({$this->dateFrom} to {$this->dateTo})",
-            'year' => "for year {$this->selectedYear}",
-            default => '(all submissions)',
-        };
-
-        return "Bulk deleted {$totalDeleted} form submissions {$modeDesc}. {$photosDeleted} associated photos removed.";
     }
 }
