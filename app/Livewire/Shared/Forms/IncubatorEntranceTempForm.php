@@ -22,7 +22,6 @@ class IncubatorEntranceTempForm extends FormNavigation
 
     public bool $formSubmitted = false;
 
-    protected bool $disableShiftLogic = true;
 
     /** @var array */
     public $incubators = [];
@@ -278,7 +277,7 @@ class IncubatorEntranceTempForm extends FormNavigation
                     'submitted_by' => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
                     'date_time'    => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
                     'photos'       => [],
-                    'shift'        => 'N/A',
+                    'shift'        => $formInputs['shift'] ?? 'N/A',
                 ],
                 'timestamp' => now()->toISOString(),
             ];

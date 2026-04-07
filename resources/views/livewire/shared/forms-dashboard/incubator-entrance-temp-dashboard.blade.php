@@ -48,7 +48,6 @@
                         </th>
                         <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700"><p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Hatchery Man</p></th>
                         <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700"><p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Incubator</p></th>
-                        <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700"><p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Days of Incubation</p></th>
                         <th class="p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-center"><p class="text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Actions</p></th>
                     </tr>
                 </thead>
@@ -59,7 +58,6 @@
                             <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p></td>
                             <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p></td>
                             <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $formData['machine_info']['name'] ?? 'N/A' }}</p></td>
-                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $formData['days_of_incubation'] ?? 'N/A' }}</p></td>
                             <td class="p-4 py-5 text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <button wire:click="viewDetails({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors">View</button>
@@ -81,7 +79,6 @@
                     <div class="space-y-2">
                         <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span></div>
                         <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Incubator:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $formData['machine_info']['name'] ?? 'N/A' }}</span></div>
-                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Days of Incubation:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $formData['days_of_incubation'] ?? 'N/A' }}</span></div>
                     </div>
                     <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                         <button wire:click="viewDetails({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 rounded-md hover:bg-blue-100 transition-colors">View</button>

@@ -8,16 +8,15 @@ class IncubatorEntranceTempConfig
     {
         return [
             'form.hatchery_man'       => 'required|integer|exists:users,id',
+            'form.shift'              => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
             'form.time_of_check'      => ['required', 'date_format:H:i'],
-            'form.days_of_incubation' => 'required|string|in:Day 1 to 10,Day 10 to 12,Day 12 to 14,Day 14 to 18',
             'form.incubator'          => 'required|integer|exists:incubator-machines,id',
 
             'form.set_point_temp'     => 'required|string',
             'form.set_point_humidity' => 'required|string',
-            'form.entrance_temp'      => 'required|string',
+            'form.entrance_temp_left'  => 'required|string',
+            'form.entrance_temp_right' => 'required|string',
             'form.entrance_photo.*'   => 'image|max:1024',
-            'form.baggy'              => 'required|string',
-            'form.baggy_photo.*'      => 'image|max:1024',
 
             'form.temp_adjustment_notes'   => 'required|string',
             'form.temp_adjustment_photo.*' => 'image|max:1024',
@@ -36,15 +35,15 @@ class IncubatorEntranceTempConfig
             'image'                                 => 'Please upload a valid image.',
             'form.hatchery_man.required'            => 'Please select a hatcheryman.',
             'form.hatchery_man.exists'              => 'Please select a valid hatcheryman.',
+            'form.shift.required'                   => 'Please select a shift.',
             'form.time_of_check.required'           => 'Please enter the time of checking.',
             'form.time_of_check.date_format'        => 'Please select a valid time.',
-            'form.days_of_incubation.required'      => 'Please select the days of incubation.',
             'form.incubator.required'               => 'Please select an incubator.',
             'form.incubator.exists'                 => 'Please select a valid incubator.',
             'form.set_point_temp.required'     => 'Please enter the set point temperature.',
             'form.set_point_humidity.required' => 'Please enter the set point humidity.',
-            'form.entrance_temp.required'      => 'Please enter the entrance temperature reading (left and right).',
-            'form.baggy.required'              => 'Please enter the Baggy No. 2 temperature reading (left and right).',
+            'form.entrance_temp_left.required'  => 'Please enter the left entrance temperature reading.',
+            'form.entrance_temp_right.required' => 'Please enter the right entrance temperature reading.',
             'form.temp_adjustment_notes.required'   => 'Please enter the temperature adjustment notes.',
             'form.time_finished.required'           => 'Please enter the time finished.',
             'form.time_finished.date_format'        => 'Please select a valid time.',
@@ -60,16 +59,15 @@ class IncubatorEntranceTempConfig
     {
         return [
             'hatchery_man'       => '',
+            'shift'              => '',
             'time_of_check'      => '',
-            'days_of_incubation' => '',
             'incubator'          => '',
 
             'set_point_temp'     => '',
             'set_point_humidity' => '',
-            'entrance_temp'      => '',
+            'entrance_temp_left'  => '',
+            'entrance_temp_right' => '',
             'entrance_photo'     => [],
-            'baggy'              => '',
-            'baggy_photo'        => [],
 
             'temp_adjustment_notes'  => '',
             'temp_adjustment_photo'  => [],
@@ -80,11 +78,10 @@ class IncubatorEntranceTempConfig
     public static function stepFieldMap(): array
     {
         return [
-            1 => ['hatchery_man', 'time_of_check', 'days_of_incubation', 'incubator'],
+            1 => ['hatchery_man', 'shift', 'time_of_check', 'incubator'],
             2 => [
                 'set_point_temp', 'set_point_humidity',
-                'entrance_temp', 'entrance_photo',
-                'baggy', 'baggy_photo',
+                'entrance_temp_left', 'entrance_temp_right', 'entrance_photo',
             ],
             3 => ['temp_adjustment_notes', 'temp_adjustment_photo', 'time_finished'],
         ];
