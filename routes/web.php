@@ -274,6 +274,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/import/diesel-generator-weekly', function () {
             return view('admin.import-diesel-generator-weekly');
         })->name('admin.import.diesel-generator-weekly');
+
+        Route::get('/admin/danger-zone', function () {
+            return view('admin.danger-zone');
+        })->name('admin.danger-zone');
     });
     
     // User routes
