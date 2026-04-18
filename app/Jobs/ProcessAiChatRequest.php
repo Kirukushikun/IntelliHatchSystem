@@ -92,7 +92,7 @@ class ProcessAiChatRequest implements ShouldQueue
                 ->where('form_type_id', $typeId)
                 ->whereBetween('date_submitted', [$start, $end])
                 ->orderBy('date_submitted', 'asc')
-                ->get(['id', 'form_inputs', 'date_submitted']);
+                ->get(['id', 'form_inputs', 'date_submitted', 'uploaded_by']);
 
             $total = $forms->count();
 
@@ -104,9 +104,25 @@ class ProcessAiChatRequest implements ShouldQueue
 
             // Daily breakdown
             $byDay = [];
+            $submitterCounts = [];
             foreach ($forms as $form) {
                 $day = Carbon::parse($form->date_submitted)->format('Y-m-d');
                 $byDay[$day] = ($byDay[$day] ?? 0) + 1;
+
+                if ($form->uploaded_by) {
+                    $submitterCounts[$form->uploaded_by] = ($submitterCounts[$form->uploaded_by] ?? 0) + 1;
+                }
+            }
+
+            // Resolve user names for submitters
+            $submitterNames = [];
+            if (! empty($submitterCounts)) {
+                $submitterNames = DB::table('users')
+                    ->whereIn('id', array_keys($submitterCounts))
+                    ->get(['id', 'first_name', 'last_name'])
+                    ->pluck(null, 'id')
+                    ->map(fn ($u) => trim("{$u->first_name} {$u->last_name}"))
+                    ->toArray();
             }
 
             // Field value aggregation (sample up to 50)
@@ -147,12 +163,24 @@ class ProcessAiChatRequest implements ShouldQueue
                 $byDayText .= "  {$day}: {$cnt} submission(s)\n";
             }
 
+            $submitterText = '';
+            if (! empty($submitterCounts)) {
+                arsort($submitterCounts);
+                $submitterLines = [];
+                foreach ($submitterCounts as $userId => $cnt) {
+                    $name = $submitterNames[$userId] ?? "User #{$userId}";
+                    $submitterLines[] = "  {$name}: {$cnt} submission(s)";
+                }
+                $submitterText = implode("\n", $submitterLines);
+            }
+
             $sections[] = implode("\n", array_filter([
                 "## {$formType->form_name}",
                 "Period: {$label}",
                 "Total Submissions: {$total}",
                 'Daily Breakdown:',
                 rtrim($byDayText),
+                ! empty($submitterText) ? "Submitted By:\n{$submitterText}" : null,
                 "Field Value Summary (top values from {$sample->count()} sampled records):",
                 implode("\n", $fieldLines),
             ]));
