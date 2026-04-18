@@ -13,7 +13,7 @@
                 <x-title>HATCHERY SULLAIR AIR COMPRESSOR WEEKLY PMS CHECKLIST</x-title>
 
                 <div data-field="hatchery_man">
-                    <x-dropdown label="Hatchery Man" name="hatchery_man" error-key="form.hatchery_man" placeholder="Select hatchery man" wire:model.live="form.hatchery_man" required>
+                    <x-dropdown label="Maintenance Personnel" name="hatchery_man" error-key="form.hatchery_man" placeholder="Select maintenance personnel" wire:model.live="form.hatchery_man" required>
                         @foreach($hatcheryMen as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
                         @endforeach
@@ -44,7 +44,7 @@
                 </div>
 
                 <div data-field="actual_psi_temperature_photos">
-                    <x-photo-attach label="Photos of Actual PSI and Temperature Reading" name="actual_psi_temperature_photos"/>
+                    <x-photo-attach label="Photos of Actual PSI and Temperature Reading" name="actual_psi_temperature_photos" :required="true"/>
                 </div>
 
                 <div data-field="actual_volt_reading">
@@ -52,7 +52,7 @@
                 </div>
 
                 <div data-field="actual_volt_photos">
-                    <x-photo-attach label="Photos" name="actual_volt_photos"/>
+                    <x-photo-attach label="Photos" name="actual_volt_photos" :required="true"/>
                 </div>
 
                 <div data-field="actual_ampere_reading">
@@ -60,7 +60,7 @@
                 </div>
 
                 <div data-field="actual_ampere_photos">
-                    <x-photo-attach label="Photos" name="actual_ampere_photos"/>
+                    <x-photo-attach label="Photos" name="actual_ampere_photos" :required="true"/>
                 </div>
             </div>
 
@@ -73,7 +73,7 @@
                         <option value="With Minimal Damage">With Minimal Damage</option>
                         <option value="For Replacement">For Replacement</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="status_wiring_lugs_control_photos"/>
+                    <x-photo-attach label="Photos" name="status_wiring_lugs_control_photos" :required="true"/>
                 </div>
 
                 <div data-field="status_solenoid_valve">
@@ -82,7 +82,7 @@
                         <option value="With Minimal Damage">With Minimal Damage</option>
                         <option value="For Replacement">For Replacement</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="status_solenoid_valve_photos"/>
+                    <x-photo-attach label="Photos" name="status_solenoid_valve_photos" :required="true"/>
                 </div>
 
                 <div data-field="status_fan_motor">
@@ -91,7 +91,7 @@
                         <option value="With Minimal Damage">With Minimal Damage</option>
                         <option value="For Replacement">For Replacement</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="status_fan_motor_photos"/>
+                    <x-photo-attach label="Photos" name="status_fan_motor_photos" :required="true"/>
                 </div>
             </div>
 
@@ -104,7 +104,7 @@
                         <option value="With Leak for Repair">With Leak for Repair</option>
                         <option value="With Leak for Replacement">With Leak for Replacement</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="status_hose_photos"/>
+                    <x-photo-attach label="Photos" name="status_hose_photos" :required="true"/>
                 </div>
 
                 <div data-field="actual_oil_level_status">
@@ -112,7 +112,7 @@
                         <option value="Above or On Its Level Requirement">Above or On Its Level Requirement</option>
                         <option value="For Refill">For Refill</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="actual_oil_level_status_photos"/>
+                    <x-photo-attach label="Photos" name="actual_oil_level_status_photos" :required="true"/>
                 </div>
 
                 <div data-field="tension_belt_status">
@@ -120,7 +120,7 @@
                         <option value="Good Condition">Good Condition</option>
                         <option value="For Replacement">For Replacement</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="tension_belt_status_photos"/>
+                    <x-photo-attach label="Photos" name="tension_belt_status_photos" :required="true"/>
                 </div>
             </div>
 
@@ -132,7 +132,7 @@
                         <option value="Good Condition">Good Condition</option>
                         <option value="For Replacement">For Replacement</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="status_water_filter_photos"/>
+                    <x-photo-attach label="Photos" name="status_water_filter_photos" :required="true"/>
                 </div>
 
                 <div data-field="air_pipe_status">
@@ -140,7 +140,7 @@
                         <option value="No Any Leak">No Any Leak</option>
                         <option value="With Leak For Repair or Replacement">With Leak For Repair or Replacement</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="air_pipe_status_photos"/>
+                    <x-photo-attach label="Photos" name="air_pipe_status_photos" :required="true"/>
                 </div>
 
                 <div data-field="air_dryer_status">
@@ -148,7 +148,7 @@
                         <option value="Clean and Good Status">Clean and Good Status</option>
                         <option value="For Repair and Replacement">For Repair and Replacement</option>
                     </x-dropdown>
-                    <x-photo-attach label="Photos" name="air_dryer_status_photos"/>
+                    <x-photo-attach label="Photos" name="air_dryer_status_photos" :required="true"/>
                 </div>
 
                 <div data-field="inspected_by">

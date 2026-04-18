@@ -150,7 +150,7 @@
                             </p>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Hatchery Man</p>
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Maintenance Personnel</p>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Sullair No.</p>
@@ -223,7 +223,7 @@
 
                     <div class="space-y-2">
                         <div class="flex justify-between">
-                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Maintenance Personnel:</span>
                             <span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span>
                         </div>
                         <div class="flex justify-between">

@@ -80,7 +80,7 @@
                                 <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->selectedForm->date_submitted ? $this->selectedForm->date_submitted->format('d M, Y g:i A') : 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
-                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Hatchery Man:</span>
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Maintenance Personnel:</span>
                                 <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->selectedForm->user ? ($this->selectedForm->user->first_name . ' ' . $this->selectedForm->user->last_name) : 'Unknown' }}</span>
                             </div>
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
