@@ -83,6 +83,9 @@ class DieselGeneratorWeeklyConfig
             'form.oil_temperature_f'                    => 'required|string|max:255',
             'form.running_condition'                    => 'required|in:Normal,Abnormal',
 
+            // FIRE EXTINGUISHER
+            'form.fire_extinguisher_qty'                => 'required|integer|min:0',
+
             // SUMMARY
             'form.notes'                                => 'required|string|max:2000',
             'form.diesel_tank_level'                    => 'required|in:Full Tank,Half Tank,For Refill',
@@ -170,6 +173,10 @@ class DieselGeneratorWeeklyConfig
             'form.oil_pressure_kpa.required'                     => 'Please enter the oil pressure reading.',
             'form.oil_temperature_f.required'                    => 'Please enter the oil temperature reading.',
             'form.running_condition.required'                    => 'Please indicate the running condition.',
+
+            'form.fire_extinguisher_qty.required'                 => 'Please enter the quantity of fire extinguishers.',
+            'form.fire_extinguisher_qty.integer'                  => 'Please enter a valid number.',
+            'form.fire_extinguisher_qty.min'                      => 'Quantity cannot be negative.',
 
             'form.notes.required'                                => 'Please enter notes or write "N/A".',
             'form.diesel_tank_level.required'                    => 'Please indicate the diesel tank level.',
@@ -262,6 +269,9 @@ class DieselGeneratorWeeklyConfig
             'oil_temperature_f'                    => '',
             'running_condition'                    => '',
 
+            // FIRE EXTINGUISHER
+            'fire_extinguisher_qty'                => '',
+
             // SUMMARY
             'notes'                                => '',
             'diesel_tank_level'                    => '',
@@ -290,7 +300,8 @@ class DieselGeneratorWeeklyConfig
             15 => ['main_gen_windings_status', 'main_gen_windings_problem', 'main_gen_windings_corrective_action', 'photo_main_gen_windings'],
             16 => ['switch_gear_status', 'switch_gear_problem', 'switch_gear_corrective_action', 'photo_switch_gear'],
             17 => ['test_run_conducted', 'test_run_time', 'previous_running_time', 'present_running_time', 'line_voltages', 'line_amperes', 'hertz_reading', 'oil_pressure_kpa', 'oil_temperature_f', 'running_condition'],
-            18 => ['notes', 'diesel_tank_level', 'refill_date', 'available_diesel_stock'],
+            18 => ['fire_extinguisher_qty', 'photo_fire_extinguisher'],
+            19 => ['notes', 'diesel_tank_level', 'refill_date', 'available_diesel_stock'],
         ];
     }
 

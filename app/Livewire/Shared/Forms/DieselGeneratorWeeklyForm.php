@@ -99,6 +99,41 @@ class DieselGeneratorWeeklyForm extends FormNavigation
         try {
             $this->validate(DieselGeneratorWeeklyConfig::getRules(), $this->messages());
 
+            // All photos are required
+            $requiredPhotos = [
+                'photo_lub_leaks'           => 2,
+                'photo_lub_oil_level'       => 3,
+                'photo_cool_leaks'          => 4,
+                'photo_cool_radiator'       => 5,
+                'photo_cool_hose'           => 6,
+                'photo_cool_coolant_level'  => 7,
+                'photo_cool_belt'           => 8,
+                'photo_fuel_leaks'          => 9,
+                'photo_air_intake_leaks'    => 10,
+                'photo_air_intake_cleaner'  => 11,
+                'photo_exhaust_leaks'       => 12,
+                'photo_engine_vibration'    => 13,
+                'photo_main_gen_air'        => 14,
+                'photo_main_gen_windings'   => 15,
+                'photo_switch_gear'         => 16,
+            ];
+
+            foreach ($requiredPhotos as $photoKey => $step) {
+                if (empty($this->uploadedPhotoIds[$photoKey])) {
+                    $this->dispatch('showToast', message: 'Please upload at least one photo for each check item before submitting.', type: 'error');
+                    $this->goToStepWithField($photoKey);
+                    return;
+                }
+            }
+
+            // Fire extinguisher photo required only when qty > 0
+            $fireQty = (int) ($this->form['fire_extinguisher_qty'] ?? 0);
+            if ($fireQty > 0 && empty($this->uploadedPhotoIds['photo_fire_extinguisher'])) {
+                $this->dispatch('showToast', message: 'Please upload a photo of the fire extinguisher(s).', type: 'error');
+                $this->goToStepWithField('photo_fire_extinguisher');
+                return;
+            }
+
             if (!$this->ensureAllPhotosUploaded()) {
                 $this->dispatch('showToast', message: 'Photo uploads are still in progress. Please wait for all photos to finish uploading before submitting the form.', type: 'error');
                 return;

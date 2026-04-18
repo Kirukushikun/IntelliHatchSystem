@@ -64,7 +64,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="lub_leaks_problem">
+                <div data-field="lub_leaks_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.lub_leaks_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="lub_leaks_problem"
@@ -75,7 +76,8 @@
                     />
                 </div>
 
-                <div data-field="lub_leaks_corrective_action">
+                <div data-field="lub_leaks_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.lub_leaks_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="lub_leaks_corrective_action"
@@ -87,7 +89,7 @@
                 </div>
 
                 <div data-field="photo_lub_leaks">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_lub_leaks" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_lub_leaks" required />
                 </div>
             </div>
 
@@ -109,7 +111,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="lub_oil_level_problem">
+                <div data-field="lub_oil_level_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.lub_oil_level_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="lub_oil_level_problem"
@@ -120,7 +123,8 @@
                     />
                 </div>
 
-                <div data-field="lub_oil_level_corrective_action">
+                <div data-field="lub_oil_level_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.lub_oil_level_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="lub_oil_level_corrective_action"
@@ -132,7 +136,7 @@
                 </div>
 
                 <div data-field="photo_lub_oil_level">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_lub_oil_level" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_lub_oil_level" required />
                 </div>
             </div>
 
@@ -154,7 +158,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="cool_leaks_problem">
+                <div data-field="cool_leaks_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_leaks_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="cool_leaks_problem"
@@ -165,7 +170,8 @@
                     />
                 </div>
 
-                <div data-field="cool_leaks_corrective_action">
+                <div data-field="cool_leaks_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_leaks_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="cool_leaks_corrective_action"
@@ -177,7 +183,7 @@
                 </div>
 
                 <div data-field="photo_cool_leaks">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_cool_leaks" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_cool_leaks" required />
                 </div>
             </div>
 
@@ -199,7 +205,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="cool_radiator_problem">
+                <div data-field="cool_radiator_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_radiator_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="cool_radiator_problem"
@@ -210,7 +217,8 @@
                     />
                 </div>
 
-                <div data-field="cool_radiator_corrective_action">
+                <div data-field="cool_radiator_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_radiator_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="cool_radiator_corrective_action"
@@ -222,7 +230,7 @@
                 </div>
 
                 <div data-field="photo_cool_radiator">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_cool_radiator" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_cool_radiator" required />
                 </div>
             </div>
 
@@ -244,7 +252,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="cool_hose_problem">
+                <div data-field="cool_hose_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_hose_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="cool_hose_problem"
@@ -255,7 +264,8 @@
                     />
                 </div>
 
-                <div data-field="cool_hose_corrective_action">
+                <div data-field="cool_hose_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_hose_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="cool_hose_corrective_action"
@@ -267,7 +277,7 @@
                 </div>
 
                 <div data-field="photo_cool_hose">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_cool_hose" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_cool_hose" required />
                 </div>
             </div>
 
@@ -289,7 +299,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="cool_coolant_level_problem">
+                <div data-field="cool_coolant_level_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_coolant_level_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="cool_coolant_level_problem"
@@ -300,7 +311,8 @@
                     />
                 </div>
 
-                <div data-field="cool_coolant_level_corrective_action">
+                <div data-field="cool_coolant_level_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_coolant_level_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="cool_coolant_level_corrective_action"
@@ -312,7 +324,7 @@
                 </div>
 
                 <div data-field="photo_cool_coolant_level">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_cool_coolant_level" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_cool_coolant_level" required />
                 </div>
             </div>
 
@@ -334,7 +346,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="cool_belt_problem">
+                <div data-field="cool_belt_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_belt_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="cool_belt_problem"
@@ -345,7 +358,8 @@
                     />
                 </div>
 
-                <div data-field="cool_belt_corrective_action">
+                <div data-field="cool_belt_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.cool_belt_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="cool_belt_corrective_action"
@@ -357,7 +371,7 @@
                 </div>
 
                 <div data-field="photo_cool_belt">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_cool_belt" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_cool_belt" required />
                 </div>
             </div>
 
@@ -379,7 +393,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="fuel_leaks_problem">
+                <div data-field="fuel_leaks_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.fuel_leaks_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="fuel_leaks_problem"
@@ -390,7 +405,8 @@
                     />
                 </div>
 
-                <div data-field="fuel_leaks_corrective_action">
+                <div data-field="fuel_leaks_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.fuel_leaks_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="fuel_leaks_corrective_action"
@@ -402,7 +418,7 @@
                 </div>
 
                 <div data-field="photo_fuel_leaks">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_fuel_leaks" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_fuel_leaks" required />
                 </div>
             </div>
 
@@ -424,7 +440,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="air_intake_leaks_problem">
+                <div data-field="air_intake_leaks_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.air_intake_leaks_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="air_intake_leaks_problem"
@@ -435,7 +452,8 @@
                     />
                 </div>
 
-                <div data-field="air_intake_leaks_corrective_action">
+                <div data-field="air_intake_leaks_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.air_intake_leaks_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="air_intake_leaks_corrective_action"
@@ -447,7 +465,7 @@
                 </div>
 
                 <div data-field="photo_air_intake_leaks">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_air_intake_leaks" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_air_intake_leaks" required />
                 </div>
             </div>
 
@@ -469,7 +487,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="air_intake_cleaner_problem">
+                <div data-field="air_intake_cleaner_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.air_intake_cleaner_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="air_intake_cleaner_problem"
@@ -480,7 +499,8 @@
                     />
                 </div>
 
-                <div data-field="air_intake_cleaner_corrective_action">
+                <div data-field="air_intake_cleaner_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.air_intake_cleaner_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="air_intake_cleaner_corrective_action"
@@ -492,7 +512,7 @@
                 </div>
 
                 <div data-field="photo_air_intake_cleaner">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_air_intake_cleaner" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_air_intake_cleaner" required />
                 </div>
             </div>
 
@@ -514,7 +534,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="exhaust_leaks_problem">
+                <div data-field="exhaust_leaks_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.exhaust_leaks_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="exhaust_leaks_problem"
@@ -525,7 +546,8 @@
                     />
                 </div>
 
-                <div data-field="exhaust_leaks_corrective_action">
+                <div data-field="exhaust_leaks_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.exhaust_leaks_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="exhaust_leaks_corrective_action"
@@ -537,7 +559,7 @@
                 </div>
 
                 <div data-field="photo_exhaust_leaks">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_exhaust_leaks" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_exhaust_leaks" required />
                 </div>
             </div>
 
@@ -559,7 +581,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="engine_vibration_problem">
+                <div data-field="engine_vibration_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.engine_vibration_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="engine_vibration_problem"
@@ -570,7 +593,8 @@
                     />
                 </div>
 
-                <div data-field="engine_vibration_corrective_action">
+                <div data-field="engine_vibration_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.engine_vibration_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="engine_vibration_corrective_action"
@@ -582,7 +606,7 @@
                 </div>
 
                 <div data-field="photo_engine_vibration">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_engine_vibration" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_engine_vibration" required />
                 </div>
             </div>
 
@@ -604,7 +628,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="main_gen_air_problem">
+                <div data-field="main_gen_air_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.main_gen_air_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="main_gen_air_problem"
@@ -615,7 +640,8 @@
                     />
                 </div>
 
-                <div data-field="main_gen_air_corrective_action">
+                <div data-field="main_gen_air_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.main_gen_air_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="main_gen_air_corrective_action"
@@ -627,7 +653,7 @@
                 </div>
 
                 <div data-field="photo_main_gen_air">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_main_gen_air" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_main_gen_air" required />
                 </div>
             </div>
 
@@ -649,7 +675,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="main_gen_windings_problem">
+                <div data-field="main_gen_windings_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.main_gen_windings_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="main_gen_windings_problem"
@@ -660,7 +687,8 @@
                     />
                 </div>
 
-                <div data-field="main_gen_windings_corrective_action">
+                <div data-field="main_gen_windings_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.main_gen_windings_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="main_gen_windings_corrective_action"
@@ -672,7 +700,7 @@
                 </div>
 
                 <div data-field="photo_main_gen_windings">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_main_gen_windings" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_main_gen_windings" required />
                 </div>
             </div>
 
@@ -694,7 +722,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="switch_gear_problem">
+                <div data-field="switch_gear_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.switch_gear_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
                         name="switch_gear_problem"
@@ -705,7 +734,8 @@
                     />
                 </div>
 
-                <div data-field="switch_gear_corrective_action">
+                <div data-field="switch_gear_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.switch_gear_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
                         name="switch_gear_corrective_action"
@@ -717,7 +747,7 @@
                 </div>
 
                 <div data-field="photo_switch_gear">
-                    <x-photo-attach label="Attached necessary pictures or document for reference. (Optional)" name="photo_switch_gear" />
+                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_switch_gear" required />
                 </div>
             </div>
 
@@ -741,7 +771,8 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="test_run_time">
+                <div data-field="test_run_time" class="relative">
+                    <button type="button" @click="$wire.set('form.test_run_time', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-input
                         label="Indicate the time start and end time of the actual test run conducted"
                         name="test_run_time"
@@ -774,7 +805,8 @@
                     />
                 </div>
 
-                <div data-field="line_voltages">
+                <div data-field="line_voltages" class="relative">
+                    <button type="button" @click="$wire.set('form.line_voltages', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-input
                         label="Indicate the three (3) line voltages (V) reading"
                         name="line_voltages"
@@ -785,7 +817,8 @@
                     />
                 </div>
 
-                <div data-field="line_amperes">
+                <div data-field="line_amperes" class="relative">
+                    <button type="button" @click="$wire.set('form.line_amperes', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-input
                         label="Indicate the three (3) line amperes (A) reading"
                         name="line_amperes"
@@ -796,7 +829,8 @@
                     />
                 </div>
 
-                <div data-field="hertz_reading">
+                <div data-field="hertz_reading" class="relative">
+                    <button type="button" @click="$wire.set('form.hertz_reading', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-input
                         label="Indicate the hertz (Hz) reading"
                         name="hertz_reading"
@@ -807,7 +841,8 @@
                     />
                 </div>
 
-                <div data-field="oil_pressure_kpa">
+                <div data-field="oil_pressure_kpa" class="relative">
+                    <button type="button" @click="$wire.set('form.oil_pressure_kpa', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-input
                         label="Indicate the oil pressure reading (kPa)"
                         name="oil_pressure_kpa"
@@ -818,7 +853,8 @@
                     />
                 </div>
 
-                <div data-field="oil_temperature_f">
+                <div data-field="oil_temperature_f" class="relative">
+                    <button type="button" @click="$wire.set('form.oil_temperature_f', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-input
                         label="Indicate the oil temperature (°F)"
                         name="oil_temperature_f"
@@ -844,11 +880,37 @@
                 </div>
             </div>
 
-            {{-- Step 18: Summary & Diesel Status --}}
+            {{-- Step 18: Fire Extinguisher --}}
             <div data-step="18" class="space-y-4" @style(["display:none" => $currentStep !== 18])>
+                <x-title>QUANTITY OF FIRE EXTINGUISHER</x-title>
+
+                <div data-field="fire_extinguisher_qty">
+                    <x-text-input
+                        label="Quantity of Fire Extinguisher"
+                        name="fire_extinguisher_qty"
+                        error-key="form.fire_extinguisher_qty"
+                        type="number"
+                        :required="true"
+                        placeholder="Enter quantity"
+                        wireModel="form.fire_extinguisher_qty"
+                    />
+                </div>
+
+                <div data-field="photo_fire_extinguisher">
+                    @if(($form['fire_extinguisher_qty'] ?? '') !== '' && (int) ($form['fire_extinguisher_qty'] ?? 0) === 0)
+                        <x-photo-attach label="Photo of Fire Extinguisher (Optional)" name="photo_fire_extinguisher" :required="false" />
+                    @else
+                        <x-photo-attach label="Photo of Fire Extinguisher" name="photo_fire_extinguisher" required />
+                    @endif
+                </div>
+            </div>
+
+            {{-- Step 19: Summary & Diesel Status --}}
+            <div data-step="19" class="space-y-4" @style(["display:none" => $currentStep !== 19])>
                 <x-title>SUMMARY &amp; DIESEL STATUS</x-title>
 
-                <div data-field="notes">
+                <div data-field="notes" class="relative">
+                    <button type="button" @click="$wire.set('form.notes', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Notes and other concerns"
                         name="notes"
@@ -874,13 +936,14 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="refill_date">
+                <div data-field="refill_date" class="relative">
+                    <button type="button" @click="$wire.set('form.refill_date', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-input
                         label="If for refill, when will it be refilled?"
                         name="refill_date"
                         error-key="form.refill_date"
                         :required="true"
-                        placeholder='Enter refill date or schedule. Write "N/A" if not for refill.'
+                        placeholder='Enter refill date or schedule. Write "N/A" if full tank or not for refill.'
                         wireModel="form.refill_date"
                     />
                 </div>
