@@ -14,6 +14,8 @@ class Index extends Component
 {
     use WithPagination;
 
+    public string $search = '';
+
     public bool $showForm = false;
 
     #[Validate('required|string|min:10|max:2000')]
@@ -117,10 +119,16 @@ class Index extends Component
         }
     }
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         $chats = AiChat::where('user_id', auth()->id())
             ->with('formType')
+            ->when($this->search !== '', fn ($q) => $q->where('prompt', 'like', '%' . $this->search . '%'))
             ->orderByDesc('created_at')
             ->paginate(10);
 
