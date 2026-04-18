@@ -243,7 +243,21 @@ class IncubatorRoutineForm extends FormNavigation
 
         try {
             $this->validate($rules, $messages);
-            
+
+            // Require at least one photo for each visible checklist field
+            $visibleFields = $this->getVisibleFieldNames();
+            $headerFields = ['shift', 'alarm_system_condition', 'corrective_action', 'hatchery_man', 'incubator'];
+            $checklistFields = array_diff($visibleFields, $headerFields);
+
+            foreach ($checklistFields as $field) {
+                $photoKey = $field . '_photos';
+                if (empty($this->uploadedPhotoIds[$photoKey])) {
+                    $this->dispatch('showToast', message: 'Please upload at least one photo for each checklist item before submitting.', type: 'error');
+                    $this->goToStepWithField($field);
+                    return;
+                }
+            }
+
             // Ensure all pending photos are fully uploaded before proceeding
             if (!$this->ensureAllPhotosUploaded()) {
                 $this->dispatch('showToast', message: 'Photo uploads are still in progress. Please wait for all photos to finish uploading before submitting the form.', type: 'error');

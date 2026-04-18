@@ -59,7 +59,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="check_incubator_doors_for_air_leakage_photos"/>
+                    <x-photo-attach label="Attach Photos" name="check_incubator_doors_for_air_leakage_photos" required/>
                 </div>
 
                 <div data-field="checking_of_baggy_against_the_gaskets" @style(["display:none" => !$this->isFieldVisible('checking_of_baggy_against_the_gaskets')])>
@@ -67,7 +67,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="checking_of_baggy_against_the_gaskets_photos"/>
+                    <x-photo-attach label="Attach Photos" name="checking_of_baggy_against_the_gaskets_photos" required/>
                 </div>
 
                 <div data-field="check_curtain_position_and_condition" @style(["display:none" => !$this->isFieldVisible('check_curtain_position_and_condition')])>
@@ -75,7 +75,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="check_curtain_position_and_condition_photos"/>
+                    <x-photo-attach label="Attach Photos" name="check_curtain_position_and_condition_photos" required/>
                 </div>
 
                 <div data-field="check_wick_for_replacement_washing" @style(["display:none" => !$this->isFieldVisible('check_wick_for_replacement_washing')])>
@@ -83,7 +83,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="check_wick_for_replacement_washing_photos"/>
+                    <x-photo-attach label="Attach Photos" name="check_wick_for_replacement_washing_photos" required/>
                 </div>
 
                 <div data-field="check_spray_nozzle_and_water_pan" @style(["display:none" => !$this->isFieldVisible('check_spray_nozzle_and_water_pan')])>
@@ -91,7 +91,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="check_spray_nozzle_and_water_pan_photos"/>
+                    <x-photo-attach label="Attach Photos" name="check_spray_nozzle_and_water_pan_photos" required/>
                 </div>
 
                 <div data-field="check_incubator_fans_for_vibration" @style(["display:none" => !$this->isFieldVisible('check_incubator_fans_for_vibration')])>
@@ -99,7 +99,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="check_incubator_fans_for_vibration_photos"/>
+                    <x-photo-attach label="Attach Photos" name="check_incubator_fans_for_vibration_photos" required/>
                 </div>
 
                 <div data-field="check_rack_baffle_condition" @style(["display:none" => !$this->isFieldVisible('check_rack_baffle_condition')])>
@@ -107,7 +107,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="check_rack_baffle_condition_photos"/>
+                    <x-photo-attach label="Attach Photos" name="check_rack_baffle_condition_photos" required/>
                 </div>
 
                 <div data-field="drain_water_out_from_air_compressor_tank" @style(["display:none" => !$this->isFieldVisible('drain_water_out_from_air_compressor_tank')])>
@@ -115,7 +115,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="drain_water_out_from_air_compressor_tank_photos"/>
+                    <x-photo-attach label="Attach Photos" name="drain_water_out_from_air_compressor_tank_photos" required/>
                 </div>
             </div>
 
@@ -127,7 +127,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="cleaning_incubator_roof_and_plenum_photos"/>
+                    <x-photo-attach label="Attach Photos" name="cleaning_incubator_roof_and_plenum_photos" required/>
                 </div>
             </div>
 
@@ -139,7 +139,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="check_water_level_of_blue_tank_photos"/>
+                    <x-photo-attach label="Attach Photos" name="check_water_level_of_blue_tank_photos" required/>
                 </div>
 
                 <div data-field="cleaning_of_incubator_floor_area" @style(["display:none" => !$this->isFieldVisible('cleaning_of_incubator_floor_area')])>
@@ -147,7 +147,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="cleaning_of_incubator_floor_area_photos"/>
+                    <x-photo-attach label="Attach Photos" name="cleaning_of_incubator_floor_area_photos" required/>
                 </div>
 
                 <div data-field="cleaning_of_entrance_and_exit_area_flooring" @style(["display:none" => !$this->isFieldVisible('cleaning_of_entrance_and_exit_area_flooring')])>
@@ -155,7 +155,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="cleaning_of_entrance_and_exit_area_flooring_photos"/>
+                    <x-photo-attach label="Attach Photos" name="cleaning_of_entrance_and_exit_area_flooring_photos" required/>
                 </div>
 
                 <div data-field="clean_and_refill_water_reservoir" @style(["display:none" => !$this->isFieldVisible('clean_and_refill_water_reservoir')])>
@@ -163,7 +163,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="clean_and_refill_water_reservoir_photos"/>
+                    <x-photo-attach label="Attach Photos" name="clean_and_refill_water_reservoir_photos" required/>
                 </div>
             </div>
 
@@ -175,7 +175,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="egg_setting_preparation_photos"/>
+                    <x-photo-attach label="Attach Photos" name="egg_setting_preparation_photos" required/>
                 </div>
 
                 <div data-field="egg_setting" @style(["display:none" => !$this->isFieldVisible('egg_setting')])>
@@ -183,7 +183,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="egg_setting_photos"/>
+                    <x-photo-attach label="Attach Photos" name="egg_setting_photos" required/>
                 </div>
 
                 <div data-field="record_egg_setting_on_board" @style(["display:none" => !$this->isFieldVisible('record_egg_setting_on_board')])>
@@ -191,7 +191,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="record_egg_setting_on_board_photos"/>
+                    <x-photo-attach label="Attach Photos" name="record_egg_setting_on_board_photos" required/>
                 </div>
 
                 <div data-field="record_egg_setting_time" @style(["display:none" => !$this->isFieldVisible('record_egg_setting_time')])>
@@ -199,7 +199,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="record_egg_setting_time_photos"/>
+                    <x-photo-attach label="Attach Photos" name="record_egg_setting_time_photos" required/>
                 </div>
 
                 <div data-field="assist_in_random_candling" @style(["display:none" => !$this->isFieldVisible('assist_in_random_candling')])>
@@ -207,7 +207,7 @@
                         <option value="Pending">Pending</option>
                         <option value="Done">Done</option>
                     </x-dropdown>
-                    <x-photo-attach label="Attach Photos" name="assist_in_random_candling_photos"/>
+                    <x-photo-attach label="Attach Photos" name="assist_in_random_candling_photos" required/>
                 </div>
             </div>
         </x-progress-navigation>
