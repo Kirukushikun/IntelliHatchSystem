@@ -41,6 +41,7 @@ class ProcessAiChatRequest implements ShouldQueue
             $chat->update(['context_data' => $contextData]);
 
             $systemPrompt = $chat->system_prompt_snapshot ?: $this->defaultSystemPrompt();
+            $systemPrompt .= "\n\n" . $this->chartInstructions();
 
             $userMessage = "User Question:\n{$chat->prompt}\n\n--- Hatchery Data Context ---\n{$contextData}";
 
@@ -208,5 +209,29 @@ Be professional and concise. Focus on practical insights that help improve hatch
 Format your response with clear headings and bullet points where appropriate.
 If the data context is limited or empty, say so and provide general guidance based on your expertise.
 PROMPT;
+    }
+
+    private function chartInstructions(): string
+    {
+        return <<<'CHART'
+## Chart/Graph Visualization
+
+When the user explicitly asks for a chart, graph, or visualization, include one or more chart blocks in your response using this exact format:
+
+```chart
+{"type":"bar","title":"Chart Title","labels":["Label1","Label2"],"datasets":[{"label":"Series Name","data":[10,20]}]}
+```
+
+Rules for charts:
+- Supported chart types: bar, line, pie, doughnut, radar, polarArea
+- Always include a "title" describing what the chart shows
+- The "labels" array contains x-axis labels (or slice labels for pie/doughnut)
+- Each dataset needs "label" (series name) and "data" (numeric array matching labels length)
+- You may include multiple datasets for comparison charts
+- Always provide textual analysis alongside the chart — never respond with only a chart
+- Only generate charts when the user requests a visualization — do not add charts to every response
+- Use real data from the provided context; do not fabricate data
+- Keep labels concise and readable
+CHART;
     }
 }

@@ -250,10 +250,15 @@
 
         .print-btn:hover { background: #c86009; }
 
+        .chart-container {
+            page-break-inside: avoid;
+        }
+
         @media print {
             .print-btn { display: none; }
             body { padding: 8px; max-width: none; }
             .question-block { page-break-inside: avoid; }
+            .chart-container { page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -325,12 +330,26 @@
                     return $html;
                 }
 
+                function aichat_render_chart(string $json): string {
+                    $json = trim($json);
+                    $data = json_decode($json, true);
+                    if (!is_array($data) || !isset($data['type'], $data['labels'], $data['datasets'])) {
+                        return '<pre>' . htmlspecialchars($json) . '</pre>';
+                    }
+                    $config = htmlspecialchars(json_encode($data), ENT_QUOTES, 'UTF-8');
+                    $id = 'chart-' . uniqid();
+                    return '<div class="chart-container" style="margin:10px 0;page-break-inside:avoid">'
+                         . '<canvas id="' . $id . '" data-chart-config="' . $config . '" style="max-height:350px;width:100%"></canvas>'
+                         . '</div>';
+                }
+
                 function aichat_render(string $markdown): string {
                     $lines       = explode("\n", str_replace("\r\n", "\n", $markdown));
                     $html        = '';
                     $inList      = false;
                     $listTag     = '';
                     $inCode      = false;
+                    $isChart     = false;
                     $codeBuffer  = '';
                     $inTable     = false;
                     $tableBuffer = [];
@@ -351,10 +370,16 @@
                                 $closeList();
                                 $closeTable();
                                 $inCode = true;
+                                $isChart = preg_match('/^```chart\s*$/i', $t) === 1;
                                 $codeBuffer = '';
                             } else {
-                                $html .= '<pre>' . htmlspecialchars($codeBuffer) . '</pre>';
+                                if ($isChart) {
+                                    $html .= aichat_render_chart($codeBuffer);
+                                } else {
+                                    $html .= '<pre>' . htmlspecialchars($codeBuffer) . '</pre>';
+                                }
                                 $inCode = false;
+                                $isChart = false;
                                 $codeBuffer = '';
                             }
                             continue;
@@ -435,7 +460,11 @@
                     }
 
                     if ($inCode) {
-                        $html .= '<pre>' . htmlspecialchars($codeBuffer) . '</pre>';
+                        if ($isChart) {
+                            $html .= aichat_render_chart($codeBuffer);
+                        } else {
+                            $html .= '<pre>' . htmlspecialchars($codeBuffer) . '</pre>';
+                        }
                     }
                     if ($inTable) {
                         $html .= aichat_render_table($tableBuffer);
@@ -462,6 +491,57 @@
             <div>{{ now()->format('d M Y') }}</div>
         </div>
     </div>
+
+    {{-- Chart.js for print view --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var colors = ['#f97316','#3b82f6','#22c55e','#ef4444','#a855f7','#06b6d4','#eab308','#ec4899','#14b8a6','#f59e0b'];
+            document.querySelectorAll('canvas[data-chart-config]').forEach(function(canvas) {
+                try {
+                    var config = JSON.parse(canvas.dataset.chartConfig);
+                } catch(e) { return; }
+                if (!config.type || !config.labels || !config.datasets) return;
+
+                var isPie = ['pie','doughnut','polarArea'].indexOf(config.type) !== -1;
+                config.datasets.forEach(function(ds, i) {
+                    var c = colors[i % colors.length];
+                    if (isPie) {
+                        ds.backgroundColor = ds.backgroundColor || config.labels.map(function(_,j){ return colors[j%colors.length]+'cc'; });
+                        ds.borderColor = ds.borderColor || '#ffffff';
+                        ds.borderWidth = ds.borderWidth || 2;
+                    } else if (config.type === 'line') {
+                        ds.borderColor = ds.borderColor || c;
+                        ds.backgroundColor = ds.backgroundColor || c+'33';
+                        ds.tension = ds.tension != null ? ds.tension : 0.3;
+                        ds.fill = ds.fill != null ? ds.fill : true;
+                    } else {
+                        ds.backgroundColor = ds.backgroundColor || c+'cc';
+                        ds.borderColor = ds.borderColor || c;
+                        ds.borderRadius = ds.borderRadius || 4;
+                    }
+                });
+
+                new Chart(canvas, {
+                    type: config.type,
+                    data: { labels: config.labels, datasets: config.datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        animation: false,
+                        plugins: {
+                            title: config.title ? { display:true, text:config.title, font:{size:12,weight:'600'}, padding:{bottom:8} } : { display:false },
+                            legend: { display: config.datasets.length > 1 || isPie, labels:{usePointStyle:true,padding:8} }
+                        },
+                        scales: isPie ? {} : {
+                            x: { grid:{color:'rgba(0,0,0,0.06)'} },
+                            y: { grid:{color:'rgba(0,0,0,0.06)'}, beginAtZero:true }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>

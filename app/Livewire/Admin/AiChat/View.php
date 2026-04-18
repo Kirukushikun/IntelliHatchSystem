@@ -62,12 +62,30 @@ class View extends Component
         $this->isTranslating = true;
 
         try {
+            // Strip chart blocks before translation to preserve JSON data
+            $chartBlocks = [];
+            $textToTranslate = preg_replace_callback(
+                '/```chart\s*\n(.*?\n)```/si',
+                function ($match) use (&$chartBlocks) {
+                    $placeholder = '[[CHART_BLOCK_' . count($chartBlocks) . ']]';
+                    $chartBlocks[] = $match[0];
+
+                    return $placeholder;
+                },
+                $this->chat->response,
+            );
+
             $client = new OpenRouterClient();
 
             $translated = $client->ask(
-                userMessage:  $this->chat->response,
-                systemPrompt: 'Isinalin mo ang teksto sa Filipino (Tagalog). Gamitin ang natural na Taglish (halo ng Tagalog at Ingles) tulad ng karaniwang ginagamit sa Pilipinas. Panatilihin ang lahat ng numero, sukat, pangalan ng makina, teknikal na abbreviation, at unit ng pagsukat sa Ingles. Huwag magdagdag ng sariling komento — isinalin lamang ang ibinigay na teksto.',
+                userMessage:  $textToTranslate,
+                systemPrompt: 'Isinalin mo ang teksto sa Filipino (Tagalog). Gamitin ang natural na Taglish (halo ng Tagalog at Ingles) tulad ng karaniwang ginagamit sa Pilipinas. Panatilihin ang lahat ng numero, sukat, pangalan ng makina, teknikal na abbreviation, at unit ng pagsukat sa Ingles. Huwag magdagdag ng sariling komento — isinalin lamang ang ibinigay na teksto. Huwag baguhin ang [[CHART_BLOCK_*]] placeholders.',
             );
+
+            // Re-insert chart blocks
+            foreach ($chartBlocks as $i => $block) {
+                $translated = str_replace("[[CHART_BLOCK_{$i}]]", $block, $translated);
+            }
 
             Cache::put($tlKey, $translated, now()->addHours(6));
 
@@ -126,6 +144,7 @@ class View extends Component
         $inList      = false;
         $listTag     = '';
         $inCode      = false;
+        $isChart     = false;
         $codeBuffer  = '';
         $inTable     = false;
         $tableBuffer = [];
@@ -146,11 +165,17 @@ class View extends Component
                     $closeList();
                     $closeTable();
                     $inCode     = true;
+                    $isChart    = preg_match('/^```chart\s*$/i', $trimmed) === 1;
                     $codeBuffer = '';
                 } else {
-                    $escaped = htmlspecialchars($codeBuffer);
-                    $html   .= "<pre class=\"bg-gray-100 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto my-3 text-xs font-mono text-gray-800 dark:text-gray-200\">{$escaped}</pre>";
+                    if ($isChart) {
+                        $html .= $this->renderChart($codeBuffer);
+                    } else {
+                        $escaped = htmlspecialchars($codeBuffer);
+                        $html   .= "<pre class=\"bg-gray-100 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto my-3 text-xs font-mono text-gray-800 dark:text-gray-200\">{$escaped}</pre>";
+                    }
                     $inCode     = false;
+                    $isChart    = false;
                     $codeBuffer = '';
                 }
                 continue;
@@ -261,8 +286,12 @@ class View extends Component
 
         // Close any open blocks
         if ($inCode) {
-            $escaped = htmlspecialchars($codeBuffer);
-            $html   .= "<pre class=\"bg-gray-100 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto my-3 text-xs font-mono text-gray-800 dark:text-gray-200\">{$escaped}</pre>";
+            if ($isChart) {
+                $html .= $this->renderChart($codeBuffer);
+            } else {
+                $escaped = htmlspecialchars($codeBuffer);
+                $html   .= "<pre class=\"bg-gray-100 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto my-3 text-xs font-mono text-gray-800 dark:text-gray-200\">{$escaped}</pre>";
+            }
         }
         if ($inTable) {
             $html .= $this->renderTable($tableBuffer);
@@ -274,28 +303,48 @@ class View extends Component
         return $html;
     }
 
+    private function renderChart(string $json): string
+    {
+        $json = trim($json);
+        $data = json_decode($json, true);
+
+        // Validate required keys — fall back to code block if invalid
+        if (! is_array($data) || ! isset($data['type'], $data['labels'], $data['datasets'])) {
+            $escaped = htmlspecialchars($json);
+
+            return "<pre class=\"bg-gray-100 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto my-3 text-xs font-mono text-gray-800 dark:text-gray-200\">{$escaped}</pre>";
+        }
+
+        $config = htmlspecialchars(json_encode($data), ENT_QUOTES, 'UTF-8');
+        $id     = 'chart-' . uniqid();
+
+        return "<div class=\"my-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4\">"
+             . "<canvas id=\"{$id}\" data-chart-config=\"{$config}\" style=\"max-height:400px\"></canvas>"
+             . '</div>';
+    }
+
     private function renderTable(array $rows): string
     {
         if (empty($rows)) {
             return '';
         }
 
-        $html = '<div class="overflow-x-auto my-3"><table class="w-full text-sm border-collapse">';
+        $html = '<div class="overflow-x-auto my-3 rounded-lg border border-gray-200 dark:border-gray-700"><table class="w-full text-sm border-collapse">';
 
         foreach ($rows as $i => $row) {
             $cells = array_map('trim', explode('|', trim($row, '|')));
 
             if ($i === 0) {
-                $html .= '<thead><tr>';
+                $html .= '<thead><tr class="bg-gray-50 dark:bg-gray-700/50">';
                 foreach ($cells as $cell) {
-                    $html .= '<th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700">'
+                    $html .= '<th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700">'
                         . $this->inline($cell) . '</th>';
                 }
                 $html .= '</tr></thead><tbody>';
             } else {
-                $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">';
+                $html .= '<tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/30">';
                 foreach ($cells as $cell) {
-                    $html .= '<td class="px-3 py-2 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">'
+                    $html .= '<td class="px-3 py-2 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700">'
                         . $this->inline($cell) . '</td>';
                 }
                 $html .= '</tr>';
