@@ -27,6 +27,7 @@ class HatcherySullairConfig
             'form.status_water_filter' => 'required|string|in:Good Condition,For Replacement',
             'form.air_pipe_status' => 'required|string|in:No Any Leak,With Leak For Repair or Replacement',
             'form.air_dryer_status' => 'required|string|in:Clean and Good Status,For Repair and Replacement',
+            'form.date_of_change_operation' => 'required|date',
             'form.inspected_by' => 'required|string|min:2',
 
             'form.actual_psi_temperature_photos.*' => 'image|max:1024',
@@ -105,6 +106,7 @@ class HatcherySullairConfig
             'status_water_filter' => '',
             'air_pipe_status' => '',
             'air_dryer_status' => '',
+            'date_of_change_operation' => '',
             'inspected_by' => '',
 
             'status_water_filter_photos' => [],
@@ -149,6 +151,7 @@ class HatcherySullairConfig
                 'air_pipe_status_photos',
                 'air_dryer_status',
                 'air_dryer_status_photos',
+                'date_of_change_operation',
                 'inspected_by',
             ],
         ];

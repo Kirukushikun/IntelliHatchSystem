@@ -14,10 +14,11 @@ class HatcherMachineAccuracyConfig
             'form.shift' => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
             'form.hatcher' => 'required|integer|exists:hatcher-machines,id',
 
+            'form.set_point_temp' => 'required|numeric',
             'form.display_temp' => 'required|numeric',
             'form.calibrator' => 'required|numeric',
-            'form.wet_bulb' => 'required|numeric',
-            'form.dry_bulb' => 'required|numeric',
+            'form.humidity_set_point' => 'required|numeric',
+            'form.humidity_machine_reading' => 'required|numeric',
 
             'form.accuracy_photos.*' => 'image|max:1024',
         ];
@@ -33,10 +34,11 @@ class HatcherMachineAccuracyConfig
             'form.hatcher.exists' => 'Please select a valid hatcher.',
             'form.hatchery_man.required' => 'Please select a hatchery man.',
             'form.hatchery_man.exists' => 'Please select a valid hatchery man.',
+            'form.set_point_temp.numeric' => 'Set Point Temperature must be a number.',
             'form.display_temp.numeric' => 'Display Temp must be a number.',
             'form.calibrator.numeric' => 'Calibrator must be a number.',
-            'form.wet_bulb.numeric' => 'Wet Bulb must be a number.',
-            'form.dry_bulb.numeric' => 'Dry Bulb must be a number.',
+            'form.humidity_set_point.numeric' => 'Humidity Set Point must be a number.',
+            'form.humidity_machine_reading.numeric' => 'Humidity Machine Reading must be a number.',
             'in' => 'Please select a valid option.',
             'integer' => 'Please enter a valid number.',
             'string' => 'Please enter valid text.',
@@ -61,10 +63,11 @@ class HatcherMachineAccuracyConfig
             'shift' => '',
             'hatcher' => '',
 
+            'set_point_temp' => '',
             'display_temp' => '',
             'calibrator' => '',
-            'wet_bulb' => '',
-            'dry_bulb' => '',
+            'humidity_set_point' => '',
+            'humidity_machine_reading' => '',
 
             'accuracy_photos' => [],
         ];
@@ -74,7 +77,7 @@ class HatcherMachineAccuracyConfig
     {
         return [
             1 => ['hatchery_man', 'cellphone_number', 'date_submitted', 'time_of_reading', 'shift', 'hatcher'],
-            2 => ['display_temp', 'calibrator', 'wet_bulb', 'dry_bulb', 'accuracy_photos'],
+            2 => ['set_point_temp', 'display_temp', 'calibrator', 'humidity_set_point', 'humidity_machine_reading', 'accuracy_photos'],
         ];
     }
 

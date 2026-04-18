@@ -59,12 +59,24 @@
             <div data-step="2" class="space-y-4" @style(["display:none" => $currentStep !== 2])>
                 <x-title>TEMPERATURE READINGS</x-title>
 
+                <div data-field="set_point_temp">
+                    <x-text-input label="Set Point Temperature" name="set_point_temp" error-key="form.set_point_temp" :required="true" placeholder="Enter set point temperature..." wireModel="form.set_point_temp" type="number" step="0.01" />
+                </div>
+
                 <div data-field="display_temp">
                     <x-text-input label="Display Temp" name="display_temp" error-key="form.display_temp" :required="true" placeholder="Enter display temperature..." wireModel="form.display_temp" type="number" step="0.01" />
                 </div>
 
                 <div data-field="calibrator">
                     <x-text-input label="Calibrator" name="calibrator" error-key="form.calibrator" :required="true" placeholder="Enter calibrator reading..." wireModel="form.calibrator" type="number" step="0.01" />
+                </div>
+
+                <div data-field="humidity_set_point">
+                    <x-text-input label="Humidity Set Point" name="humidity_set_point" error-key="form.humidity_set_point" :required="true" placeholder="Enter humidity set point..." wireModel="form.humidity_set_point" type="number" step="0.01" />
+                </div>
+
+                <div data-field="humidity_machine_reading">
+                    <x-text-input label="Humidity Machine Reading" name="humidity_machine_reading" error-key="form.humidity_machine_reading" :required="true" placeholder="Enter humidity machine reading..." wireModel="form.humidity_machine_reading" type="number" step="0.01" />
                 </div>
 
                 <div data-field="accuracy_photos">

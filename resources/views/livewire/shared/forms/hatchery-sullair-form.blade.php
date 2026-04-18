@@ -151,6 +151,10 @@
                     <x-photo-attach label="Photos" name="air_dryer_status_photos" :required="true"/>
                 </div>
 
+                <div data-field="date_of_change_operation">
+                    <x-text-input label="Date of Change Operation" name="date_of_change_operation" error-key="form.date_of_change_operation" :required="true" type="date" wireModel="form.date_of_change_operation" subtext="Sullair 1 to Sullair 2 or vice versa" />
+                </div>
+
                 <div data-field="inspected_by">
                     <x-text-area label="Inspected by" name="inspected_by" error-key="form.inspected_by" placeholder="Enter inspected by..." wire:model.live="form.inspected_by" required/>
                 </div>

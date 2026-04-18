@@ -14,8 +14,11 @@ class IncubatorMachineAccuracyConfig
             'form.shift'           => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
             'form.incubator'       => 'required|integer|exists:incubator-machines,id',
 
+            'form.set_point_temp'  => 'required|numeric',
             'form.display_temp'    => 'required|numeric',
             'form.calibrator'      => 'required|numeric',
+            'form.humidity_set_point' => 'required|numeric',
+            'form.humidity_machine_reading' => 'required|numeric',
 
             'form.accuracy_photos.*' => 'image|max:1024',
         ];
@@ -31,8 +34,11 @@ class IncubatorMachineAccuracyConfig
             'form.hatchery_man.exists'         => 'Please select a valid hatchery man.',
             'form.incubator.required'          => 'Please select an incubator.',
             'form.incubator.exists'            => 'Please select a valid incubator.',
+            'form.set_point_temp.numeric'      => 'Set Point Temperature must be a number.',
             'form.display_temp.numeric'        => 'Display Temp must be a number.',
             'form.calibrator.numeric'          => 'Calibrator must be a number.',
+            'form.humidity_set_point.numeric'  => 'Humidity Set Point must be a number.',
+            'form.humidity_machine_reading.numeric' => 'Humidity Machine Reading must be a number.',
             'in'                               => 'Please select a valid option.',
             'integer'                          => 'Please enter a valid number.',
             'string'                           => 'Please enter valid text.',
@@ -57,8 +63,11 @@ class IncubatorMachineAccuracyConfig
             'shift'           => '',
             'incubator'       => '',
 
+            'set_point_temp'  => '',
             'display_temp'    => '',
             'calibrator'      => '',
+            'humidity_set_point' => '',
+            'humidity_machine_reading' => '',
 
             'accuracy_photos' => [],
         ];
@@ -68,7 +77,7 @@ class IncubatorMachineAccuracyConfig
     {
         return [
             1 => ['hatchery_man', 'mobile_number', 'date_submitted', 'time_of_reading', 'shift', 'incubator'],
-            2 => ['display_temp', 'calibrator', 'accuracy_photos'],
+            2 => ['set_point_temp', 'display_temp', 'calibrator', 'humidity_set_point', 'humidity_machine_reading', 'accuracy_photos'],
         ];
     }
 

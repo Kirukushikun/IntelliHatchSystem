@@ -59,6 +59,10 @@
             <div data-step="2" class="space-y-4" @style(["display:none" => $currentStep !== 2])>
                 <x-title>TEMPERATURE READINGS</x-title>
 
+                <div data-field="set_point_temp">
+                    <x-text-input label="Set Point Temperature" name="set_point_temp" error-key="form.set_point_temp" :required="true" placeholder="Enter set point temperature..." wireModel="form.set_point_temp" />
+                </div>
+
                 <div data-field="display_temp">
                     <x-text-input label="Display Temp" name="display_temp" error-key="form.display_temp" :required="true" placeholder="Enter display temperature..." wireModel="form.display_temp" />
                 </div>
@@ -67,12 +71,12 @@
                     <x-text-input label="Calibrator" name="calibrator" error-key="form.calibrator" :required="true" placeholder="Enter calibrator reading..." wireModel="form.calibrator" />
                 </div>
 
-                <div data-field="wet_bulb">
-                    <x-text-input label="Wet Bulb" name="wet_bulb" error-key="form.wet_bulb" :required="true" placeholder="Enter wet bulb reading..." wireModel="form.wet_bulb" />
+                <div data-field="humidity_set_point">
+                    <x-text-input label="Humidity Set Point" name="humidity_set_point" error-key="form.humidity_set_point" :required="true" placeholder="Enter humidity set point..." wireModel="form.humidity_set_point" />
                 </div>
 
-                <div data-field="dry_bulb">
-                    <x-text-input label="Dry Bulb" name="dry_bulb" error-key="form.dry_bulb" :required="true" placeholder="Enter dry bulb reading..." wireModel="form.dry_bulb" />
+                <div data-field="humidity_machine_reading">
+                    <x-text-input label="Humidity Machine Reading" name="humidity_machine_reading" error-key="form.humidity_machine_reading" :required="true" placeholder="Enter humidity machine reading..." wireModel="form.humidity_machine_reading" />
                 </div>
 
                 <div data-field="accuracy_photos">
