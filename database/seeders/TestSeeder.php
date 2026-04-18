@@ -371,8 +371,9 @@ class TestSeeder extends Seeder
 
                         'status_water_filter' => rand(1, 10) > 2 ? 'Good Condition' : 'For Replacement',
                         'air_pipe_status'     => fake()->randomElement($pipeStatuses),
-                        'air_dryer_status'    => fake()->randomElement($dryerStatuses),
-                        'inspected_by'        => $user->first_name . ' ' . $user->last_name,
+                        'air_dryer_status'         => fake()->randomElement($dryerStatuses),
+                        'date_of_change_operation' => $date->format('Y-m-d'),
+                        'inspected_by'             => $user->first_name . ' ' . $user->last_name,
                     ],
                     'date_submitted' => $date,
                     'uploaded_by'    => $user->id,
@@ -408,12 +409,13 @@ class TestSeeder extends Seeder
                 foreach ($hatchers as $hatcher) {
                     if (rand(1, 100) > 80) continue;
 
-                    $user          = $hatcheryUsers->random();
-                    $displayTemp   = round(rand(978, 995) / 10, 1); // 97.8–99.5°F
-                    $calibrator    = round($displayTemp + (rand(-5, 5) / 10), 1);
-                    $wetBulb       = round(rand(840, 870) / 10, 1); // 84–87°F
-                    $dryBulb       = round(rand(980, 1000) / 10, 1); // 98–100°F
-                    $phone         = '09' . str_pad((string) rand(0, 999999999), 9, '0', STR_PAD_LEFT);
+                    $user            = $hatcheryUsers->random();
+                    $setPointTemp    = round(rand(985, 995) / 10, 1); // 98.5–99.5°F set point
+                    $displayTemp     = round($setPointTemp + (rand(-3, 3) / 10), 1);
+                    $calibrator      = round($displayTemp + (rand(-5, 5) / 10), 1);
+                    $humidSetPoint   = round(rand(780, 840) / 10, 1); // 78–84% target humidity
+                    $humidReading    = round($humidSetPoint + (rand(-20, 20) / 10), 1);
+                    $phone           = '09' . str_pad((string) rand(0, 999999999), 9, '0', STR_PAD_LEFT);
 
                     Form::create([
                         'form_type_id' => $formTypeId,
@@ -423,16 +425,17 @@ class TestSeeder extends Seeder
                                 'id'    => $hatcher->id,
                                 'name'  => $hatcher->hatcherName,
                             ],
-                            'hatchery_man'    => $user->id,
-                            'cellphone_number' => $phone,
-                            'date_submitted'  => $date->format('Y-m-d'),
-                            'time_of_reading' => $shiftTimes[$shift],
-                            'shift'           => $shift,
-                            'hatcher'         => $hatcher->id,
-                            'display_temp'    => $displayTemp,
-                            'calibrator'      => $calibrator,
-                            'wet_bulb'        => $wetBulb,
-                            'dry_bulb'        => $dryBulb,
+                            'hatchery_man'           => $user->id,
+                            'cellphone_number'       => $phone,
+                            'date_submitted'         => $date->format('Y-m-d'),
+                            'time_of_reading'        => $shiftTimes[$shift],
+                            'shift'                  => $shift,
+                            'hatcher'                => $hatcher->id,
+                            'set_point_temp'         => $setPointTemp,
+                            'display_temp'           => $displayTemp,
+                            'calibrator'             => $calibrator,
+                            'humidity_set_point'     => $humidSetPoint,
+                            'humidity_machine_reading' => $humidReading,
                         ],
                         'date_submitted' => $date,
                         'uploaded_by'    => $user->id,
@@ -558,10 +561,13 @@ class TestSeeder extends Seeder
                 foreach ($incubators as $incubator) {
                     if (rand(1, 100) > 80) continue;
 
-                    $user        = $hatcheryUsers->random();
-                    $displayTemp = round(rand(995, 1005) / 10, 1); // 99.5–100.5°F
-                    $calibrator  = round($displayTemp + (rand(-4, 4) / 10), 1);
-                    $phone       = '09' . str_pad((string) rand(0, 999999999), 9, '0', STR_PAD_LEFT);
+                    $user          = $hatcheryUsers->random();
+                    $setPointTemp  = round(rand(995, 1005) / 10, 1); // 99.5–100.5°F set point
+                    $displayTemp   = round($setPointTemp + (rand(-3, 3) / 10), 1);
+                    $calibrator    = round($displayTemp + (rand(-4, 4) / 10), 1);
+                    $humidSetPoint = round(rand(580, 650) / 10, 1); // 58–65% target humidity
+                    $humidReading  = round($humidSetPoint + (rand(-15, 15) / 10), 1);
+                    $phone         = '09' . str_pad((string) rand(0, 999999999), 9, '0', STR_PAD_LEFT);
 
                     Form::create([
                         'form_type_id' => $formTypeId,
@@ -571,14 +577,17 @@ class TestSeeder extends Seeder
                                 'id'    => $incubator->id,
                                 'name'  => $incubator->incubatorName,
                             ],
-                            'hatchery_man'    => $user->id,
-                            'mobile_number'   => $phone,
-                            'date_submitted'  => $date->format('Y-m-d'),
-                            'time_of_reading' => $shiftTimes[$shift],
-                            'shift'           => $shift,
-                            'incubator'       => $incubator->id,
-                            'display_temp'    => $displayTemp,
-                            'calibrator'      => $calibrator,
+                            'hatchery_man'             => $user->id,
+                            'mobile_number'            => $phone,
+                            'date_submitted'           => $date->format('Y-m-d'),
+                            'time_of_reading'          => $shiftTimes[$shift],
+                            'shift'                    => $shift,
+                            'incubator'                => $incubator->id,
+                            'set_point_temp'           => $setPointTemp,
+                            'display_temp'             => $displayTemp,
+                            'calibrator'               => $calibrator,
+                            'humidity_set_point'       => $humidSetPoint,
+                            'humidity_machine_reading' => $humidReading,
                         ],
                         'date_submitted' => $date,
                         'uploaded_by'    => $user->id,
@@ -658,68 +667,57 @@ class TestSeeder extends Seeder
 
         echo "Creating incubator entrance temperature forms...\n";
 
-        $incubationDays  = ['Day 1 to 10', 'Day 10 to 12', 'Day 12 to 14', 'Day 14 to 18'];
-        $checkTimes      = ['07:00', '10:00', '13:00', '16:00', '19:00'];
-        $finishOffsets   = [30, 30, 30, 30, 30]; // minutes after start
+        $shifts          = ['1st Shift', '2nd Shift', '3rd Shift'];
+        $shiftTimes      = ['1st Shift' => '07:00', '2nd Shift' => '14:00', '3rd Shift' => '22:00'];
         $adjustmentNotes = [
             'Temperature within acceptable range, no adjustment needed',
             'Adjusted set point +0.2°F to compensate for entrance temp drop',
             'Curtain position corrected to improve temperature retention',
-            'Baggy repositioned for better sealing',
             'Minor adjustment made; temperature stabilized after 15 minutes',
+            'Checked damper spacing and corrected airflow balance',
         ];
         $count = 0;
 
         for ($day = 0; $day < 90; $day++) {
             $date = Carbon::now()->subDays($day);
             foreach ($incubators as $incubator) {
-                $checks     = rand(1, 2);
-                $usedSlots  = [];
-                for ($c = 0; $c < $checks; $c++) {
-                    if (rand(1, 100) > 85) continue;
+                if (rand(1, 100) > 85) continue;
 
-                    // Pick an unused time slot
-                    do {
-                        $ti = array_rand($checkTimes);
-                    } while (in_array($ti, $usedSlots) && count($usedSlots) < count($checkTimes));
-                    $usedSlots[] = $ti;
+                $shift         = $shifts[array_rand($shifts)];
+                $user          = $hatcheryUsers->random();
+                $setTemp       = round(rand(995, 1005) / 10, 1); // 99.5–100.5°F
+                $setHumid      = round(rand(580, 680) / 10, 1);  // 58–68%
+                $entranceLeft  = round(rand(990, 1010) / 10, 1);
+                $entranceRight = round(rand(990, 1010) / 10, 1);
+                $checkTime     = $shiftTimes[$shift];
+                [$sh, $sm]     = explode(':', $checkTime);
+                $fh            = (int) $sh;
+                $fm            = (int) $sm + rand(20, 40);
+                if ($fm >= 60) { $fh++; $fm -= 60; }
 
-                    $user          = $hatcheryUsers->random();
-                    $setTemp       = rand(0, 1) ? '99.5°F' : '100.0°F';
-                    $setHumid      = rand(0, 1) ? '65%' : '68%';
-                    $entranceLeft  = round(rand(990, 1010) / 10, 1);
-                    $entranceRight = round(rand(990, 1010) / 10, 1);
-                    $baggyLeft     = round(rand(985, 1005) / 10, 1);
-                    $baggyRight    = round(rand(985, 1005) / 10, 1);
-                    [$sh, $sm]     = explode(':', $checkTimes[$ti]);
-                    $fh            = (int) $sh;
-                    $fm            = (int) $sm + $finishOffsets[$ti];
-                    if ($fm >= 60) { $fh++; $fm -= 60; }
-
-                    Form::create([
-                        'form_type_id' => $formTypeId,
-                        'form_inputs'  => [
-                            'machine_info' => [
-                                'table' => 'incubator-machines',
-                                'id'    => $incubator->id,
-                                'name'  => $incubator->incubatorName,
-                            ],
-                            'hatchery_man'         => $user->id,
-                            'time_of_check'        => $checkTimes[$ti],
-                            'days_of_incubation'   => $incubationDays[array_rand($incubationDays)],
-                            'incubator'            => $incubator->id,
-                            'set_point_temp'       => $setTemp,
-                            'set_point_humidity'   => $setHumid,
-                            'entrance_temp'        => "Left: {$entranceLeft}°F / Right: {$entranceRight}°F",
-                            'baggy'                => "Left: {$baggyLeft}°F / Right: {$baggyRight}°F",
-                            'temp_adjustment_notes' => $adjustmentNotes[array_rand($adjustmentNotes)],
-                            'time_finished'        => sprintf('%02d:%02d', $fh, $fm),
+                Form::create([
+                    'form_type_id' => $formTypeId,
+                    'form_inputs'  => [
+                        'machine_info' => [
+                            'table' => 'incubator-machines',
+                            'id'    => $incubator->id,
+                            'name'  => $incubator->incubatorName,
                         ],
-                        'date_submitted' => $date,
-                        'uploaded_by'    => $user->id,
-                    ]);
-                    $count++;
-                }
+                        'hatchery_man'          => $user->id,
+                        'shift'                 => $shift,
+                        'time_of_check'         => $checkTime,
+                        'incubator'             => $incubator->id,
+                        'set_point_temp'        => $setTemp,
+                        'set_point_humidity'    => $setHumid,
+                        'entrance_temp_left'    => $entranceLeft,
+                        'entrance_temp_right'   => $entranceRight,
+                        'temp_adjustment_notes' => $adjustmentNotes[array_rand($adjustmentNotes)],
+                        'time_finished'         => sprintf('%02d:%02d', $fh, $fm),
+                    ],
+                    'date_submitted' => $date,
+                    'uploaded_by'    => $user->id,
+                ]);
+                $count++;
             }
         }
 
@@ -751,14 +749,17 @@ class TestSeeder extends Seeder
             foreach ($incubators as $incubator) {
                 if (rand(1, 100) > 82) continue;
 
-                $user           = $hatcheryUsers->random();
-                $machineTemp    = round(rand(995, 1005) / 10, 1); // 99.5–100.5°F
-                $calibratorTemp = round($machineTemp + (rand(-3, 3) / 10), 1);
-                $humidity       = round(rand(580, 680) / 10, 1);  // 58–68%
-                $startH         = $shift === '1st Shift' ? rand(6, 8) : ($shift === '2nd Shift' ? rand(14, 16) : rand(22, 23));
-                $startM         = rand(0, 59);
-                $endH           = $startH;
-                $endM           = $startM + rand(15, 45);
+                $user              = $hatcheryUsers->random();
+                $tempSetPoint      = round(rand(995, 1005) / 10, 1); // 99.5–100.5°F set point
+                $machineTemp       = round($tempSetPoint + (rand(-3, 3) / 10), 1);
+                $calibratorTemp    = round($machineTemp + (rand(-3, 3) / 10), 1);
+                $humidSetPoint     = round(rand(580, 650) / 10, 1);  // 58–65% set point
+                $humidityReading   = round($humidSetPoint + (rand(-15, 15) / 10), 1);
+                $needsCorrection   = abs($machineTemp - $calibratorTemp) > 0.3;
+                $startH            = $shift === '1st Shift' ? rand(6, 8) : ($shift === '2nd Shift' ? rand(14, 16) : rand(22, 23));
+                $startM            = rand(0, 59);
+                $endH              = $startH;
+                $endM              = $startM + rand(15, 45);
                 if ($endM >= 60) { $endH++; $endM -= 60; }
 
                 Form::create([
@@ -769,15 +770,20 @@ class TestSeeder extends Seeder
                             'id'    => $incubator->id,
                             'name'  => $incubator->incubatorName,
                         ],
-                        'hatchery_man'     => $user->id,
-                        'shift'            => $shift,
-                        'time_started'     => sprintf('%02d:%02d', $startH, $startM),
-                        'incubator'        => $incubator->id,
-                        'machine_temp'     => $machineTemp,
-                        'calibrator_temp'  => $calibratorTemp,
-                        'humidity_reading' => $humidity,
-                        'approver'         => $approvers[array_rand($approvers)],
-                        'time_finished'    => sprintf('%02d:%02d', $endH, $endM),
+                        'hatchery_man'             => $user->id,
+                        'shift'                    => $shift,
+                        'time_started'             => sprintf('%02d:%02d', $startH, $startM),
+                        'incubator'                => $incubator->id,
+                        'machine_temp_set_point'   => $tempSetPoint,
+                        'machine_temp'             => $machineTemp,
+                        'calibrator_temp'          => $calibratorTemp,
+                        'machine_humidity_set_point' => $humidSetPoint,
+                        'humidity_reading'         => $humidityReading,
+                        'corrective_action'        => $needsCorrection
+                            ? 'Recalibrated sensor and verified with calibrator'
+                            : '',
+                        'approver'                 => $approvers[array_rand($approvers)],
+                        'time_finished'            => sprintf('%02d:%02d', $endH, $endM),
                     ],
                     'date_submitted' => $date,
                     'uploaded_by'    => $user->id,
@@ -814,14 +820,17 @@ class TestSeeder extends Seeder
             foreach ($hatchers as $hatcher) {
                 if (rand(1, 100) > 82) continue;
 
-                $user           = $hatcheryUsers->random();
-                $machineTemp    = round(rand(980, 996) / 10, 1); // 98.0–99.6°F (hatchers run cooler)
-                $calibratorTemp = round($machineTemp + (rand(-3, 3) / 10), 1);
-                $humidity       = round(rand(700, 820) / 10, 1); // 70–82% (hatchers run more humid)
-                $startH         = $shift === '1st Shift' ? rand(6, 8) : ($shift === '2nd Shift' ? rand(14, 16) : rand(22, 23));
-                $startM         = rand(0, 59);
-                $endH           = $startH;
-                $endM           = $startM + rand(15, 45);
+                $user              = $hatcheryUsers->random();
+                $tempSetPoint      = round(rand(980, 996) / 10, 1); // 98.0–99.6°F set point (hatchers run cooler)
+                $machineTemp       = round($tempSetPoint + (rand(-3, 3) / 10), 1);
+                $calibratorTemp    = round($machineTemp + (rand(-3, 3) / 10), 1);
+                $humidSetPoint     = round(rand(750, 820) / 10, 1); // 75–82% set point (hatchers run more humid)
+                $humidityReading   = round($humidSetPoint + (rand(-15, 15) / 10), 1);
+                $needsCorrection   = abs($machineTemp - $calibratorTemp) > 0.3;
+                $startH            = $shift === '1st Shift' ? rand(6, 8) : ($shift === '2nd Shift' ? rand(14, 16) : rand(22, 23));
+                $startM            = rand(0, 59);
+                $endH              = $startH;
+                $endM              = $startM + rand(15, 45);
                 if ($endM >= 60) { $endH++; $endM -= 60; }
 
                 Form::create([
@@ -832,15 +841,20 @@ class TestSeeder extends Seeder
                             'id'    => $hatcher->id,
                             'name'  => $hatcher->hatcherName,
                         ],
-                        'hatchery_man'     => $user->id,
-                        'shift'            => $shift,
-                        'time_started'     => sprintf('%02d:%02d', $startH, $startM),
-                        'hatcher'          => $hatcher->id,
-                        'machine_temp'     => $machineTemp,
-                        'calibrator_temp'  => $calibratorTemp,
-                        'humidity_reading' => $humidity,
-                        'approver'         => $approvers[array_rand($approvers)],
-                        'time_finished'    => sprintf('%02d:%02d', $endH, $endM),
+                        'hatchery_man'             => $user->id,
+                        'shift'                    => $shift,
+                        'time_started'             => sprintf('%02d:%02d', $startH, $startM),
+                        'hatcher'                  => $hatcher->id,
+                        'machine_temp_set_point'   => $tempSetPoint,
+                        'machine_temp'             => $machineTemp,
+                        'calibrator_temp'          => $calibratorTemp,
+                        'machine_humidity_set_point' => $humidSetPoint,
+                        'humidity_reading'         => $humidityReading,
+                        'corrective_action'        => $needsCorrection
+                            ? 'Recalibrated sensor and verified with calibrator'
+                            : '',
+                        'approver'                 => $approvers[array_rand($approvers)],
+                        'time_finished'            => sprintf('%02d:%02d', $endH, $endM),
                     ],
                     'date_submitted' => $date,
                     'uploaded_by'    => $user->id,
@@ -876,7 +890,6 @@ class TestSeeder extends Seeder
 
         echo "Creating PASGAR score forms...\n";
 
-        $scoringOptions = ['9.0', '9.1', '9.2', '9.3', '9.4', '9.5', '9.6', '9.7', '9.8', '9.9', '10.0'];
         $qcPersonnel    = ['Maria Santos', 'Roberto Cruz', 'Ana Reyes', 'Jose Garcia'];
         $count          = 0;
 
@@ -893,13 +906,56 @@ class TestSeeder extends Seeder
                 $incubator = $incubators[array_rand($incubators)];
                 $hatcher   = $hatchers[array_rand($hatchers)];
 
-                $chickWeight   = round(rand(380, 440) / 10, 1); // 38–44 g
                 $dopPrimeQty   = rand(50, 200);
                 $dopJrPrimeQty = rand(20, 100);
                 $startH        = rand(6, 18);
                 $startM        = rand(0, 59);
                 $endH          = $startH + rand(0, 2);
                 $endM          = rand(0, 59);
+
+                // Generate 10–20 individual chick samples
+                $sampleCount = rand(10, 20);
+                $samples = [];
+                $totalWeight = 0;
+                $lowReflexQty = 0;
+                $navelQty = 0;
+                $legQty = 0;
+                $beakQty = 0;
+                $bellyQty = 0;
+                $vaccinationQty = 0;
+
+                for ($s = 0; $s < $sampleCount; $s++) {
+                    $weight = round(rand(360, 460) / 10, 1); // 36–46 g
+                    $lowReflex    = rand(1, 100) <= 5;  // 5% chance
+                    $navel        = rand(1, 100) <= 8;  // 8% chance
+                    $leg          = rand(1, 100) <= 4;  // 4% chance
+                    $beak         = rand(1, 100) <= 3;  // 3% chance
+                    $belly        = rand(1, 100) <= 6;  // 6% chance
+                    $vaccination  = rand(1, 100) <= 2;  // 2% chance
+
+                    $samples[] = [
+                        'chick_weight'          => $weight,
+                        'low_reflex_alertness'  => $lowReflex,
+                        'navel_issue'           => $navel,
+                        'leg_issue'             => $leg,
+                        'beak_issue'            => $beak,
+                        'belly_bloated'         => $belly,
+                        'vaccination_issue'     => $vaccination,
+                    ];
+
+                    $totalWeight += $weight;
+                    if ($lowReflex) $lowReflexQty++;
+                    if ($navel) $navelQty++;
+                    if ($leg) $legQty++;
+                    if ($beak) $beakQty++;
+                    if ($belly) $bellyQty++;
+                    if ($vaccination) $vaccinationQty++;
+                }
+
+                $avgWeight = round($totalWeight / $sampleCount, 1);
+                // PASGAR: 10 minus deductions per issue found
+                $totalIssues = $lowReflexQty + $navelQty + $legQty + $beakQty + $bellyQty + $vaccinationQty;
+                $pasgarScore = round(max(8.0, 10 - ($totalIssues / $sampleCount) * 2), 1);
 
                 Form::create([
                     'form_type_id' => $formTypeId,
@@ -911,13 +967,14 @@ class TestSeeder extends Seeder
                         'house_number'             => $houseNum->id,
                         'incubator_number'         => $incubator->id,
                         'hatcher_number'           => $hatcher->id,
-                        'average_chick_weight'     => $chickWeight,
-                        'low_reflex_alertness_qty' => rand(0, 5),
-                        'navel_issue_qty'          => rand(0, 8),
-                        'leg_issue_qty'            => rand(0, 4),
-                        'beak_issue_qty'           => rand(0, 3),
-                        'belly_bloated_qty'        => rand(0, 6),
-                        'pasgar_average_scoring'   => $scoringOptions[array_rand($scoringOptions)],
+                        'average_chick_weight'     => $avgWeight,
+                        'samples'                  => $samples,
+                        'low_reflex_alertness_qty' => $lowReflexQty,
+                        'navel_issue_qty'          => $navelQty,
+                        'leg_issue_qty'            => $legQty,
+                        'beak_issue_qty'           => $beakQty,
+                        'belly_bloated_qty'        => $bellyQty,
+                        'pasgar_average_scoring'   => $pasgarScore,
                         'dop_prime_qty'            => $dopPrimeQty,
                         'dop_prime_box_numbers'    => 'Box ' . rand(1, 20) . '-' . rand(21, 40),
                         'dop_jr_prime_qty'         => $dopJrPrimeQty,
@@ -1195,6 +1252,8 @@ class TestSeeder extends Seeder
                         'switch_gear_status'                   => $switchGear,
                         'switch_gear_problem'                  => $naOrProblem($switchGear),
                         'switch_gear_corrective_action'        => $naOrProblem($switchGear),
+
+                        'fire_extinguisher_qty' => rand(2, 6),
 
                         'test_run_conducted'    => 'Conducted',
                         'test_run_time'         => rand(15, 30) . ' minutes',
