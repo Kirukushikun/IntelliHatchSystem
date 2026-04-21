@@ -188,8 +188,8 @@
                             {{-- Accordion Body (collapsible) --}}
                             @if($expandedSample === $index)
                                 <div class="px-4 pb-4 border-t border-gray-200 dark:border-gray-600 pt-3">
-                                    <div class="flex gap-3 mb-3">
-                                        <div class="w-1/2">
+                                    <div class="mb-3 space-y-3">
+                                        <div>
                                             <label for="chick_weight_{{ $index }}" class="block text-xs font-medium text-gray-600 dark:text-gray-200 mb-1">
                                                 Chick Weight (g) <span class="text-red-500">*</span>
                                             </label>
@@ -202,7 +202,7 @@
                                                 <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
                                             @enderror
                                         </div>
-                                        <div class="w-1/2" data-field="weighing_photo_{{ $sample['_key'] }}">
+                                        <div data-field="weighing_photo_{{ $sample['_key'] }}">
                                             <x-photo-attach
                                                 label="Weighing Proof Photo"
                                                 name="weighing_photo_{{ $sample['_key'] }}"

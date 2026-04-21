@@ -266,9 +266,9 @@ class PasgarScoreForm extends FormNavigation
             $this->validate(PasgarScoreConfig::getRules(), $this->messages());
 
             // Require at least one photo of the form
-            $sessionPhotos = session("temp_photos.pasgar_score.form_photo", []);
-            if (empty($sessionPhotos)) {
-                $this->dispatch('showToast', message: 'Please upload at least one photo of the form with data before submitting.', type: 'error');
+            $formPhotos = $this->uploadedPhotoIds['form_photo'] ?? [];
+            if (empty($formPhotos)) {
+                $this->dispatch('showToast', message: 'Please upload at least one "Photo of Form with Data" before submitting.', type: 'error');
                 $this->goToStepWithField('form_photo');
                 return;
             }
