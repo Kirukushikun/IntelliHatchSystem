@@ -50,14 +50,11 @@ class IncubatorRoutineDashboard extends Component
 
     public function mount(): void
     {
-        // Hardcode the incubator routine form type ID (assuming it's ID 1)
-        $this->typeId = 1;
+        $formType = FormType::where('form_name', 'Incubator Routine Checklist Per Shift')->firstOrFail();
+        $this->typeId = $formType->id;
         $this->loadFormType();
         $this->page = (int) request()->query('page', 1);
         $this->loadTodayShiftCounts();
-        
-        // Debug: Log that component is mounting
-        Log::info('IncubatorRoutineDashboard component mounted with typeId: ' . $this->typeId);
     }
 
     protected function loadTodayShiftCounts(): void
@@ -184,19 +181,7 @@ class IncubatorRoutineDashboard extends Component
         }
 
         $forms = $query->paginate($this->perPage, ['*'], 'page', $this->page);
-        
-        // Debug: Log paginated form data for comparison
-        $forms->getCollection()->each(function ($form, $index) {
-            Log::info('Paginated Form Data', [
-                'index' => $index,
-                'form_id' => $form->id,
-                'form_inputs_type' => gettype($form->form_inputs),
-                'form_inputs_is_array' => is_array($form->form_inputs),
-                'shift_from_paginated' => $form->form_inputs['shift'] ?? 'NOT_FOUND',
-                'raw_form_inputs' => $form->form_inputs,
-            ]);
-        });
-            
+
         $currentPage = $forms->currentPage();
         $lastPage = $forms->lastPage();
         
@@ -330,12 +315,6 @@ class IncubatorRoutineDashboard extends Component
         $this->formPhotos = $this->getFormPhotos($formId);
         $this->currentPhotoIndex = 0;
         $this->showModal = true;
-        
-        // Debug logging
-        Log::info('ViewDetails Called - Simple', [
-            'form_id' => $formId,
-            'selectedFormId' => $this->selectedFormId,
-        ]);
     }
 
     public function deleteForm(int $formId): void
