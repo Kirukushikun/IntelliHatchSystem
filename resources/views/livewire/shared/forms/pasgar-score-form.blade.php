@@ -171,7 +171,7 @@
                                 <div class="flex items-center gap-3">
                                     <span class="text-xs font-medium px-2 py-1 rounded-full
                                         {{ $this->getSampleScore($index) >= 8 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($this->getSampleScore($index) >= 6 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400') }}">
-                                        Score: {{ $this->getSampleScore($index) }}/10
+                                        Score: {{ $this->getSampleScore($index) }}/100
                                     </span>
                                     @if(count($form['samples']) > 1)
                                         <span wire:click.stop="removeSample({{ $index }})"
@@ -188,18 +188,30 @@
                             {{-- Accordion Body (collapsible) --}}
                             @if($expandedSample === $index)
                                 <div class="px-4 pb-4 border-t border-gray-200 dark:border-gray-600 pt-3">
-                                    <div class="mb-3">
-                                        <label for="chick_weight_{{ $index }}" class="block text-xs font-medium text-gray-600 dark:text-gray-200 mb-1">
-                                            Chick Weight (g) <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="number" id="chick_weight_{{ $index }}"
-                                            wire:model.live="form.samples.{{ $index }}.chick_weight"
-                                            step="0.01" min="0"
-                                            placeholder="Enter weight in grams"
-                                            class="chick-weight-input w-full rounded-md border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
-                                        @error("form.samples.{$index}.chick_weight")
-                                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
-                                        @enderror
+                                    <div class="flex gap-3 mb-3">
+                                        <div class="w-1/2">
+                                            <label for="chick_weight_{{ $index }}" class="block text-xs font-medium text-gray-600 dark:text-gray-200 mb-1">
+                                                Chick Weight (g) <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="number" id="chick_weight_{{ $index }}"
+                                                wire:model.live="form.samples.{{ $index }}.chick_weight"
+                                                step="0.01" min="0"
+                                                placeholder="Enter weight in grams"
+                                                class="chick-weight-input w-full rounded-md border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+                                            @error("form.samples.{$index}.chick_weight")
+                                                <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div class="w-1/2" data-field="weighing_photo_{{ $sample['_key'] }}">
+                                            <x-photo-attach
+                                                label="Weighing Proof Photo"
+                                                name="weighing_photo_{{ $sample['_key'] }}"
+                                                :max-files="1"
+                                                :compact="true"
+                                                :camera-only="true"
+                                                :initial-photos="$this->getInitialPhotosForKey('weighing_photo_' . $sample['_key'])"
+                                            />
+                                        </div>
                                     </div>
 
                                     <p class="text-xs text-gray-500 dark:text-gray-300 mb-2">Check if the DOP has the issue (checked = has issue)</p>
@@ -246,6 +258,24 @@
                                                 class="rounded border-gray-300 text-red-500 shadow-sm focus:ring-red-500 dark:border-gray-500 dark:bg-gray-600 dark:checked:bg-red-500 dark:focus:ring-offset-gray-800 h-5 w-5">
                                             <span class="text-sm text-gray-700 dark:text-gray-200">Vaccination Issue</span>
                                         </label>
+                                    </div>
+
+                                    @php
+                                        $hasIssue = ($sample['low_reflex_alertness'] ?? false) ||
+                                            ($sample['navel_issue'] ?? false) ||
+                                            ($sample['leg_issue'] ?? false) ||
+                                            ($sample['beak_issue'] ?? false) ||
+                                            ($sample['belly_bloated'] ?? false) ||
+                                            ($sample['vaccination_issue'] ?? false);
+                                    @endphp
+                                    <div class="mt-3" data-field="issue_photo_{{ $sample['_key'] }}" @style(['display:none' => !$hasIssue])>
+                                        <x-photo-attach
+                                            label="Issue Proof Photo"
+                                            name="issue_photo_{{ $sample['_key'] }}"
+                                            :max-files="3"
+                                            :compact="true"
+                                            :initial-photos="$this->getInitialPhotosForKey('issue_photo_' . $sample['_key'])"
+                                        />
                                     </div>
                                 </div>
                             @endif

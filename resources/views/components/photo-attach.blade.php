@@ -4,9 +4,12 @@
     'required' => false,
     'maxFiles' => 20,
     'maxSizeMb' => 10,
+    'initialPhotos' => [],
+    'compact' => false,
+    'cameraOnly' => false,
 ])
 
-<div class="mb-6" x-data="{ 
+<div class="{{ $compact ? 'mb-2' : 'mb-6' }}" x-data="{
     showCameraModal: false,
     showCancelConfirmation: false,
     showCarouselModal: false,
@@ -58,6 +61,19 @@
         return true;
     },
     init() {
+        const preloaded = @json($initialPhotos ?? []);
+        if (preloaded && preloaded.length > 0) {
+            for (const p of preloaded) {
+                this.attachedPhotos.push({
+                    id: p.id,
+                    data: p.url,
+                    serverPhotoId: p.id,
+                    serverUrl: p.url,
+                });
+                this.attachedFiles.push(null);
+            }
+        }
+
         window.addEventListener('photoLimitReached', (event) => {
             if (!event || !event.detail || event.detail.photoKey !== this.photoKey) return;
             this.toast('error', `Maximum ${event.detail.max} photos allowed per field.`);
@@ -162,6 +178,7 @@
             return;
         }
         this.showCameraModal = true;
+        this.$nextTick(() => this.startCamera());
     },
     triggerUpload() {
         if (this.uploading || this.processingGallery) {
@@ -204,7 +221,7 @@
 
             const dataTransfer = new DataTransfer();
             const allFiles = [...this.attachedFiles, ...newFiles];
-            allFiles.forEach(file => dataTransfer.items.add(file));
+            allFiles.filter(f => f).forEach(file => dataTransfer.items.add(file));
 
             this.suppressInputChange = true;
             this.$refs.originalInput.files = dataTransfer.files;
@@ -542,12 +559,10 @@
         }
 
         this.attachedPhotos.splice(index, 1);
-        if (file) {
-            this.attachedFiles.splice(index, 1);
-        }
+        this.attachedFiles.splice(index, 1);
 
         const dataTransfer = new DataTransfer();
-        this.attachedFiles.forEach(f => dataTransfer.items.add(f));
+        this.attachedFiles.filter(f => f).forEach(f => dataTransfer.items.add(f));
         this.suppressInputChange = true;
         this.$refs.originalInput.files = dataTransfer.files;
         this.suppressInputChange = false;
@@ -616,7 +631,7 @@
             // Create a DataTransfer object to set files to the original input
             const dataTransfer = new DataTransfer();
             const allFiles = [...this.attachedFiles, ...files];
-            allFiles.forEach(file => dataTransfer.items.add(file));
+            allFiles.filter(f => f).forEach(file => dataTransfer.items.add(file));
             
             console.log('[photo-attach] DataTransfer size', { items: dataTransfer.items.length });
             
@@ -645,7 +660,7 @@
 }">
     @if($label)
         <div class="flex items-center justify-between gap-3 mb-1">
-            <label class="block text-sm font-medium text-gray-700">
+            <label class="block {{ $compact ? 'text-xs' : 'text-sm' }} font-medium text-gray-700">
                 {{ $label }}
                 @if($required)
                     <span class="text-red-500">*</span>
@@ -654,14 +669,16 @@
                       :class="isAtLimit ? 'text-red-500 font-medium' : 'text-gray-400'"
                       x-text="`(${attachedPhotos.length}/${maxFiles})`"></span>
             </label>
-            <button type="button"
-                    @click="attachMode = (attachMode === 'camera' ? 'upload' : 'camera')"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"></path>
-                </svg>
-                <span x-text="attachMode === 'camera' ? 'Camera' : 'Gallery'"></span>
-            </button>
+            @unless($cameraOnly)
+                <button type="button"
+                        @click="attachMode = (attachMode === 'camera' ? 'upload' : 'camera')"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"></path>
+                    </svg>
+                    <span x-text="attachMode === 'camera' ? 'Camera' : 'Gallery'"></span>
+                </button>
+            @endunless
         </div>
     @endif
 
@@ -673,39 +690,39 @@
     </div>
 
     <template x-if="attachedPhotos.length === 0">
-        <div class="flex items-center gap-2 mb-6">
+        <div class="flex items-center gap-2 {{ $compact ? 'mb-2' : 'mb-6' }}">
             <button
                 @click="if(!isAtLimit) { openAttachAction(); } $event.preventDefault()"
                 type="button"
                 :disabled="isAtLimit"
-                class="flex-1 flex items-center justify-center px-4 py-6 border-2 border-dashed rounded-lg transition"
+                class="flex-1 flex items-center justify-center {{ $compact ? 'px-3 py-2.5' : 'px-4 py-6' }} border-2 border-dashed rounded-lg transition"
                 :class="isAtLimit ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-blue-500 border-gray-300 bg-blue-50 hover:bg-blue-100'"
             >
                 <template x-if="attachMode === 'camera'">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="{{ $compact ? 'w-4 h-4' : 'w-5 h-5' }} text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                 </template>
                 <template x-if="attachMode === 'upload'">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="{{ $compact ? 'w-4 h-4' : 'w-5 h-5' }} text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                 </template>
 
-                <span class="ml-2 text-blue-600" x-text="attachMode === 'upload' ? 'Upload photo' : 'Take photo'"></span>
+                <span class="ml-2 {{ $compact ? 'text-xs' : '' }} text-blue-600" x-text="attachMode === 'upload' ? 'Upload photo' : 'Take photo'"></span>
             </button>
         </div>
     </template>
 
     <template x-if="attachedPhotos.length > 0">
-        <div class="flex flex-col sm:flex-row gap-2 mb-6">
-            <button 
+        <div class="flex flex-col sm:flex-row gap-2 {{ $compact ? 'mb-2' : 'mb-6' }}">
+            <button
                 @click="openCarousel(0)"
                 type="button"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors duration-150"
+                class="flex-1 inline-flex items-center justify-center {{ $compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm' }} bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-150"
             >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="{{ $compact ? 'w-3.5 h-3.5 mr-1.5' : 'w-4 h-4 mr-2' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
                 See Photos (<span x-text="attachedPhotos.length"></span>)
@@ -714,21 +731,21 @@
                 @click="if(!isAtLimit) { openAttachAction(); } $event.preventDefault()"
                 type="button"
                 :disabled="isAtLimit"
-                class="flex-1 flex items-center justify-center px-4 py-2 border-2 border-dashed rounded-lg transition"
+                class="flex-1 flex items-center justify-center {{ $compact ? 'px-3 py-1.5' : 'px-4 py-2' }} border-2 border-dashed rounded-lg transition"
                 :class="isAtLimit ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-blue-500 border-gray-300 bg-blue-50 hover:bg-blue-100'"
             >
                 <template x-if="attachMode === 'camera'">
-                    <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="{{ $compact ? 'w-3.5 h-3.5 mr-1.5' : 'w-4 h-4 mr-2' }} text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                 </template>
                 <template x-if="attachMode === 'upload'">
-                    <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="{{ $compact ? 'w-3.5 h-3.5 mr-1.5' : 'w-4 h-4 mr-2' }} text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                 </template>
-                <span class="text-blue-600" x-text="isAtLimit ? `Limit reached (${maxFiles})` : (attachMode === 'upload' ? 'Upload Photo' : 'Take Photo')"></span>
+                <span class="{{ $compact ? 'text-xs' : '' }} text-blue-600" x-text="isAtLimit ? `Limit reached (${maxFiles})` : (attachMode === 'upload' ? 'Upload Photo' : 'Take Photo')"></span>
             </button>
         </div>
     </template>
@@ -801,22 +818,13 @@
             </div>
 
             {{-- Footer Buttons --}}
-            <div class="flex flex-wrap justify-center sm:justify-end items-center gap-2 mt-4 sm:mt-6 sticky bottom-0 bg-white dark:bg-gray-800 pt-2 pb-1 border-t border-gray-100 dark:border-gray-700">
-                {{-- Cancel --}}
+            <div class="flex items-center justify-center gap-4 mt-4 sm:mt-6 sticky bottom-0 bg-white dark:bg-gray-800 pt-2 pb-1 border-t border-gray-100 dark:border-gray-700">
+                {{-- Cancel (pinned left) --}}
                 <button @click="tryCancel()" type="button" title="Cancel"
                         :disabled="uploading || processingGallery"
-                        class="p-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="absolute left-0 p-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-
-                {{-- Start Camera --}}
-                <button @click="startCamera()" type="button" title="Start Camera"
-                        x-show="!cameraActive && !uploading && !processingGallery"
-                        class="p-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                     </svg>
                 </button>
 
@@ -841,20 +849,10 @@
                         x-show="cameraActive && !uploading && !processingGallery"
                         :disabled="isAtLimit"
                         :class="isAtLimit ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
-                        class="p-2.5 text-white rounded-full">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="p-4 text-white rounded-full">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                </button>
-
-                {{-- Stop Camera --}}
-                <button @click="stopCamera()" type="button" title="Stop Camera"
-                        x-show="cameraActive && !uploading && !processingGallery"
-                        class="p-2.5 bg-orange-500 text-white rounded-full hover:bg-orange-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
                     </svg>
                 </button>
 

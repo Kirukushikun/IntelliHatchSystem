@@ -440,6 +440,143 @@ class FormsPrintController extends Controller
         );
     }
 
+    public function pasgarScore(Request $request)
+    {
+        $formType = FormType::where('form_name', 'PASGAR Score')->firstOrFail();
+
+        $search = (string) $request->query('search', '');
+        $dateFrom = (string) $request->query('dateFrom', '');
+        $dateTo = (string) $request->query('dateTo', '');
+        $sortField = (string) $request->query('sortField', 'date_submitted');
+        $sortDirection = strtolower((string) $request->query('sortDirection', 'desc'));
+
+        if (! in_array($sortDirection, ['asc', 'desc'], true)) {
+            $sortDirection = 'desc';
+        }
+        if ($sortField !== 'date_submitted') {
+            $sortField = 'date_submitted';
+        }
+
+        $query = Form::query()
+            ->where('form_type_id', $formType->id)
+            ->whereNotNull('date_submitted');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('form_inputs', 'like', '%"personnel_name":"%' . $search . '%"%')
+                    ->orWhere(function ($subQ) use ($search) {
+                        $subQ->where('form_inputs', 'like', '%"machine_info":%')
+                            ->where('form_inputs', 'like', '%"name":"%' . $search . '%"%');
+                    })
+                    ->orWhere('form_inputs', 'like', '%"qc_personnel":"%' . $search . '%"%');
+            });
+        }
+
+        if ($dateFrom !== '' && $dateTo !== '') {
+            $query->whereBetween('date_submitted', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
+        } elseif ($dateFrom !== '') {
+            $query->whereDate('date_submitted', '>=', $dateFrom);
+        } elseif ($dateTo !== '') {
+            $query->whereDate('date_submitted', '<=', $dateTo);
+        }
+
+        $query->orderBy($sortField, $sortDirection);
+
+        $forms = $query->get();
+
+        $rows = $forms->map(function ($form) {
+            $inputs = is_array($form->form_inputs) ? $form->form_inputs : (json_decode((string) $form->form_inputs, true) ?: []);
+
+            $hatcherName = 'N/A';
+            if (isset($inputs['hatcher_number']) && $inputs['hatcher_number'] !== '') {
+                $hatcher = DB::table('hatcher-machines')->where('id', $inputs['hatcher_number'])->first();
+                $hatcherName = $hatcher->hatcherName ?? 'N/A';
+            }
+
+            $houseNumber = 'N/A';
+            if (isset($inputs['house_number']) && $inputs['house_number'] !== '') {
+                $house = DB::table('house-numbers')->where('id', $inputs['house_number'])->first();
+                $houseNumber = $house->houseNumber ?? 'N/A';
+            }
+
+            $incubatorName = 'N/A';
+            if (isset($inputs['incubator_number']) && $inputs['incubator_number'] !== '') {
+                $inc = DB::table('incubator-machines')->where('id', $inputs['incubator_number'])->first();
+                $incubatorName = $inc->incubatorName ?? 'N/A';
+            }
+
+            $personnelName = $inputs['personnel_name'] ?? 'N/A';
+            if (is_numeric($personnelName)) {
+                $personnelUser = DB::table('users')->where('id', $personnelName)->first();
+                $personnelName = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
+            }
+
+            return [
+                'date' => $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A',
+                'personnel' => $personnelName,
+                'ps_number' => $inputs['machine_info']['name'] ?? 'N/A',
+                'house_number' => $houseNumber,
+                'incubator' => $incubatorName,
+                'hatcher' => $hatcherName,
+                'pasgar_avg' => $inputs['pasgar_average_scoring'] ?? '0.00',
+                'samples' => $inputs['total_samples'] ?? count($inputs['samples'] ?? []),
+            ];
+        })->values();
+
+        $sortDirectionLabel = $sortDirection === 'asc' ? 'Ascending' : 'Descending';
+
+        return view('admin.print.pasgar-score', [
+            'title' => 'PASGAR Score',
+            'rows' => $rows,
+            'criteria' => [
+                'search' => $search !== '' ? $search : '—',
+                'date_from' => $dateFrom !== '' ? $dateFrom : '—',
+                'date_to' => $dateTo !== '' ? $dateTo : '—',
+                'sort' => 'Date Submitted (' . $sortDirectionLabel . ')',
+            ],
+        ]);
+    }
+
+    public function pasgarScoreDetail(Request $request)
+    {
+        $formId = (int) $request->query('form_id', 0);
+        $form = Form::findOrFail($formId);
+
+        $inputs = is_array($form->form_inputs) ? $form->form_inputs : (json_decode((string) $form->form_inputs, true) ?: []);
+
+        $houseNumber = 'N/A';
+        if (isset($inputs['house_number']) && $inputs['house_number'] !== '') {
+            $house = DB::table('house-numbers')->where('id', $inputs['house_number'])->first();
+            $houseNumber = $house->houseNumber ?? 'N/A';
+        }
+
+        $incubatorName = 'N/A';
+        if (isset($inputs['incubator_number']) && $inputs['incubator_number'] !== '') {
+            $inc = DB::table('incubator-machines')->where('id', $inputs['incubator_number'])->first();
+            $incubatorName = $inc->incubatorName ?? 'N/A';
+        }
+
+        $hatcherName = 'N/A';
+        if (isset($inputs['hatcher_number']) && $inputs['hatcher_number'] !== '') {
+            $hatcher = DB::table('hatcher-machines')->where('id', $inputs['hatcher_number'])->first();
+            $hatcherName = $hatcher->hatcherName ?? 'N/A';
+        }
+
+        // Resolve personnel name if stored as user ID
+        if (isset($inputs['personnel_name']) && is_numeric($inputs['personnel_name'])) {
+            $personnelUser = DB::table('users')->where('id', $inputs['personnel_name'])->first();
+            $inputs['personnel_name'] = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
+        }
+
+        return view('admin.print.pasgar-score-detail', [
+            'form' => $form,
+            'inputs' => $inputs,
+            'houseNumber' => $houseNumber,
+            'incubatorName' => $incubatorName,
+            'hatcherName' => $hatcherName,
+        ]);
+    }
+
     private function printForms(
         Request $request,
         FormType $formType,

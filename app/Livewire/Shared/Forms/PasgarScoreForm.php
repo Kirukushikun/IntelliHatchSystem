@@ -39,11 +39,13 @@ class PasgarScoreForm extends FormNavigation
 
     public int $expandedSample = 0;
 
+    public int $nextSampleKey = 2;
+
     public function mount($formType = 'pasgar_score'): void
     {
         $this->form = PasgarScoreConfig::defaultFormState();
-        // Start with one empty sample
-        $this->form['samples'] = [PasgarScoreConfig::defaultSample()];
+        // Start with one empty sample (with stable key for photo tracking)
+        $this->form['samples'] = [array_merge(PasgarScoreConfig::defaultSample(), ['_key' => 1])];
 
         parent::mount($formType);
         $this->schedule = $this->scheduleConfig();
@@ -110,7 +112,8 @@ class PasgarScoreForm extends FormNavigation
             return;
         }
 
-        $this->form['samples'][] = PasgarScoreConfig::defaultSample();
+        $this->form['samples'][] = array_merge(PasgarScoreConfig::defaultSample(), ['_key' => $this->nextSampleKey]);
+        $this->nextSampleKey++;
         $this->expandedSample = count($this->form['samples']) - 1;
     }
 
@@ -123,6 +126,18 @@ class PasgarScoreForm extends FormNavigation
     {
         if (count($this->form['samples']) <= 1) {
             return;
+        }
+
+        // Clean up photos for this sample
+        $sampleKey = $this->form['samples'][$index]['_key'] ?? null;
+        if ($sampleKey) {
+            foreach (['weighing_photo_', 'issue_photo_'] as $prefix) {
+                $photoKey = $prefix . $sampleKey;
+                $photoIds = $this->uploadedPhotoIds[$photoKey] ?? [];
+                foreach ($photoIds as $photoId) {
+                    $this->deleteUploadedPhoto($photoKey, $photoId);
+                }
+            }
         }
 
         unset($this->form['samples'][$index]);
@@ -205,6 +220,19 @@ class PasgarScoreForm extends FormNavigation
         ];
     }
 
+    public function getInitialPhotosForKey(string $photoKey): array
+    {
+        $ids = $this->uploadedPhotoIds[$photoKey] ?? [];
+        $urls = $this->uploadedPhotoUrls[$photoKey] ?? [];
+        $result = [];
+
+        foreach ($ids as $i => $id) {
+            $result[] = ['id' => $id, 'url' => $urls[$i] ?? ''];
+        }
+
+        return $result;
+    }
+
     protected function formTypeKey(): string
     {
         return 'pasgar_score';
@@ -253,8 +281,22 @@ class PasgarScoreForm extends FormNavigation
             $formId = $this->storeSubmissionAndReturnId($this->formTypeName(), $this->formInputsForStorageWithoutPhotos());
             $this->finalizePhotosForForm($formId);
 
+            $finalInputs = $this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos());
+
+            // Embed per-sample photos and remove top-level keys
+            foreach ($this->form['samples'] as $i => $sample) {
+                $key = $sample['_key'] ?? null;
+                if ($key && isset($finalInputs['samples'][$i])) {
+                    foreach (['weighing_photo_' => 'weighing_photos', 'issue_photo_' => 'issue_photos'] as $prefix => $field) {
+                        $photoKey = $prefix . $key;
+                        $finalInputs['samples'][$i][$field] = $finalInputs[$photoKey] ?? [];
+                        unset($finalInputs[$photoKey]);
+                    }
+                }
+            }
+
             DB::table('forms')->where('id', $formId)->update([
-                'form_inputs' => json_encode($this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos())),
+                'form_inputs' => json_encode($finalInputs),
                 'updated_at'  => now(),
             ]);
 
@@ -340,6 +382,12 @@ class PasgarScoreForm extends FormNavigation
         $inputs['vaccination_issue_qty']    = $totals['vaccination_issue'];
         $inputs['pasgar_average_scoring']   = $this->getPasgarAverageProperty();
         $inputs['total_samples']            = count($inputs['samples'] ?? []);
+
+        // Strip internal _key from samples
+        foreach ($inputs['samples'] as $i => &$sample) {
+            unset($sample['_key']);
+        }
+        unset($sample);
 
         return $inputs;
     }

@@ -924,8 +924,10 @@ class TestSeeder extends Seeder
                 $bellyQty = 0;
                 $vaccinationQty = 0;
 
+                $totalScore = 0;
+
                 for ($s = 0; $s < $sampleCount; $s++) {
-                    $weight = round(rand(360, 460) / 10, 1); // 36–46 g
+                    $weight = round(rand(280, 460) / 10, 1); // 28–46 g
                     $lowReflex    = rand(1, 100) <= 5;  // 5% chance
                     $navel        = rand(1, 100) <= 8;  // 8% chance
                     $leg          = rand(1, 100) <= 4;  // 4% chance
@@ -950,12 +952,20 @@ class TestSeeder extends Seeder
                     if ($beak) $beakQty++;
                     if ($belly) $bellyQty++;
                     if ($vaccination) $vaccinationQty++;
+
+                    // Score: base 100, -1 per issue, weight deduction
+                    $sampleScore = 100;
+                    $sampleScore -= ($lowReflex + $navel + $leg + $beak + $belly + $vaccination);
+                    if ($weight > 0 && $weight <= 30) {
+                        $sampleScore -= 2;
+                    } elseif ($weight >= 31 && $weight <= 34) {
+                        $sampleScore -= 1;
+                    }
+                    $totalScore += $sampleScore;
                 }
 
                 $avgWeight = round($totalWeight / $sampleCount, 1);
-                // PASGAR: 10 minus deductions per issue found
-                $totalIssues = $lowReflexQty + $navelQty + $legQty + $beakQty + $bellyQty + $vaccinationQty;
-                $pasgarScore = round(max(8.0, 10 - ($totalIssues / $sampleCount) * 2), 1);
+                $pasgarScore = round($totalScore / $sampleCount, 2);
 
                 Form::create([
                     'form_type_id' => $formTypeId,

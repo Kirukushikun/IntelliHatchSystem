@@ -86,4 +86,9 @@ class DashboardController extends Controller
     {
         return view('admin.hatcher-temp-calibration-dashboard');
     }
+
+    public function pasgarScore()
+    {
+        return view('admin.pasgar-score-dashboard');
+    }
 }

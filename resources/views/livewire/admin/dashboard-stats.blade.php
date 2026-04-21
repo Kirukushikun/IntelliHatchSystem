@@ -173,6 +173,7 @@
                     'Incubator Entrance Temperature Monitoring' => 'incubator-entrance-temp-dashboard',
                     'Incubator Temperature Calibration' => 'incubator-temp-calibration-dashboard',
                     'Hatcher Temperature Calibration' => 'hatcher-temp-calibration-dashboard',
+                    'PASGAR Score' => 'pasgar-score-dashboard',
                     default => '#'
                 } }}" class="block h-full">
                 <!-- Card Header -->

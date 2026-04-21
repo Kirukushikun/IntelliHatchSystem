@@ -131,6 +131,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/hatcher-temp-calibration-dashboard', [DashboardController::class, 'hatcherTempCalibration'])->name('admin.hatcher-temp-calibration-dashboard');
 
+        Route::get('/admin/pasgar-score-dashboard', [DashboardController::class, 'pasgarScore'])->name('admin.pasgar-score-dashboard');
+
         Route::get('/admin/forms/hatcher-machine-accuracy', [FormController::class, 'hatcherMachineAccuracy'])->name('admin.forms.hatcher-machine-accuracy');
 
         Route::get('/admin/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('admin.forms.plenum-temp-humidity');
@@ -214,6 +216,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/print/forms/hatcher-temp-calibration', [FormsPrintController::class, 'hatcherTempCalibration'])
             ->middleware('signed')
             ->name('admin.print.forms.hatcher-temp-calibration');
+
+        Route::get('/admin/print/forms/pasgar-score', [FormsPrintController::class, 'pasgarScore'])
+            ->middleware('signed')
+            ->name('admin.print.forms.pasgar-score');
+
+        Route::get('/admin/print/forms/pasgar-score-detail', [FormsPrintController::class, 'pasgarScoreDetail'])
+            ->middleware('signed')
+            ->name('admin.print.forms.pasgar-score-detail');
 
         Route::get('/admin/print/insights/{formTypeId}', [InsightsController::class, 'printView'])
             ->middleware('signed')
