@@ -137,6 +137,9 @@ class PasgarScoreForm extends FormNavigation
     public function getSampleScore(int $index): int
     {
         $sample = $this->form['samples'][$index] ?? [];
+        $score = 100;
+
+        // Deduct 1 for each issue checked (6 possible issues)
         $issues = collect([
             $sample['low_reflex_alertness'] ?? false,
             $sample['navel_issue'] ?? false,
@@ -145,8 +148,18 @@ class PasgarScoreForm extends FormNavigation
             $sample['belly_bloated'] ?? false,
             $sample['vaccination_issue'] ?? false,
         ])->filter()->count();
+        $score -= $issues;
 
-        return 10 - ($issues * 2);
+        // Weight deduction
+        $weight = (float) ($sample['chick_weight'] ?? 0);
+        if ($weight > 0 && $weight <= 30) {
+            $score -= 2;
+        } elseif ($weight >= 31 && $weight <= 34) {
+            $score -= 1;
+        }
+        // 35g or above: no deduction
+
+        return $score;
     }
 
     public function getPasgarAverageProperty(): string
