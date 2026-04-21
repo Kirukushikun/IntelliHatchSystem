@@ -298,7 +298,7 @@ class PasgarScoreDashboard extends Component
         $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
 
         // If no specific field, return form_photo photos
-        $photoFieldKey = $field ? $field . '_photos' : 'form_photo_photos';
+        $photoFieldKey = $field ?: 'form_photo';
 
         if (isset($formData[$photoFieldKey]) && ! empty($formData[$photoFieldKey])) {
             $photoUrls = is_array($formData[$photoFieldKey]) ? $formData[$photoFieldKey] : [];
