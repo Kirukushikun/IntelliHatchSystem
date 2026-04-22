@@ -57,5 +57,44 @@
         
         <!-- Livewire Scripts -->
         <livewire:scripts />
+
+        <!-- Form dirty guard — prevents accidental page refresh/close when a form has unsaved data -->
+        <script>
+            (function () {
+                var formDirty = false;
+                var formSubmitting = false;
+
+                document.addEventListener('input', function (e) {
+                    if (e.target.closest('#step-form')) {
+                        formDirty = true;
+                    }
+                });
+
+                document.addEventListener('change', function (e) {
+                    if (e.target.closest('#step-form')) {
+                        formDirty = true;
+                    }
+                });
+
+                document.addEventListener('submit', function (e) {
+                    if (e.target.id === 'step-form') {
+                        formSubmitting = true;
+                    }
+                });
+
+                window.addEventListener('beforeunload', function (e) {
+                    if (formDirty && !formSubmitting) {
+                        e.preventDefault();
+                        e.returnValue = '';
+                    }
+                });
+
+                document.addEventListener('livewire:init', function () {
+                    Livewire.hook('morph.updated', function () {
+                        formSubmitting = false;
+                    });
+                });
+            })();
+        </script>
     </body>
 </html>
