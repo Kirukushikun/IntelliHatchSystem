@@ -107,6 +107,12 @@ class EntranceDamperSpacingForm extends FormNavigation
         try {
             $this->validate(EntranceDamperSpacingConfig::getRules(), $this->messages());
 
+            if (empty($this->uploadedPhotoIds['measurement_photo'])) {
+                $this->dispatch('showToast', message: 'Please upload at least one photo.', type: 'error');
+                $this->goToStepWithField('measurement_photo');
+                return;
+            }
+
             if (!$this->ensureAllPhotosUploaded()) {
                 $this->dispatch('showToast', message: 'Photo uploads are still in progress. Please wait for all photos to finish uploading before submitting the form.', type: 'error');
                 return;

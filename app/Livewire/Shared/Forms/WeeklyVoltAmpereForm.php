@@ -91,11 +91,8 @@ class WeeklyVoltAmpereForm extends FormNavigation
         try {
             $this->validate(WeeklyVoltAmpereConfig::getRules(), $this->messages());
 
-            $formTypeKey = $this->formTypeKey();
-
             // voltage_ampere_photos is required
-            $voltageAmperePhotos = session("temp_photos.{$formTypeKey}.voltage_ampere_photos", []);
-            if (empty($voltageAmperePhotos)) {
+            if (empty($this->uploadedPhotoIds['voltage_ampere_photos'])) {
                 $this->dispatch('showToast', message: 'Please upload at least one photo of the voltage and ampere readings before submitting.', type: 'error');
                 $this->goToStepWithField('voltage_ampere_photos');
                 return;

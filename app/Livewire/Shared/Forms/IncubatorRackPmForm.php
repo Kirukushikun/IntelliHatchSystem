@@ -91,8 +91,6 @@ class IncubatorRackPmForm extends FormNavigation
         try {
             $this->validate(IncubatorRackPmConfig::getRules(), $this->messages());
 
-            $formTypeKey = $this->formTypeKey();
-
             $photoChecks = [
                 'photo_chord_connection'   => 2,
                 'photo_air_hose'           => 3,
@@ -108,8 +106,7 @@ class IncubatorRackPmForm extends FormNavigation
             ];
 
             foreach ($photoChecks as $photoKey => $step) {
-                $sessionPhotos = session("temp_photos.{$formTypeKey}.{$photoKey}", []);
-                if (empty($sessionPhotos)) {
+                if (empty($this->uploadedPhotoIds[$photoKey])) {
                     $this->dispatch('showToast', message: 'Please upload at least one photo for each check item before submitting.', type: 'error');
                     $this->goToStepWithField($photoKey);
                     return;
