@@ -50,7 +50,7 @@ class PlenumTempHumidityDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Plenum Temperature and Humidity Monitoring')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Plenum Temperature and Humidity Monitoring')->where('isActive', true)->firstOrFail();
         $this->calculateTodayFormCount();
     }
 

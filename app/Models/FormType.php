@@ -14,12 +14,19 @@ class FormType extends Model
         'form_name',
         'description',
         'impact_level',
+        'isActive',
     ];
 
     protected $casts = [
+        'isActive' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('isActive', true);
+    }
 
     public function forms(): HasMany
     {

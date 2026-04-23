@@ -56,7 +56,7 @@ class HatcherySullairDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Hatchery Sullair Air Compressor Weekly PMS Checklist')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Hatchery Sullair Air Compressor Weekly PMS Checklist')->where('isActive', true)->firstOrFail();
         $this->calculateTodayFormCount();
 
         $this->sullairNumbers = [

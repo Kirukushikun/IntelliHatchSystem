@@ -77,14 +77,14 @@ class ProcessAiChatRequest implements ShouldQueue
         }
 
         $formTypeIds = empty($selectedIds)
-            ? DB::table('form_types')->pluck('id')->toArray()
+            ? DB::table('form_types')->where('isActive', true)->pluck('id')->toArray()
             : $selectedIds;
 
         $sections = [];
 
         foreach ($formTypeIds as $typeId) {
             $formType = FormType::find($typeId);
-            if (! $formType) {
+            if (! $formType || ! $formType->isActive) {
                 continue;
             }
 

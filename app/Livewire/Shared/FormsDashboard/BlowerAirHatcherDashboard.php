@@ -54,7 +54,7 @@ class BlowerAirHatcherDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Hatcher Blower Air Speed Monitoring')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Hatcher Blower Air Speed Monitoring')->where('isActive', true)->firstOrFail();
         $this->calculateTodayFormCount();
     }
 

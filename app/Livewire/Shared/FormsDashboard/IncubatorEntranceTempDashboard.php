@@ -50,7 +50,7 @@ class IncubatorEntranceTempDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Incubator Entrance Temperature Monitoring')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Incubator Entrance Temperature Monitoring')->where('isActive', true)->firstOrFail();
         $this->calculateTodayFormCount();
     }
 

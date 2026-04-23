@@ -25,7 +25,7 @@ class InsightsIndex extends Component
         $monthStart = $now->copy()->startOfMonth()->startOfDay();
         $monthEnd   = $now->copy()->endOfMonth()->endOfDay();
 
-        $formTypes = DB::table('form_types')->orderBy('form_name')->get(['id', 'form_name']);
+        $formTypes = DB::table('form_types')->where('isActive', true)->orderBy('form_name')->get(['id', 'form_name']);
 
         $typeIds = $formTypes->pluck('id')->toArray();
 

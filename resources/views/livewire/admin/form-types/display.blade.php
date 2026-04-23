@@ -62,7 +62,7 @@
                         default           => [null, null],
                     };
                 @endphp
-                <li class="px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
+                <li class="px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors {{ !$ft->isActive ? 'opacity-60' : '' }}">
                     @if($editingId === $ft->id)
                         {{-- Edit mode --}}
                         <form wire:submit="saveEdit" class="space-y-3">
@@ -119,9 +119,22 @@
                                 @if($badgeClass)
                                     <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded {{ $badgeClass }}">{{ $badgeLabel }}</span>
                                 @endif
+                                @if(!$ft->isActive)
+                                    <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Inactive</span>
+                                @endif
                             </div>
 
                             <div class="flex items-center gap-3 shrink-0">
+                                {{-- Toggle active/inactive --}}
+                                <button
+                                    wire:click="toggleStatus({{ $ft->id }})"
+                                    wire:confirm="{{ $ft->isActive ? 'Deactivate this form type? It will be hidden from all users, dashboards, insights, and AI chat.' : 'Activate this form type? It will become available across the system.' }}"
+                                    class="px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer {{ $ft->isActive ? 'text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40' : 'text-green-600 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:bg-green-900/20 dark:hover:bg-green-900/40' }}"
+                                    title="{{ $ft->isActive ? 'Deactivate' : 'Activate' }}"
+                                >
+                                    {{ $ft->isActive ? 'Deactivate' : 'Activate' }}
+                                </button>
+
                                 {{-- Edit button --}}
                                 <button
                                     wire:click="startEditing({{ $ft->id }})"

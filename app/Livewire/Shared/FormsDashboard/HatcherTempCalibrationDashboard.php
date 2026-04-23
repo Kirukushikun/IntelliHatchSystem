@@ -53,7 +53,7 @@ class HatcherTempCalibrationDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Hatcher Temperature Calibration')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Hatcher Temperature Calibration')->where('isActive', true)->firstOrFail();
         $this->calculateTodayFormCount();
         $this->loadTodayShiftCounts();
     }

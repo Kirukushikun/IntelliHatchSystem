@@ -50,7 +50,7 @@ class IncubatorRoutineDashboard extends Component
 
     public function mount(): void
     {
-        $formType = FormType::where('form_name', 'Incubator Routine Checklist Per Shift')->firstOrFail();
+        $formType = FormType::where('form_name', 'Incubator Routine Checklist Per Shift')->where('isActive', true)->firstOrFail();
         $this->typeId = $formType->id;
         $this->loadFormType();
         $this->page = (int) request()->query('page', 1);

@@ -18,7 +18,7 @@
             'Hatchery Diesel Generator Weekly Maintenance Checklist' => '/forms/diesel-generator-weekly',
         ];
 
-        $formTypes = \App\Models\FormType::orderBy('id')->get();
+        $formTypes = \App\Models\FormType::where('isActive', true)->orderBy('id')->get();
 
         $forms = $formTypes->map(function ($ft) use ($routeMap) {
             return [

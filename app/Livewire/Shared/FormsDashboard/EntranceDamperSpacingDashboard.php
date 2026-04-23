@@ -53,7 +53,7 @@ class EntranceDamperSpacingDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Entrance Damper Spacing Monitoring')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Entrance Damper Spacing Monitoring')->where('isActive', true)->firstOrFail();
         $this->calculateTodayFormCount();
         $this->loadTodayShiftCounts();
     }

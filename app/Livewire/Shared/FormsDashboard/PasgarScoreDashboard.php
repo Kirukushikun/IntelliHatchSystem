@@ -45,7 +45,7 @@ class PasgarScoreDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'PASGAR Score')->first();
+        $this->formType = FormType::where('form_name', 'PASGAR Score')->where('isActive', true)->first();
 
         if (! $this->formType) {
             abort(404, 'PASGAR Score form type not found');

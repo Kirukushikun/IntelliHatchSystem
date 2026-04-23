@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Components;
 
+use App\Models\FormType;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -39,7 +40,12 @@ abstract class FormNavigation extends Component
 
     public function mount($formType = null): void
     {
-        // Base mount logic; can be extended by child components.
+        if (method_exists($this, 'formTypeName')) {
+            $ft = FormType::where('form_name', $this->formTypeName())->first();
+            if (! $ft || ! $ft->isActive) {
+                abort(404);
+            }
+        }
     }
 
     public function updatedFormShift($value): void

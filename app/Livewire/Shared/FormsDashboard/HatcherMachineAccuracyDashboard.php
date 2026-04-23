@@ -53,7 +53,7 @@ class HatcherMachineAccuracyDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Hatcher Machine Accuracy Temperature Checking')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Hatcher Machine Accuracy Temperature Checking')->where('isActive', true)->firstOrFail();
         $this->calculateTodayFormCount();
         $this->loadTodayShiftCounts();
     }

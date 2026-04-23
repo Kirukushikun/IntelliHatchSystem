@@ -53,7 +53,7 @@ class IncubatorTempCalibrationDashboard extends Component
 
     public function mount(): void
     {
-        $this->formType = FormType::where('form_name', 'Incubator Temperature Calibration')->firstOrFail();
+        $this->formType = FormType::where('form_name', 'Incubator Temperature Calibration')->where('isActive', true)->firstOrFail();
         $this->calculateTodayFormCount();
         $this->loadTodayShiftCounts();
     }

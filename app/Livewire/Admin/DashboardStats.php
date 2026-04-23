@@ -61,6 +61,7 @@ class DashboardStats extends Component
     protected function loadData(): void
     {
         $formTypes = DB::table('form_types')
+            ->where('isActive', true)
             ->orderBy('form_name')
             ->get(['id', 'form_name']);
 

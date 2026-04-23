@@ -83,6 +83,27 @@ class Display extends Component
         session()->flash('success', "Tag updated for \"{$formType->form_name}\".");
     }
 
+    public function toggleStatus(int $id): void
+    {
+        $formType = FormType::findOrFail($id);
+        $newStatus = ! $formType->isActive;
+
+        $formType->update(['isActive' => $newStatus]);
+
+        $action = $newStatus ? 'enable' : 'disable';
+        $label = $newStatus ? 'enabled' : 'disabled';
+
+        ActivityLogger::log(
+            action: $action,
+            description: "Form type \"{$formType->form_name}\" {$label}",
+            module: 'FormType',
+            subjectId: $formType->id,
+            properties: ['isActive' => $newStatus]
+        );
+
+        session()->flash('success', "Form type \"{$formType->form_name}\" has been {$label}.");
+    }
+
     public function render()
     {
         return view('livewire.admin.form-types.display', [
