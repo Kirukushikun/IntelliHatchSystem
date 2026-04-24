@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\DangerZone;
 
 use App\Jobs\PurgeActivityLogs;
+use App\Jobs\PurgeFormPhotos;
 use App\Jobs\WipeFormSubmissions;
 use App\Models\ActivityLog;
 use App\Models\Form;
@@ -19,6 +20,16 @@ class Display extends Component
     public bool $showConfirmModal = false;
     public int $affectedCount = 0;
 
+    // Photo purge properties
+    public string $photoPurgeMode = 'quarter';
+    public string $photoDateFrom = '';
+    public string $photoDateTo = '';
+    public string $photoSelectedYear = '';
+    public string $photoSelectedQuarter = '';
+    public string $photoConfirmationText = '';
+    public bool $showPhotoConfirmModal = false;
+    public int $photoAffectedCount = 0;
+
     // Activity log purge properties
     public string $logWipeMode = 'all';
     public string $logDateFrom = '';
@@ -32,6 +43,12 @@ class Display extends Component
     {
         $this->reset(['dateFrom', 'dateTo', 'selectedYear', 'confirmationText']);
         $this->affectedCount = 0;
+    }
+
+    public function updatedPhotoPurgeMode(): void
+    {
+        $this->reset(['photoDateFrom', 'photoDateTo', 'photoSelectedYear', 'photoSelectedQuarter', 'photoConfirmationText']);
+        $this->photoAffectedCount = 0;
     }
 
     public function updatedLogWipeMode(): void
@@ -64,6 +81,73 @@ class Display extends Component
             ->filter()
             ->values()
             ->toArray();
+    }
+
+    public function getPhotoAvailableYears(): array
+    {
+        return Form::query()
+            ->whereNull('photos_purged_at')
+            ->selectRaw('YEAR(date_submitted) as year')
+            ->whereNotNull('date_submitted')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->filter()
+            ->values()
+            ->toArray();
+    }
+
+    public function getAvailableQuarters(): array
+    {
+        return ['Q1', 'Q2', 'Q3', 'Q4'];
+    }
+
+    public function previewPhotoCount(): void
+    {
+        $this->photoAffectedCount = $this->buildPhotoQuery()->count();
+    }
+
+    public function openPhotoConfirmModal(): void
+    {
+        $this->photoAffectedCount = $this->buildPhotoQuery()->count();
+
+        if ($this->photoAffectedCount === 0) {
+            $this->dispatch('showToast', message: 'No form submissions with photos match the selected criteria.', type: 'error');
+            return;
+        }
+
+        $this->photoConfirmationText = '';
+        $this->showPhotoConfirmModal = true;
+    }
+
+    public function confirmPhotoPurge(): void
+    {
+        if ($this->photoConfirmationText !== (string) $this->photoAffectedCount) {
+            return;
+        }
+
+        PurgeFormPhotos::dispatch(
+            purgeMode: $this->photoPurgeMode,
+            dateFrom: $this->photoDateFrom ?: null,
+            dateTo: $this->photoDateTo ?: null,
+            selectedYear: $this->photoSelectedYear ?: null,
+            selectedQuarter: $this->photoSelectedQuarter ?: null,
+            userId: auth()->id(),
+        );
+
+        $count = $this->photoAffectedCount;
+
+        $this->showPhotoConfirmModal = false;
+        $this->reset(['photoConfirmationText', 'photoDateFrom', 'photoDateTo', 'photoSelectedYear', 'photoSelectedQuarter']);
+        $this->photoAffectedCount = 0;
+
+        $this->dispatch('showToast', message: "Purge of photos from {$count} form submissions has been queued and will be processed in the background.", type: 'success');
+    }
+
+    public function closePhotoModal(): void
+    {
+        $this->showPhotoConfirmModal = false;
+        $this->photoConfirmationText = '';
     }
 
     public function previewCount(): void
@@ -166,6 +250,8 @@ class Display extends Component
         return view('livewire.admin.danger-zone.display', [
             'availableYears' => $this->getAvailableYears(),
             'logAvailableYears' => $this->getLogAvailableYears(),
+            'photoAvailableYears' => $this->getPhotoAvailableYears(),
+            'availableQuarters' => $this->getAvailableQuarters(),
         ]);
     }
 
@@ -180,6 +266,42 @@ class Display extends Component
             'year' => $query->whereYear('date_submitted', $this->selectedYear),
             default => $query,
         };
+    }
+
+    private function buildPhotoQuery()
+    {
+        $query = Form::query()->whereNull('photos_purged_at');
+
+        return match ($this->photoPurgeMode) {
+            'quarter' => $this->applyQuarterFilter($query),
+            'custom' => $query
+                ->when($this->photoDateFrom, fn ($q) => $q->whereDate('date_submitted', '>=', $this->photoDateFrom))
+                ->when($this->photoDateTo, fn ($q) => $q->whereDate('date_submitted', '<=', $this->photoDateTo)),
+            default => $query,
+        };
+    }
+
+    private function applyQuarterFilter($query)
+    {
+        if (! $this->photoSelectedYear || ! $this->photoSelectedQuarter) {
+            return $query;
+        }
+
+        $quarterRanges = [
+            'Q1' => ['01-01', '03-31'],
+            'Q2' => ['04-01', '06-30'],
+            'Q3' => ['07-01', '09-30'],
+            'Q4' => ['10-01', '12-31'],
+        ];
+
+        $range = $quarterRanges[$this->photoSelectedQuarter] ?? null;
+
+        if (! $range) {
+            return $query;
+        }
+
+        return $query->whereDate('date_submitted', '>=', "{$this->photoSelectedYear}-{$range[0]}")
+            ->whereDate('date_submitted', '<=', "{$this->photoSelectedYear}-{$range[1]}");
     }
 
     private function buildLogQuery()

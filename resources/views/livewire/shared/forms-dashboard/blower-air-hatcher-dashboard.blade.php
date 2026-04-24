@@ -123,7 +123,7 @@
     </div>
 
     <!-- Table Section -->
-    <div wire:poll.30s wire:key="{{ now()->timestamp }}" class="relative flex flex-col w-full h-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-lg bg-clip-border">
+    <div wire:poll.60s.visible wire:key="{{ now()->timestamp }}" class="relative flex flex-col w-full h-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-lg bg-clip-border">
         <!-- Desktop Table View -->
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left table-auto min-w-max">

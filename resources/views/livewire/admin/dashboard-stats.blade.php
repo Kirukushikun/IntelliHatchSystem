@@ -158,7 +158,7 @@
 
     <!-- Stats Cards -->
     <div x-show="view === 'cards'" x-transition>
-    <div wire:poll.30s="refreshStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div wire:poll.60s.visible="refreshStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($cards as $card)
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-xl dark:hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-l-4 border-gray-200 dark:border-gray-700 border-l-amber-500 cursor-pointer transform hover:scale-[1.02] hover:-translate-y-1">
                 <a href="{{ match($card['type_name']) {

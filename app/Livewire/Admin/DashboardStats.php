@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Carbon\Constants\UnitValue;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -86,18 +87,28 @@ class DashboardStats extends Component
         $filteredTypeNamesById = array_intersect_key($typeNamesById, $selectedIdSet);
 
         $now = now();
-        $weekStart = $now->copy()->startOfWeek(UnitValue::SUNDAY)->startOfDay();
-        $weekEnd = $now->copy()->endOfWeek(UnitValue::SATURDAY)->endOfDay();
-        $monthStart = $now->copy()->startOfMonth()->startOfDay();
-        $monthEnd = $now->copy()->endOfMonth()->endOfDay();
-        $yearStart = $now->copy()->startOfYear()->startOfDay();
-        $yearEnd = $now->copy()->endOfYear()->endOfDay();
-
         $allTypeIds = array_keys($typeNamesById);
 
-        $allWeekCountsById = $this->countsByTypeId($allTypeIds, $weekStart, $weekEnd);
-        $allMonthCountsById = $this->countsByTypeId($allTypeIds, $monthStart, $monthEnd);
-        $allYearCountsById = $this->countsByTypeId($allTypeIds, $yearStart, $yearEnd);
+        // Cache the heavy count queries for 30 seconds so concurrent admins share results
+        $countsCacheKey = 'dashboard_counts_' . md5(json_encode($allTypeIds) . $now->format('Y-m-d'));
+        $allCounts = Cache::remember($countsCacheKey, 30, function () use ($allTypeIds, $now) {
+            $weekStart = $now->copy()->startOfWeek(UnitValue::SUNDAY)->startOfDay();
+            $weekEnd = $now->copy()->endOfWeek(UnitValue::SATURDAY)->endOfDay();
+            $monthStart = $now->copy()->startOfMonth()->startOfDay();
+            $monthEnd = $now->copy()->endOfMonth()->endOfDay();
+            $yearStart = $now->copy()->startOfYear()->startOfDay();
+            $yearEnd = $now->copy()->endOfYear()->endOfDay();
+
+            return [
+                'week' => $this->countsByTypeId($allTypeIds, $weekStart, $weekEnd),
+                'month' => $this->countsByTypeId($allTypeIds, $monthStart, $monthEnd),
+                'year' => $this->countsByTypeId($allTypeIds, $yearStart, $yearEnd),
+            ];
+        });
+
+        $allWeekCountsById = $allCounts['week'];
+        $allMonthCountsById = $allCounts['month'];
+        $allYearCountsById = $allCounts['year'];
 
         $yearCounts = $this->countsByNameFromCountsById($filteredTypeNamesById, $allYearCountsById);
 
@@ -128,12 +139,19 @@ class DashboardStats extends Component
         $this->cards = $cards;
 
         if ($this->showCharts) {
+            $weekStart = $now->copy()->startOfWeek(UnitValue::SUNDAY)->startOfDay();
+            $monthStart = $now->copy()->startOfMonth()->startOfDay();
             $daysInMonth = $now->daysInMonth;
-            $this->charts = [
-                'week' => $this->stackedByDayChart($filteredTypeNamesById, $weekStart, 7),
-                'month' => $this->lineByDayChart($filteredTypeNamesById, $monthStart, $daysInMonth),
-                'year' => $this->doughnutByTypeChart($yearCounts), // 12 months
-            ];
+
+            // Cache chart data for 30 seconds
+            $chartCacheKey = 'dashboard_charts_' . md5(json_encode(array_keys($filteredTypeNamesById)) . $now->format('Y-m-d'));
+            $this->charts = Cache::remember($chartCacheKey, 30, function () use ($filteredTypeNamesById, $weekStart, $monthStart, $daysInMonth, $yearCounts) {
+                return [
+                    'week' => $this->stackedByDayChart($filteredTypeNamesById, $weekStart, 7),
+                    'month' => $this->lineByDayChart($filteredTypeNamesById, $monthStart, $daysInMonth),
+                    'year' => $this->doughnutByTypeChart($yearCounts),
+                ];
+            });
         } else {
             $this->charts = [];
         }

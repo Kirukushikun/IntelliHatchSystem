@@ -16,11 +16,13 @@ class Form extends Model
         'form_inputs',
         'date_submitted',
         'uploaded_by',
+        'photos_purged_at',
     ];
 
     protected $casts = [
         'form_inputs' => 'array',
         'date_submitted' => 'datetime',
+        'photos_purged_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

@@ -53,6 +53,8 @@
                                     @php $photoCount = $this->getPhotoCount('accuracy_photos'); @endphp
                                     @if($photoCount > 0)
                                         <button @click="$wire.viewPhotos('accuracy_photos')" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-all cursor-pointer">Photos ({{ $photoCount }})</button>
+                                    @elseif($this->selectedForm && $this->selectedForm->photos_purged_at)
+                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-600">Photos Expired</span>
                                     @else
                                         <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600">No Photos</span>
                                     @endif
