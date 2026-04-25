@@ -21,7 +21,7 @@
     </div>
 
     <!-- Navigation with inline progress -->
-    <div class="flex justify-between items-center my-6 w-full max-w-lg">
+    <div class="flex justify-between items-center my-4 sm:my-6 w-full max-w-lg">
 
         <div class="flex items-center">
             @if(((int) $currentStep) > 1)
@@ -48,10 +48,10 @@
                 $progressPct = $totalSteps > 1 ? round(($currentIndex / ($totalSteps - 1)) * 100) : 100;
             @endphp
             <div class="flex flex-col items-center gap-1 flex-1 mx-3">
-                <span class="text-xs text-gray-400 dark:text-gray-500 tabular-nums">
+                <span class="text-sm sm:text-xs text-gray-400 dark:text-gray-500 tabular-nums">
                     {{ $currentIndex + 1 }} / {{ $totalSteps }}
                 </span>
-                <div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div class="w-full h-2 sm:h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div class="h-full bg-orange-500 rounded-full transition-all duration-300"
                          style="width: {{ $progressPct }}%"></div>
                 </div>

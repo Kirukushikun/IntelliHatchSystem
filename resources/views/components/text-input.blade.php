@@ -16,9 +16,9 @@
     $errorKey = $errorKey ?: $name;
 @endphp
 
-<div class="mb-6 {{ $class }}">
+<div class="mb-4 sm:mb-6 {{ $class }}">
     @if($label)
-        <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label for="{{ $name }}" class="block text-base sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {{ $label }}
             @if($required)
                 <span class="text-red-500">*</span>
@@ -53,10 +53,10 @@
             @endif
             placeholder="{{ $placeholder }}"
             @if($required) required @endif
-            class="mt-1 block w-full rounded-lg border shadow-sm 
-            {{ $icon ? 'pl-10' : 'px-4' }} py-2
-            {{ $errors->has($errorKey) 
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+            class="mt-1 block w-full rounded-lg border shadow-sm text-base sm:text-sm
+            {{ $icon ? 'pl-10' : 'px-4' }} py-3 sm:py-2
+            {{ $errors->has($errorKey)
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' }}
             autofill:bg-white autofill:text-gray-900 dark:autofill:bg-gray-800 dark:autofill:text-white"
         >
@@ -77,7 +77,7 @@
     </div>
 
     @error($errorKey)
-        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        <p class="text-red-500 text-sm sm:text-xs mt-1">{{ $message }}</p>
     @enderror
 </div>
 

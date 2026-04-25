@@ -660,7 +660,7 @@
 }">
     @if($label)
         <div class="flex items-center justify-between gap-3 mb-1">
-            <label class="block {{ $compact ? 'text-xs' : 'text-sm' }} font-medium text-gray-700">
+            <label class="block {{ $compact ? 'text-xs' : 'text-base sm:text-sm' }} font-medium text-gray-700 dark:text-gray-300">
                 {{ $label }}
                 @if($required)
                     <span class="text-red-500">*</span>
@@ -672,7 +672,7 @@
             @unless($cameraOnly)
                 <button type="button"
                         @click="attachMode = (attachMode === 'camera' ? 'upload' : 'camera')"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-2.5 sm:py-1 text-sm sm:text-xs font-medium rounded-md border border-gray-300 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"></path>
                     </svg>
@@ -710,7 +710,7 @@
                     </svg>
                 </template>
 
-                <span class="ml-2 {{ $compact ? 'text-xs' : '' }} text-blue-600" x-text="attachMode === 'upload' ? 'Upload photo' : 'Take photo'"></span>
+                <span class="ml-2 {{ $compact ? 'text-xs' : 'text-base sm:text-sm' }} text-blue-600" x-text="attachMode === 'upload' ? 'Upload photo' : 'Take photo'"></span>
             </button>
         </div>
     </template>
@@ -720,7 +720,7 @@
             <button
                 @click="openCarousel(0)"
                 type="button"
-                class="flex-1 inline-flex items-center justify-center {{ $compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm' }} bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-150"
+                class="flex-1 inline-flex items-center justify-center {{ $compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 sm:py-2 text-base sm:text-sm' }} bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-150"
             >
                 <svg class="{{ $compact ? 'w-3.5 h-3.5 mr-1.5' : 'w-4 h-4 mr-2' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -731,7 +731,7 @@
                 @click="if(!isAtLimit) { openAttachAction(); } $event.preventDefault()"
                 type="button"
                 :disabled="isAtLimit"
-                class="flex-1 flex items-center justify-center {{ $compact ? 'px-3 py-1.5' : 'px-4 py-2' }} border-2 border-dashed rounded-lg transition"
+                class="flex-1 flex items-center justify-center {{ $compact ? 'px-3 py-1.5' : 'px-4 py-2.5 sm:py-2' }} border-2 border-dashed rounded-lg transition"
                 :class="isAtLimit ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-blue-500 border-gray-300 bg-blue-50 hover:bg-blue-100'"
             >
                 <template x-if="attachMode === 'camera'">

@@ -32,9 +32,9 @@
     [data-theme=dark] select option { color: white !important; }
 </style>
 
-<div class="mb-6">
+<div class="mb-4 sm:mb-6">
     @if($label)
-        <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label for="{{ $name }}" class="block text-base sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {{ $label }}
             @if($required)
                 <span class="text-red-500">*</span>
@@ -42,11 +42,11 @@
         </label>
     @endif
 
-    <select 
+    <select
         id="{{ $name }}"
         name="{{ $name }}"
         @if($required) required @endif
-        {{ $attributes->merge(['class' => "mt-1 block w-full rounded-lg border px-4 py-2 shadow-sm cursor-pointer " . (
+        {{ $attributes->merge(['class' => "mt-1 block w-full rounded-lg border px-4 py-3 sm:py-2 text-base sm:text-sm shadow-sm cursor-pointer " . (
             $errors->has($errorKey)
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
                 : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
@@ -62,6 +62,6 @@
     </select>
 
     @error($errorKey)
-        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        <p class="text-red-500 text-sm sm:text-xs mt-1">{{ $message }}</p>
     @enderror
 </div>
