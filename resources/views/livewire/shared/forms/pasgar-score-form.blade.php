@@ -13,8 +13,6 @@
             <div data-step="1" class="space-y-4" @style(["display:none" => $currentStep !== 1])>
                 <x-title>PASGAR SCORE</x-title>
 
-                <p class="text-sm text-gray-500 dark:text-gray-400 -mt-2">50 samples per PS</p>
-
                 <div data-field="personnel_name">
                     <x-dropdown
                         label="Personnel Performed PASGAR Scoring"
@@ -153,7 +151,7 @@
                     @enderror
 
                     @foreach($form['samples'] as $index => $sample)
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800/50" wire:key="sample-{{ $index }}">
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800/50" wire:key="sample-{{ $sample['_key'] }}">
                             {{-- Accordion Header (always visible) --}}
                             <button type="button" wire:click="toggleSample({{ $index }})"
                                 class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
@@ -186,8 +184,7 @@
                             </button>
 
                             {{-- Accordion Body (collapsible) --}}
-                            @if($expandedSample === $index)
-                                <div class="px-4 pb-4 border-t border-gray-200 dark:border-gray-600 pt-3">
+                                <div class="px-4 pb-4 border-t border-gray-200 dark:border-gray-600 pt-3" @style(['display:none' => $expandedSample !== $index])>
                                     <div class="mb-3 space-y-3">
                                         <div>
                                             <label for="chick_weight_{{ $index }}" class="block text-xs font-medium text-gray-600 dark:text-gray-200 mb-1">
@@ -206,7 +203,7 @@
                                             <x-photo-attach
                                                 label="Weighing Proof Photo"
                                                 name="weighing_photo_{{ $sample['_key'] }}"
-                                                :max-files="1"
+                                                :max-files="3"
                                                 :compact="true"
                                                 :camera-only="true"
                                                 :initial-photos="$this->getInitialPhotosForKey('weighing_photo_' . $sample['_key'])"
@@ -278,7 +275,6 @@
                                         />
                                     </div>
                                 </div>
-                            @endif
                         </div>
                     @endforeach
 

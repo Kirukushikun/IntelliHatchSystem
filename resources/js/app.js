@@ -1,4 +1,5 @@
 import './bootstrap';
+import './photo-attach';
 import Chart from 'chart.js/auto';
 
 const CHART_COLORS = [

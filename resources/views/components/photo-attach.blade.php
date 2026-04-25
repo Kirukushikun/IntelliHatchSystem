@@ -9,655 +9,13 @@
     'cameraOnly' => false,
 ])
 
-<div class="{{ $compact ? 'mb-2' : 'mb-6' }}" x-data="{
-    showCameraModal: false,
-    showCancelConfirmation: false,
-    showCarouselModal: false,
-    showRemoveConfirmation: false,
-    attachMode: 'camera',
+<div class="{{ $compact ? 'mb-2' : 'mb-6' }}" x-data="photoAttach({
     photoKey: '{{ $name }}',
     maxFiles: {{ (int) $maxFiles }},
     maxSizeMb: {{ (int) $maxSizeMb }},
-    stream: null,
-    flashOn: false,
-    flashSupported: false,
-    photos: [],
-    attachedPhotos: [],
-    attachedFiles: [],
-    suppressInputChange: false,
-    currentPhotoIndex: 0,
-    cameraActive: false,
-    uploading: false,
-    processingGallery: false,
-    serverPhotoQueue: [],
-    toast(type, message) {
-        window.dispatchEvent(new CustomEvent('showToast', {
-            detail: { type, message }
-        }));
-    },
-    get totalPhotoCount() {
-        return this.attachedPhotos.length + this.photos.length;
-    },
-    get remainingSlots() {
-        return Math.max(0, this.maxFiles - this.totalPhotoCount);
-    },
-    get isAtLimit() {
-        return this.totalPhotoCount >= this.maxFiles;
-    },
-    checkFileSize(file) {
-        const maxBytes = this.maxSizeMb * 1024 * 1024;
-        if (file.size > maxBytes) {
-            this.toast('error', `File '${file.name}' exceeds ${this.maxSizeMb}MB limit (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
-            return false;
-        }
-        return true;
-    },
-    checkCanAddPhotos(count = 1) {
-        if (this.totalPhotoCount + count > this.maxFiles) {
-            const remaining = this.remainingSlots;
-            this.toast('error', `Maximum ${this.maxFiles} photos allowed. ${remaining > 0 ? `You can add ${remaining} more.` : 'Limit reached.'}`);
-            return false;
-        }
-        return true;
-    },
-    init() {
-        const preloaded = @json($initialPhotos ?? []);
-        if (preloaded && preloaded.length > 0) {
-            for (const p of preloaded) {
-                this.attachedPhotos.push({
-                    id: p.id,
-                    data: p.url,
-                    serverPhotoId: p.id,
-                    serverUrl: p.url,
-                });
-                this.attachedFiles.push(null);
-            }
-        }
-
-        window.addEventListener('photoLimitReached', (event) => {
-            if (!event || !event.detail || event.detail.photoKey !== this.photoKey) return;
-            this.toast('error', `Maximum ${event.detail.max} photos allowed per field.`);
-        });
-
-        window.addEventListener('photoStored', (event) => {
-            if (!event || !event.detail) {
-                return;
-            }
-
-            if (event.detail.photoKey !== this.photoKey) {
-                return;
-            }
-
-            this.serverPhotoQueue.push({
-                photoId: event.detail.photoId,
-                url: event.detail.url,
-            });
-        });
-
-        window.addEventListener('formSubmitted', () => {
-            this.photos = [];
-            this.attachedPhotos = [];
-            this.attachedFiles = [];
-            this.serverPhotoQueue = [];
-            this.currentPhotoIndex = 0;
-            this.showCarouselModal = false;
-            this.showCameraModal = false;
-            this.showCancelConfirmation = false;
-            this.showRemoveConfirmation = false;
-
-            if (this.$refs && this.$refs.originalInput) {
-                this.suppressInputChange = true;
-                this.$refs.originalInput.value = '';
-                this.suppressInputChange = false;
-            }
-
-            this.stopCamera();
-        });
-
-        window.addEventListener('formReset', () => {
-            this.photos = [];
-            this.attachedPhotos = [];
-            this.attachedFiles = [];
-            this.serverPhotoQueue = [];
-            this.currentPhotoIndex = 0;
-            this.showCarouselModal = false;
-            this.showCameraModal = false;
-            this.showCancelConfirmation = false;
-            this.showRemoveConfirmation = false;
-
-            if (this.$refs && this.$refs.originalInput) {
-                this.suppressInputChange = true;
-                this.$refs.originalInput.value = '';
-                this.suppressInputChange = false;
-            }
-
-            this.stopCamera();
-        });
-    },
-    assignServerPhotosToLastAttached(count) {
-        if (!count || count <= 0) {
-            return;
-        }
-
-        const startIndex = this.attachedPhotos.length - count;
-        for (let i = 0; i < count; i++) {
-            const queueItem = this.serverPhotoQueue.shift();
-            if (!queueItem) {
-                continue;
-            }
-
-            const index = startIndex + i;
-            if (!this.attachedPhotos[index]) {
-                continue;
-            }
-
-            this.attachedPhotos[index].serverPhotoId = queueItem.photoId;
-            this.attachedPhotos[index].serverUrl = queueItem.url;
-        }
-    },
-    async uploadFilesToServer(files) {
-        if (!files || files.length === 0) {
-            return;
-        }
-
-        if (!this.$wire) {
-            console.warn('[photo-attach] Livewire ($wire) is not available; cannot upload to server');
-            return;
-        }
-
-        await new Promise((resolve, reject) => {
-            this.$wire.uploadMultiple('photoUploads.' + this.photoKey, files,
-                () => resolve(true),
-                (err) => reject(err)
-            );
-        });
-    },
-    openAttachAction() {
-        if (this.attachMode === 'upload') {
-            this.triggerUpload();
-            return;
-        }
-        this.showCameraModal = true;
-        this.$nextTick(() => this.startCamera());
-    },
-    triggerUpload() {
-        if (this.uploading || this.processingGallery) {
-            return;
-        }
-        this.$refs.originalInput.click();
-    },
-    async handleInputChange(e) {
-        if (this.suppressInputChange) {
-            return;
-        }
-
-        const selected = e && e.target && e.target.files ? Array.from(e.target.files) : [];
-        if (selected.length === 0) {
-            return;
-        }
-
-        if (!this.checkCanAddPhotos(selected.length)) {
-            e.target.value = '';
-            return;
-        }
-
-        this.processingGallery = true;
-        try {
-            const processed = [];
-            for (const file of selected) {
-                if (!this.checkFileSize(file)) continue;
-                if (this.attachedPhotos.length + processed.length >= this.maxFiles) {
-                    this.toast('warning', `Maximum ${this.maxFiles} photos reached. Remaining files skipped.`);
-                    break;
-                }
-                const result = await this.processUploadFile(file);
-                if (result) {
-                    processed.push(result);
-                }
-            }
-
-            const newFiles = processed.map(p => p.file);
-            const newPhotos = processed.map(p => p.photo);
-
-            const dataTransfer = new DataTransfer();
-            const allFiles = [...this.attachedFiles, ...newFiles];
-            allFiles.filter(f => f).forEach(file => dataTransfer.items.add(file));
-
-            this.suppressInputChange = true;
-            this.$refs.originalInput.files = dataTransfer.files;
-            this.suppressInputChange = false;
-
-            this.attachedFiles = allFiles;
-            this.attachedPhotos = [...this.attachedPhotos, ...newPhotos];
-
-            this.uploading = true;
-            try {
-                await this.uploadFilesToServer(newFiles);
-                this.assignServerPhotosToLastAttached(newPhotos.length);
-            } finally {
-                this.uploading = false;
-            }
-        } finally {
-            this.processingGallery = false;
-        }
-    },
-    async processUploadFile(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                const img = new Image();
-
-                img.onload = () => {
-                    const canvas = this.$refs.canvas;
-                    const ctx = canvas.getContext('2d');
-
-                    const maxDimension = 1920;
-                    let targetWidth = img.width;
-                    let targetHeight = img.height;
-
-                    if (img.width > maxDimension || img.height > maxDimension) {
-                        const scale = Math.min(maxDimension / img.width, maxDimension / img.height);
-                        targetWidth = Math.floor(img.width * scale);
-                        targetHeight = Math.floor(img.height * scale);
-                    }
-
-                    canvas.width = targetWidth;
-                    canvas.height = targetHeight;
-
-                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-                    this.addTimestampWatermark(ctx, canvas.width, canvas.height);
-
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-
-                    fetch(dataUrl)
-                        .then(r => r.blob())
-                        .then((blob) => {
-                            const processedFile = new File([blob], file.name, { type: 'image/jpeg' });
-                            resolve({
-                                file: processedFile,
-                                photo: { id: Date.now() + Math.random(), data: dataUrl }
-                            });
-                        })
-                        .catch(() => resolve(null));
-                };
-
-                img.onerror = () => resolve(null);
-                img.src = e.target.result;
-            };
-
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(file);
-        });
-    },
-    async startCamera() {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            this.toast('error', 'Camera not supported! You need HTTPS or localhost.');
-            return;
-        }
-
-        try {
-            this.stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1920 } },
-                audio: false
-            });
-            this.$refs.video.srcObject = this.stream;
-            this.cameraActive = true;
-
-            // Check if torch/flash is supported
-            const track = this.stream.getVideoTracks()[0];
-            if (track) {
-                const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-                this.flashSupported = !!(capabilities.torch);
-            }
-            this.flashOn = false;
-        } catch(err) {
-            this.toast('error', 'Camera error: ' + err.message);
-        }
-    },
-    async toggleFlash() {
-        if (!this.stream || !this.flashSupported) return;
-        const track = this.stream.getVideoTracks()[0];
-        if (!track) return;
-        try {
-            this.flashOn = !this.flashOn;
-            await track.applyConstraints({ advanced: [{ torch: this.flashOn }] });
-        } catch(err) {
-            this.flashOn = false;
-            this.toast('error', 'Flash not available');
-        }
-    },
-    capturePhoto() {
-        if (!this.checkCanAddPhotos(1)) return;
-
-        const video = this.$refs.video;
-        const canvas = this.$refs.canvas;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        
-        // Draw the video frame
-        ctx.drawImage(video, 0, 0);
-        
-        // Add timestamp watermark
-        this.addTimestampWatermark(ctx, canvas.width, canvas.height);
-        
-        const imageData = canvas.toDataURL('image/jpeg', 0.85);
-        this.photos.push({ id: Date.now(), data: imageData });
-    },
-    addTimestampWatermark(ctx, width, height) {
-        // Add timestamp overlay at bottom left
-        const now = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Manila'}));
-        const dateStr = now.toLocaleDateString('en-US', { 
-            timeZone: 'Asia/Manila',
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit' 
-        });
-        const timeStr = now.toLocaleTimeString('en-US', { 
-            timeZone: 'Asia/Manila',
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit',
-            hour12: false 
-        });
-        const timestamp = `${dateStr} ${timeStr}`;
-        
-        // Configure text style
-        const fontSize = Math.max(16, height * 0.03);
-        ctx.font = `bold ${fontSize}px Arial`;
-        ctx.textBaseline = 'bottom';
-        
-        // Add semi-transparent black background for text
-        const padding = fontSize * 0.3;
-        const textWidth = ctx.measureText(timestamp).width;
-        const textHeight = fontSize;
-        const bgX = padding;
-        const bgY = height - textHeight - padding * 2;
-        const bgWidth = textWidth + padding * 2;
-        const bgHeight = textHeight + padding * 2;
-        
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(bgX, bgY, bgWidth, bgHeight);
-        
-        // Draw text with black stroke/border for maximum visibility
-        const textX = padding * 2;
-        const textY = height - padding * 2;
-        
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = fontSize * 0.15;
-        ctx.lineJoin = 'round';
-        ctx.miterLimit = 2;
-        ctx.strokeText(timestamp, textX, textY);
-        
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(timestamp, textX, textY);
-    },
-    async selectFromGallery() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.multiple = true;
-        
-        input.onchange = async (e) => {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
-
-            if (!this.checkCanAddPhotos(files.length)) return;
-
-            this.processingGallery = true;
-
-            for (const file of files) {
-                if (!this.checkFileSize(file)) continue;
-                if (this.isAtLimit) {
-                    this.toast('warning', `Maximum ${this.maxFiles} photos reached. Remaining files skipped.`);
-                    break;
-                }
-                await this.processGalleryImage(file);
-            }
-
-            this.processingGallery = false;
-        };
-        
-        input.click();
-    },
-    async processGalleryImage(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                const img = new Image();
-                
-                img.onload = () => {
-                    const canvas = this.$refs.canvas;
-                    const ctx = canvas.getContext('2d');
-                    
-                    const maxDimension = 1920;
-                    let targetWidth = img.width;
-                    let targetHeight = img.height;
-                    
-                    // Scale down if image is larger than maxDimension
-                    if (img.width > maxDimension || img.height > maxDimension) {
-                        const scale = Math.min(maxDimension / img.width, maxDimension / img.height);
-                        targetWidth = Math.floor(img.width * scale);
-                        targetHeight = Math.floor(img.height * scale);
-                    }
-                    
-                    // Set canvas to target size
-                    canvas.width = targetWidth;
-                    canvas.height = targetHeight;
-                    
-                    // Draw the resized image
-                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-                    
-                    // Add timestamp watermark
-                    this.addTimestampWatermark(ctx, canvas.width, canvas.height);
-                    
-                    // Compress with same quality as camera capture
-                    const imageData = canvas.toDataURL('image/jpeg', 0.85);
-                    
-                    // Calculate final size
-                    const base64Length = imageData.length - 'data:image/jpeg;base64,'.length;
-                    const sizeInBytes = (base64Length * 3) / 4;
-                    const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2);
-                    
-                    // Check if still too large
-                    if (sizeInBytes > this.maxSizeMb * 1024 * 1024) {
-                        this.toast('error', `Photo '${file.name}' exceeds ${this.maxSizeMb}MB limit even after resizing`);
-                        resolve();
-                        return;
-                    }
-                    
-                    this.photos.push({ id: Date.now(), data: imageData });
-                    resolve();
-                };
-                
-                img.onerror = () => {
-                    this.toast('error', 'Failed to load image: ' + file.name);
-                    resolve();
-                };
-                
-                img.src = e.target.result;
-            };
-            
-            reader.onerror = () => {
-                this.toast('error', 'Failed to read file: ' + file.name);
-                resolve();
-            };
-            
-            reader.readAsDataURL(file);
-        });
-    },
-    stopCamera() {
-        if (this.stream) {
-            this.stream.getTracks().forEach(track => track.stop());
-            this.stream = null;
-        }
-        this.$refs.video.srcObject = null;
-        this.cameraActive = false;
-        this.flashOn = false;
-        this.flashSupported = false;
-    },
-    tryCancel() {
-        if (this.photos.length > 0 || this.cameraActive) {
-            this.showCancelConfirmation = true;
-        } else {
-            this.confirmCancel();
-        }
-    },
-    confirmCancel() {
-        this.stopCamera();
-        this.photos = [];
-        this.showCancelConfirmation = false;
-        this.showCameraModal = false;
-        this.showGalleryUpload = false;
-        this.uploading = false;
-        this.processingGallery = false;
-    },
-    openCarousel(index = 0) {
-        if (this.attachedPhotos.length === 0) {
-            return;
-        }
-        this.currentPhotoIndex = Math.min(Math.max(index, 0), this.attachedPhotos.length - 1);
-        this.showCarouselModal = true;
-    },
-    nextPhoto() {
-        if (this.attachedPhotos.length === 0) {
-            return;
-        }
-        this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.attachedPhotos.length;
-    },
-    prevPhoto() {
-        if (this.attachedPhotos.length === 0) {
-            return;
-        }
-        this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.attachedPhotos.length) % this.attachedPhotos.length;
-    },
-    tryRemoveCurrentAttachedPhoto() {
-        this.showRemoveConfirmation = true;
-    },
-    async removeCurrentAttachedPhoto() {
-        this.showRemoveConfirmation = false;
-
-        if (this.attachedPhotos.length === 0) {
-            return;
-        }
-
-        const index = this.currentPhotoIndex;
-        const photo = this.attachedPhotos[index];
-        const serverPhotoId = photo && photo.serverPhotoId ? photo.serverPhotoId : null;
-
-        const file = this.attachedFiles[index] || null;
-
-        if (this.$wire && serverPhotoId) {
-            try {
-                await this.$wire.call('deleteUploadedPhoto', this.photoKey, serverPhotoId);
-            } catch (err) {
-                this.toast('error', 'Failed to remove photo: ' + (err && err.message ? err.message : 'Unknown error'));
-                return;
-            }
-        }
-
-        this.attachedPhotos.splice(index, 1);
-        this.attachedFiles.splice(index, 1);
-
-        const dataTransfer = new DataTransfer();
-        this.attachedFiles.filter(f => f).forEach(f => dataTransfer.items.add(f));
-        this.suppressInputChange = true;
-        this.$refs.originalInput.files = dataTransfer.files;
-        this.suppressInputChange = false;
-
-        if (this.attachedPhotos.length === 0) {
-            this.showCarouselModal = false;
-            this.currentPhotoIndex = 0;
-            this.toast('success', 'Photo removed');
-            return;
-        }
-
-        this.currentPhotoIndex = Math.min(this.currentPhotoIndex, this.attachedPhotos.length - 1);
-        this.toast('success', 'Photo removed');
-    },
-    deletePhoto(id) {
-        this.photos = this.photos.filter(p => p.id !== id);
-    },
-    validatePhotos() {
-        @if($required)
-        const originalInput = this.$refs.originalInput;
-        
-        // Check if input has files
-        const hasFiles = originalInput && originalInput.files && originalInput.files.length > 0;
-        
-        if (!hasFiles) {
-            return 'Please take at least one photo';
-        }
-        @endif
-        return null;
-    },
-    async uploadPhotos() {
-        if (this.photos.length === 0) {
-            console.warn('[photo-attach] No photos to upload');
-            this.toast('warning', 'No photos to upload!');
-            return;
-        }
-
-        // Check if adding these photos would exceed the limit
-        const wouldBeTotal = this.attachedPhotos.length + this.photos.length;
-        if (wouldBeTotal > this.maxFiles) {
-            const canAdd = this.maxFiles - this.attachedPhotos.length;
-            if (canAdd <= 0) {
-                this.toast('error', `Maximum ${this.maxFiles} photos already attached.`);
-                return;
-            }
-            this.toast('warning', `Only uploading first ${canAdd} of ${this.photos.length} photos to stay within the ${this.maxFiles} photo limit.`);
-            this.photos = this.photos.slice(0, canAdd);
-        }
-
-        this.uploading = true;
-        console.log('[photo-attach] Preparing upload', { count: this.photos.length });
-        
-        try {
-            // Convert data URLs to blobs and create File objects
-            const files = await Promise.all(this.photos.map(async (photo, index) => {
-                const response = await fetch(photo.data);
-                const blob = await response.blob();
-                console.log('[photo-attach] Created blob', { index, size: blob.size, type: blob.type });
-                return new File([blob], 'photo_' + (index + 1) + '.jpg', { type: 'image/jpeg' });
-            }));
-            
-            console.log('[photo-attach] Files ready', files.map(file => ({ name: file.name, size: file.size, type: file.type })));
-            
-            await this.uploadFilesToServer(files);
-
-            // Create a DataTransfer object to set files to the original input
-            const dataTransfer = new DataTransfer();
-            const allFiles = [...this.attachedFiles, ...files];
-            allFiles.filter(f => f).forEach(file => dataTransfer.items.add(file));
-            
-            console.log('[photo-attach] DataTransfer size', { items: dataTransfer.items.length });
-            
-            // Set files to the original input
-            this.$refs.originalInput.files = dataTransfer.files;
-            console.log('[photo-attach] Input files set', { files: this.$refs.originalInput.files.length });
-            
-            this.suppressInputChange = true;
-            this.suppressInputChange = false;
-            
-            this.toast('success', files.length + ' photo(s) uploaded successfully!');
-            
-            this.attachedFiles = allFiles;
-            this.attachedPhotos = [...this.attachedPhotos, ...this.photos];
-            this.assignServerPhotosToLastAttached(this.photos.length);
-            this.photos = [];
-            this.stopCamera();
-            this.showCameraModal = false;
-        } catch(err) {
-            console.error('[photo-attach] Upload error:', err);
-            this.toast('error', 'Upload failed: ' + err.message);
-        } finally {
-            this.uploading = false;
-        }
-    },
-}">
+    initialPhotos: @json($initialPhotos ?? []),
+    required: {{ $required ? 'true' : 'false' }},
+})">
     @if($label)
         <div class="flex items-center justify-between gap-3 mb-1">
             <label class="block {{ $compact ? 'text-xs' : 'text-base sm:text-sm' }} font-medium text-gray-700 dark:text-gray-300">
@@ -751,10 +109,10 @@
     </template>
 
     <!-- Hidden file input -->
-    <input 
-        type="file" 
-        name="{{ $name }}[]" 
-        id="{{ $name }}" 
+    <input
+        type="file"
+        name="{{ $name }}[]"
+        id="{{ $name }}"
         class="hidden"
         x-ref="originalInput"
         @change="handleInputChange($event)"
@@ -763,7 +121,7 @@
     >
 
     <!-- Camera Modal -->
-    <div x-show="showCameraModal" 
+    <div x-show="showCameraModal"
     x-cloak
     class="fixed inset-0 z-50 overflow-y-auto"
     style="display: none;">
@@ -772,50 +130,61 @@
 
     <div class="relative min-h-screen flex items-start sm:items-center justify-center p-2 sm:p-4">
         <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-4 sm:p-6 my-4 sm:my-8 max-h-[95vh] overflow-y-auto">
-            
+
             <div class="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10 pb-2">
                 <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                     Add Photos
                     <span class="text-xs font-normal text-gray-400" :class="isAtLimit ? 'text-red-500' : ''"
                           x-text="`(${totalPhotoCount}/${maxFiles})`"></span>
                 </h3>
-                <button @click="tryCancel()" type="button" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shrink-0">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+                @unless($cameraOnly)
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="selectFromGallery()"
+                            :disabled="isAtLimit || uploading || processingGallery"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border transition-colors"
+                            :class="isAtLimit ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600'">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Gallery
+                    </button>
+                </div>
+                @endunless
             </div>
 
-            <div class="flex flex-col items-center space-y-3 sm:space-y-4">
-                {{-- Status --}}
-                <div class="w-full text-center py-2 px-3 sm:px-4 rounded-lg font-medium text-xs sm:text-sm"
-                    :class="isAtLimit ? 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300' : (uploading ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : (processingGallery ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : (cameraActive ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300')))">
-                    <span x-text="isAtLimit ? `Photo limit reached (${maxFiles}/${maxFiles})` : (uploading ? 'Uploading...' : (processingGallery ? 'Processing images...' : (cameraActive ? 'Camera is active' : `Max ${maxSizeMb}MB per file · ${remainingSlots} slots remaining`)))"></span>
-                </div>
-                
-                {{-- Camera Preview --}}
-                <div class="relative w-full max-w-sm aspect-square bg-gray-900 rounded-lg overflow-hidden"
-                    x-show="cameraActive">
-                    <video x-ref="video" class="w-full h-full object-cover" autoplay playsinline></video>
-                    <canvas x-ref="canvas" class="hidden"></canvas>
-                </div>
+            {{-- Status Bar --}}
+            <div class="mb-3 px-3 py-2 rounded-lg text-xs font-medium"
+                :class="isAtLimit ? 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300' : (uploading ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : (processingGallery ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : (cameraActive ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300')))">
+                <span x-text="isAtLimit ? `Photo limit reached (${maxFiles}/${maxFiles})` : (uploading ? 'Uploading...' : (processingGallery ? 'Processing images...' : (cameraActive ? 'Camera is active' : `Max ${maxSizeMb}MB per file · ${remainingSlots} slots remaining`)))"></span>
+            </div>
 
-                {{-- Photos Grid --}}
-                <div class="w-full" x-show="photos.length > 0">
-                    <h4 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">Captured Photos (<span x-text="photos.length"></span>)</h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-h-[40vh] overflow-y-auto pr-1">
+            {{-- Camera Preview --}}
+            <div class="relative w-full max-w-2xl aspect-[4/3] bg-black rounded-lg overflow-hidden mb-4">
+                <video x-ref="video" class="w-full h-full object-cover" autoplay playsinline></video>
+                <canvas x-ref="canvas" class="hidden"></canvas>
+            </div>
+
+            {{-- Captured Photos Preview --}}
+            <template x-if="photos.length > 0">
+                <div class="mb-4">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                        Captured (<span x-text="photos.length"></span>) — click upload to save
+                    </p>
+                    <div class="flex gap-2 overflow-x-auto pb-2">
                         <template x-for="photo in photos" :key="photo.id">
-                            <div class="relative rounded-lg overflow-hidden shadow-md">
-                                <img :src="photo.data" class="w-full h-24 sm:h-32 object-cover">
-                                <button @click="deletePhoto(photo.id)" 
-                                    class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
-                                    Delete
+                            <div class="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                                <img :src="photo.data" class="w-full h-full object-cover">
+                                <button type="button" @click="deletePhoto(photo.id)"
+                                        class="absolute top-0 right-0 bg-red-500 text-white rounded-bl-lg p-0.5">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
                                 </button>
                             </div>
                         </template>
                     </div>
                 </div>
-            </div>
+            </template>
 
             {{-- Footer Buttons --}}
             <div class="flex items-center justify-center gap-4 mt-4 sm:mt-6 sticky bottom-0 bg-white dark:bg-gray-800 pt-2 pb-1 border-t border-gray-100 dark:border-gray-700">
@@ -907,7 +276,7 @@
                 </div>
             </div>
         </div>
-    </div> 
+    </div>
 </div>
 </div>
 
