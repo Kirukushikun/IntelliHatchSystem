@@ -58,51 +58,21 @@
         <!-- Livewire Scripts -->
         <livewire:scripts />
 
-        <!-- Unsaved Changes Modal -->
-        <div id="unsaved-changes-modal" style="display: none;" class="fixed inset-0 z-9999 flex items-center justify-center p-4">
-            <div class="fixed inset-0 bg-black/50"></div>
-            <div class="relative w-full max-w-md p-6 bg-white dark:bg-gray-800 shadow-xl dark:shadow-2xl rounded-lg">
-                <div class="flex items-center mb-4">
-                    <div class="shrink-0 w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Unsaved Changes</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">You have unsaved changes that will be lost if you leave this page.</p>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-3">
-                    <button id="unsaved-stay-btn" class="inline-flex items-center justify-center font-medium rounded-lg border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-4 py-2 text-sm bg-white hover:bg-gray-50 text-gray-700 border-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 dark:border-gray-600 cursor-pointer">
-                        Stay on Page
-                    </button>
-                    <button id="unsaved-leave-btn" class="inline-flex items-center justify-center font-medium rounded-lg border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white border-red-600 dark:bg-red-700 dark:hover:bg-red-800 dark:border-red-700 cursor-pointer">
-                        Leave Page
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Form dirty guard — prevents accidental navigation when a form has unsaved data -->
+        <!-- Form dirty guard — browser prompt when navigating away from unsaved form -->
         <script>
             (function () {
                 var formDirty = false;
                 var formSubmitting = false;
-                var pendingAction = null;
-                var guardStatePushed = false;
 
                 document.addEventListener('input', function (e) {
                     if (e.target.closest('#step-form') && !formSubmitting) {
                         formDirty = true;
-                        pushGuardState();
                     }
                 });
 
                 document.addEventListener('change', function (e) {
                     if (e.target.closest('#step-form') && !formSubmitting) {
                         formDirty = true;
-                        pushGuardState();
                     }
                 });
 
@@ -113,8 +83,6 @@
                     }
                 });
 
-                // Listen for Livewire navigation steps (nextStep, previousStep)
-                // to avoid false dirty state from Livewire DOM morphs
                 document.addEventListener('livewire:init', function () {
                     Livewire.hook('commit', function ({commit, succeed}) {
                         var calls = commit.calls || [];
@@ -137,61 +105,6 @@
                     });
                 });
 
-                // --- Custom modal ---
-                function showModal(action) {
-                    pendingAction = action;
-                    var modal = document.getElementById('unsaved-changes-modal');
-                    if (modal) modal.style.display = 'flex';
-                }
-
-                function hideModal() {
-                    var modal = document.getElementById('unsaved-changes-modal');
-                    if (modal) modal.style.display = 'none';
-                    pendingAction = null;
-                }
-
-                document.getElementById('unsaved-stay-btn').addEventListener('click', function () {
-                    hideModal();
-                });
-
-                document.getElementById('unsaved-leave-btn').addEventListener('click', function () {
-                    var action = pendingAction;
-                    formDirty = false;
-                    guardStatePushed = false;
-                    hideModal();
-                    if (action) action();
-                });
-
-                // --- Intercept keyboard refresh (F5, Ctrl+R, Cmd+R) ---
-                document.addEventListener('keydown', function (e) {
-                    if (!formDirty || formSubmitting) return;
-                    var isRefresh = e.key === 'F5' ||
-                        ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R'));
-                    if (isRefresh) {
-                        e.preventDefault();
-                        showModal(function () { location.reload(); });
-                    }
-                });
-
-                // --- Intercept browser back/forward button ---
-                function pushGuardState() {
-                    if (!guardStatePushed && formDirty) {
-                        history.pushState({ dirtyGuard: true }, '');
-                        guardStatePushed = true;
-                    }
-                }
-
-                window.addEventListener('popstate', function () {
-                    if (formDirty && !formSubmitting) {
-                        history.pushState({ dirtyGuard: true }, '');
-                        showModal(function () {
-                            guardStatePushed = false;
-                            history.back();
-                        });
-                    }
-                });
-
-                // --- Fallback for browser refresh button / tab close (native dialog) ---
                 window.addEventListener('beforeunload', function (e) {
                     if (formDirty && !formSubmitting) {
                         e.preventDefault();
