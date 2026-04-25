@@ -300,9 +300,10 @@ class PasgarScoreDashboard extends Component
         // If no specific field, return form_photo photos
         $photoFieldKey = $field ?: 'form_photo';
 
-        if (isset($formData[$photoFieldKey]) && ! empty($formData[$photoFieldKey])) {
-            $photoUrls = is_array($formData[$photoFieldKey]) ? $formData[$photoFieldKey] : [];
+        // Support nested sample photo keys like "samples.0.weighing_photos"
+        $photoUrls = data_get($formData, $photoFieldKey, []);
 
+        if (! empty($photoUrls) && is_array($photoUrls)) {
             $photos = [];
             foreach ($photoUrls as $url) {
                 $photos[] = [

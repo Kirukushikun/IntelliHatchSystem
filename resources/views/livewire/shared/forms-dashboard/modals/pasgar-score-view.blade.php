@@ -180,6 +180,7 @@
                                             <th class="px-3 py-2 border border-gray-200 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300 text-center">Beak</th>
                                             <th class="px-3 py-2 border border-gray-200 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300 text-center">Belly</th>
                                             <th class="px-3 py-2 border border-gray-200 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300 text-center">Vaccine</th>
+                                            <th class="px-3 py-2 border border-gray-200 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300 text-center">Photos</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -228,6 +229,25 @@
                                                     @else
                                                         <span class="text-green-500">&#10003;</span>
                                                     @endif
+                                                </td>
+                                                <td class="px-3 py-2 border border-gray-200 dark:border-gray-600 text-center">
+                                                    <div class="flex flex-col gap-1 items-center">
+                                                        @php $weighingCount = $this->getPhotoCount("samples.{$index}.weighing_photos"); @endphp
+                                                        @if($weighingCount > 0)
+                                                            <button @click="$wire.viewPhotos('samples.{{ $index }}.weighing_photos')" class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-blue-200 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-all cursor-pointer whitespace-nowrap">
+                                                                Weighing ({{ $weighingCount }})
+                                                            </button>
+                                                        @endif
+                                                        @php $issueCount = $this->getPhotoCount("samples.{$index}.issue_photos"); @endphp
+                                                        @if($issueCount > 0)
+                                                            <button @click="$wire.viewPhotos('samples.{{ $index }}.issue_photos')" class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-amber-200 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-100 transition-all cursor-pointer whitespace-nowrap">
+                                                                Issue ({{ $issueCount }})
+                                                            </button>
+                                                        @endif
+                                                        @if($weighingCount === 0 && $issueCount === 0)
+                                                            <span class="text-gray-400 text-[10px]">—</span>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach

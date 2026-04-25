@@ -54,7 +54,7 @@
         
         <!-- Global Toast Component -->
         <x-toast />
-        
+
         <!-- Livewire Scripts -->
         <livewire:scripts />
 

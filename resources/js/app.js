@@ -1,5 +1,4 @@
 import './bootstrap';
-import './photo-attach';
 import Chart from 'chart.js/auto';
 
 const CHART_COLORS = [
@@ -113,17 +112,8 @@ document.addEventListener('DOMContentLoaded', initCharts);
 document.addEventListener('livewire:navigated', initCharts);
 
 // Livewire 3/4 morphing — fires after each component update
-if (typeof Livewire !== 'undefined') {
-    document.addEventListener('livewire:init', () => {
-        Livewire.hook('morph.updated', () => {
-            setTimeout(initCharts, 50);
-        });
+document.addEventListener('livewire:init', () => {
+    Livewire.hook('morph.updated', () => {
+        setTimeout(initCharts, 50);
     });
-} else {
-    // Fallback: listen for init event then hook
-    document.addEventListener('livewire:init', () => {
-        Livewire.hook('morph.updated', () => {
-            setTimeout(initCharts, 50);
-        });
-    });
-}
+});

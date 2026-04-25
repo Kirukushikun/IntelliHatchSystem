@@ -363,3 +363,506 @@
     </div>
 
  </div>
+
+@once
+<script>
+document.addEventListener('alpine:init', function() {
+    Alpine.data('photoAttach', function(config) {
+        return {
+            showCameraModal: false,
+            showCancelConfirmation: false,
+            showCarouselModal: false,
+            showRemoveConfirmation: false,
+            attachMode: 'camera',
+            photoKey: config.photoKey || '',
+            maxFiles: config.maxFiles || 20,
+            maxSizeMb: config.maxSizeMb || 10,
+            isRequired: config.required || false,
+            stream: null,
+            flashOn: false,
+            flashSupported: false,
+            photos: [],
+            attachedPhotos: [],
+            attachedFiles: [],
+            suppressInputChange: false,
+            currentPhotoIndex: 0,
+            cameraActive: false,
+            uploading: false,
+            processingGallery: false,
+            serverPhotoQueue: [],
+
+            toast: function(type, message) {
+                window.dispatchEvent(new CustomEvent('showToast', { detail: { type: type, message: message } }));
+            },
+
+            get totalPhotoCount() { return this.attachedPhotos.length + this.photos.length; },
+            get remainingSlots() { return Math.max(0, this.maxFiles - this.totalPhotoCount); },
+            get isAtLimit() { return this.totalPhotoCount >= this.maxFiles; },
+
+            checkFileSize: function(file) {
+                var maxBytes = this.maxSizeMb * 1024 * 1024;
+                if (file.size > maxBytes) {
+                    this.toast('error', 'File \'' + file.name + '\' exceeds ' + this.maxSizeMb + 'MB limit (' + (file.size / 1024 / 1024).toFixed(1) + 'MB)');
+                    return false;
+                }
+                return true;
+            },
+
+            checkCanAddPhotos: function(count) {
+                count = count || 1;
+                if (this.totalPhotoCount + count > this.maxFiles) {
+                    var remaining = this.remainingSlots;
+                    this.toast('error', 'Maximum ' + this.maxFiles + ' photos allowed. ' + (remaining > 0 ? 'You can add ' + remaining + ' more.' : 'Limit reached.'));
+                    return false;
+                }
+                return true;
+            },
+
+            init: function() {
+                var self = this;
+                var preloaded = config.initialPhotos || [];
+                if (preloaded && preloaded.length > 0) {
+                    for (var i = 0; i < preloaded.length; i++) {
+                        self.attachedPhotos.push({ id: preloaded[i].id, data: preloaded[i].url, serverPhotoId: preloaded[i].id, serverUrl: preloaded[i].url });
+                        self.attachedFiles.push(null);
+                    }
+                }
+
+                window.addEventListener('photoLimitReached', function(event) {
+                    if (!event || !event.detail || event.detail.photoKey !== self.photoKey) return;
+                    self.toast('error', 'Maximum ' + event.detail.max + ' photos allowed per field.');
+                });
+
+                window.addEventListener('photoStored', function(event) {
+                    if (!event || !event.detail) return;
+                    if (event.detail.photoKey !== self.photoKey) return;
+                    self.serverPhotoQueue.push({ photoId: event.detail.photoId, url: event.detail.url });
+                });
+
+                window.addEventListener('formSubmitted', function() {
+                    self.photos = []; self.attachedPhotos = []; self.attachedFiles = []; self.serverPhotoQueue = [];
+                    self.currentPhotoIndex = 0; self.showCarouselModal = false; self.showCameraModal = false;
+                    self.showCancelConfirmation = false; self.showRemoveConfirmation = false;
+                    if (self.$refs && self.$refs.originalInput) { self.suppressInputChange = true; self.$refs.originalInput.value = ''; self.suppressInputChange = false; }
+                    self.stopCamera();
+                });
+
+                window.addEventListener('formReset', function() {
+                    self.photos = []; self.attachedPhotos = []; self.attachedFiles = []; self.serverPhotoQueue = [];
+                    self.currentPhotoIndex = 0; self.showCarouselModal = false; self.showCameraModal = false;
+                    self.showCancelConfirmation = false; self.showRemoveConfirmation = false;
+                    if (self.$refs && self.$refs.originalInput) { self.suppressInputChange = true; self.$refs.originalInput.value = ''; self.suppressInputChange = false; }
+                    self.stopCamera();
+                });
+            },
+
+            assignServerPhotosToLastAttached: function(count) {
+                if (!count || count <= 0) return;
+                var startIndex = this.attachedPhotos.length - count;
+                for (var i = 0; i < count; i++) {
+                    var queueItem = this.serverPhotoQueue.shift();
+                    if (!queueItem) continue;
+                    var index = startIndex + i;
+                    if (!this.attachedPhotos[index]) continue;
+                    this.attachedPhotos[index].serverPhotoId = queueItem.photoId;
+                    this.attachedPhotos[index].serverUrl = queueItem.url;
+                }
+            },
+
+            uploadFilesToServer: function(files) {
+                if (!files || files.length === 0) return Promise.resolve();
+                if (!this.$wire) {
+                    return Promise.reject(new Error('Livewire ($wire) is not available.'));
+                }
+                var self = this;
+                return new Promise(function(resolve, reject) {
+                    self.$wire.uploadMultiple('photoUploads.' + self.photoKey, files,
+                        function() { resolve(true); },
+                        function(err) { reject(err); }
+                    );
+                });
+            },
+
+            openAttachAction: function() {
+                if (this.attachMode === 'upload') { this.triggerUpload(); return; }
+                this.showCameraModal = true;
+                var self = this;
+                this.$nextTick(function() { self.startCamera(); });
+            },
+
+            triggerUpload: function() {
+                if (this.uploading || this.processingGallery) return;
+                this.$refs.originalInput.click();
+            },
+
+            handleInputChange: function(e) {
+                if (this.suppressInputChange) return;
+                var selected = e && e.target && e.target.files ? Array.from(e.target.files) : [];
+                if (selected.length === 0) return;
+                if (!this.checkCanAddPhotos(selected.length)) { e.target.value = ''; return; }
+
+                var self = this;
+                self.processingGallery = true;
+
+                (async function() {
+                    try {
+                        var processed = [];
+                        for (var i = 0; i < selected.length; i++) {
+                            var file = selected[i];
+                            if (!self.checkFileSize(file)) continue;
+                            if (self.attachedPhotos.length + processed.length >= self.maxFiles) {
+                                self.toast('warning', 'Maximum ' + self.maxFiles + ' photos reached. Remaining files skipped.');
+                                break;
+                            }
+                            var result = await self.processUploadFile(file);
+                            if (result) processed.push(result);
+                        }
+
+                        var newFiles = processed.map(function(p) { return p.file; });
+                        var newPhotos = processed.map(function(p) { return p.photo; });
+                        var dataTransfer = new DataTransfer();
+                        var allFiles = self.attachedFiles.concat(newFiles);
+                        allFiles.filter(function(f) { return f; }).forEach(function(file) { dataTransfer.items.add(file); });
+
+                        self.suppressInputChange = true;
+                        self.$refs.originalInput.files = dataTransfer.files;
+                        self.suppressInputChange = false;
+
+                        self.attachedFiles = allFiles;
+                        self.attachedPhotos = self.attachedPhotos.concat(newPhotos);
+
+                        self.uploading = true;
+                        try {
+                            await self.uploadFilesToServer(newFiles);
+                            self.assignServerPhotosToLastAttached(newPhotos.length);
+                        } finally {
+                            self.uploading = false;
+                        }
+                    } finally {
+                        self.processingGallery = false;
+                    }
+                })();
+            },
+
+            processUploadFile: function(file) {
+                var self = this;
+                return new Promise(function(resolve) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = new Image();
+                        img.onload = function() {
+                            var canvas = self.$refs.canvas;
+                            var ctx = canvas.getContext('2d');
+                            var maxDimension = 1920;
+                            var targetWidth = img.width;
+                            var targetHeight = img.height;
+                            if (img.width > maxDimension || img.height > maxDimension) {
+                                var scale = Math.min(maxDimension / img.width, maxDimension / img.height);
+                                targetWidth = Math.floor(img.width * scale);
+                                targetHeight = Math.floor(img.height * scale);
+                            }
+                            canvas.width = targetWidth;
+                            canvas.height = targetHeight;
+                            ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                            self.addTimestampWatermark(ctx, canvas.width, canvas.height);
+                            var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                            fetch(dataUrl).then(function(r) { return r.blob(); }).then(function(blob) {
+                                var processedFile = new File([blob], file.name, { type: 'image/jpeg' });
+                                resolve({ file: processedFile, photo: { id: Date.now() + Math.random(), data: dataUrl } });
+                            }).catch(function() { resolve(null); });
+                        };
+                        img.onerror = function() { resolve(null); };
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = function() { resolve(null); };
+                    reader.readAsDataURL(file);
+                });
+            },
+
+            startCamera: function() {
+                var self = this;
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    self.toast('error', 'Camera not supported! You need HTTPS or localhost.');
+                    return;
+                }
+                navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1920 } },
+                    audio: false
+                }).then(function(stream) {
+                    self.stream = stream;
+                    self.$refs.video.srcObject = stream;
+                    self.cameraActive = true;
+                    var track = stream.getVideoTracks()[0];
+                    if (track) {
+                        var capabilities = track.getCapabilities ? track.getCapabilities() : {};
+                        self.flashSupported = !!(capabilities.torch);
+                    }
+                    self.flashOn = false;
+                }).catch(function(err) {
+                    self.toast('error', 'Camera error: ' + err.message);
+                });
+            },
+
+            toggleFlash: function() {
+                if (!this.stream || !this.flashSupported) return;
+                var track = this.stream.getVideoTracks()[0];
+                if (!track) return;
+                var self = this;
+                self.flashOn = !self.flashOn;
+                track.applyConstraints({ advanced: [{ torch: self.flashOn }] }).catch(function() {
+                    self.flashOn = false;
+                    self.toast('error', 'Flash not available');
+                });
+            },
+
+            capturePhoto: function() {
+                if (!this.checkCanAddPhotos(1)) return;
+                var video = this.$refs.video;
+                var canvas = this.$refs.canvas;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                this.addTimestampWatermark(ctx, canvas.width, canvas.height);
+                var imageData = canvas.toDataURL('image/jpeg', 0.85);
+                this.photos.push({ id: Date.now(), data: imageData });
+            },
+
+            addTimestampWatermark: function(ctx, width, height) {
+                var now = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Manila'}));
+                var dateStr = now.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' });
+                var timeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                var timestamp = dateStr + ' ' + timeStr;
+                var fontSize = Math.max(16, height * 0.03);
+                ctx.font = 'bold ' + fontSize + 'px Arial';
+                ctx.textBaseline = 'bottom';
+                var padding = fontSize * 0.3;
+                var textWidth = ctx.measureText(timestamp).width;
+                var textHeight = fontSize;
+                var bgX = padding;
+                var bgY = height - textHeight - padding * 2;
+                var bgWidth = textWidth + padding * 2;
+                var bgHeight = textHeight + padding * 2;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(bgX, bgY, bgWidth, bgHeight);
+                var textX = padding * 2;
+                var textY = height - padding * 2;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = fontSize * 0.15;
+                ctx.lineJoin = 'round';
+                ctx.miterLimit = 2;
+                ctx.strokeText(timestamp, textX, textY);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillText(timestamp, textX, textY);
+            },
+
+            selectFromGallery: function() {
+                var self = this;
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.multiple = true;
+                input.onchange = function(e) {
+                    var files = Array.from(e.target.files);
+                    if (files.length === 0) return;
+                    if (!self.checkCanAddPhotos(files.length)) return;
+                    self.processingGallery = true;
+
+                    (async function() {
+                        for (var i = 0; i < files.length; i++) {
+                            if (!self.checkFileSize(files[i])) continue;
+                            if (self.isAtLimit) {
+                                self.toast('warning', 'Maximum ' + self.maxFiles + ' photos reached. Remaining files skipped.');
+                                break;
+                            }
+                            await self.processGalleryImage(files[i]);
+                        }
+                        self.processingGallery = false;
+                    })();
+                };
+                input.click();
+            },
+
+            processGalleryImage: function(file) {
+                var self = this;
+                return new Promise(function(resolve) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = new Image();
+                        img.onload = function() {
+                            var canvas = self.$refs.canvas;
+                            var ctx = canvas.getContext('2d');
+                            var maxDimension = 1920;
+                            var targetWidth = img.width;
+                            var targetHeight = img.height;
+                            if (img.width > maxDimension || img.height > maxDimension) {
+                                var scale = Math.min(maxDimension / img.width, maxDimension / img.height);
+                                targetWidth = Math.floor(img.width * scale);
+                                targetHeight = Math.floor(img.height * scale);
+                            }
+                            canvas.width = targetWidth;
+                            canvas.height = targetHeight;
+                            ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                            self.addTimestampWatermark(ctx, canvas.width, canvas.height);
+                            var imageData = canvas.toDataURL('image/jpeg', 0.85);
+                            var base64Length = imageData.length - 'data:image/jpeg;base64,'.length;
+                            var sizeInBytes = (base64Length * 3) / 4;
+                            if (sizeInBytes > self.maxSizeMb * 1024 * 1024) {
+                                self.toast('error', 'Photo \'' + file.name + '\' exceeds ' + self.maxSizeMb + 'MB limit even after resizing');
+                                resolve();
+                                return;
+                            }
+                            self.photos.push({ id: Date.now(), data: imageData });
+                            resolve();
+                        };
+                        img.onerror = function() { self.toast('error', 'Failed to load image: ' + file.name); resolve(); };
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = function() { self.toast('error', 'Failed to read file: ' + file.name); resolve(); };
+                    reader.readAsDataURL(file);
+                });
+            },
+
+            stopCamera: function() {
+                if (this.stream) { this.stream.getTracks().forEach(function(track) { track.stop(); }); this.stream = null; }
+                if (this.$refs.video) { this.$refs.video.srcObject = null; }
+                this.cameraActive = false;
+                this.flashOn = false;
+                this.flashSupported = false;
+            },
+
+            tryCancel: function() {
+                if (this.photos.length > 0 || this.cameraActive) { this.showCancelConfirmation = true; }
+                else { this.confirmCancel(); }
+            },
+
+            confirmCancel: function() {
+                this.stopCamera();
+                this.photos = [];
+                this.showCancelConfirmation = false;
+                this.showCameraModal = false;
+                this.uploading = false;
+                this.processingGallery = false;
+            },
+
+            openCarousel: function(index) {
+                index = index || 0;
+                if (this.attachedPhotos.length === 0) return;
+                this.currentPhotoIndex = Math.min(Math.max(index, 0), this.attachedPhotos.length - 1);
+                this.showCarouselModal = true;
+            },
+
+            nextPhoto: function() {
+                if (this.attachedPhotos.length === 0) return;
+                this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.attachedPhotos.length;
+            },
+
+            prevPhoto: function() {
+                if (this.attachedPhotos.length === 0) return;
+                this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.attachedPhotos.length) % this.attachedPhotos.length;
+            },
+
+            tryRemoveCurrentAttachedPhoto: function() { this.showRemoveConfirmation = true; },
+
+            removeCurrentAttachedPhoto: function() {
+                this.showRemoveConfirmation = false;
+                if (this.attachedPhotos.length === 0) return;
+
+                var self = this;
+                var index = self.currentPhotoIndex;
+                var photo = self.attachedPhotos[index];
+                var serverPhotoId = photo && photo.serverPhotoId ? photo.serverPhotoId : null;
+
+                (async function() {
+                    if (self.$wire && serverPhotoId) {
+                        try {
+                            await self.$wire.call('deleteUploadedPhoto', self.photoKey, serverPhotoId);
+                        } catch (err) {
+                            self.toast('error', 'Failed to remove photo: ' + (err && err.message ? err.message : 'Unknown error'));
+                            return;
+                        }
+                    }
+
+                    self.attachedPhotos.splice(index, 1);
+                    self.attachedFiles.splice(index, 1);
+
+                    var dataTransfer = new DataTransfer();
+                    self.attachedFiles.filter(function(f) { return f; }).forEach(function(f) { dataTransfer.items.add(f); });
+                    self.suppressInputChange = true;
+                    self.$refs.originalInput.files = dataTransfer.files;
+                    self.suppressInputChange = false;
+
+                    if (self.attachedPhotos.length === 0) {
+                        self.showCarouselModal = false;
+                        self.currentPhotoIndex = 0;
+                        self.toast('success', 'Photo removed');
+                        return;
+                    }
+
+                    self.currentPhotoIndex = Math.min(self.currentPhotoIndex, self.attachedPhotos.length - 1);
+                    self.toast('success', 'Photo removed');
+                })();
+            },
+
+            deletePhoto: function(id) { this.photos = this.photos.filter(function(p) { return p.id !== id; }); },
+
+            validatePhotos: function() {
+                if (this.isRequired) {
+                    var originalInput = this.$refs.originalInput;
+                    var hasFiles = originalInput && originalInput.files && originalInput.files.length > 0;
+                    if (!hasFiles) return 'Please take at least one photo';
+                }
+                return null;
+            },
+
+            uploadPhotos: function() {
+                if (this.photos.length === 0) { this.toast('warning', 'No photos to upload!'); return; }
+
+                var wouldBeTotal = this.attachedPhotos.length + this.photos.length;
+                if (wouldBeTotal > this.maxFiles) {
+                    var canAdd = this.maxFiles - this.attachedPhotos.length;
+                    if (canAdd <= 0) { this.toast('error', 'Maximum ' + this.maxFiles + ' photos already attached.'); return; }
+                    this.toast('warning', 'Only uploading first ' + canAdd + ' of ' + this.photos.length + ' photos to stay within the ' + this.maxFiles + ' photo limit.');
+                    this.photos = this.photos.slice(0, canAdd);
+                }
+
+                var self = this;
+                self.uploading = true;
+
+                (async function() {
+                    try {
+                        var files = await Promise.all(self.photos.map(function(photo, index) {
+                            return fetch(photo.data).then(function(r) { return r.blob(); }).then(function(blob) {
+                                return new File([blob], 'photo_' + (index + 1) + '.jpg', { type: 'image/jpeg' });
+                            });
+                        }));
+
+                        await self.uploadFilesToServer(files);
+
+                        var dataTransfer = new DataTransfer();
+                        var allFiles = self.attachedFiles.concat(files);
+                        allFiles.filter(function(f) { return f; }).forEach(function(file) { dataTransfer.items.add(file); });
+
+                        self.$refs.originalInput.files = dataTransfer.files;
+
+                        self.toast('success', files.length + ' photo(s) uploaded successfully!');
+
+                        self.attachedFiles = allFiles;
+                        self.attachedPhotos = self.attachedPhotos.concat(self.photos);
+                        self.assignServerPhotosToLastAttached(self.photos.length);
+                        self.photos = [];
+                        self.stopCamera();
+                        self.showCameraModal = false;
+                    } catch(err) {
+                        console.error('[photo-attach] Upload error:', err);
+                        self.toast('error', 'Upload failed: ' + (err && err.message ? err.message : 'Unknown error'));
+                    } finally {
+                        self.uploading = false;
+                    }
+                })();
+            }
+        };
+    });
+});
+</script>
+@endonce

@@ -199,13 +199,13 @@
                                                 <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
                                             @enderror
                                         </div>
-                                        <div data-field="weighing_photo_{{ $sample['_key'] }}">
+
+                                        <div data-field="weighing_photo_{{ $sample['_key'] }}" wire:ignore>
                                             <x-photo-attach
                                                 label="Weighing Proof Photo"
                                                 name="weighing_photo_{{ $sample['_key'] }}"
                                                 :max-files="3"
                                                 :compact="true"
-                                                :camera-only="true"
                                                 :initial-photos="$this->getInitialPhotosForKey('weighing_photo_' . $sample['_key'])"
                                             />
                                         </div>
@@ -257,23 +257,18 @@
                                         </label>
                                     </div>
 
-                                    @php
-                                        $hasIssue = ($sample['low_reflex_alertness'] ?? false) ||
-                                            ($sample['navel_issue'] ?? false) ||
-                                            ($sample['leg_issue'] ?? false) ||
-                                            ($sample['beak_issue'] ?? false) ||
-                                            ($sample['belly_bloated'] ?? false) ||
-                                            ($sample['vaccination_issue'] ?? false);
-                                    @endphp
-                                    <div class="mt-3" data-field="issue_photo_{{ $sample['_key'] }}" @style(['display:none' => !$hasIssue])>
-                                        <x-photo-attach
-                                            label="Issue Proof Photo"
-                                            name="issue_photo_{{ $sample['_key'] }}"
-                                            :max-files="3"
-                                            :compact="true"
-                                            :initial-photos="$this->getInitialPhotosForKey('issue_photo_' . $sample['_key'])"
-                                        />
-                                    </div>
+                                    @if($sample['low_reflex_alertness'] || $sample['navel_issue'] || $sample['leg_issue'] || $sample['beak_issue'] || $sample['belly_bloated'] || $sample['vaccination_issue'])
+                                        <div data-field="issue_photo_{{ $sample['_key'] }}" class="mt-3" wire:ignore>
+                                            <x-photo-attach
+                                                label="Issue Proof Photo"
+                                                name="issue_photo_{{ $sample['_key'] }}"
+                                                :max-files="3"
+                                                :compact="true"
+                                                :initial-photos="$this->getInitialPhotosForKey('issue_photo_' . $sample['_key'])"
+                                            />
+                                        </div>
+                                    @endif
+
                                 </div>
                         </div>
                     @endforeach
@@ -400,7 +395,7 @@
                     />
                 </div>
 
-                <div data-field="form_photo">
+                <div data-field="form_photo" wire:ignore>
                     <x-photo-attach label="Photo of Form with Data" name="form_photo" required />
                 </div>
 
