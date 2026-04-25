@@ -34,7 +34,7 @@ class IncubatorRackPmForm extends FormNavigation
         $this->recalculateVisibleSteps();
 
         $this->personnelList = User::where('is_disabled', false)
-            ->whereIn('user_type', [1, 2])
+            ->whereIn('user_type', [2])
             ->orderBy('first_name')
             ->get()
             ->mapWithKeys(fn ($u) => [$u->id => $u->full_name])
