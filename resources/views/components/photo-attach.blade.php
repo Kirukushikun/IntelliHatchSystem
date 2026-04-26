@@ -280,48 +280,53 @@
 </div>
 </div>
 
-    <!-- Carousel Modal -->
+    <!-- Carousel Modal (fullscreen on mobile, centered on desktop) -->
     <div x-show="showCarouselModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
         <div class="fixed inset-0 bg-black/80" @click="showCarouselModal = false"></div>
-        <div class="relative min-h-screen flex items-center justify-center p-4">
-            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-4 sm:p-6">
+        <div class="relative min-h-screen flex items-end sm:items-center justify-center sm:p-4">
+            <div class="relative bg-white dark:bg-gray-800 sm:rounded-lg shadow-xl w-full sm:max-w-sm p-4 sm:p-6 rounded-t-2xl sm:rounded-b-lg">
                 <div class="flex items-center justify-between mb-4">
+                    {{-- Drag handle for mobile bottom sheet feel --}}
+                    <div class="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full sm:hidden"></div>
                     <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Attached Photos</h3>
-                    <button type="button" @click="showCarouselModal = false" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button type="button" @click="showCarouselModal = false" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 min-h-11 min-w-11 flex items-center justify-center">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
 
-                <div class="relative w-full max-w-sm aspect-square bg-gray-900 rounded-lg overflow-hidden">
-                    <img :src="attachedPhotos[currentPhotoIndex]?.data" class="w-full h-full object-contain">
+                <div class="relative w-full max-w-sm aspect-square bg-gray-900 rounded-lg overflow-hidden"
+                     @touchstart="handleCarouselTouchStart($event)"
+                     @touchend="handleCarouselTouchEnd($event)">
+                    <img :src="attachedPhotos[currentPhotoIndex]?.data" class="w-full h-full object-contain select-none" draggable="false">
 
                     <template x-if="attachedPhotos.length > 1">
-                        <button type="button" @click="prevPhoto()" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full shadow-lg">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button type="button" @click="prevPhoto()" class="photo-carousel-nav absolute left-1 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-2 sm:p-3 rounded-full shadow-lg">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                             </svg>
                         </button>
                     </template>
 
                     <template x-if="attachedPhotos.length > 1">
-                        <button type="button" @click="nextPhoto()" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full shadow-lg">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button type="button" @click="nextPhoto()" class="photo-carousel-nav absolute right-1 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-2 sm:p-3 rounded-full shadow-lg">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </button>
                     </template>
                 </div>
 
-                <div class="mt-3 text-center text-sm text-gray-600">
+                <div class="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
                     <span x-text="currentPhotoIndex + 1"></span> / <span x-text="attachedPhotos.length"></span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 ml-1 sm:hidden">(swipe to navigate)</span>
                 </div>
 
-                <div class="mt-4 flex justify-end">
+                <div class="mt-4 flex justify-end" style="padding-bottom: env(safe-area-inset-bottom, 0px)">
                     <button type="button"
                             @click="tryRemoveCurrentAttachedPhoto()"
-                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                            class="px-4 py-2 min-h-11 bg-red-600 text-white rounded-md hover:bg-red-700">
                         Remove
                     </button>
                 </div>
@@ -390,6 +395,8 @@ document.addEventListener('alpine:init', function() {
             uploading: false,
             processingGallery: false,
             serverPhotoQueue: [],
+            carouselTouchStartX: 0,
+            carouselTouchStartY: 0,
 
             toast: function(type, message) {
                 window.dispatchEvent(new CustomEvent('showToast', { detail: { type: type, message: message } }));
@@ -582,7 +589,9 @@ document.addEventListener('alpine:init', function() {
             startCamera: function() {
                 var self = this;
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    self.toast('error', 'Camera not supported! You need HTTPS or localhost.');
+                    self.toast('error', 'Camera is not available. Please use HTTPS or try a different browser.');
+                    self.attachMode = 'upload';
+                    self.showCameraModal = false;
                     return;
                 }
                 navigator.mediaDevices.getUserMedia({
@@ -599,7 +608,18 @@ document.addEventListener('alpine:init', function() {
                     }
                     self.flashOn = false;
                 }).catch(function(err) {
-                    self.toast('error', 'Camera error: ' + err.message);
+                    var name = err.name || '';
+                    if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+                        self.toast('error', 'Camera access denied. Please allow camera permission in your browser settings, or switch to gallery upload.');
+                    } else if (name === 'NotFoundError') {
+                        self.toast('error', 'No camera found on this device. Switching to gallery upload.');
+                    } else if (name === 'NotReadableError') {
+                        self.toast('error', 'Camera is in use by another app. Please close other camera apps and try again.');
+                    } else {
+                        self.toast('error', 'Camera error: ' + err.message);
+                    }
+                    self.attachMode = 'upload';
+                    self.showCameraModal = false;
                 });
             },
 
@@ -760,6 +780,24 @@ document.addEventListener('alpine:init', function() {
             prevPhoto: function() {
                 if (this.attachedPhotos.length === 0) return;
                 this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.attachedPhotos.length) % this.attachedPhotos.length;
+            },
+
+            handleCarouselTouchStart: function(e) {
+                if (e.touches && e.touches[0]) {
+                    this.carouselTouchStartX = e.touches[0].clientX;
+                    this.carouselTouchStartY = e.touches[0].clientY;
+                }
+            },
+
+            handleCarouselTouchEnd: function(e) {
+                if (!e.changedTouches || !e.changedTouches[0]) return;
+                var dx = e.changedTouches[0].clientX - this.carouselTouchStartX;
+                var dy = e.changedTouches[0].clientY - this.carouselTouchStartY;
+                // Only trigger if horizontal swipe is dominant and exceeds threshold
+                if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+                    if (dx > 0) { this.prevPhoto(); }
+                    else { this.nextPhoto(); }
+                }
             },
 
             tryRemoveCurrentAttachedPhoto: function() { this.showRemoveConfirmation = true; },

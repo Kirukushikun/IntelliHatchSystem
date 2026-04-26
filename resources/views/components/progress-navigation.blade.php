@@ -21,7 +21,8 @@
     </div>
 
     <!-- Navigation with inline progress -->
-    <div class="flex justify-between items-center my-4 sm:my-6 w-full max-w-lg">
+    <div class="flex justify-between items-center my-4 sm:my-6 w-full max-w-lg"
+         style="padding-bottom: env(safe-area-inset-bottom, 0px)">
 
         <div class="flex items-center">
             @if(((int) $currentStep) > 1)
@@ -31,6 +32,7 @@
                     wire:target="previousStep,nextStep,submitForm"
                     variant="outline-secondary"
                     type="button"
+                    class="min-h-11 min-w-11"
                 >
                     <svg wire:loading wire:target="previousStep"
                          class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -73,6 +75,7 @@
                     variant="primary"
                     type="button"
                     :disabled="!$canProceed"
+                    class="min-h-11"
                 >
                     <span wire:loading.remove wire:target="nextStep">Next</span>
                     <svg wire:loading.remove wire:target="nextStep"
@@ -92,6 +95,7 @@
                     wire:target="previousStep,nextStep,submitForm"
                     variant="success"
                     type="button"
+                    class="min-h-11"
                 >
                     <span wire:loading.remove wire:target="submitForm">Submit</span>
                     <svg wire:loading wire:target="submitForm"

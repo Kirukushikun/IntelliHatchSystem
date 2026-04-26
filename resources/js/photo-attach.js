@@ -28,6 +28,8 @@ export const photoAttachComponent = (config) => ({
     uploading: false,
     processingGallery: false,
     serverPhotoQueue: [],
+    carouselTouchStartX: 0,
+    carouselTouchStartY: 0,
 
     toast(type, message) {
         window.dispatchEvent(new CustomEvent('showToast', {
@@ -256,7 +258,9 @@ export const photoAttachComponent = (config) => ({
 
     async startCamera() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            this.toast('error', 'Camera not supported! You need HTTPS or localhost.');
+            this.toast('error', 'Camera is not available. Please use HTTPS or try a different browser.');
+            this.attachMode = 'upload';
+            this.showCameraModal = false;
             return;
         }
         try {
@@ -273,7 +277,18 @@ export const photoAttachComponent = (config) => ({
             }
             this.flashOn = false;
         } catch(err) {
-            this.toast('error', 'Camera error: ' + err.message);
+            const name = err.name || '';
+            if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+                this.toast('error', 'Camera access denied. Please allow camera permission in your browser settings, or switch to gallery upload.');
+            } else if (name === 'NotFoundError') {
+                this.toast('error', 'No camera found on this device. Switching to gallery upload.');
+            } else if (name === 'NotReadableError') {
+                this.toast('error', 'Camera is in use by another app. Please close other camera apps and try again.');
+            } else {
+                this.toast('error', 'Camera error: ' + err.message);
+            }
+            this.attachMode = 'upload';
+            this.showCameraModal = false;
         }
     },
 
@@ -438,6 +453,23 @@ export const photoAttachComponent = (config) => ({
     prevPhoto() {
         if (this.attachedPhotos.length === 0) return;
         this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.attachedPhotos.length) % this.attachedPhotos.length;
+    },
+
+    handleCarouselTouchStart(e) {
+        if (e.touches && e.touches[0]) {
+            this.carouselTouchStartX = e.touches[0].clientX;
+            this.carouselTouchStartY = e.touches[0].clientY;
+        }
+    },
+
+    handleCarouselTouchEnd(e) {
+        if (!e.changedTouches || !e.changedTouches[0]) return;
+        const dx = e.changedTouches[0].clientX - this.carouselTouchStartX;
+        const dy = e.changedTouches[0].clientY - this.carouselTouchStartY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+            if (dx > 0) { this.prevPhoto(); }
+            else { this.nextPhoto(); }
+        }
     },
 
     tryRemoveCurrentAttachedPhoto() {

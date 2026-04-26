@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
@@ -213,6 +213,159 @@
                         e.preventDefault();
                         e.returnValue = '';
                     }
+                });
+            })();
+        </script>
+
+        <!-- Auto-scroll to first validation error after form submission / next step -->
+        <script>
+            (function () {
+                document.addEventListener('livewire:init', function () {
+                    Livewire.hook('commit', function (bundle) {
+                        var calls = bundle.commit.calls || [];
+                        var isValidating = calls.some(function (c) {
+                            return c.method === 'submitForm' || c.method === 'nextStep';
+                        });
+
+                        if (!isValidating) return;
+
+                        bundle.succeed(function () {
+                            setTimeout(function () {
+                                var firstError = document.querySelector(
+                                    '#step-form .text-red-500, #step-form .text-red-600'
+                                );
+                                if (firstError) {
+                                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                            }, 150);
+                        });
+                    });
+                });
+            })();
+        </script>
+
+        <!-- Form draft auto-save to localStorage (protects against connection loss / accidental close) -->
+        <script>
+            (function () {
+                var DRAFT_PREFIX = 'ihs_draft_';
+                var SAVE_INTERVAL = 5000;
+                var MAX_AGE = 86400000; // 24 hours
+
+                function getDraftKey() {
+                    return DRAFT_PREFIX + window.location.pathname;
+                }
+
+                function getLivewireComponent() {
+                    var formEl = document.getElementById('step-form');
+                    if (!formEl) return null;
+                    var wireEl = formEl.closest('[wire\\:id]');
+                    if (!wireEl) return null;
+                    var id = wireEl.getAttribute('wire:id');
+                    try { return Livewire.find(id); } catch (e) { return null; }
+                }
+
+                function saveDraft() {
+                    try {
+                        var comp = getLivewireComponent();
+                        if (!comp || !comp.form) return;
+                        var data = {
+                            form: JSON.parse(JSON.stringify(comp.form)),
+                            savedAt: Date.now(),
+                            path: window.location.pathname
+                        };
+                        localStorage.setItem(getDraftKey(), JSON.stringify(data));
+                    } catch (e) {}
+                }
+
+                function clearDraft() {
+                    try { localStorage.removeItem(getDraftKey()); } catch (e) {}
+                }
+
+                function showRestoreBanner(draft) {
+                    var savedDate = new Date(draft.savedAt);
+                    var timeStr = savedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    var banner = document.createElement('div');
+                    banner.id = 'draft-restore-banner';
+                    banner.className = 'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm z-50 bg-blue-600 text-white rounded-xl shadow-2xl p-4 transform transition-all duration-300';
+                    banner.innerHTML =
+                        '<div class="flex items-start gap-3">' +
+                            '<svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>' +
+                            '</svg>' +
+                            '<div class="flex-1 min-w-0">' +
+                                '<p class="text-sm font-medium">Unsaved draft found</p>' +
+                                '<p class="text-xs text-blue-200 mt-0.5">Saved at ' + timeStr + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="flex gap-2 mt-3">' +
+                            '<button id="draft-dismiss" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-blue-500 hover:bg-blue-400 transition-colors">Dismiss</button>' +
+                            '<button id="draft-restore" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-white text-blue-600 hover:bg-blue-50 transition-colors">Restore</button>' +
+                        '</div>';
+
+                    document.body.appendChild(banner);
+
+                    document.getElementById('draft-dismiss').addEventListener('click', function () {
+                        clearDraft();
+                        banner.remove();
+                    });
+
+                    document.getElementById('draft-restore').addEventListener('click', function () {
+                        try {
+                            var comp = getLivewireComponent();
+                            if (comp && draft.form) {
+                                Object.keys(draft.form).forEach(function (key) {
+                                    comp.set('form.' + key, draft.form[key]);
+                                });
+                                window.dispatchEvent(new CustomEvent('showToast', {
+                                    detail: { type: 'success', message: 'Draft restored successfully!' }
+                                }));
+                            }
+                        } catch (e) {
+                            window.dispatchEvent(new CustomEvent('showToast', {
+                                detail: { type: 'error', message: 'Could not restore draft.' }
+                            }));
+                        }
+                        banner.remove();
+                    });
+                }
+
+                document.addEventListener('livewire:init', function () {
+                    // Only activate on form pages
+                    if (!document.getElementById('step-form')) return;
+
+                    // Periodic auto-save
+                    setInterval(saveDraft, SAVE_INTERVAL);
+
+                    // Save on input/change events
+                    document.addEventListener('change', function (e) {
+                        if (e.target.closest('#step-form')) saveDraft();
+                    });
+
+                    // Clear on successful submission
+                    window.addEventListener('formSubmitted', clearDraft);
+
+                    // Check for saved draft after component is ready
+                    setTimeout(function () {
+                        try {
+                            var saved = localStorage.getItem(getDraftKey());
+                            if (!saved) return;
+                            var draft = JSON.parse(saved);
+                            if (Date.now() - draft.savedAt > MAX_AGE) {
+                                clearDraft();
+                                return;
+                            }
+                            // Only show if the form has an empty state (not already filled)
+                            var comp = getLivewireComponent();
+                            if (!comp || !comp.form) return;
+                            var currentValues = Object.values(comp.form).filter(function (v) {
+                                return v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0);
+                            });
+                            if (currentValues.length <= 0) {
+                                showRestoreBanner(draft);
+                            }
+                        } catch (e) {}
+                    }, 1000);
                 });
             })();
         </script>

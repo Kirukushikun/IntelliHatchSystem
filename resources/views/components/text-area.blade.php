@@ -1,15 +1,27 @@
 @props([
-    'label' => '', 
-    'name' => '', 
+    'label' => '',
+    'name' => '',
     'errorKey' => null,
-    'value' => '', 
-    'placeholder' => 'Enter text here', 
+    'value' => '',
+    'placeholder' => 'Enter text here',
     'required' => false,
     'subtext' => ''
 ])
 
 @php
     $errorKey = $errorKey ?: $name;
+
+    // Auto-debounce wire:model.live on text areas to reduce server round-trips during typing
+    $wireModelLive = null;
+    foreach ($attributes->getAttributes() as $attrKey => $attrVal) {
+        if ($attrKey === 'wire:model.live') {
+            $wireModelLive = $attrVal;
+            break;
+        }
+    }
+    $filteredAttributes = $wireModelLive !== null
+        ? $attributes->except(['wire:model.live'])
+        : $attributes;
 @endphp
 
 <div class="mb-4 sm:mb-6">
@@ -31,7 +43,10 @@
         rows="4"
         placeholder="{{ $placeholder }}"
         @if($required) required @endif
-        {{ $attributes->merge(['class' => "mt-1 block w-full rounded-lg border px-4 py-3 sm:py-2 text-base sm:text-sm shadow-sm " . (
+        @if($wireModelLive !== null)
+            wire:model.live.debounce.300ms="{{ $wireModelLive }}"
+        @endif
+        {{ $filteredAttributes->merge(['class' => "mt-1 block w-full rounded-lg border px-4 py-3 sm:py-2 text-base sm:text-sm shadow-sm " . (
             $errors->has($errorKey)
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
                 : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'

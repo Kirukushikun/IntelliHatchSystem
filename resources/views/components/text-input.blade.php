@@ -1,16 +1,25 @@
 @props([
-    'label' => '', 
-    'name' => '', 
+    'label' => '',
+    'name' => '',
     'errorKey' => null,
-    'value' => '', 
-    'placeholder' => 'Enter text here', 
+    'value' => '',
+    'placeholder' => 'Enter text here',
     'required' => false,
     'type' => 'text',
     'class' => '',
     'icon' => '',
     'wireModel' => null,
-    'subtext' => ''
+    'subtext' => '',
+    'inputmode' => null,
 ])
+
+@php
+    // Auto-set inputmode for mobile keyboard optimization
+    $resolvedInputmode = $inputmode;
+    if (!$resolvedInputmode && $type === 'number') {
+        $resolvedInputmode = 'decimal';
+    }
+@endphp
 
 @php
     $errorKey = $errorKey ?: $name;
@@ -42,10 +51,10 @@
             </div>
         @endif
 
-        <input 
-            type="{{ $type }}" 
-            id="{{ $name }}" 
-            name="{{ $name }}" 
+        <input
+            type="{{ $type }}"
+            id="{{ $name }}"
+            name="{{ $name }}"
             @if($wireModel)
                 wire:model="{{ $wireModel }}"
             @else
@@ -53,6 +62,7 @@
             @endif
             placeholder="{{ $placeholder }}"
             @if($required) required @endif
+            @if($resolvedInputmode) inputmode="{{ $resolvedInputmode }}" @endif
             class="mt-1 block w-full rounded-lg border shadow-sm text-base sm:text-sm
             {{ $icon ? 'pl-10' : 'px-4' }} py-3 sm:py-2
             {{ $errors->has($errorKey)
