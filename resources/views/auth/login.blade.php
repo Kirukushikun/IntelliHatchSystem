@@ -25,9 +25,9 @@
                         href="/" 
                         variant="secondary" 
                         size="sm"
-                        icon="arrow-left"
+                        icon="home"
                     >
-                        Back to Home
+                        Home
                     </x-button>
                 </div>
             </div>
