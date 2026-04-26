@@ -29,7 +29,11 @@
                            request()->is('admin/entrance-damper-spacing-dashboard*') ||
                            request()->is('admin/incubator-entrance-temp-dashboard*') ||
                            request()->is('admin/incubator-temp-calibration-dashboard*') ||
-                           request()->is('admin/hatcher-temp-calibration-dashboard*');
+                           request()->is('admin/hatcher-temp-calibration-dashboard*') ||
+                           request()->is('admin/pasgar-score-dashboard*') ||
+                           request()->is('admin/incubator-rack-pm-dashboard*') ||
+                           request()->is('admin/weekly-volt-ampere-dashboard*') ||
+                           request()->is('admin/diesel-generator-weekly-dashboard*');
                 }
             ],
             [

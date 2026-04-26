@@ -162,18 +162,21 @@
         @foreach($cards as $card)
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-xl dark:hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-l-4 border-gray-200 dark:border-gray-700 border-l-amber-500 cursor-pointer transform hover:scale-[1.02] hover:-translate-y-1">
                 <a href="{{ match($card['type_name']) {
-                    'Incubator Routine Checklist Per Shift' => 'incubator-routine-dashboard',
-                    'Hatcher Blower Air Speed Monitoring' => 'blower-air-hatcher-dashboard',
-                    'Incubator Blower Air Speed Monitoring' => 'blower-air-incubator-dashboard',
-                    'Hatchery Sullair Air Compressor Weekly PMS Checklist' => 'hatchery-sullair-dashboard',
-                    'Plenum Temperature and Humidity Monitoring' => 'plenum-temp-humidity-dashboard',
-                    'Hatcher Machine Accuracy Temperature Checking' => 'hatcher-machine-accuracy-dashboard',
-                    'Incubator Machine Accuracy Temperature Checking' => 'incubator-machine-accuracy-dashboard',
-                    'Entrance Damper Spacing Monitoring' => 'entrance-damper-spacing-dashboard',
-                    'Incubator Entrance Temperature Monitoring' => 'incubator-entrance-temp-dashboard',
-                    'Incubator Temperature Calibration' => 'incubator-temp-calibration-dashboard',
-                    'Hatcher Temperature Calibration' => 'hatcher-temp-calibration-dashboard',
-                    'PASGAR Score' => 'pasgar-score-dashboard',
+                    'Incubator Routine Checklist Per Shift' => '/admin/incubator-routine-dashboard',
+                    'Hatcher Blower Air Speed Monitoring' => '/admin/blower-air-hatcher-dashboard',
+                    'Incubator Blower Air Speed Monitoring' => '/admin/blower-air-incubator-dashboard',
+                    'Hatchery Sullair Air Compressor Weekly PMS Checklist' => '/admin/hatchery-sullair-dashboard',
+                    'Plenum Temperature and Humidity Monitoring' => '/admin/plenum-temp-humidity-dashboard',
+                    'Hatcher Machine Accuracy Temperature Checking' => '/admin/hatcher-machine-accuracy-dashboard',
+                    'Incubator Machine Accuracy Temperature Checking' => '/admin/incubator-machine-accuracy-dashboard',
+                    'Entrance Damper Spacing Monitoring' => '/admin/entrance-damper-spacing-dashboard',
+                    'Incubator Entrance Temperature Monitoring' => '/admin/incubator-entrance-temp-dashboard',
+                    'Incubator Temperature Calibration' => '/admin/incubator-temp-calibration-dashboard',
+                    'Hatcher Temperature Calibration' => '/admin/hatcher-temp-calibration-dashboard',
+                    'PASGAR Score' => '/admin/pasgar-score-dashboard',
+                    'Incubator Rack Preventive Maintenance Checklist' => '/admin/incubator-rack-pm-dashboard',
+                    'Weekly Voltage and Ampere Monitoring' => '/admin/weekly-volt-ampere-dashboard',
+                    'Hatchery Diesel Generator Weekly Maintenance Checklist' => '/admin/diesel-generator-weekly-dashboard',
                     default => '#'
                 } }}" class="block h-full">
                 <!-- Card Header -->

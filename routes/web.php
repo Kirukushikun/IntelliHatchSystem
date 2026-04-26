@@ -133,6 +133,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/pasgar-score-dashboard', [DashboardController::class, 'pasgarScore'])->name('admin.pasgar-score-dashboard');
 
+        Route::get('/admin/incubator-rack-pm-dashboard', [DashboardController::class, 'incubatorRackPm'])->name('admin.incubator-rack-pm-dashboard');
+
+        Route::get('/admin/weekly-volt-ampere-dashboard', [DashboardController::class, 'weeklyVoltAmpere'])->name('admin.weekly-volt-ampere-dashboard');
+
+        Route::get('/admin/diesel-generator-weekly-dashboard', [DashboardController::class, 'dieselGeneratorWeekly'])->name('admin.diesel-generator-weekly-dashboard');
+
         Route::get('/admin/forms/hatcher-machine-accuracy', [FormController::class, 'hatcherMachineAccuracy'])->name('admin.forms.hatcher-machine-accuracy');
 
         Route::get('/admin/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('admin.forms.plenum-temp-humidity');

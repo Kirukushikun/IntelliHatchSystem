@@ -91,4 +91,19 @@ class DashboardController extends Controller
     {
         return view('admin.pasgar-score-dashboard');
     }
+
+    public function incubatorRackPm()
+    {
+        return view('admin.incubator-rack-pm-dashboard');
+    }
+
+    public function weeklyVoltAmpere()
+    {
+        return view('admin.weekly-volt-ampere-dashboard');
+    }
+
+    public function dieselGeneratorWeekly()
+    {
+        return view('admin.diesel-generator-weekly-dashboard');
+    }
 }
