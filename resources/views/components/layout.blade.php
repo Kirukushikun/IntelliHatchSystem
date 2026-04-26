@@ -50,8 +50,111 @@
         </style>
     </head>
     <body class="h-full bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+        {{-- Offline detection banner --}}
+        <div x-data="{ online: navigator.onLine }"
+             x-init="
+                 window.addEventListener('online', () => online = true);
+                 window.addEventListener('offline', () => online = false);
+             "
+             x-show="!online"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="transform -translate-y-full opacity-0"
+             x-transition:enter-end="transform translate-y-0 opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="transform translate-y-0 opacity-100"
+             x-transition:leave-end="transform -translate-y-full opacity-0"
+             x-cloak
+             class="fixed top-0 left-0 right-0 z-60 bg-red-600 text-white text-center py-3 px-4 text-sm font-medium shadow-lg">
+            <div class="flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728"></path>
+                </svg>
+                <span>No internet connection. Your data is safe &mdash; it will sync when you reconnect.</span>
+            </div>
+        </div>
+
+        {{-- Connection error overlay with retry --}}
+        <div x-data="{
+                 show: false,
+                 message: '',
+                 retrying: false,
+                 init() {
+                     window.addEventListener('livewire-request-error', (e) => {
+                         this.message = e.detail.message;
+                         this.show = true;
+                         this.retrying = false;
+                     });
+                 },
+                 retry() {
+                     this.retrying = true;
+                     var self = this;
+                     try {
+                         Livewire.all().forEach(function(component) {
+                             component.$wire.$commit();
+                         });
+                     } catch (e) {}
+                     setTimeout(function() {
+                         if (self.retrying) {
+                             self.show = false;
+                             self.retrying = false;
+                         }
+                     }, 3000);
+                 },
+                 dismiss() {
+                     this.show = false;
+                     this.retrying = false;
+                 }
+             }"
+             x-show="show"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             x-cloak
+             class="fixed inset-0 z-70 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm p-4"
+             @keydown.escape.window="dismiss()">
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-sm w-full p-6"
+                 @click.outside="dismiss()">
+                <div class="flex justify-center mb-4">
+                    <div class="w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                        <svg class="w-7 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-center text-lg font-semibold text-gray-900 dark:text-white mb-1">Connection Error</h3>
+                <p class="text-center text-sm text-gray-600 dark:text-gray-300 mb-1" x-text="message"></p>
+                <p class="text-center text-xs text-gray-500 dark:text-gray-400 mb-5">Your data has not been lost. You can retry or dismiss this message.</p>
+                <div class="flex gap-3">
+                    <button @click="dismiss()"
+                            class="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600
+                                   text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700
+                                   hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        Dismiss
+                    </button>
+                    <button @click="retry()"
+                            :disabled="retrying"
+                            class="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg
+                                   text-white bg-orange-600 hover:bg-orange-700
+                                   disabled:opacity-50 disabled:cursor-not-allowed transition-colors
+                                   flex items-center justify-center gap-2">
+                        <svg x-show="retrying" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span x-text="retrying ? 'Retrying...' : 'Try Again'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         {{ $slot }}
-        
+
         <!-- Global Toast Component -->
         <x-toast />
 
@@ -110,6 +213,55 @@
                         e.preventDefault();
                         e.returnValue = '';
                     }
+                });
+            })();
+        </script>
+
+        <!-- Livewire request error & timeout interception -->
+        <script>
+            (function () {
+                var REQUEST_TIMEOUT_MS = 30000;
+
+                document.addEventListener('livewire:init', function () {
+                    Livewire.hook('request', function ({uri, options, payload, respond, succeed, fail}) {
+                        var timeoutId = setTimeout(function () {
+                            window.dispatchEvent(new CustomEvent('showToast', {
+                                detail: {
+                                    message: 'The request is taking longer than expected. Please check your connection.',
+                                    type: 'warning'
+                                }
+                            }));
+                        }, REQUEST_TIMEOUT_MS);
+
+                        succeed(function ({status, json}) {
+                            clearTimeout(timeoutId);
+                        });
+
+                        fail(function ({status, content}) {
+                            clearTimeout(timeoutId);
+
+                            var message = 'Something went wrong. ';
+                            if (status === 0 || !navigator.onLine) {
+                                message = 'Connection lost. Please check your internet connection.';
+                            } else if (status === 408 || status === 504) {
+                                message = 'Request timed out. Please try again.';
+                            } else if (status === 419) {
+                                window.dispatchEvent(new CustomEvent('showToast', {
+                                    detail: {
+                                        message: 'Session expired. Please refresh the page.',
+                                        type: 'error'
+                                    }
+                                }));
+                                return;
+                            } else if (status >= 500) {
+                                message = 'Server error occurred. Please try again.';
+                            }
+
+                            window.dispatchEvent(new CustomEvent('livewire-request-error', {
+                                detail: { message: message, status: status }
+                            }));
+                        });
+                    });
                 });
             })();
         </script>

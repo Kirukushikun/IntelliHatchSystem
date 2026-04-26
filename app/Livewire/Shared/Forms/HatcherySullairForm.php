@@ -172,6 +172,12 @@ class HatcherySullairForm extends FormNavigation
 
         unset($inputs['hatchery_man']);
 
+        // Resolve inspected_by user ID to name for storage
+        $inspectedById = $this->form['inspected_by'] ?? null;
+        if ($inspectedById) {
+            $inputs['inspected_by'] = $this->hatcheryMen[$inspectedById] ?? $inspectedById;
+        }
+
         $sullairNumber = (string) ($this->form['sullair_number'] ?? '');
         if ($sullairNumber !== '') {
             $inputs['machine_info'] = [

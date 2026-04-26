@@ -156,7 +156,11 @@
                 </div>
 
                 <div data-field="inspected_by">
-                    <x-text-area label="Inspected by" name="inspected_by" error-key="form.inspected_by" placeholder="Enter inspected by..." wire:model.live="form.inspected_by" required/>
+                    <x-dropdown label="Inspected by" name="inspected_by" error-key="form.inspected_by" placeholder="Select inspector" wire:model.live="form.inspected_by" required>
+                        @foreach($hatcheryMen as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </x-dropdown>
                 </div>
             </div>
         </x-progress-navigation>
