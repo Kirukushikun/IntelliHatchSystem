@@ -4,6 +4,7 @@ namespace App\Livewire\Components;
 
 use App\Models\FormType;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -41,9 +42,17 @@ abstract class FormNavigation extends Component
     public function mount($formType = null): void
     {
         if (method_exists($this, 'formTypeName')) {
-            $ft = FormType::where('form_name', $this->formTypeName())->first();
+            $ft = FormType::where('form_name', $this->formTypeName())->with('tags')->first();
             if (! $ft || ! $ft->isActive) {
                 abort(404);
+            }
+
+            // Tag-based access control for hatchery users (user_type 2)
+            if (Auth::check() && (int) Auth::user()->user_type === 2 && $ft->tags->isNotEmpty()) {
+                $userTagIds = Auth::user()->tags()->pluck('tags.id');
+                if ($ft->tags->pluck('id')->intersect($userTagIds)->isEmpty()) {
+                    abort(403);
+                }
             }
         }
     }

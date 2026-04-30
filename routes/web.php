@@ -16,7 +16,7 @@ use App\Http\Controllers\Admin\FormsPrintController;
 use App\Http\Controllers\Admin\InsightsController;
 
 Route::get('/', function () {
-    return view('landing');
+    return redirect('/login');
 });
 
 // Public form routes

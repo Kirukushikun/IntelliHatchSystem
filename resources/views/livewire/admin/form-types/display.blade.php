@@ -37,13 +37,13 @@
     <div class="mb-3">
         <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Impact Level</p>
         <div class="flex flex-wrap gap-2">
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400"></span> Direct
             </span>
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-orange-400"></span> Direct + Indirect
             </span>
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400"></span> Indirect
             </span>
             <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
@@ -56,13 +56,13 @@
     <div class="mb-3">
         <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Usage Frequency</p>
         <div class="flex flex-wrap gap-2">
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Daily
             </span>
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-200">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-violet-500 dark:bg-violet-400"></span> Weekly
             </span>
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400"></span> Monthly
             </span>
         </div>
@@ -73,7 +73,7 @@
         <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">User Type Tags</p>
         <div class="flex flex-wrap gap-2">
             @foreach($tags as $tag)
-                <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-200">
+                <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300">
                     <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400"></span> {{ $tag->name }}
                 </span>
             @endforeach
@@ -86,17 +86,17 @@
             @foreach($formTypes as $ft)
                 @php
                     [$badgeClass, $badgeLabel] = match($ft->impact_level) {
-                        'direct'          => ['bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200', 'Direct'],
-                        'direct_indirect' => ['bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200', 'Direct + Indirect'],
-                        'indirect'        => ['bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200', 'Indirect'],
+                        'direct'          => ['bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300', 'Direct'],
+                        'direct_indirect' => ['bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300', 'Direct + Indirect'],
+                        'indirect'        => ['bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300', 'Indirect'],
                         'support'         => ['bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200', 'Support'],
                         default           => [null, null],
                     };
 
                     [$freqBadgeClass, $freqBadgeLabel] = match($ft->usage_frequency) {
-                        'daily'   => ['bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200', 'Daily'],
-                        'weekly'  => ['bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-200', 'Weekly'],
-                        'monthly' => ['bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200', 'Monthly'],
+                        'daily'   => ['bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300', 'Daily'],
+                        'weekly'  => ['bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300', 'Weekly'],
+                        'monthly' => ['bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300', 'Monthly'],
                         default   => [null, null],
                     };
                 @endphp
@@ -161,7 +161,7 @@
                                     <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded {{ $freqBadgeClass }}">{{ $freqBadgeLabel }}</span>
                                 @endif
                                 @foreach($ft->tags as $tag)
-                                    <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-200">{{ $tag->name }}</span>
+                                    <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300">{{ $tag->name }}</span>
                                 @endforeach
                                 @if(!$ft->isActive)
                                     <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Inactive</span>

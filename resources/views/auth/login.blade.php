@@ -20,15 +20,6 @@
                     <!-- Dark Mode Toggle -->
                     <x-dark-mode-toggle />
                     
-                    <!-- Back to Home -->
-                    <x-button 
-                        href="/" 
-                        variant="secondary" 
-                        size="sm"
-                        icon="home"
-                    >
-                        Home
-                    </x-button>
                 </div>
             </div>
         </div>

@@ -1,39 +1,65 @@
 <x-layout>
     @php
-        // Route mapping keyed by form_type ID — routes are defined in web.php
+        // Route mapping keyed by form_type name — routes are defined in web.php
         $routeMap = [
-            'Incubator Routine Checklist Per Shift' => '/forms/incubator-routine',
-            'Hatcher Blower Air Speed Monitoring' => '/forms/blower-air-hatcher',
-            'Incubator Blower Air Speed Monitoring' => '/forms/blower-air-incubator',
-            'Hatchery Sullair Air Compressor Weekly PMS Checklist' => '/forms/hatchery-sullair',
-            'Hatcher Machine Accuracy Temperature Checking' => '/forms/hatcher-machine-accuracy',
-            'Plenum Temperature and Humidity Monitoring' => '/forms/plenum-temp-humidity',
-            'Incubator Machine Accuracy Temperature Checking' => '/forms/incubator-machine-accuracy',
-            'Entrance Damper Spacing Monitoring' => '/forms/entrance-damper-spacing',
-            'Incubator Entrance Temperature Monitoring' => '/forms/incubator-entrance-temp',
-            'Incubator Temperature Calibration' => '/forms/incubator-temp-calibration',
-            'Hatcher Temperature Calibration' => '/forms/hatcher-temp-calibration',
-            'PASGAR Score' => '/forms/pasgar-score',
-            'Incubator Rack Preventive Maintenance Checklist' => '/forms/incubator-rack-pm',
-            'Weekly Voltage and Ampere Monitoring' => '/forms/weekly-volt-ampere',
-            'Hatchery Diesel Generator Weekly Maintenance Checklist' => '/forms/diesel-generator-weekly',
+            'Incubator Routine Checklist Per Shift' => 'incubator-routine',
+            'Hatcher Blower Air Speed Monitoring' => 'blower-air-hatcher',
+            'Incubator Blower Air Speed Monitoring' => 'blower-air-incubator',
+            'Hatchery Sullair Air Compressor Weekly PMS Checklist' => 'hatchery-sullair',
+            'Hatcher Machine Accuracy Temperature Checking' => 'hatcher-machine-accuracy',
+            'Plenum Temperature and Humidity Monitoring' => 'plenum-temp-humidity',
+            'Incubator Machine Accuracy Temperature Checking' => 'incubator-machine-accuracy',
+            'Entrance Damper Spacing Monitoring' => 'entrance-damper-spacing',
+            'Incubator Entrance Temperature Monitoring' => 'incubator-entrance-temp',
+            'Incubator Temperature Calibration' => 'incubator-temp-calibration',
+            'Hatcher Temperature Calibration' => 'hatcher-temp-calibration',
+            'PASGAR Score' => 'pasgar-score',
+            'Incubator Rack Preventive Maintenance Checklist' => 'incubator-rack-pm',
+            'Weekly Voltage and Ampere Monitoring' => 'weekly-volt-ampere',
+            'Hatchery Diesel Generator Weekly Maintenance Checklist' => 'diesel-generator-weekly',
         ];
 
-        $formTypes = \App\Models\FormType::where('isActive', true)->orderBy('id')->get();
+        // Determine route prefix based on auth
+        $routePrefix = (Auth::check() && (int) Auth::user()->user_type === 2) ? '/user/forms/' : '/forms/';
 
-        $forms = $formTypes->map(function ($ft) use ($routeMap) {
+        // Load active form types with tags
+        $formTypes = \App\Models\FormType::where('isActive', true)->with('tags')->orderBy('id')->get();
+
+        // Filter by user tags if authenticated as user_type 2
+        if (Auth::check() && (int) Auth::user()->user_type === 2) {
+            $userTagIds = Auth::user()->tags()->pluck('tags.id')->toArray();
+
+            $formTypes = $formTypes->filter(function ($ft) use ($userTagIds) {
+                // Form has no tags → available to all users
+                if ($ft->tags->isEmpty()) {
+                    return true;
+                }
+                // Form has tags → user must have at least one matching tag
+                return $ft->tags->pluck('id')->intersect($userTagIds)->isNotEmpty();
+            });
+        }
+
+        $forms = $formTypes->map(function ($ft) use ($routeMap, $routePrefix) {
+            $slug = $routeMap[$ft->form_name] ?? null;
             return [
                 'title' => $ft->form_name,
                 'description' => $ft->description ?? '',
-                'route' => $routeMap[$ft->form_name] ?? '#',
-                'color' => 'amber',
+                'route' => $slug ? $routePrefix . $slug : '#',
+                'frequency' => $ft->usage_frequency ?? 'daily',
             ];
         })->toArray();
+
+        // Group counts for tab badges
+        $frequencyCounts = [
+            'daily' => collect($forms)->where('frequency', 'daily')->count(),
+            'weekly' => collect($forms)->where('frequency', 'weekly')->count(),
+            'monthly' => collect($forms)->where('frequency', 'monthly')->count(),
+        ];
     @endphp
 
     <x-navbar title="Forms" :includeSidebar="Auth::check()" :user="Auth::user()">
-        <div class="min-h-screen bg-linear-to-br from-orange-50 dark:from-gray-900 via-white dark:via-gray-800 to-orange-100 dark:to-gray-900" x-data="{ query: '' }">
-            <!-- Hero Section -->
+        <div class="min-h-screen bg-linear-to-br from-orange-50 dark:from-gray-900 via-white dark:via-gray-800 to-orange-100 dark:to-gray-900"
+             x-data="{ query: '', activeTab: 'daily' }">
             <div class="container mx-auto px-4 py-6">
                 <!-- Search Section -->
                 <div class="max-w-2xl mx-auto mb-6">
@@ -50,13 +76,36 @@
                     </div>
                 </div>
 
+                <!-- Frequency Tabs -->
+                <div class="max-w-6xl mx-auto mb-6">
+                    <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+                        @foreach(['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'] as $key => $label)
+                            <button
+                                @click="activeTab = '{{ $key }}'"
+                                :class="activeTab === '{{ $key }}'
+                                    ? 'border-b-2 border-orange-500 text-orange-600 dark:text-orange-400 font-semibold'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                                class="px-4 py-3 text-sm transition-colors flex items-center gap-2 cursor-pointer"
+                            >
+                                {{ $label }}
+                                <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full"
+                                      :class="activeTab === '{{ $key }}'
+                                          ? 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300'
+                                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'">
+                                    {{ $frequencyCounts[$key] }}
+                                </span>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
                 <!-- Forms Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     @foreach($forms as $form)
                         <a href="{{ $form['route'] }}"
-                           x-show="!query || '{{ strtolower($form['title']) }}'.includes(query.toLowerCase())"
+                           x-show="activeTab === '{{ $form['frequency'] }}' && (!query || '{{ strtolower(addslashes($form['title'])) }}'.includes(query.toLowerCase()))"
+                           x-cloak
                            class="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-xl dark:hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-l-4 border-gray-200 dark:border-gray-700 border-l-amber-500 cursor-pointer transform hover:scale-[1.02] hover:-translate-y-1">
-                            <!-- Card Header -->
                             <div class="px-6 py-4">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-3 mr-2">
@@ -73,18 +122,16 @@
                     @endforeach
                 </div>
 
-                <!-- Empty State (when no forms are available) -->
-                @if(empty($forms))
-                    <div class="text-center py-12">
-                        <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
-                            <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No forms available</h3>
-                        <p class="text-gray-500 dark:text-gray-400">Check back later for available forms.</p>
+                <!-- Empty State (when no forms match) -->
+                <div class="text-center py-12" x-show="!document.querySelectorAll('[x-show]:not([style*=\'display: none\'])').length" x-cloak>
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
+                        <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                     </div>
-                @endif
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No forms available</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Check back later for available forms.</p>
+                </div>
             </div>
         </div>
     </x-navbar>

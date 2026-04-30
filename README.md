@@ -47,6 +47,12 @@ IntelliHatchSystem is a web-based hatchery monitoring and management platform bu
 - PS Number, House Number, and GetSet registries
 - Full CRUD with enable/disable toggle per item
 
+### Tagging System
+
+- User categorization tags (Hatcheryman, Maintenance, QA/QC)
+- Form type tagging for classification and filtering
+- Tag-based user and form type associations
+
 ### AI Chat & Insights
 
 - AI-powered chat with form data context (single or multi-form-type)
@@ -67,9 +73,14 @@ IntelliHatchSystem is a web-based hatchery monitoring and management platform bu
 
 - User and admin management with password reset
 - Activity log viewer with search, filtering, and CSV/PDF export
-- Form type management with descriptions, impact levels, and activation toggle
+- Form type management with descriptions, impact levels, usage frequency, and activation toggle
 - User activity dashboard (superadmin)
 - Danger zone: bulk photo purge, form wipe, log purge (superadmin)
+
+### Backup
+
+- Google Drive integration via `spatie/laravel-backup`
+- Automated backup with configurable Google Drive folder
 
 ### API
 
@@ -119,6 +130,11 @@ WEBHOOK_URL=               # External webhook destination
 SESSION_DRIVER=database
 QUEUE_CONNECTION=database
 CACHE_STORE=database
+GOOGLE_DRIVE_CLIENT_ID=    # Google Drive backup
+GOOGLE_DRIVE_CLIENT_SECRET=
+GOOGLE_DRIVE_REFRESH_TOKEN=
+GOOGLE_DRIVE_FOLDER_ID=
+ADMIN_NOTIFICATION_EMAIL=  # Admin notification recipient
 ```
 
 ### Testing
@@ -126,6 +142,13 @@ CACHE_STORE=database
 ```bash
 php artisan test       # Run PHPUnit tests
 ./vendor/bin/pint      # Fix code style
+```
+
+### Seeding
+
+```bash
+php artisan db:seed                    # Run all seeders (users, form types, tags, machines, hatchery users)
+php artisan db:seed --class=TestSeeder # Generate comprehensive test data for all 15 form types
 ```
 
 ### Docker

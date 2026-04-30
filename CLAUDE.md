@@ -42,7 +42,9 @@ php artisan test     # Run PHPUnit tests
 |-------|---------|
 | `users` | Superadmin, admin, and hatchery users |
 | `form_types` | 15 form type definitions (with description, impact_level, usage_frequency, isActive) |
-| `form_type_tag` | Pivot: form_types ↔ tags (user type tagging) |
+| `tags` | Tag definitions (Hatcheryman, Maintenance, QA/QC) |
+| `tag_user` | Pivot: tags ↔ users (user categorization) |
+| `form_type_tag` | Pivot: form_types ↔ tags (form type tagging) |
 | `forms` | Submitted forms (JSON inputs, photos_purged_at) |
 | `photos` | Uploaded photos (with disk/path) |
 | `incubator-machines` | Incubator machine registry |
@@ -81,6 +83,7 @@ Forms store all inputs as JSON in `forms.form_inputs`. The `Form` model has a `g
 ```
 User           → user_type (0=superadmin, 1=admin, 2=user), is_disabled, username, first_name, last_name
                  hasMany: Form (uploaded_by), AiChat, SystemPrompt (created_by), ActivityLog
+                 belongsToMany: Tag (via tag_user)
 Form           → belongsTo(FormType), belongsTo(User via uploaded_by), form_inputs (JSON), photos_purged_at
 FormType       → hasMany(Form), belongsToMany(Tag via form_type_tag), form_name (unique), description,
                  impact_level, usage_frequency (daily/weekly/monthly), isActive; scope: active()
@@ -168,7 +171,7 @@ app/Livewire/
 
 ## Routes Summary
 
-- `GET /` — Landing page
+- `GET /` — Redirect to `/login`
 - `GET /login`, `POST /login`, `POST /logout` — Auth
 - `GET /forms/{type}` — Public form submission (no auth) — all 15 types
 - `/admin/*` — Admin area (admin or superadmin middleware)
@@ -303,6 +306,12 @@ WEBHOOK_URL=               # External webhook destination
 SESSION_DRIVER=database
 QUEUE_CONNECTION=database
 CACHE_STORE=database
+GOOGLE_DRIVE_CLIENT_ID=    # Google Drive OAuth (for backups)
+GOOGLE_DRIVE_CLIENT_SECRET=
+GOOGLE_DRIVE_REFRESH_TOKEN=
+GOOGLE_DRIVE_FOLDER_ID=
+GOOGLE_DRIVE_FOLDER_PATH=  # e.g. Backup/IHS
+ADMIN_NOTIFICATION_EMAIL=  # Admin notification recipient
 ```
 
 ## Middleware
@@ -354,6 +363,17 @@ Proxy trust level set to `*` in `bootstrap/app.php`.
 - Forms with JSON inputs — always use `form_inputs` JSON column, not separate columns
 - Machine/registry tables use camelCase column names (incubatorName, isActive, creationDate) — follow for all new registries
 - Activity logging — use `audit(module, action, label, subject, meta)` or `ActivityLogger::log()` with standardized action/module names (see Activity Logging section)
+
+## Database Seeders
+
+| Seeder | Purpose |
+|--------|---------|
+| `DatabaseSeeder` | Orchestrator: creates 3 default users (1 superadmin, 2 admins), calls all other seeders |
+| `FormTypeSeeder` | Seeds 11 base form types (remaining 4 added via migrations) |
+| `TagSeeder` | Seeds 3 default tags: Hatcheryman, Maintenance, QA/QC |
+| `MachineSeeder` | Seeds 10 each of Incubator, Hatcher, and Plenum machines |
+| `HatcheryUserSeeder` | Seeds 10 hatchery users (user_type=2) |
+| `TestSeeder` | Comprehensive test data: registries + form submissions for all 15 form types |
 
 ## Migrations (33 total)
 
