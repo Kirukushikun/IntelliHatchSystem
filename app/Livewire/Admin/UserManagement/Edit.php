@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
+use App\Models\Tag;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Traits\SanitizesInput;
@@ -15,6 +16,7 @@ class Edit extends Component
     public $userId = '';
     public $firstName = '';
     public $lastName = '';
+    public $selectedTags = [];
     public $showModal = false;
 
     protected $rules = [
@@ -42,6 +44,7 @@ class Edit extends Component
         if ($user) {
             $this->firstName = $user->first_name;
             $this->lastName = $user->last_name;
+            $this->selectedTags = $user->tags()->pluck('tags.id')->map(fn ($id) => (string) $id)->toArray();
             $this->resetValidation();
             $this->showModal = true;
         }
@@ -50,7 +53,7 @@ class Edit extends Component
     public function closeModal()
     {
         $this->showModal = false;
-        $this->reset(['firstName', 'lastName', 'userId']);
+        $this->reset(['firstName', 'lastName', 'selectedTags', 'userId']);
         $this->resetValidation();
     }
 
@@ -83,6 +86,8 @@ class Edit extends Component
                     'username' => $username,
                 ]);
 
+                $user->tags()->sync($this->selectedTags);
+
                 Cache::forget('management:users:all');
                 Cache::forget('management:users:' . (int) $this->userId);
 
@@ -100,6 +105,8 @@ class Edit extends Component
 
     public function render()
     {
-        return view('livewire.admin.user-management.edit-user-management');
+        return view('livewire.admin.user-management.edit-user-management', [
+            'tags' => Tag::orderBy('name')->get(),
+        ]);
     }
 }

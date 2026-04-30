@@ -30,23 +30,54 @@
     {{-- Header --}}
     <div class="mb-6">
         <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Form Types</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage form type names, descriptions, and production impact tags.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage form type names, descriptions, and classifications.</p>
     </div>
 
-    {{-- Legend --}}
-    <div class="flex flex-wrap gap-2 mb-5">
-        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400"></span> Direct
-        </span>
-        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200">
-            <span class="w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-orange-400"></span> Direct + Indirect
-        </span>
-        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400"></span> Indirect
-        </span>
-        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
-            <span class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-400"></span> Support
-        </span>
+    {{-- Legend: Impact Level --}}
+    <div class="mb-3">
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Impact Level</p>
+        <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400"></span> Direct
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-orange-400"></span> Direct + Indirect
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400"></span> Indirect
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-400"></span> Support
+            </span>
+        </div>
+    </div>
+
+    {{-- Legend: Usage Frequency --}}
+    <div class="mb-3">
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Usage Frequency</p>
+        <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Daily
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-violet-500 dark:bg-violet-400"></span> Weekly
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400"></span> Monthly
+            </span>
+        </div>
+    </div>
+
+    {{-- Legend: User Type Tags --}}
+    <div class="mb-5">
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">User Type Tags</p>
+        <div class="flex flex-wrap gap-2">
+            @foreach($tags as $tag)
+                <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400"></span> {{ $tag->name }}
+                </span>
+            @endforeach
+        </div>
     </div>
 
     {{-- Form Types List --}}
@@ -60,6 +91,13 @@
                         'indirect'        => ['bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200', 'Indirect'],
                         'support'         => ['bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200', 'Support'],
                         default           => [null, null],
+                    };
+
+                    [$freqBadgeClass, $freqBadgeLabel] = match($ft->usage_frequency) {
+                        'daily'   => ['bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200', 'Daily'],
+                        'weekly'  => ['bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-200', 'Weekly'],
+                        'monthly' => ['bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200', 'Monthly'],
+                        default   => [null, null],
                     };
                 @endphp
                 <li class="px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors {{ !$ft->isActive ? 'opacity-60' : '' }}">
@@ -119,6 +157,12 @@
                                 @if($badgeClass)
                                     <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded {{ $badgeClass }}">{{ $badgeLabel }}</span>
                                 @endif
+                                @if($freqBadgeClass)
+                                    <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded {{ $freqBadgeClass }}">{{ $freqBadgeLabel }}</span>
+                                @endif
+                                @foreach($ft->tags as $tag)
+                                    <span class="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-200">{{ $tag->name }}</span>
+                                @endforeach
                                 @if(!$ft->isActive)
                                     <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Inactive</span>
                                 @endif
@@ -146,12 +190,38 @@
                                     </svg>
                                 </button>
 
+                                {{-- User type tag checkboxes --}}
+                                <div class="flex items-center gap-2.5">
+                                    @foreach($tags as $tag)
+                                        <label class="inline-flex items-center cursor-pointer text-xs">
+                                            <input
+                                                type="checkbox"
+                                                wire:click="toggleTag({{ $ft->id }}, {{ $tag->id }})"
+                                                @checked($ft->tags->contains('id', $tag->id))
+                                                class="rounded border-gray-300 dark:border-gray-600 text-cyan-600 focus:ring-cyan-500 dark:bg-gray-700 w-3.5 h-3.5"
+                                            />
+                                            <span class="ml-1 text-gray-600 dark:text-gray-400">{{ $tag->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+
+                                {{-- Usage frequency dropdown --}}
+                                <select
+                                    wire:change="updateUsageFrequency({{ $ft->id }}, $event.target.value)"
+                                    class="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
+                                >
+                                    <option value="" @selected(!$ft->usage_frequency)>— Frequency —</option>
+                                    <option value="daily" @selected($ft->usage_frequency === 'daily')>Daily</option>
+                                    <option value="weekly" @selected($ft->usage_frequency === 'weekly')>Weekly</option>
+                                    <option value="monthly" @selected($ft->usage_frequency === 'monthly')>Monthly</option>
+                                </select>
+
                                 {{-- Impact level dropdown --}}
                                 <select
                                     wire:change="updateImpactLevel({{ $ft->id }}, $event.target.value)"
                                     class="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent dark:scheme-dark"
                                 >
-                                    <option value="" @selected(!$ft->impact_level)>— None —</option>
+                                    <option value="" @selected(!$ft->impact_level)>— Impact —</option>
                                     <option value="direct" @selected($ft->impact_level === 'direct')>Direct</option>
                                     <option value="direct_indirect" @selected($ft->impact_level === 'direct_indirect')>Direct + Indirect</option>
                                     <option value="indirect" @selected($ft->impact_level === 'indirect')>Indirect</option>

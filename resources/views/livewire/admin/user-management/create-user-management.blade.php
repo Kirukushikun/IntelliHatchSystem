@@ -30,7 +30,7 @@
                     </div>
 
                     <!-- Last Name -->
-                    <div class="mb-6">
+                    <div class="mb-4">
                         <x-text-input
                             label="Last Name"
                             id="lastName"
@@ -39,6 +39,24 @@
                             :wireModel="'lastName'"
                             placeholder="Enter last name"
                         />
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                        <div class="flex flex-wrap gap-4">
+                            @foreach ($tags as $tag)
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        wire:model="selectedTags"
+                                        value="{{ $tag->id }}"
+                                        class="rounded border-gray-300 dark:border-gray-600 text-orange-600 focus:ring-orange-500 dark:bg-gray-700"
+                                    />
+                                    <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ $tag->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
 
                     <!-- Actions -->

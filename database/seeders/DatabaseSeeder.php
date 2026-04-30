@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(FormTypeSeeder::class);
+        $this->call(TagSeeder::class);
         $this->call(MachineSeeder::class);
         $this->call(HatcheryUserSeeder::class);
     }

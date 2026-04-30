@@ -41,7 +41,8 @@ php artisan test     # Run PHPUnit tests
 | Table | Purpose |
 |-------|---------|
 | `users` | Superadmin, admin, and hatchery users |
-| `form_types` | 15 form type definitions (with description, impact_level, isActive) |
+| `form_types` | 15 form type definitions (with description, impact_level, usage_frequency, isActive) |
+| `form_type_tag` | Pivot: form_types ↔ tags (user type tagging) |
 | `forms` | Submitted forms (JSON inputs, photos_purged_at) |
 | `photos` | Uploaded photos (with disk/path) |
 | `incubator-machines` | Incubator machine registry |
@@ -81,7 +82,9 @@ Forms store all inputs as JSON in `forms.form_inputs`. The `Form` model has a `g
 User           → user_type (0=superadmin, 1=admin, 2=user), is_disabled, username, first_name, last_name
                  hasMany: Form (uploaded_by), AiChat, SystemPrompt (created_by), ActivityLog
 Form           → belongsTo(FormType), belongsTo(User via uploaded_by), form_inputs (JSON), photos_purged_at
-FormType       → hasMany(Form), form_name (unique), description, impact_level, isActive; scope: active()
+FormType       → hasMany(Form), belongsToMany(Tag via form_type_tag), form_name (unique), description,
+                 impact_level, usage_frequency (daily/weekly/monthly), isActive; scope: active()
+Tag            → belongsToMany(User via tag_user), belongsToMany(FormType via form_type_tag), name (unique)
 Incubator      → table: incubator-machines, incubatorName, isActive, creationDate
 Hatcher        → table: hatcher-machines, hatcherName, isActive, creationDate
 Plenum         → table: plenum-machines, plenumName, isActive, creationDate
@@ -352,7 +355,7 @@ Proxy trust level set to `*` in `bootstrap/app.php`.
 - Machine/registry tables use camelCase column names (incubatorName, isActive, creationDate) — follow for all new registries
 - Activity logging — use `audit(module, action, label, subject, meta)` or `ActivityLogger::log()` with standardized action/module names (see Activity Logging section)
 
-## Migrations (31 total)
+## Migrations (33 total)
 
 ```
 0001_01_01_000000  create_users_table
@@ -386,6 +389,8 @@ Proxy trust level set to `*` in `bootstrap/app.php`.
 2026_04_24_000000  add_is_active_to_form_types_table
 2026_04_24_213019  add_photos_purged_at_to_forms_table
 2026_04_25_000000  add_index_to_forms_table
+2026_04_30_000000  create_tags_table
+2026_04_30_100000  add_usage_frequency_and_form_type_tag
 ```
 
 ## Testing

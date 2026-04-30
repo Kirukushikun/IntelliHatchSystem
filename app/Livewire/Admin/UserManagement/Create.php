@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
+use App\Models\Tag;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Traits\SanitizesInput;
@@ -14,6 +15,7 @@ class Create extends Component
     
     public $firstName = '';
     public $lastName = '';
+    public $selectedTags = [];
     public $showModal = false;
 
     protected $rules = [
@@ -34,7 +36,7 @@ class Create extends Component
 
     public function openModal()
     {
-        $this->reset(['firstName', 'lastName']);
+        $this->reset(['firstName', 'lastName', 'selectedTags']);
         $this->resetValidation();
         $this->showModal = true;
     }
@@ -42,7 +44,7 @@ class Create extends Component
     public function closeModal()
     {
         $this->showModal = false;
-        $this->reset(['firstName', 'lastName']);
+        $this->reset(['firstName', 'lastName', 'selectedTags']);
         $this->resetValidation();
     }
 
@@ -66,7 +68,7 @@ class Create extends Component
                 $counter++;
             }
             
-            User::create([
+            $user = User::create([
                 'first_name' => $this->firstName,
                 'last_name' => $this->lastName,
                 'user_type' => 2, // hatchery-user
@@ -75,14 +77,18 @@ class Create extends Component
                 'password' => bcrypt('brookside25'), // Default password
             ]);
 
+            if (!empty($this->selectedTags)) {
+                $user->tags()->sync($this->selectedTags);
+            }
+
             Cache::forget('management:users:all');
 
             $fullName = $this->firstName . ' ' . $this->lastName; // Store full name before closing modal
-            ActivityLogger::log('create', "Created user {$fullName}", module: 'User', subjectId: User::where('username', $username)->value('id'));
+            ActivityLogger::log('create', "Created user {$fullName}", module: 'User', subjectId: $user->id);
             $this->closeModal();
             $this->dispatch('showToast', message: "{$fullName} has been created successfully!", type: 'success');
             $this->dispatch('refreshUsers'); // Refresh the user list
-            $this->reset(['firstName', 'lastName']);
+            $this->reset(['firstName', 'lastName', 'selectedTags']);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Validation errors will be displayed automatically
             // Just re-throw to let Livewire handle validation display
@@ -94,6 +100,8 @@ class Create extends Component
 
     public function render()
     {
-        return view('livewire.admin.user-management.create-user-management');
+        return view('livewire.admin.user-management.create-user-management', [
+            'tags' => Tag::orderBy('name')->get(),
+        ]);
     }
 }

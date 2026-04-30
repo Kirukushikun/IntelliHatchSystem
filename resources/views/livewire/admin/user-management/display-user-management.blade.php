@@ -26,7 +26,7 @@
                 @if ($showFilterDropdown)
                     <div class="absolute top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-700 z-50 left-0 right-0 md:left-auto md:right-0 md:w-80">
                         <div class="p-4">
-                            <div class="grid grid-cols-2 gap-1">
+                            <div class="grid grid-cols-2 gap-4">
                                 <!-- Status Filter Column -->
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Status</h3>
@@ -45,38 +45,55 @@
                                         </label>
                                     </div>
                                 </div>
-                                
-                                <!-- Date Filter Column -->
+
+                                <!-- Tag Filter Column -->
                                 <div>
-                                    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Date Range</h3>
+                                    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Tag</h3>
                                     <div class="space-y-2">
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
-                                            <input 
-                                                type="date" 
-                                                wire:model="dateFrom"
-                                                class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                                placeholder="YYYY-MM-DD"
-                                                max="{{ $dateTo ?: now()->format('Y-m-d') }}"
-                                                wire:target="dateFrom"
-                                                wire:loading.attr="disabled"
-                                                x-on:change="$wire.set('dateTo', ($wire.get('dateTo') && $el.value > $wire.get('dateTo')) ? '' : $wire.get('dateTo'))"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
-                                            <input 
-                                                type="date" 
-                                                wire:model="dateTo"
-                                                class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                                placeholder="YYYY-MM-DD"
-                                                max="{{ now()->format('Y-m-d') }}"
-                                                min="{{ $dateFrom ?: '' }}"
-                                                wire:target="dateTo"
-                                                wire:loading.attr="disabled"
-                                                x-on:change="($wire.get('dateFrom') && $el.value < $wire.get('dateFrom')) ? $wire.set('dateTo', '') : null"
-                                            />
-                                        </div>
+                                        <label class="flex items-center">
+                                            <input type="radio" wire:model="tagFilter" value="" class="mr-2">
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">All Tags</span>
+                                        </label>
+                                        @foreach ($tags as $tag)
+                                            <label class="flex items-center">
+                                                <input type="radio" wire:model="tagFilter" value="{{ $tag->id }}" class="mr-2">
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $tag->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Date Filter Row -->
+                            <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Date Range</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
+                                        <input
+                                            type="date"
+                                            wire:model="dateFrom"
+                                            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                            placeholder="YYYY-MM-DD"
+                                            max="{{ $dateTo ?: now()->format('Y-m-d') }}"
+                                            wire:target="dateFrom"
+                                            wire:loading.attr="disabled"
+                                            x-on:change="$wire.set('dateTo', ($wire.get('dateTo') && $el.value > $wire.get('dateTo')) ? '' : $wire.get('dateTo'))"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
+                                        <input
+                                            type="date"
+                                            wire:model="dateTo"
+                                            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                            placeholder="YYYY-MM-DD"
+                                            max="{{ now()->format('Y-m-d') }}"
+                                            min="{{ $dateFrom ?: '' }}"
+                                            wire:target="dateTo"
+                                            wire:loading.attr="disabled"
+                                            x-on:change="($wire.get('dateFrom') && $el.value < $wire.get('dateFrom')) ? $wire.set('dateTo', '') : null"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -154,6 +171,11 @@
                                 @endif
                             </p>
                         </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">
+                                Tags
+                            </p>
+                        </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('created_at')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
                                 Created Date
@@ -191,6 +213,17 @@
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $user->username }}</p>
+                            </td>
+                            <td class="p-3 md:p-4 py-4 md:py-5">
+                                <div class="flex flex-wrap gap-1">
+                                    @forelse ($user->tags as $tag)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                            {{ $tag->name }}
+                                        </span>
+                                    @empty
+                                        <span class="text-xs text-gray-400 dark:text-gray-500">-</span>
+                                    @endforelse
+                                </div>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $user->created_at ? $user->created_at->format('d M, Y') : 'N/A' }}</p>
@@ -237,7 +270,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="7" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
@@ -259,6 +292,15 @@
                         <div class="space-y-1">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $user->first_name }} {{ $user->last_name }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->username }}</p>
+                            @if ($user->tags->isNotEmpty())
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach ($user->tags as $tag)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                            {{ $tag->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->created_at ? $user->created_at->format('d M, Y') : 'N/A' }}</p>
                         </div>
                         <div class="text-center">

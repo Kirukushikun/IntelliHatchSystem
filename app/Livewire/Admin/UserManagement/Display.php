@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\UserManagement;
 
 use Livewire\Component;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -14,6 +15,7 @@ class Display extends Component
     public $sortDirection = 'asc';
     public $page = 1;
     public $statusFilter = 'all'; // all, enabled, disabled
+    public $tagFilter = ''; // filter by tag id
     public $dateFrom = ''; // Custom date range from
     public $dateTo = ''; // Custom date range to
     public $showFilterDropdown = false;
@@ -22,6 +24,7 @@ class Display extends Component
         'search' => ['except' => ''],
         'page' => ['except' => 1],
         'statusFilter' => ['except' => 'all'],
+        'tagFilter' => ['except' => ''],
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
         'perPage' => ['except' => 10],
@@ -36,6 +39,7 @@ class Display extends Component
         $this->search = request()->get('search', '');
         $this->page = request()->get('page', 1);
         $this->statusFilter = request()->get('statusFilter', 'all');
+        $this->tagFilter = request()->get('tagFilter', '');
         $this->dateFrom = request()->get('dateFrom', '');
         $this->dateTo = request()->get('dateTo', '');
     }
@@ -46,6 +50,11 @@ class Display extends Component
     }
 
     public function updatingStatusFilter()
+    {
+        $this->page = 1;
+    }
+
+    public function updatingTagFilter()
     {
         $this->page = 1;
     }
@@ -81,6 +90,7 @@ class Display extends Component
     public function resetFilters()
     {
         $this->statusFilter = 'all';
+        $this->tagFilter = '';
         $this->dateFrom = '';
         $this->dateTo = '';
         $this->page = 1;
@@ -175,6 +185,7 @@ class Display extends Component
     protected function baseQuery(): Builder
     {
         $users = User::query()
+            ->with('tags')
             ->where('user_type', 2)
             ->where(function ($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%')
@@ -185,6 +196,12 @@ class Display extends Component
             $users->where('is_disabled', true);
         } elseif ($this->statusFilter === 'enabled') {
             $users->where('is_disabled', false);
+        }
+
+        if ($this->tagFilter) {
+            $users->whereHas('tags', function ($query) {
+                $query->where('tags.id', $this->tagFilter);
+            });
         }
 
         if ($this->dateFrom || $this->dateTo) {
@@ -202,6 +219,9 @@ class Display extends Component
 
     public function render()
     {
-        return view('livewire.admin.user-management.display-user-management', $this->getPaginationData());
+        return view('livewire.admin.user-management.display-user-management', array_merge(
+            $this->getPaginationData(),
+            ['tags' => Tag::orderBy('name')->get()]
+        ));
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\FormTypes;
 
 use App\Models\FormType;
+use App\Models\Tag;
 use App\Services\ActivityLogger;
 use Livewire\Component;
 
@@ -83,6 +84,55 @@ class Display extends Component
         session()->flash('success', "Tag updated for \"{$formType->form_name}\".");
     }
 
+    public function updateUsageFrequency(int $id, ?string $frequency): void
+    {
+        $formType = FormType::findOrFail($id);
+
+        $normalizedFrequency = in_array($frequency, ['daily', 'weekly', 'monthly'])
+            ? $frequency
+            : null;
+
+        $formType->update(['usage_frequency' => $normalizedFrequency]);
+
+        ActivityLogger::log(
+            action: 'update',
+            description: "Usage frequency for \"{$formType->form_name}\" set to " . ($normalizedFrequency ?? 'none'),
+            module: 'FormType',
+            subjectId: $formType->id,
+            properties: ['usage_frequency' => $normalizedFrequency]
+        );
+
+        session()->flash('success', "Usage frequency updated for \"{$formType->form_name}\".");
+    }
+
+    public function toggleTag(int $formTypeId, int $tagId): void
+    {
+        $formType = FormType::findOrFail($formTypeId);
+        $tag = Tag::findOrFail($tagId);
+
+        if ($formType->tags()->where('tags.id', $tagId)->exists()) {
+            $formType->tags()->detach($tagId);
+            $action = 'removed';
+        } else {
+            $formType->tags()->attach($tagId);
+            $action = 'added';
+        }
+
+        ActivityLogger::log(
+            action: 'update',
+            description: "Tag \"{$tag->name}\" {$action} for \"{$formType->form_name}\"",
+            module: 'FormType',
+            subjectId: $formType->id,
+            properties: [
+                'tag_id' => $tagId,
+                'tag_name' => $tag->name,
+                'action' => $action,
+            ]
+        );
+
+        session()->flash('success', "Tag \"{$tag->name}\" {$action} for \"{$formType->form_name}\".");
+    }
+
     public function toggleStatus(int $id): void
     {
         $formType = FormType::findOrFail($id);
@@ -107,7 +157,8 @@ class Display extends Component
     public function render()
     {
         return view('livewire.admin.form-types.display', [
-            'formTypes' => FormType::orderBy('form_name')->get(),
+            'formTypes' => FormType::with('tags')->orderBy('form_name')->get(),
+            'tags' => Tag::orderBy('name')->get(),
         ]);
     }
 }

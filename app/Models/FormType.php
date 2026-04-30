@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormType extends Model
@@ -14,6 +15,7 @@ class FormType extends Model
         'form_name',
         'description',
         'impact_level',
+        'usage_frequency',
         'isActive',
     ];
 
@@ -31,5 +33,10 @@ class FormType extends Model
     public function forms(): HasMany
     {
         return $this->hasMany(Form::class);
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class);
     }
 }
