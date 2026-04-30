@@ -7,7 +7,8 @@ class HatcherMachineAccuracyConfig
     public static function getRules(): array
     {
         return [
-            'form.hatchery_man' => 'required|integer|exists:users,id',
+            'form.hatchery_man' => 'required|array|min:1',
+            'form.hatchery_man.*' => 'integer|exists:users,id',
             'form.cellphone_number' => ['required', 'string', 'regex:/^(09\d{9}|\+639\d{9})$/'],
             'form.date_submitted' => 'required|date',
             'form.time_of_reading' => ['required', 'date_format:H:i'],
@@ -32,8 +33,8 @@ class HatcherMachineAccuracyConfig
             'form.time_of_reading.date_format' => 'Please select a valid time.',
             'form.hatcher.required' => 'Please select a hatcher.',
             'form.hatcher.exists' => 'Please select a valid hatcher.',
-            'form.hatchery_man.required' => 'Please select a hatchery man.',
-            'form.hatchery_man.exists' => 'Please select a valid hatchery man.',
+            'form.hatchery_man.required' => 'Please select at least one hatchery man.',
+            'form.hatchery_man.min' => 'Please select at least one hatchery man.',
             'form.set_point_temp.numeric' => 'Set Point Temperature must be a number.',
             'form.display_temp.numeric' => 'Display Temp must be a number.',
             'form.calibrator.numeric' => 'Calibrator must be a number.',
@@ -56,7 +57,7 @@ class HatcherMachineAccuracyConfig
     public static function defaultFormState(): array
     {
         return [
-            'hatchery_man' => '',
+            'hatchery_man' => [],
             'cellphone_number' => '',
             'date_submitted' => '',
             'time_of_reading' => '',

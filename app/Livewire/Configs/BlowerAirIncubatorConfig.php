@@ -8,7 +8,8 @@ class BlowerAirIncubatorConfig
     {
         return [
             'form.incubator' => 'required|integer|exists:incubator-machines,id',
-            'form.hatchery_man' => 'required|integer|exists:users,id',
+            'form.hatchery_man' => 'required|array|min:1',
+            'form.hatchery_man.*' => 'integer|exists:users,id',
             'form.cfm_fan_reading' => 'required|string',
             'form.cfm_fan_action_taken' => 'required|string',
             'form.cfm_fan_photos.*' => 'image|max:1024',
@@ -25,8 +26,8 @@ class BlowerAirIncubatorConfig
             'image' => 'Please upload a valid image.',
             'form.incubator.required' => 'Please select an incubator.',
             'form.incubator.exists' => 'Please select a valid incubator.',
-            'form.hatchery_man.required' => 'Please select a hatchery man.',
-            'form.hatchery_man.exists' => 'Please select a valid hatchery man.',
+            'form.hatchery_man.required' => 'Please select at least one hatchery man.',
+            'form.hatchery_man.min' => 'Please select at least one hatchery man.',
             'form.cfm_fan_reading.required' => 'Please enter CFM fan reading.',
             'form.cfm_fan_action_taken.required' => 'Please enter action taken.',
             'form.cfm_fan_photos.required' => 'Please upload photos.',
@@ -44,7 +45,7 @@ class BlowerAirIncubatorConfig
     {
         return [
             'incubator' => '',
-            'hatchery_man' => '',
+            'hatchery_man' => [],
             'cfm_fan_reading' => '',
             'cfm_fan_action_taken' => '',
             'cfm_fan_photos' => []

@@ -7,7 +7,8 @@ class PasgarScoreConfig
     public static function getRules(): array
     {
         return [
-            'form.personnel_name'          => 'required|integer|exists:users,id',
+            'form.personnel_name'          => 'required|array|min:1',
+            'form.personnel_name.*'        => 'integer|exists:users,id',
             'form.hatch_date'              => 'required|date',
             'form.time_started'            => 'required|string',
             'form.ps_number'               => 'required|integer|exists:ps-numbers,id',
@@ -42,7 +43,8 @@ class PasgarScoreConfig
             'date'     => 'Please enter a valid date.',
             'exists'   => 'Please select a valid option.',
             'max'      => 'This field is too long.',
-            'form.personnel_name.required'           => 'Please enter the name of the personnel who performed PASGAR scoring.',
+            'form.personnel_name.required'           => 'Please select at least one personnel who performed PASGAR scoring.',
+            'form.personnel_name.min'                => 'Please select at least one personnel who performed PASGAR scoring.',
             'form.hatch_date.required'               => 'Please enter the hatch date.',
             'form.time_started.required'             => 'Please enter the time started.',
             'form.ps_number.required'                => 'Please select a PS number.',
@@ -74,7 +76,7 @@ class PasgarScoreConfig
     public static function defaultFormState(): array
     {
         return [
-            'personnel_name'           => '',
+            'personnel_name'           => [],
             'hatch_date'               => '',
             'time_started'             => '',
             'ps_number'                => '',

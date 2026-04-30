@@ -14,11 +14,15 @@
                 <x-title>PLENUM TEMPERATURE AND HUMIDITY MONITORING</x-title>
 
                 <div data-field="hatcheryman">
-                    <x-dropdown label="Hatcheryman" name="hatcheryman" error-key="form.hatcheryman" placeholder="Select hatcheryman" wire:model.live="form.hatcheryman" required>
-                        @foreach($hatcheryMen as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
+                    <x-personnel-select
+                        label="Hatcheryman"
+                        name="hatcheryman"
+                        error-key="form.hatcheryman"
+                        :personnel="$hatcheryMen"
+                        :logged-in-user-id="$loggedInUserId"
+                        wire:model.live="form.hatcheryman"
+                        required
+                    />
                 </div>
 
                 <div data-field="shift">

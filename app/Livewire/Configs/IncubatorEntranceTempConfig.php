@@ -7,7 +7,8 @@ class IncubatorEntranceTempConfig
     public static function getRules(): array
     {
         return [
-            'form.hatchery_man'       => 'required|integer|exists:users,id',
+            'form.hatchery_man'       => 'required|array|min:1',
+            'form.hatchery_man.*'     => 'integer|exists:users,id',
             'form.shift'              => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
             'form.time_of_check'      => ['required', 'date_format:H:i'],
             'form.incubator'          => 'required|integer|exists:incubator-machines,id',
@@ -33,8 +34,8 @@ class IncubatorEntranceTempConfig
             'integer'                               => 'Please enter a valid number.',
             'max'                                   => 'File size must not exceed 1MB.',
             'image'                                 => 'Please upload a valid image.',
-            'form.hatchery_man.required'            => 'Please select a hatcheryman.',
-            'form.hatchery_man.exists'              => 'Please select a valid hatcheryman.',
+            'form.hatchery_man.required'            => 'Please select at least one hatcheryman.',
+            'form.hatchery_man.min'                 => 'Please select at least one hatcheryman.',
             'form.shift.required'                   => 'Please select a shift.',
             'form.time_of_check.required'           => 'Please enter the time of checking.',
             'form.time_of_check.date_format'        => 'Please select a valid time.',
@@ -58,7 +59,7 @@ class IncubatorEntranceTempConfig
     public static function defaultFormState(): array
     {
         return [
-            'hatchery_man'       => '',
+            'hatchery_man'       => [],
             'shift'              => '',
             'time_of_check'      => '',
             'incubator'          => '',

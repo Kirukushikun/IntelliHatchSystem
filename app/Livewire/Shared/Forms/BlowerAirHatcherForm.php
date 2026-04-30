@@ -82,16 +82,9 @@ class BlowerAirHatcherForm extends FormNavigation
             ->toArray();
         
         // Load hatchery men
-        $this->hatcheryMen = User::where('user_type', 2)
-            ->where('is_disabled', false)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get()
-            ->mapWithKeys(function ($user) {
-                return [$user->id => $user->first_name . ' ' . $user->last_name];
-            })
-            ->toArray();
-        
+        $this->hatcheryMen = $this->loadPersonnelByTags();
+        $this->form['hatchery_man'] = $this->initPersonnelField();
+
         // Update completed hatchers for today
         $this->updateCompletedHatchers();
     }
@@ -171,15 +164,11 @@ class BlowerAirHatcherForm extends FormNavigation
                 throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
-            // Get the original form values before they're removed from JSON
-            $hatcheryMan = $this->form['hatchery_man'] ?? null;
-            $hatcher = $this->form['hatcher'] ?? null;
-
             $formId = (int) DB::table('forms')->insertGetId([
                 'form_type_id' => $formTypeId,
                 'form_inputs' => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by' => $this->uploadedBy ?: $hatcheryMan,
+                'uploaded_by' => Auth::id(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -199,10 +188,10 @@ class BlowerAirHatcherForm extends FormNavigation
     {
         $inputs = $this->form;
 
-        // Remove hatchery_man from JSON as it's stored in dedicated column
+        // Resolve hatchery_man IDs to names for storage
         // Remove hatcher from JSON since it's now in machine_info
         // Photos should stay in form_inputs JSON
-        unset($inputs['hatchery_man']);
+        $inputs['hatchery_man'] = $this->resolvePersonnelNames($this->form['hatchery_man'] ?? [], $this->hatcheryMen);
         unset($inputs['hatcher']);
 
         // Add machine information to JSON for easier extraction

@@ -7,7 +7,8 @@ class IncubatorMachineAccuracyConfig
     public static function getRules(): array
     {
         return [
-            'form.hatchery_man'    => 'required|integer|exists:users,id',
+            'form.hatchery_man'    => 'required|array|min:1',
+            'form.hatchery_man.*'  => 'integer|exists:users,id',
             'form.mobile_number'   => ['required', 'string', 'regex:/^(09\d{9}|\+639\d{9})$/'],
             'form.date_submitted'  => 'required|date',
             'form.time_of_reading' => ['required', 'date_format:H:i'],
@@ -30,8 +31,8 @@ class IncubatorMachineAccuracyConfig
             'required'                         => 'Please fill in this field.',
             'form.mobile_number.regex'         => 'Please enter a valid Philippine mobile number (09XXXXXXXXX or +639XXXXXXXXX).',
             'form.time_of_reading.date_format' => 'Please select a valid time.',
-            'form.hatchery_man.required'       => 'Please select a hatchery man.',
-            'form.hatchery_man.exists'         => 'Please select a valid hatchery man.',
+            'form.hatchery_man.required'       => 'Please select at least one hatchery man.',
+            'form.hatchery_man.min'            => 'Please select at least one hatchery man.',
             'form.incubator.required'          => 'Please select an incubator.',
             'form.incubator.exists'            => 'Please select a valid incubator.',
             'form.set_point_temp.numeric'      => 'Set Point Temperature must be a number.',
@@ -56,7 +57,7 @@ class IncubatorMachineAccuracyConfig
     public static function defaultFormState(): array
     {
         return [
-            'hatchery_man'    => '',
+            'hatchery_man'    => [],
             'mobile_number'   => '',
             'date_submitted'  => '',
             'time_of_reading' => '',

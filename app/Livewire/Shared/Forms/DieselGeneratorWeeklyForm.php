@@ -36,12 +36,8 @@ class DieselGeneratorWeeklyForm extends FormNavigation
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
 
-        $this->personnelList = User::where('is_disabled', false)
-            ->whereIn('user_type', [2])
-            ->orderBy('first_name')
-            ->get()
-            ->mapWithKeys(fn ($u) => [$u->id => $u->full_name])
-            ->toArray();
+        $this->personnelList = $this->loadPersonnelByTags();
+        $this->form['technician_id'] = $this->initPersonnelField();
 
         $this->genSetList = GetSet::orderBy('getSetName')
             ->get()
@@ -186,7 +182,7 @@ class DieselGeneratorWeeklyForm extends FormNavigation
                 'form_type_id'   => $formTypeId,
                 'form_inputs'    => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by'    => null,
+                'uploaded_by'    => \Illuminate\Support\Facades\Auth::id(),
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
@@ -212,9 +208,8 @@ class DieselGeneratorWeeklyForm extends FormNavigation
             ];
         }
 
-        if (!empty($inputs['technician_id']) && isset($this->personnelList[$inputs['technician_id']])) {
-            $inputs['maintenance_personnel_name'] = $this->personnelList[$inputs['technician_id']];
-        }
+        $inputs['technician_id'] = $this->resolvePersonnelNames($this->form['technician_id'] ?? [], $this->personnelList);
+        $inputs['maintenance_personnel_name'] = implode(', ', $inputs['technician_id']);
 
         return $inputs;
     }

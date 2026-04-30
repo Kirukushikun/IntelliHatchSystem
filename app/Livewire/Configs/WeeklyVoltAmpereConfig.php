@@ -7,7 +7,8 @@ class WeeklyVoltAmpereConfig
     public static function getRules(): array
     {
         return [
-            'form.maintenance_personnel'      => 'required|integer|exists:users,id',
+            'form.maintenance_personnel'      => 'required|array|min:1',
+            'form.maintenance_personnel.*'    => 'integer|exists:users,id',
             'form.date'                        => 'required|date',
             'form.time_started'                => 'required|string',
             'form.voltage_readings'            => 'required|string|max:1000',
@@ -31,7 +32,8 @@ class WeeklyVoltAmpereConfig
             'image'    => 'Please upload a valid image file.',
             'form.voltage_ampere_photos.*.max'   => 'Each photo must not exceed 1MB.',
             'form.problem_photos.*.max'          => 'Each photo must not exceed 1MB.',
-            'form.maintenance_personnel.required' => 'Please select the maintenance personnel.',
+            'form.maintenance_personnel.required' => 'Please select at least one maintenance personnel.',
+            'form.maintenance_personnel.min'      => 'Please select at least one maintenance personnel.',
             'form.date.required'                  => 'Please enter the date.',
             'form.time_started.required'          => 'Please enter the time started.',
             'form.voltage_readings.required'      => 'Please enter the voltage readings.',
@@ -49,7 +51,7 @@ class WeeklyVoltAmpereConfig
     public static function defaultFormState(): array
     {
         return [
-            'maintenance_personnel'    => '',
+            'maintenance_personnel'    => [],
             'date'                     => '',
             'time_started'             => '',
             'voltage_readings'         => '',

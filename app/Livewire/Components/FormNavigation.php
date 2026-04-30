@@ -3,6 +3,7 @@
 namespace App\Livewire\Components;
 
 use App\Models\FormType;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -11,6 +12,10 @@ use Livewire\WithFileUploads;
 abstract class FormNavigation extends Component
 {
     public array $schedule = [];
+
+    public array $formTypeTagIds = [];
+
+    public ?int $loggedInUserId = null;
 
     public int $currentStep = 1;
 
@@ -47,6 +52,12 @@ abstract class FormNavigation extends Component
                 abort(404);
             }
 
+            $this->formTypeTagIds = $ft->tags->pluck('id')->toArray();
+
+            if (Auth::check() && (int) Auth::user()->user_type === 2) {
+                $this->loggedInUserId = Auth::id();
+            }
+
             // Tag-based access control for hatchery users (user_type 2)
             if (Auth::check() && (int) Auth::user()->user_type === 2 && $ft->tags->isNotEmpty()) {
                 $userTagIds = Auth::user()->tags()->pluck('tags.id');
@@ -55,6 +66,35 @@ abstract class FormNavigation extends Component
                 }
             }
         }
+    }
+
+    protected function loadPersonnelByTags(): array
+    {
+        $query = User::where('user_type', 2)
+            ->where('is_disabled', false);
+
+        if (! empty($this->formTypeTagIds)) {
+            $query->whereHas('tags', fn ($q) => $q->whereIn('tags.id', $this->formTypeTagIds));
+        }
+
+        return $query->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get()
+            ->mapWithKeys(fn ($u) => [$u->id => $u->full_name])
+            ->toArray();
+    }
+
+    protected function resolvePersonnelNames(array $ids, array $personnelList): array
+    {
+        return collect($ids)
+            ->map(fn ($id) => $personnelList[(int) $id] ?? $personnelList[$id] ?? $id)
+            ->values()
+            ->toArray();
+    }
+
+    protected function initPersonnelField(): array
+    {
+        return $this->loggedInUserId ? [(string) $this->loggedInUserId] : [];
     }
 
     public function updatedFormShift($value): void

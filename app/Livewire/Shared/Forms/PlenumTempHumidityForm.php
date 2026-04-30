@@ -58,13 +58,8 @@ class PlenumTempHumidityForm extends FormNavigation
             ->mapWithKeys(fn ($m) => [$m->id => $m->hatcherName])
             ->toArray();
 
-        $this->hatcheryMen = User::where('user_type', 2)
-            ->where('is_disabled', false)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get()
-            ->mapWithKeys(fn ($u) => [$u->id => $u->first_name . ' ' . $u->last_name])
-            ->toArray();
+        $this->hatcheryMen = $this->loadPersonnelByTags();
+        $this->form['hatcheryman'] = $this->initPersonnelField();
     }
 
     public function updated($name, $value): void
@@ -203,13 +198,11 @@ class PlenumTempHumidityForm extends FormNavigation
                 throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
-            $hatcheryman = $this->form['hatcheryman'] ?? null;
-
             $formId = (int) DB::table('forms')->insertGetId([
                 'form_type_id'   => $formTypeId,
                 'form_inputs'    => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by'    => $this->uploadedBy ?: $hatcheryman,
+                'uploaded_by'    => Auth::id(),
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
@@ -226,7 +219,7 @@ class PlenumTempHumidityForm extends FormNavigation
     protected function formInputsForStorageWithoutPhotos(): array
     {
         $inputs = $this->form;
-        unset($inputs['hatcheryman']);
+        $inputs['hatcheryman'] = $this->resolvePersonnelNames($this->form['hatcheryman'] ?? [], $this->hatcheryMen);
 
         $incubatorReadings = [];
         foreach ($this->form['incubator_readings'] as $reading) {

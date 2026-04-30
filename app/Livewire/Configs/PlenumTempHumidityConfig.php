@@ -7,7 +7,8 @@ class PlenumTempHumidityConfig
     public static function getRules(): array
     {
         return [
-            'form.hatcheryman'                                  => 'required|integer|exists:users,id',
+            'form.hatcheryman'                                  => 'required|array|min:1',
+            'form.hatcheryman.*'                                => 'integer|exists:users,id',
             'form.date'                                         => 'required|date',
             'form.shift'                                        => 'required|string|in:1st Shift,2nd Shift,3rd Shift',
             'form.time'                                         => 'required|string|in:6:00 AM,11:00 AM,4:00 PM,9:00 PM,2:00 AM',
@@ -45,8 +46,8 @@ class PlenumTempHumidityConfig
             'in'                                                                => 'Please select a valid option.',
             'max'                                                               => 'File size must not exceed 1MB.',
             'image'                                                             => 'Please upload a valid image.',
-            'form.hatcheryman.required'                                        => 'Please select a hatcheryman.',
-            'form.hatcheryman.exists'                                          => 'Please select a valid hatcheryman.',
+            'form.hatcheryman.required'                                        => 'Please select at least one hatcheryman.',
+            'form.hatcheryman.min'                                             => 'Please select at least one hatcheryman.',
             'form.date.required'                                                => 'Please select a date.',
             'form.shift.required'                                               => 'Please select a shift.',
             'form.time.required'                                                => 'Please select a time.',
@@ -86,7 +87,7 @@ class PlenumTempHumidityConfig
     public static function defaultFormState(): array
     {
         return [
-            'hatcheryman'  => '',
+            'hatcheryman'  => [],
             'date'         => '',
             'shift'        => '',
             'time'         => '',

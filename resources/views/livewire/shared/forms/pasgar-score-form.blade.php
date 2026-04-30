@@ -14,18 +14,15 @@
                 <x-title>PASGAR SCORE</x-title>
 
                 <div data-field="personnel_name">
-                    <x-dropdown
+                    <x-personnel-select
                         label="Personnel Performed PASGAR Scoring"
                         name="personnel_name"
                         error-key="form.personnel_name"
-                        placeholder="Select personnel"
+                        :personnel="$users"
+                        :logged-in-user-id="$loggedInUserId"
                         wire:model.live="form.personnel_name"
                         required
-                    >
-                        @foreach($users as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
+                    />
                 </div>
 
                 <div data-field="hatch_date" x-data>

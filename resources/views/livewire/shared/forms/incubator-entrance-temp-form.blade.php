@@ -14,19 +14,15 @@
                 <x-title subtitle="Every 24 hours after setting">INCUBATOR ENTRANCE TEMPERATURE MONITORING</x-title>
 
                 <div data-field="hatchery_man">
-                    <x-dropdown
+                    <x-personnel-select
                         label="Hatcheryman"
                         name="hatchery_man"
                         error-key="form.hatchery_man"
-                        placeholder="Select your name"
+                        :personnel="$hatcheryMen"
+                        :logged-in-user-id="$loggedInUserId"
                         wire:model.live="form.hatchery_man"
                         required
-                        subtext="Select the hatcheryman performing this monitoring check"
-                    >
-                        @foreach($hatcheryMen as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
+                    />
                 </div>
 
                 <div data-field="shift">

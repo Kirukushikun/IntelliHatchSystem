@@ -13,11 +13,15 @@
                 <x-title>HATCHERY SULLAIR AIR COMPRESSOR WEEKLY PMS CHECKLIST</x-title>
 
                 <div data-field="hatchery_man">
-                    <x-dropdown label="Maintenance Personnel" name="hatchery_man" error-key="form.hatchery_man" placeholder="Select maintenance personnel" wire:model.live="form.hatchery_man" required>
-                        @foreach($hatcheryMen as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
+                    <x-personnel-select
+                        label="Maintenance Personnel"
+                        name="hatchery_man"
+                        error-key="form.hatchery_man"
+                        :personnel="$hatcheryMen"
+                        :logged-in-user-id="$loggedInUserId"
+                        wire:model.live="form.hatchery_man"
+                        required
+                    />
                 </div>
 
                 <div data-field="cellphone_number">
@@ -156,11 +160,15 @@
                 </div>
 
                 <div data-field="inspected_by">
-                    <x-dropdown label="Inspected by" name="inspected_by" error-key="form.inspected_by" placeholder="Select inspector" wire:model.live="form.inspected_by" required>
-                        @foreach($hatcheryMen as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
+                    <x-personnel-select
+                        label="Inspected by"
+                        name="inspected_by"
+                        error-key="form.inspected_by"
+                        :personnel="$hatcheryMen"
+                        :logged-in-user-id="$loggedInUserId"
+                        wire:model.live="form.inspected_by"
+                        required
+                    />
                 </div>
             </div>
         </x-progress-navigation>

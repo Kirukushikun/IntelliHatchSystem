@@ -7,7 +7,8 @@ class HatcherySullairConfig
     public static function getRules(): array
     {
         return [
-            'form.hatchery_man' => 'required|integer|exists:users,id',
+            'form.hatchery_man' => 'required|array|min:1',
+            'form.hatchery_man.*' => 'integer|exists:users,id',
             'form.cellphone_number' => ['required', 'string', 'regex:/^(09\d{9}|\+639\d{9})$/'],
             'form.sullair_number' => 'required|string|in:Sullair 1 (Inside Incubation Area),Sullair 2 (Maintenance Area)',
 
@@ -28,7 +29,8 @@ class HatcherySullairConfig
             'form.air_pipe_status' => 'required|string|in:No Any Leak,With Leak For Repair or Replacement',
             'form.air_dryer_status' => 'required|string|in:Clean and Good Status,For Repair and Replacement',
             'form.date_of_change_operation' => 'required|date',
-            'form.inspected_by' => 'required|integer|exists:users,id',
+            'form.inspected_by' => 'required|array|min:1',
+            'form.inspected_by.*' => 'integer|exists:users,id',
 
             'form.actual_psi_temperature_photos.*' => 'image|max:1024',
             'form.actual_volt_photos.*' => 'image|max:1024',
@@ -74,7 +76,7 @@ class HatcherySullairConfig
     public static function defaultFormState(): array
     {
         return [
-            'hatchery_man' => '',
+            'hatchery_man' => [],
             'cellphone_number' => '',
             'sullair_number' => '',
 
@@ -107,7 +109,7 @@ class HatcherySullairConfig
             'air_pipe_status' => '',
             'air_dryer_status' => '',
             'date_of_change_operation' => '',
-            'inspected_by' => '',
+            'inspected_by' => [],
 
             'status_water_filter_photos' => [],
             'air_pipe_status_photos' => [],

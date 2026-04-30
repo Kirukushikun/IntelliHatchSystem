@@ -42,15 +42,8 @@ class IncubatorRoutineForm extends FormNavigation
         $this->recalculateVisibleSteps();
         
         // Load hatchery men and incubators
-        $this->hatcheryMen = User::where('user_type', 2)
-            ->where('is_disabled', false)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get()
-            ->mapWithKeys(function ($user) {
-                return [$user->id => $user->first_name . ' ' . $user->last_name];
-            })
-            ->toArray();
+        $this->hatcheryMen = $this->loadPersonnelByTags();
+        $this->form['hatchery_man'] = $this->initPersonnelField();
 
         $this->incubators = Incubator::where('isActive', true)
             ->orderBy('incubatorName')
@@ -101,15 +94,11 @@ class IncubatorRoutineForm extends FormNavigation
                 throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
-            // Get the original form values before they're removed from JSON
-            $hatcheryMan = $this->form['hatchery_man'] ?? null;
-            $incubator = $this->form['incubator'] ?? null;
-
             $formId = (int) DB::table('forms')->insertGetId([
                 'form_type_id' => $formTypeId,
                 'form_inputs' => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by' => $hatcheryMan,
+                'uploaded_by' => Auth::id(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -310,9 +299,9 @@ class IncubatorRoutineForm extends FormNavigation
     {
         $inputs = $this->form;
 
-        // Remove hatchery_man from JSON as it's stored in dedicated column
+        // Resolve hatchery_man IDs to names for storage
         // Keep incubator in JSON for machine info extraction
-        unset($inputs['hatchery_man']);
+        $inputs['hatchery_man'] = $this->resolvePersonnelNames($this->form['hatchery_man'] ?? [], $this->hatcheryMen);
 
         // Add machine_info structure for consistency with blower air forms
         if (isset($inputs['incubator']) && !empty($inputs['incubator'])) {

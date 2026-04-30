@@ -16,18 +16,15 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 -mt-2">Weekly maintenance checklist for diesel generator sets.</p>
 
                 <div data-field="technician_id">
-                    <x-dropdown
+                    <x-personnel-select
                         label="Name of Maintenance Technician"
                         name="technician_id"
                         error-key="form.technician_id"
-                        placeholder="Select technician"
+                        :personnel="$personnelList"
+                        :logged-in-user-id="$loggedInUserId"
                         wire:model.live="form.technician_id"
                         required
-                    >
-                        @foreach($personnelList as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
+                    />
                 </div>
 
                 <div data-field="gen_set_number">

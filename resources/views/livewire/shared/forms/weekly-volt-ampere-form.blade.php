@@ -14,18 +14,15 @@
                 <x-title>WEEKLY VOLTAGE AND AMPERE MONITORING</x-title>
 
                 <div data-field="maintenance_personnel">
-                    <x-dropdown
+                    <x-personnel-select
                         label="Maintenance Personnel"
                         name="maintenance_personnel"
                         error-key="form.maintenance_personnel"
-                        placeholder="Select personnel"
+                        :personnel="$personnelList"
+                        :logged-in-user-id="$loggedInUserId"
                         wire:model.live="form.maintenance_personnel"
                         required
-                    >
-                        @foreach($personnelList as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
+                    />
                 </div>
 
                 <div data-field="date" x-data>

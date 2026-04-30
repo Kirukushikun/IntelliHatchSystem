@@ -7,6 +7,7 @@ use App\Livewire\Components\FormNavigation;
 use App\Livewire\Shared\Forms\Traits\TempPhotoManager;
 use App\Models\Incubator;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -48,13 +49,8 @@ class IncubatorMachineAccuracyForm extends FormNavigation
             ->mapWithKeys(fn ($m) => [$m->id => $m->incubatorName])
             ->toArray();
 
-        $this->hatcheryMen = User::where('user_type', 2)
-            ->where('is_disabled', false)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get()
-            ->mapWithKeys(fn ($u) => [$u->id => $u->first_name . ' ' . $u->last_name])
-            ->toArray();
+        $this->hatcheryMen = $this->loadPersonnelByTags();
+        $this->form['hatchery_man'] = $this->initPersonnelField();
 
         $this->updateCompletedIncubators();
     }
@@ -155,13 +151,11 @@ class IncubatorMachineAccuracyForm extends FormNavigation
                 throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
-            $hatcheryMan = $this->form['hatchery_man'] ?? null;
-
             $formId = (int) DB::table('forms')->insertGetId([
                 'form_type_id'   => $formTypeId,
                 'form_inputs'    => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by'    => $hatcheryMan,
+                'uploaded_by'    => Auth::id(),
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
@@ -179,7 +173,7 @@ class IncubatorMachineAccuracyForm extends FormNavigation
     {
         $inputs = $this->form;
 
-        unset($inputs['hatchery_man']);
+        $inputs['hatchery_man'] = $this->resolvePersonnelNames($this->form['hatchery_man'] ?? [], $this->hatcheryMen);
         unset($inputs['incubator']);
 
         if (!empty($this->form['incubator'])) {

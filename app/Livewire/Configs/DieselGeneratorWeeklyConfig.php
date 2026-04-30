@@ -7,7 +7,8 @@ class DieselGeneratorWeeklyConfig
     public static function getRules(): array
     {
         return [
-            'form.technician_id'                        => 'required|integer|exists:users,id',
+            'form.technician_id'                        => 'required|array|min:1',
+            'form.technician_id.*'                      => 'integer|exists:users,id',
             'form.gen_set_number'                       => 'required|integer|exists:get-sets,id',
 
             // LUBRICATION
@@ -105,8 +106,8 @@ class DieselGeneratorWeeklyConfig
             'exists'   => 'Please select a valid option.',
             'max'      => 'This field is too long.',
 
-            'form.technician_id.required'                        => 'Please select the maintenance technician.',
-            'form.technician_id.exists'                          => 'Please select a valid maintenance technician.',
+            'form.technician_id.required'                        => 'Please select at least one maintenance technician.',
+            'form.technician_id.min'                             => 'Please select at least one maintenance technician.',
             'form.gen_set_number.required'                       => 'Please select the diesel generator set.',
             'form.gen_set_number.exists'                         => 'Please select a valid diesel generator set.',
 
@@ -193,7 +194,7 @@ class DieselGeneratorWeeklyConfig
     public static function defaultFormState(): array
     {
         return [
-            'technician_id'                        => '',
+            'technician_id'                        => [],
             'gen_set_number'                       => '',
 
             // LUBRICATION

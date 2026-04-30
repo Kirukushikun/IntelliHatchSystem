@@ -7,7 +7,8 @@ class BlowerAirHatcherConfig
     public static function getRules(): array
     {
         return [
-            'form.hatchery_man' => 'required|integer|exists:users,id',
+            'form.hatchery_man' => 'required|array|min:1',
+            'form.hatchery_man.*' => 'integer|exists:users,id',
             'form.hatcher' => 'required|integer|exists:hatcher-machines,id',
             'form.cfm_fan_reading' => 'required|string',
             'form.cfm_fan_action_taken' => 'required|string',
@@ -25,8 +26,8 @@ class BlowerAirHatcherConfig
             'image' => 'Please upload a valid image.',
             'form.hatcher.required' => 'Please select a hatcher.',
             'form.hatcher.exists' => 'Please select a valid hatcher.',
-            'form.hatchery_man.required' => 'Please select a hatchery man.',
-            'form.hatchery_man.exists' => 'Please select a valid hatchery man.',
+            'form.hatchery_man.required' => 'Please select at least one hatchery man.',
+            'form.hatchery_man.min' => 'Please select at least one hatchery man.',
             'form.cfm_fan_reading.required' => 'Please enter CFM fan reading.',
             'form.cfm_fan_action_taken.required' => 'Please enter action taken.',
             'form.cfm_fan_photos.required' => 'Please upload photos.',
@@ -43,7 +44,7 @@ class BlowerAirHatcherConfig
     public static function defaultFormState(): array
     {
         return [
-            'hatchery_man' => '',
+            'hatchery_man' => [],
             'hatcher' => '',
             'cfm_fan_reading' => '',
             'cfm_fan_action_taken' => '',

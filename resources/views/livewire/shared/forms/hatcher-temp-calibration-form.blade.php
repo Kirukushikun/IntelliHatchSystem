@@ -13,11 +13,15 @@
                 <x-title>HATCHER TEMPERATURE CALIBRATION</x-title>
 
                 <div data-field="hatchery_man">
-                    <x-dropdown label="Hatcheryman" name="hatchery_man" error-key="form.hatchery_man" placeholder="Select hatchery man" wire:model.live="form.hatchery_man" required>
-                        @foreach($hatcheryMen as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </x-dropdown>
+                    <x-personnel-select
+                        label="Hatcheryman"
+                        name="hatchery_man"
+                        error-key="form.hatchery_man"
+                        :personnel="$hatcheryMen"
+                        :logged-in-user-id="$loggedInUserId"
+                        wire:model.live="form.hatchery_man"
+                        required
+                    />
                 </div>
 
                 <div data-field="shift">

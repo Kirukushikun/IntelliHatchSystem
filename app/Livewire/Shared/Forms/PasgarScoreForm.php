@@ -51,13 +51,8 @@ class PasgarScoreForm extends FormNavigation
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
 
-        $this->users = User::where('user_type', 2)
-            ->where('is_disabled', false)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get()
-            ->mapWithKeys(fn ($u) => [$u->id => $u->first_name . ' ' . $u->last_name])
-            ->toArray();
+        $this->users = $this->loadPersonnelByTags();
+        $this->form['personnel_name'] = $this->initPersonnelField();
 
         $this->psNumbers = PsNumber::where('isActive', true)
             ->orderBy('psNumber')
@@ -339,7 +334,7 @@ class PasgarScoreForm extends FormNavigation
                 'form_type_id' => $formTypeId,
                 'form_inputs'  => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by'  => null,
+                'uploaded_by'  => \Illuminate\Support\Facades\Auth::id(),
                 'created_at'   => now(),
                 'updated_at'   => now(),
             ]);
@@ -357,10 +352,8 @@ class PasgarScoreForm extends FormNavigation
     {
         $inputs = $this->form;
 
-        // Resolve personnel name from user ID
-        if (!empty($inputs['personnel_name']) && isset($this->users[$inputs['personnel_name']])) {
-            $inputs['personnel_name'] = $this->users[$inputs['personnel_name']];
-        }
+        // Resolve personnel name IDs to names
+        $inputs['personnel_name'] = $this->resolvePersonnelNames($this->form['personnel_name'] ?? [], $this->users);
 
         // Resolve PS number label
         if (!empty($inputs['ps_number']) && isset($this->psNumbers[$inputs['ps_number']])) {

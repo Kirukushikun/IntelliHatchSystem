@@ -33,12 +33,8 @@ class IncubatorRackPmForm extends FormNavigation
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
 
-        $this->personnelList = User::where('is_disabled', false)
-            ->whereIn('user_type', [2])
-            ->orderBy('first_name')
-            ->get()
-            ->mapWithKeys(fn ($u) => [$u->id => $u->full_name])
-            ->toArray();
+        $this->personnelList = $this->loadPersonnelByTags();
+        $this->form['maintenance_personnel'] = $this->initPersonnelField();
     }
 
     public function updated($name, $value): void
@@ -165,7 +161,7 @@ class IncubatorRackPmForm extends FormNavigation
                 'form_type_id'   => $formTypeId,
                 'form_inputs'    => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by'    => null,
+                'uploaded_by'    => \Illuminate\Support\Facades\Auth::id(),
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
@@ -183,14 +179,8 @@ class IncubatorRackPmForm extends FormNavigation
     {
         $inputs = $this->form;
 
-        if (!empty($inputs['maintenance_personnel']) && isset($this->personnelList[$inputs['maintenance_personnel']])) {
-            $inputs['machine_info'] = [
-                'table' => 'users',
-                'id'    => $inputs['maintenance_personnel'],
-                'name'  => $this->personnelList[$inputs['maintenance_personnel']],
-            ];
-            $inputs['maintenance_personnel_name'] = $this->personnelList[$inputs['maintenance_personnel']];
-        }
+        $inputs['maintenance_personnel'] = $this->resolvePersonnelNames($this->form['maintenance_personnel'] ?? [], $this->personnelList);
+        $inputs['maintenance_personnel_name'] = implode(', ', $inputs['maintenance_personnel']);
 
         return $inputs;
     }
