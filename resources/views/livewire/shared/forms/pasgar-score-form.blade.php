@@ -1,4 +1,8 @@
-<div x-data="{ formSubmitted: @entangle('formSubmitted') }">
+<div x-data="{ formSubmitted: @entangle('formSubmitted') }"
+     x-on:focus-chick-weight.window="$nextTick(() => {
+         let el = document.getElementById('chick_weight_' + $event.detail.index);
+         if (el) el.focus();
+     })">
     <form wire:submit.prevent="submitForm" id="step-form" class="space-y-4" novalidate>
         @csrf
 
@@ -345,74 +349,19 @@
                 @endif
             </div>
 
-            {{-- Step 3: DOP & Completion --}}
+            {{-- Step 3: Completion --}}
             <div data-step="3" class="space-y-4" @style(["display:none" => $currentStep !== 3])>
-                <x-title>DOP &amp; COMPLETION</x-title>
-
-                <div data-field="dop_prime_qty">
-                    <x-text-input
-                        label="DOP Prime Qty"
-                        name="dop_prime_qty"
-                        error-key="form.dop_prime_qty"
-                        :required="true"
-                        placeholder="Enter a number"
-                        wireModel="form.dop_prime_qty"
-                        type="number"
-                        min="0"
-                        subtext="In Box"
-                    />
-                </div>
-
-                <div data-field="dop_prime_box_numbers">
-                    <x-text-input
-                        label="DOP Prime Box Number/s"
-                        name="dop_prime_box_numbers"
-                        error-key="form.dop_prime_box_numbers"
-                        :required="true"
-                        placeholder="Enter your answer"
-                        wireModel="form.dop_prime_box_numbers"
-                        subtext="Not box qty. Ex. Box 1, 2, 3..."
-                    />
-                </div>
-
-                <div data-field="dop_jr_prime_qty">
-                    <x-text-input
-                        label="DOP JR Prime Qty"
-                        name="dop_jr_prime_qty"
-                        error-key="form.dop_jr_prime_qty"
-                        :required="true"
-                        placeholder="Enter a number"
-                        wireModel="form.dop_jr_prime_qty"
-                        type="number"
-                        min="0"
-                        subtext="In Box"
-                    />
-                </div>
-
-                <div data-field="dop_jr_prime_box_numbers">
-                    <x-text-input
-                        label="DOP JR Prime Box Number/s"
-                        name="dop_jr_prime_box_numbers"
-                        error-key="form.dop_jr_prime_box_numbers"
-                        :required="true"
-                        placeholder="Enter your answer"
-                        wireModel="form.dop_jr_prime_box_numbers"
-                        subtext="Not box qty. Ex. Box 1, 2, 3..."
-                    />
-                </div>
-
-                <div data-field="form_photo" wire:ignore>
-                    <x-photo-attach label="Photo of Form with Data" name="form_photo" required />
-                </div>
+                <x-title>COMPLETION</x-title>
 
                 <div data-field="qc_personnel">
-                    <x-text-input
+                    <x-personnel-select
                         label="QC Personnel"
                         name="qc_personnel"
                         error-key="form.qc_personnel"
-                        :required="true"
-                        placeholder="Enter your answer"
-                        wireModel="form.qc_personnel"
+                        :personnel="$qcPersonnel"
+                        placeholder="Select QC personnel"
+                        wire:model.live="form.qc_personnel"
+                        required
                     />
                 </div>
 

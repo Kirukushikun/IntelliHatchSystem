@@ -354,6 +354,17 @@ class PasgarScoreDashboard extends Component
         $this->dispatch('openNewTab', url: $url);
     }
 
+    public function printPasgarSummary(int $formId): void
+    {
+        $url = URL::temporarySignedRoute(
+            'admin.print.forms.pasgar-score-summary',
+            now()->addMinutes(10),
+            ['form_id' => $formId]
+        );
+
+        $this->dispatch('openNewTab', url: $url);
+    }
+
     public function render()
     {
         $paginationData = $this->getPaginationData();

@@ -9,6 +9,7 @@ use App\Models\Hatcher;
 use App\Models\HouseNumber;
 use App\Models\Incubator;
 use App\Models\PsNumber;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -36,6 +37,8 @@ class PasgarScoreForm extends FormNavigation
     public array $incubators = [];
 
     public array $hatchers = [];
+
+    public array $qcPersonnel = [];
 
     public int $expandedSample = 0;
 
@@ -77,6 +80,26 @@ class PasgarScoreForm extends FormNavigation
             ->get()
             ->mapWithKeys(fn ($h) => [$h->id => $h->hatcherName])
             ->toArray();
+
+        $this->qcPersonnel = $this->loadQcPersonnel();
+    }
+
+    protected function loadQcPersonnel(): array
+    {
+        $qcTagId = Tag::where('name', 'QA/QC')->value('id');
+
+        if (!$qcTagId) {
+            return [];
+        }
+
+        return User::where('user_type', 2)
+            ->where('is_disabled', false)
+            ->whereHas('tags', fn ($q) => $q->where('tags.id', $qcTagId))
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get()
+            ->mapWithKeys(fn ($u) => [$u->id => $u->full_name])
+            ->toArray();
     }
 
     public function updated($name, $value): void
@@ -110,6 +133,9 @@ class PasgarScoreForm extends FormNavigation
         $this->form['samples'][] = array_merge(PasgarScoreConfig::defaultSample(), ['_key' => $this->nextSampleKey]);
         $this->nextSampleKey++;
         $this->expandedSample = count($this->form['samples']) - 1;
+
+        $newIndex = $this->expandedSample;
+        $this->dispatch('focus-chick-weight', index: $newIndex);
     }
 
     public function toggleSample(int $index): void
@@ -260,14 +286,6 @@ class PasgarScoreForm extends FormNavigation
         try {
             $this->validate(PasgarScoreConfig::getRules(), $this->messages());
 
-            // Require at least one photo of the form
-            $formPhotos = $this->uploadedPhotoIds['form_photo'] ?? [];
-            if (empty($formPhotos)) {
-                $this->dispatch('showToast', message: 'Please upload at least one "Photo of Form with Data" before submitting.', type: 'error');
-                $this->goToStepWithField('form_photo');
-                return;
-            }
-
             if (!$this->ensureAllPhotosUploaded()) {
                 $this->dispatch('showToast', message: 'Photo uploads are still in progress. Please wait for all photos to finish uploading before submitting the form.', type: 'error');
                 return;
@@ -354,6 +372,9 @@ class PasgarScoreForm extends FormNavigation
 
         // Resolve personnel name IDs to names
         $inputs['personnel_name'] = $this->resolvePersonnelNames($this->form['personnel_name'] ?? [], $this->users);
+
+        // Resolve QC personnel IDs to names
+        $inputs['qc_personnel'] = $this->resolvePersonnelNames($this->form['qc_personnel'] ?? [], $this->qcPersonnel);
 
         // Resolve PS number label
         if (!empty($inputs['ps_number']) && isset($this->psNumbers[$inputs['ps_number']])) {

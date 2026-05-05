@@ -577,6 +577,45 @@ class FormsPrintController extends Controller
         ]);
     }
 
+    public function pasgarScoreSummary(Request $request)
+    {
+        $formId = (int) $request->query('form_id', 0);
+        $form = Form::findOrFail($formId);
+
+        $inputs = is_array($form->form_inputs) ? $form->form_inputs : (json_decode((string) $form->form_inputs, true) ?: []);
+
+        $houseNumber = 'N/A';
+        if (isset($inputs['house_number']) && $inputs['house_number'] !== '') {
+            $house = DB::table('house-numbers')->where('id', $inputs['house_number'])->first();
+            $houseNumber = $house->houseNumber ?? 'N/A';
+        }
+
+        $incubatorName = 'N/A';
+        if (isset($inputs['incubator_number']) && $inputs['incubator_number'] !== '') {
+            $inc = DB::table('incubator-machines')->where('id', $inputs['incubator_number'])->first();
+            $incubatorName = $inc->incubatorName ?? 'N/A';
+        }
+
+        $hatcherName = 'N/A';
+        if (isset($inputs['hatcher_number']) && $inputs['hatcher_number'] !== '') {
+            $hatcher = DB::table('hatcher-machines')->where('id', $inputs['hatcher_number'])->first();
+            $hatcherName = $hatcher->hatcherName ?? 'N/A';
+        }
+
+        if (isset($inputs['personnel_name']) && is_numeric($inputs['personnel_name'])) {
+            $personnelUser = DB::table('users')->where('id', $inputs['personnel_name'])->first();
+            $inputs['personnel_name'] = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
+        }
+
+        return view('admin.print.pasgar-score-summary', [
+            'form' => $form,
+            'inputs' => $inputs,
+            'houseNumber' => $houseNumber,
+            'incubatorName' => $incubatorName,
+            'hatcherName' => $hatcherName,
+        ]);
+    }
+
     private function printForms(
         Request $request,
         FormType $formType,

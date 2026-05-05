@@ -231,6 +231,10 @@ Route::middleware('auth')->group(function () {
             ->middleware('signed')
             ->name('admin.print.forms.pasgar-score-detail');
 
+        Route::get('/admin/print/forms/pasgar-score-summary', [FormsPrintController::class, 'pasgarScoreSummary'])
+            ->middleware('signed')
+            ->name('admin.print.forms.pasgar-score-summary');
+
         Route::get('/admin/print/insights/{formTypeId}', [InsightsController::class, 'printView'])
             ->middleware('signed')
             ->name('admin.print.insights');
