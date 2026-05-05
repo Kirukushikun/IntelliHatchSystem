@@ -98,7 +98,6 @@ class IncubatorRackPmForm extends FormNavigation
                 'photo_smooth_turning'     => 9,
                 'photo_turning_angle'      => 10,
                 'photo_lubricate_bolts'    => 11,
-                'photo_plastic_curtain'    => 12,
             ];
 
             foreach ($photoChecks as $photoKey => $step) {

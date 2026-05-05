@@ -28,16 +28,13 @@
     <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-orange-100 dark:from-gray-900 via-orange-200 dark:via-gray-800 to-orange-300 dark:to-gray-900 p-4">
         <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl px-8 pt-6 pb-8">
             
-            <x-title subtitle="Log in to your {{ request('type', 'user') }} account">
+            <x-title subtitle="Log in to your account">
                 IntelliHatch System
             </x-title>
 
             <!-- Login Form -->
             <form action="{{ route('login.submit') }}" method="POST">
                 @csrf
-                
-                <!-- Hidden user type field -->
-                <input type="hidden" name="user_type" value="{{ request('type', 'user') }}">
                 
                 <x-text-input 
                     label="Username" 
@@ -67,22 +64,6 @@
                 </div>
             </form>
             
-            <!-- Login Links for Non-Authenticated Users -->
-            @guest
-                <div class="mt-4 text-center">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                        @if(request('type', 'user') === 'superadmin')
-                            Not a superadmin? <a href="/login?type=admin" class="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 underline">Click here</a> for admin login
-                        @elseif(request('type', 'user') === 'admin')
-                            Not an admin? <a href="/login?type=user" class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 underline">Click here</a> for user login
-                            &nbsp;&middot;&nbsp;
-                            <a href="/login?type=superadmin" class="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 underline">Superadmin login</a>
-                        @else
-                            Not a user? <a href="/login?type=admin" class="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 underline">Click here</a> for admin login
-                        @endif
-                    </p>
-                </div>
-            @endguest
         </div>
     </div>
 </x-layout>

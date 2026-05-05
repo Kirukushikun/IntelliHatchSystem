@@ -298,7 +298,7 @@ class IncubatorRackPmDashboard extends Component
         $photoFields = [
             'photo_chord_connection', 'photo_air_hose', 'photo_wheels', 'photo_steel_frame',
             'photo_bolts', 'photo_turning_sensor', 'photo_pneumatic_cylinder', 'photo_smooth_turning',
-            'photo_turning_angle', 'photo_lubricate_bolts', 'photo_plastic_curtain',
+            'photo_turning_angle', 'photo_lubricate_bolts',
         ];
 
         $photos = [];

@@ -300,7 +300,7 @@
                         '</div>' +
                         '<div class="flex gap-2 mt-3">' +
                             '<button id="draft-dismiss" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-blue-500 hover:bg-blue-400 transition-colors">Dismiss</button>' +
-                            '<button id="draft-restore" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-white text-blue-600 hover:bg-blue-50 transition-colors">Restore</button>' +
+                            '<button id="draft-restore" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-white text-blue-700 hover:bg-blue-50 transition-colors" style="background-color: #ffffff; color: #1d4ed8;">Restore</button>' +
                         '</div>';
 
                     document.body.appendChild(banner);

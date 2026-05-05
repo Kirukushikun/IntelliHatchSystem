@@ -60,7 +60,6 @@
                                 ['key' => 'smooth_turning', 'label' => 'Smooth Turning'],
                                 ['key' => 'turning_angle', 'label' => 'Turning Angle'],
                                 ['key' => 'lubricate_bolts', 'label' => 'Lubricate Bolts'],
-                                ['key' => 'plastic_curtain', 'label' => 'Plastic Curtain'],
                             ];
                         @endphp
                         <div class="space-y-4">

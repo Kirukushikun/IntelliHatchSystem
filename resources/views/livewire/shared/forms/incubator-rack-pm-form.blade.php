@@ -429,7 +429,7 @@
                 </div>
             </div>
 
-            {{-- Step 11: Check 10 — Lubricate Turning Racks Bolts --}}
+            {{-- Step 11: Check 10 — Lubricate Turning Racks Bolts & Completion --}}
             <div data-step="11" class="space-y-4" @style(["display:none" => $currentStep !== 11])>
                 <x-title>CHECK 10: LUBRICATE TURNING RACKS BOLTS</x-title>
 
@@ -460,40 +460,6 @@
 
                 <div data-field="photo_lubricate_bolts">
                     <x-photo-attach label="Attach before and after photos." name="photo_lubricate_bolts" required />
-                </div>
-            </div>
-
-            {{-- Step 12: Check 11 — Plastic Curtain & Completion --}}
-            <div data-step="12" class="space-y-4" @style(["display:none" => $currentStep !== 12])>
-                <x-title>CHECK 11: PLASTIC CURTAIN &amp; COMPLETION</x-title>
-
-                <div data-field="plastic_curtain_status">
-                    <x-dropdown
-                        label="Check good condition of incubator rack plastic curtain"
-                        name="plastic_curtain_status"
-                        error-key="form.plastic_curtain_status"
-                        placeholder="Select result"
-                        wire:model.live="form.plastic_curtain_status"
-                        required
-                    >
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                    </x-dropdown>
-                </div>
-
-                <div data-field="plastic_curtain_corrective_action">
-                    <x-text-area
-                        label="Corrective Action Taken (if any)"
-                        name="plastic_curtain_corrective_action"
-                        error-key="form.plastic_curtain_corrective_action"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.plastic_curtain_corrective_action"
-                    />
-                </div>
-
-                <div data-field="photo_plastic_curtain">
-                    <x-photo-attach label="Attach before and after photos." name="photo_plastic_curtain" required />
                 </div>
 
                 <div data-field="time_finished" x-data>

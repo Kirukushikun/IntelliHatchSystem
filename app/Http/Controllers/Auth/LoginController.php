@@ -40,7 +40,6 @@ class LoginController extends Controller
         $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
-            'user_type' => 'required|in:superadmin,admin,user',
         ]);
 
         // Trim whitespace from username
@@ -77,14 +76,6 @@ class LoginController extends Controller
         $request->session()->forget($lockoutKey);
 
         $user = Auth::user();
-        
-        // Verify user type matches selected login type
-        $typeMap = ['superadmin' => 0, 'admin' => 1, 'user' => 2];
-        $expectedType = $typeMap[$credentials['user_type']];
-        if ((int) $user->user_type !== $expectedType) {
-            Auth::logout();
-            return back()->with('error', "The account does not belong to a {$credentials['user_type']}.");
-        }
 
         $request->session()->regenerate();
 

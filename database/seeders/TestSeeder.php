@@ -1050,7 +1050,6 @@ class TestSeeder extends Seeder
                 [$smooth, $smoothA]   = $statusAction();
                 [$angle, $angleA]     = $statusAction();
                 [$lub, $lubA]         = $statusAction();
-                [$curtain, $curtainA] = $statusAction();
 
                 Form::create([
                     'form_type_id' => $formTypeId,
@@ -1087,8 +1086,6 @@ class TestSeeder extends Seeder
                         'turning_angle_corrective_action'      => $angleA,
                         'lubricate_bolts_status'               => $lub,
                         'lubricate_bolts_corrective_action'    => $lubA,
-                        'plastic_curtain_status'               => $curtain,
-                        'plastic_curtain_corrective_action'    => $curtainA,
                         'time_finished'                        => sprintf('%02d:%02d', $endH, $endM),
                     ],
                     'date_submitted' => $date,

@@ -34,8 +34,6 @@ class IncubatorRackPmConfig
             'form.turning_angle_corrective_action'      => 'required|string|max:1000',
             'form.lubricate_bolts_status'               => 'required|in:Yes,No',
             'form.lubricate_bolts_corrective_action'    => 'required|string|max:1000',
-            'form.plastic_curtain_status'               => 'required|in:Yes,No',
-            'form.plastic_curtain_corrective_action'    => 'required|string|max:1000',
             'form.time_finished'                        => 'required|string',
         ];
     }
@@ -79,8 +77,6 @@ class IncubatorRackPmConfig
             'form.turning_angle_corrective_action.required'          => 'Please enter the corrective action or N/A.',
             'form.lubricate_bolts_status.required'                   => 'Please indicate the lubricate bolts status.',
             'form.lubricate_bolts_corrective_action.required'        => 'Please enter the corrective action or N/A.',
-            'form.plastic_curtain_status.required'                   => 'Please indicate the plastic curtain condition status.',
-            'form.plastic_curtain_corrective_action.required'        => 'Please enter the corrective action or N/A.',
             'form.time_finished.required'                            => 'Please enter the time finished.',
         ];
     }
@@ -119,8 +115,6 @@ class IncubatorRackPmConfig
             'turning_angle_corrective_action'      => '',
             'lubricate_bolts_status'               => '',
             'lubricate_bolts_corrective_action'    => '',
-            'plastic_curtain_status'               => '',
-            'plastic_curtain_corrective_action'    => '',
             'time_finished'                        => '',
         ];
     }
@@ -138,8 +132,7 @@ class IncubatorRackPmConfig
             8  => ['pneumatic_cylinder_status', 'pneumatic_cylinder_corrective_action', 'photo_pneumatic_cylinder'],
             9  => ['smooth_turning_status', 'smooth_turning_corrective_action', 'photo_smooth_turning'],
             10 => ['turning_angle_status', 'left_turning_angle', 'right_turning_angle', 'turning_angle_corrective_action', 'photo_turning_angle'],
-            11 => ['lubricate_bolts_status', 'lubricate_bolts_corrective_action', 'photo_lubricate_bolts'],
-            12 => ['plastic_curtain_status', 'plastic_curtain_corrective_action', 'photo_plastic_curtain', 'time_finished'],
+            11 => ['lubricate_bolts_status', 'lubricate_bolts_corrective_action', 'photo_lubricate_bolts', 'time_finished'],
         ];
     }
 
@@ -183,9 +176,6 @@ class IncubatorRackPmConfig
                 'lubricate_bolts_status',
                 'lubricate_bolts_corrective_action',
                 'photo_lubricate_bolts',
-                'plastic_curtain_status',
-                'plastic_curtain_corrective_action',
-                'photo_plastic_curtain',
                 'time_finished',
             ],
         ];
