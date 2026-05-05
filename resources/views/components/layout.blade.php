@@ -314,12 +314,17 @@
                         try {
                             var comp = getLivewireComponent();
                             if (comp && draft.form) {
+                                // Merge draft into current form state and set all at once
+                                // to avoid multiple roundtrips overwriting each other
+                                var currentForm = JSON.parse(JSON.stringify(comp.form || {}));
                                 Object.keys(draft.form).forEach(function (key) {
-                                    comp.set('form.' + key, draft.form[key]);
+                                    currentForm[key] = draft.form[key];
                                 });
-                                window.dispatchEvent(new CustomEvent('showToast', {
-                                    detail: { type: 'success', message: 'Draft restored successfully!' }
-                                }));
+                                comp.set('form', currentForm).then(function () {
+                                    window.dispatchEvent(new CustomEvent('showToast', {
+                                        detail: { type: 'success', message: 'Draft restored successfully!' }
+                                    }));
+                                });
                             }
                         } catch (e) {
                             window.dispatchEvent(new CustomEvent('showToast', {
