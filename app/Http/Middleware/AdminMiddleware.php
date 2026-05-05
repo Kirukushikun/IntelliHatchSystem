@@ -18,16 +18,12 @@ class AdminMiddleware
     {
         // Check if user is not authenticated
         if (!Auth::check()) {
-            return redirect('/admin/login')->with('error', 'Please login to access the admin panel.');
+            return redirect('/login')->with('error', 'Please login to access the admin panel.');
         }
 
         // Check if authenticated user is superadmin (0) or admin (1)
         if (!in_array((int) Auth::user()->user_type, [0, 1])) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            
-            return redirect('/admin/login')->with('error', 'Access denied. Admin privileges required.');
+            return redirect('/user/forms')->with('error', 'Access denied. Admin privileges required.');
         }
 
         return $next($request);

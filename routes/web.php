@@ -16,6 +16,9 @@ use App\Http\Controllers\Admin\FormsPrintController;
 use App\Http\Controllers\Admin\InsightsController;
 
 Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect(in_array((int) Auth::user()->user_type, [0, 1]) ? '/admin/dashboard' : '/user/forms');
+    }
     return redirect('/login');
 });
 
@@ -80,17 +83,14 @@ Route::get('/forms/diesel-generator-weekly', function () {
     return view('shared.forms.diesel-generator-weekly');
 })->name('forms.diesel-generator-weekly');
 
-// Guest routes (no authentication required)
-Route::middleware('guest')->group(function () {
-    // Unified login route
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
-    
-    // Legacy admin login routes (redirect to unified login)
-    Route::get('/admin/login', function () {
-        return redirect('/login');
-    })->name('admin.login');
-});
+// Login routes
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
+
+// Legacy admin login route (redirect to unified login)
+Route::get('/admin/login', function () {
+    return redirect('/login');
+})->name('admin.login');
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {

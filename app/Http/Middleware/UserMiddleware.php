@@ -23,11 +23,7 @@ class UserMiddleware
 
         // Check if authenticated user is hatchery user (user_type === 2)
         if (((int) Auth::user()->user_type) !== 2) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            
-            return redirect('/login')->with('error', 'Access denied. User privileges required.');
+            return redirect('/admin/dashboard')->with('error', 'Access denied. User privileges required.');
         }
 
         return $next($request);
