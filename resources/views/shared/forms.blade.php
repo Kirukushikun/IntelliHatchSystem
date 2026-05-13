@@ -27,16 +27,21 @@
 
         // Filter by user tags if authenticated as user_type 2
         if (Auth::check() && (int) Auth::user()->user_type === 2) {
-            $userTagIds = Auth::user()->tags()->pluck('tags.id')->toArray();
+            $userTagNames = Auth::user()->tags()->pluck('name')->toArray();
 
-            $formTypes = $formTypes->filter(function ($ft) use ($userTagIds) {
-                // Form has no tags → available to all users
-                if ($ft->tags->isEmpty()) {
-                    return true;
-                }
-                // Form has tags → user must have at least one matching tag
-                return $ft->tags->pluck('id')->intersect($userTagIds)->isNotEmpty();
-            });
+            // Supervisors can access all forms
+            if (!in_array('Supervisor', $userTagNames)) {
+                $userTagIds = Auth::user()->tags()->pluck('tags.id')->toArray();
+
+                $formTypes = $formTypes->filter(function ($ft) use ($userTagIds) {
+                    // Form has no tags → available to all users
+                    if ($ft->tags->isEmpty()) {
+                        return true;
+                    }
+                    // Form has tags → user must have at least one matching tag
+                    return $ft->tags->pluck('id')->intersect($userTagIds)->isNotEmpty();
+                });
+            }
         }
 
         $forms = $formTypes->map(function ($ft) use ($routeMap, $routePrefix) {

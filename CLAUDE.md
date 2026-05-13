@@ -42,7 +42,7 @@ php artisan test     # Run PHPUnit tests
 |-------|---------|
 | `users` | Superadmin, admin, and hatchery users |
 | `form_types` | 15 form type definitions (with description, impact_level, usage_frequency, isActive) |
-| `tags` | Tag definitions (Hatcheryman, Maintenance, QA/QC) |
+| `tags` | Tag definitions (Hatcheryman, Maintenance, QA/QC, Supervisor) |
 | `tag_user` | Pivot: tags ↔ users (user categorization) |
 | `form_type_tag` | Pivot: form_types ↔ tags (form type tagging) |
 | `forms` | Submitted forms (JSON inputs, photos_purged_at) |
@@ -370,7 +370,7 @@ Proxy trust level set to `*` in `bootstrap/app.php`.
 |--------|---------|
 | `DatabaseSeeder` | Orchestrator: creates 3 default users (1 superadmin, 2 admins), calls all other seeders |
 | `FormTypeSeeder` | Seeds 11 base form types (remaining 4 added via migrations) |
-| `TagSeeder` | Seeds 3 default tags: Hatcheryman, Maintenance, QA/QC |
+| `TagSeeder` | Seeds 4 default tags: Hatcheryman, Maintenance, QA/QC, Supervisor (Supervisor tag grants access to all forms) |
 | `MachineSeeder` | Seeds 10 each of Incubator, Hatcher, and Plenum machines |
 | `HatcheryUserSeeder` | Seeds 10 hatchery users (user_type=2) |
 | `TestSeeder` | Comprehensive test data: registries + form submissions for all 15 form types |

@@ -59,10 +59,14 @@ abstract class FormNavigation extends Component
             }
 
             // Tag-based access control for hatchery users (user_type 2)
+            // Supervisors bypass tag filtering and can access all forms
             if (Auth::check() && (int) Auth::user()->user_type === 2 && $ft->tags->isNotEmpty()) {
-                $userTagIds = Auth::user()->tags()->pluck('tags.id');
-                if ($ft->tags->pluck('id')->intersect($userTagIds)->isEmpty()) {
-                    abort(403);
+                $isSupervisor = Auth::user()->tags()->where('name', 'Supervisor')->exists();
+                if (!$isSupervisor) {
+                    $userTagIds = Auth::user()->tags()->pluck('tags.id');
+                    if ($ft->tags->pluck('id')->intersect($userTagIds)->isEmpty()) {
+                        abort(403);
+                    }
                 }
             }
         }
