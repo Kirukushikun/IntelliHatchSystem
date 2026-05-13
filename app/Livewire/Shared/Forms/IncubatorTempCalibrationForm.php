@@ -43,7 +43,7 @@ class IncubatorTempCalibrationForm extends FormNavigation
         $this->recalculateVisibleSteps();
 
         $this->incubators = Incubator::where('isActive', true)
-            ->orderBy('incubatorName')
+            ->orderByRaw('LENGTH(incubatorName), incubatorName')
             ->get()
             ->mapWithKeys(fn ($m) => [$m->id => $m->incubatorName])
             ->toArray();

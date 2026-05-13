@@ -48,44 +48,54 @@
                         <option value="3rd Shift">3rd Shift</option>
                     </x-dropdown>
                 </div>
-
-                <div data-field="incubator">
-                    <x-dropdown label="Incubator" name="incubator" error-key="form.incubator" placeholder="Select incubator" wire:model.live="form.incubator" required>
-                        @foreach($incubators as $id => $name)
-                            <option value="{{ $id }}" {{ in_array($id, $completedIncubators) ? 'disabled' : '' }}>
-                                {{ $name }}{{ in_array($id, $completedIncubators) ? ' (Done)' : '' }}
-                            </option>
-                        @endforeach
-                    </x-dropdown>
-                </div>
             </div>
 
             <div data-step="2" class="space-y-4" @style(["display:none" => $currentStep !== 2])>
-                <x-title>TEMPERATURE READINGS</x-title>
+                <x-title>TEMPERATURE READINGS — ALL INCUBATORS</x-title>
 
-                <div data-field="set_point_temp">
-                    <x-text-input label="Set Point Temperature" name="set_point_temp" error-key="form.set_point_temp" :required="true" placeholder="Enter set point temperature..." wireModel="form.set_point_temp" type="number" step="0.01" />
-                </div>
+                @forelse($this->form['incubators'] as $index => $incubator)
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
+                         wire:key="incubator-{{ $incubator['id'] }}"
+                         id="incubator-card-{{ $incubator['id'] }}">
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                            {{ $incubator['name'] }}
+                        </h3>
 
-                <div data-field="display_temp">
-                    <x-text-input label="Display Temp" name="display_temp" error-key="form.display_temp" :required="true" placeholder="Enter display temperature..." wireModel="form.display_temp" type="number" step="0.01" />
-                </div>
+                        <div data-field="incubators.{{ $index }}.display_temp">
+                            <x-text-input
+                                label="Display Temp"
+                                name="incubators_{{ $index }}_display_temp"
+                                error-key="form.incubators.{{ $index }}.display_temp"
+                                :required="true"
+                                placeholder="Enter display temperature..."
+                                wireModel="form.incubators.{{ $index }}.display_temp"
+                                type="number"
+                                step="0.01"
+                            />
+                        </div>
 
-                <div data-field="calibrator">
-                    <x-text-input label="Calibrator" name="calibrator" error-key="form.calibrator" :required="true" placeholder="Enter calibrator reading..." wireModel="form.calibrator" type="number" step="0.01" />
-                </div>
+                        <div data-field="incubators.{{ $index }}.calibrator">
+                            <x-text-input
+                                label="Calibrator"
+                                name="incubators_{{ $index }}_calibrator"
+                                error-key="form.incubators.{{ $index }}.calibrator"
+                                :required="true"
+                                placeholder="Enter calibrator reading..."
+                                wireModel="form.incubators.{{ $index }}.calibrator"
+                                type="number"
+                                step="0.01"
+                            />
+                        </div>
 
-                <div data-field="humidity_set_point">
-                    <x-text-input label="Humidity Set Point" name="humidity_set_point" error-key="form.humidity_set_point" :required="true" placeholder="Enter humidity set point..." wireModel="form.humidity_set_point" type="number" step="0.01" />
-                </div>
-
-                <div data-field="humidity_machine_reading">
-                    <x-text-input label="Humidity Machine Reading" name="humidity_machine_reading" error-key="form.humidity_machine_reading" :required="true" placeholder="Enter humidity machine reading..." wireModel="form.humidity_machine_reading" type="number" step="0.01" />
-                </div>
-
-                <div data-field="accuracy_photos">
-                    <x-photo-attach label="Photo (Display next to Calibrator)" name="accuracy_photos" />
-                </div>
+                        <div data-field="accuracy_photos_{{ $incubator['id'] }}">
+                            <x-photo-attach label="Photo (Display next to Calibrator)" name="accuracy_photos_{{ $incubator['id'] }}" />
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <p class="text-sm">No active incubators found.</p>
+                    </div>
+                @endforelse
             </div>
         </x-progress-navigation>
     </form>

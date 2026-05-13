@@ -74,7 +74,13 @@
                         <tr class="even:bg-slate-50 dark:even:bg-gray-700/50 hover:bg-slate-100 dark:hover:bg-gray-700">
                             <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p></td>
                             <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p></td>
-                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $formData['machine_info']['name'] ?? 'N/A' }}</p></td>
+                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">
+                                @if(!empty($formData['incubators']) && is_array($formData['incubators']))
+                                    {{ collect($formData['incubators'])->pluck('machine_info.name')->filter()->implode(', ') ?: 'N/A' }}
+                                @else
+                                    {{ $formData['machine_info']['name'] ?? 'N/A' }}
+                                @endif
+                            </p></td>
                             <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $formData['shift'] ?? 'N/A' }}</p></td>
                             <td class="p-4 py-5 text-center">
                                 <div class="flex items-center justify-center gap-2">
@@ -96,7 +102,13 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
                     <div class="space-y-2">
                         <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span></div>
-                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Incubator:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $formData['machine_info']['name'] ?? 'N/A' }}</span></div>
+                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Incubator:</span><span class="text-xs text-gray-900 dark:text-gray-200">
+                            @if(!empty($formData['incubators']) && is_array($formData['incubators']))
+                                {{ collect($formData['incubators'])->pluck('machine_info.name')->filter()->implode(', ') ?: 'N/A' }}
+                            @else
+                                {{ $formData['machine_info']['name'] ?? 'N/A' }}
+                            @endif
+                        </span></div>
                         <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Shift:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $formData['shift'] ?? 'N/A' }}</span></div>
                     </div>
                     <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">

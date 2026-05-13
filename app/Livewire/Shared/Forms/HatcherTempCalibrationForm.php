@@ -43,7 +43,7 @@ class HatcherTempCalibrationForm extends FormNavigation
         $this->recalculateVisibleSteps();
 
         $this->hatchers = Hatcher::where('isActive', true)
-            ->orderBy('hatcherName')
+            ->orderByRaw('LENGTH(hatcherName), hatcherName')
             ->get()
             ->mapWithKeys(fn ($m) => [$m->id => $m->hatcherName])
             ->toArray();

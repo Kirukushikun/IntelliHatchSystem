@@ -36,32 +36,71 @@
                         <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Shift:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['shift'] ?? 'N/A' }}</span></div>
                         <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Time of Reading:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['time_of_reading'] ?? 'N/A' }}</span></div>
                     </div>
-                    <div class="mb-6">
-                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Machine Info</h4>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Incubator:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['machine_info']['name'] ?? 'N/A' }}</span></div>
+                    @if(!empty($this->formData['incubators']) && is_array($this->formData['incubators']))
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Incubator Readings ({{ count($this->formData['incubators']) }})</h4>
+                            @foreach($this->formData['incubators'] as $incIdx => $incData)
+                                <div class="mb-4 p-3 border border-gray-100 dark:border-gray-700 rounded-lg">
+                                    <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
+                                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Incubator:</span>
+                                        <span class="text-sm font-semibold text-gray-900 dark:text-gray-200">{{ $incData['machine_info']['name'] ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
+                                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Display Temp:</span>
+                                        <span class="text-sm text-gray-900 dark:text-gray-200">{{ $incData['display_temp'] ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
+                                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Calibrator:</span>
+                                        <span class="text-sm text-gray-900 dark:text-gray-200">{{ $incData['calibrator'] ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="py-2">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Photos:</span>
+                                            @php
+                                                $incPhotoKey = 'accuracy_photos_' . ($incData['machine_info']['id'] ?? $incIdx);
+                                                $incPhotoCount = $this->getPhotoCount($incPhotoKey);
+                                            @endphp
+                                            @if($incPhotoCount > 0)
+                                                <button @click="$wire.viewPhotos('{{ $incPhotoKey }}')" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-all cursor-pointer">Photos ({{ $incPhotoCount }})</button>
+                                            @elseif($this->selectedForm && $this->selectedForm->photos_purged_at)
+                                                <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-600">Photos Expired</span>
+                                            @else
+                                                <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600">No Photos</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Accuracy Readings</h4>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Display Temp:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['display_temp'] ?? 'N/A' }}</span></div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Calibrator:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['calibrator'] ?? 'N/A' }}</span></div>
-                            <div class="py-3 border-b border-gray-100 dark:border-gray-700">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Accuracy Photos:</span>
-                                    @php $photoCount = $this->getPhotoCount('accuracy_photos'); @endphp
-                                    @if($photoCount > 0)
-                                        <button @click="$wire.viewPhotos('accuracy_photos')" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-all cursor-pointer">Photos ({{ $photoCount }})</button>
-                                    @elseif($this->selectedForm && $this->selectedForm->photos_purged_at)
-                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-600">Photos Expired</span>
-                                    @else
-                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600">No Photos</span>
-                                    @endif
+                    @else
+                        {{-- Legacy format: single incubator --}}
+                        <div class="mb-6">
+                            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Machine Info</h4>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Incubator:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['machine_info']['name'] ?? 'N/A' }}</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Accuracy Readings</h4>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Display Temp:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['display_temp'] ?? 'N/A' }}</span></div>
+                                <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Calibrator:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['calibrator'] ?? 'N/A' }}</span></div>
+                                <div class="py-3 border-b border-gray-100 dark:border-gray-700">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Accuracy Photos:</span>
+                                        @php $photoCount = $this->getPhotoCount('accuracy_photos'); @endphp
+                                        @if($photoCount > 0)
+                                            <button @click="$wire.viewPhotos('accuracy_photos')" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-all cursor-pointer">Photos ({{ $photoCount }})</button>
+                                        @elseif($this->selectedForm && $this->selectedForm->photos_purged_at)
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-600">Photos Expired</span>
+                                        @else
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600">No Photos</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 @else
                     <div class="text-center py-8"><svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No form data available</h3></div>
                 @endif

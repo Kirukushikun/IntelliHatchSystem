@@ -26,13 +26,7 @@ class IncubatorMachineAccuracyForm extends FormNavigation
     protected bool $disableShiftLogic = true;
 
     /** @var array */
-    public $incubators = [];
-
-    /** @var array */
     public $hatcheryMen = [];
-
-    /** @var array */
-    public $completedIncubators = [];
 
     public function mount($formType = 'incubator_machine_accuracy'): void
     {
@@ -43,16 +37,19 @@ class IncubatorMachineAccuracyForm extends FormNavigation
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
 
-        $this->incubators = Incubator::where('isActive', true)
-            ->orderBy('incubatorName')
-            ->get()
-            ->mapWithKeys(fn ($m) => [$m->id => $m->incubatorName])
-            ->toArray();
+        $activeIncubators = Incubator::where('isActive', true)
+            ->orderByRaw('LENGTH(incubatorName), incubatorName')
+            ->get();
+
+        $this->form['incubators'] = $activeIncubators->map(fn ($m) => [
+            'id'           => $m->id,
+            'name'         => $m->incubatorName,
+            'display_temp' => '',
+            'calibrator'   => '',
+        ])->toArray();
 
         $this->hatcheryMen = $this->loadPersonnelByTags();
         $this->form['hatchery_man'] = $this->initPersonnelField();
-
-        $this->updateCompletedIncubators();
     }
 
     public function updated($name, $value): void
@@ -126,7 +123,8 @@ class IncubatorMachineAccuracyForm extends FormNavigation
             $firstKey = array_key_first($e->validator->errors()->messages());
             if ($firstKey) {
                 $fieldName = str_replace('form.', '', $firstKey);
-                $this->goToStepWithField($fieldName);
+                $baseField = explode('.', $fieldName)[0];
+                $this->goToStepWithField($baseField);
             }
             throw $e;
         } catch (\Exception $e) {
@@ -174,56 +172,57 @@ class IncubatorMachineAccuracyForm extends FormNavigation
         $inputs = $this->form;
 
         $inputs['hatchery_man'] = $this->resolvePersonnelNames($this->form['hatchery_man'] ?? [], $this->hatcheryMen);
-        unset($inputs['incubator']);
 
-        if (!empty($this->form['incubator'])) {
+        $incubators = [];
+        foreach ($this->form['incubators'] as $entry) {
             $incubator = DB::table('incubator-machines')
-                ->where('id', $this->form['incubator'])
+                ->where('id', $entry['id'])
                 ->first();
 
-            if ($incubator) {
-                $inputs['machine_info'] = [
+            $incubators[] = [
+                'machine_info' => [
                     'table' => 'incubator-machines',
-                    'id'    => $this->form['incubator'],
-                    'name'  => $incubator->incubatorName,
-                ];
-            }
+                    'id'    => $entry['id'],
+                    'name'  => $incubator ? $incubator->incubatorName : ($entry['name'] ?? 'Unknown'),
+                ],
+                'display_temp' => $entry['display_temp'],
+                'calibrator'   => $entry['calibrator'],
+            ];
         }
+
+        $inputs['incubators'] = $incubators;
 
         return $inputs;
     }
 
-    protected function updateCompletedIncubators(): void
+    protected function formInputsWithPhotos(array $baseInputs): array
     {
-        $today = now()->format('Y-m-d');
-        $formTypeName = $this->formTypeName();
+        foreach ($this->uploadedPhotoUrls as $photoKey => $urls) {
+            if (str_starts_with($photoKey, 'accuracy_photos_')) {
+                $incubatorId = (int) str_replace('accuracy_photos_', '', $photoKey);
 
-        $formTypeId = DB::table('form_types')
-            ->where('form_name', $formTypeName)
-            ->value('id');
-
-        if (!$formTypeId) {
-            $this->completedIncubators = [];
-            return;
-        }
-
-        $completedForms = DB::table('forms')
-            ->where('form_type_id', $formTypeId)
-            ->whereDate('date_submitted', $today)
-            ->whereNotNull('form_inputs')
-            ->get();
-
-        $this->completedIncubators = [];
-
-        foreach ($completedForms as $form) {
-            $formInputs = is_array($form->form_inputs)
-                ? $form->form_inputs
-                : json_decode($form->form_inputs, true);
-
-            if (isset($formInputs['machine_info']['id'])) {
-                $this->completedIncubators[] = $formInputs['machine_info']['id'];
+                foreach ($baseInputs['incubators'] as $index => &$entry) {
+                    if ((int) ($entry['machine_info']['id'] ?? 0) === $incubatorId) {
+                        $entry['accuracy_photos'] = $urls;
+                        break;
+                    }
+                }
+                unset($entry);
+            } else {
+                if (!empty($urls)) {
+                    $baseInputs[$photoKey] = $urls;
+                }
             }
         }
+
+        foreach ($baseInputs['incubators'] as &$entry) {
+            if (!isset($entry['accuracy_photos'])) {
+                $entry['accuracy_photos'] = [];
+            }
+        }
+        unset($entry);
+
+        return $baseInputs;
     }
 
     protected function sendFormToWebhook(int $formId): void
@@ -251,7 +250,11 @@ class IncubatorMachineAccuracyForm extends FormNavigation
                 : json_decode($form->form_inputs, true);
             $formInputs = (array) $formInputs;
 
-            $machineInfo = $formInputs['machine_info'] ?? null;
+            $incubators = $formInputs['incubators'] ?? [];
+            $machineNames = collect($incubators)
+                ->pluck('machine_info.name')
+                ->filter()
+                ->implode(', ');
 
             $payload = [
                 'form' => [
@@ -264,14 +267,15 @@ class IncubatorMachineAccuracyForm extends FormNavigation
                     'id'   => $form->uploaded_by,
                     'name' => trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) ?: 'Unknown User',
                 ] : null,
-                'machine'  => $machineInfo,
+                'machines' => collect($incubators)->map(fn ($inc) => $inc['machine_info'] ?? null)->filter()->values()->toArray(),
                 'message'  => [
-                    'form_name'    => $form->form_type_name ?: 'Unknown Form Type',
-                    'machine_name' => is_array($machineInfo) ? ($machineInfo['name'] ?? null) : null,
-                    'submitted_by' => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
-                    'date_time'    => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
-                    'photos'       => [],
-                    'shift'        => $formInputs['shift'] ?? 'N/A',
+                    'form_name'       => $form->form_type_name ?: 'Unknown Form Type',
+                    'machine_name'    => $machineNames ?: null,
+                    'submitted_by'    => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
+                    'date_time'       => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
+                    'photos'          => [],
+                    'shift'           => $formInputs['shift'] ?? 'N/A',
+                    'incubator_count' => count($incubators),
                 ],
                 'timestamp' => now()->toISOString(),
             ];

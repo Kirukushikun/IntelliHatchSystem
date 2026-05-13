@@ -46,7 +46,7 @@ class IncubatorRoutineForm extends FormNavigation
         $this->form['hatchery_man'] = $this->initPersonnelField();
 
         $this->incubators = Incubator::where('isActive', true)
-            ->orderBy('incubatorName')
+            ->orderByRaw('LENGTH(incubatorName), incubatorName')
             ->get()
             ->mapWithKeys(function ($incubator) {
                 return [$incubator->id => $incubator->incubatorName];

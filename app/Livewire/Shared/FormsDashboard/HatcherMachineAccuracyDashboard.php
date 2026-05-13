@@ -237,16 +237,32 @@ class HatcherMachineAccuracyDashboard extends Component
             $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
             $photos   = [];
 
-            $photoFields = ['accuracy_photos'];
+            // New format: per-hatcher photos inside hatchers array
+            foreach ($formData['hatchers'] ?? [] as $hatcherData) {
+                $hatcherId = $hatcherData['machine_info']['id'] ?? null;
+                $photoKey  = $hatcherId ? "accuracy_photos_{$hatcherId}" : null;
 
-            foreach ($photoFields as $photoField) {
-                if ($field !== null && $photoField !== $field) {
+                if ($field !== null && $photoKey !== $field) {
                     continue;
                 }
-                if (!isset($formData[$photoField])) {
-                    continue;
+
+                $raw = $hatcherData['accuracy_photos'] ?? [];
+                if (is_string($raw)) {
+                    $raw = json_decode($raw, true) ?: [];
                 }
-                $raw = $formData[$photoField];
+                $hatcherName = $hatcherData['machine_info']['name'] ?? 'Hatcher';
+                foreach ((array) $raw as $photo) {
+                    if (is_array($photo) && isset($photo['url'])) {
+                        $photos[] = ['url' => $photo['url'], 'name' => $hatcherName];
+                    } elseif (is_string($photo)) {
+                        $photos[] = ['url' => $photo, 'name' => $hatcherName];
+                    }
+                }
+            }
+
+            // Legacy format: top-level accuracy_photos
+            if ($field === null || $field === 'accuracy_photos') {
+                $raw = $formData['accuracy_photos'] ?? [];
                 if (is_string($raw)) {
                     $raw = json_decode($raw, true) ?: [];
                 }

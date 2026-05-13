@@ -48,44 +48,93 @@
                         <option value="3rd Shift">3rd Shift</option>
                     </x-dropdown>
                 </div>
-
-                <div data-field="hatcher">
-                    <x-dropdown label="Hatcher" name="hatcher" error-key="form.hatcher" placeholder="Select hatcher" wire:model.live="form.hatcher" required>
-                        @foreach($hatchers as $id => $name)
-                            <option value="{{ $id }}" {{ in_array($id, $completedHatchers) ? 'disabled' : '' }}>
-                                {{ $name }}{{ in_array($id, $completedHatchers) ? ' (Done)' : '' }}
-                            </option>
-                        @endforeach
-                    </x-dropdown>
-                </div>
             </div>
 
             <div data-step="2" class="space-y-4" @style(["display:none" => $currentStep !== 2])>
-                <x-title>TEMPERATURE READINGS</x-title>
+                <x-title>TEMPERATURE READINGS — ALL HATCHERS</x-title>
 
-                <div data-field="set_point_temp">
-                    <x-text-input label="Set Point Temperature" name="set_point_temp" error-key="form.set_point_temp" :required="true" placeholder="Enter set point temperature..." wireModel="form.set_point_temp" />
-                </div>
+                @forelse($this->form['hatchers'] as $index => $hatcher)
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
+                         wire:key="hatcher-{{ $hatcher['id'] }}"
+                         id="hatcher-card-{{ $hatcher['id'] }}">
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                            {{ $hatcher['name'] }}
+                        </h3>
 
-                <div data-field="display_temp">
-                    <x-text-input label="Display Temp" name="display_temp" error-key="form.display_temp" :required="true" placeholder="Enter display temperature..." wireModel="form.display_temp" />
-                </div>
+                        <div data-field="hatchers.{{ $index }}.set_point_temp">
+                            <x-text-input
+                                label="Set Point Temperature"
+                                name="hatchers_{{ $index }}_set_point_temp"
+                                error-key="form.hatchers.{{ $index }}.set_point_temp"
+                                :required="true"
+                                placeholder="Enter set point temperature..."
+                                wireModel="form.hatchers.{{ $index }}.set_point_temp"
+                                type="number"
+                                step="0.01"
+                            />
+                        </div>
 
-                <div data-field="calibrator">
-                    <x-text-input label="Calibrator" name="calibrator" error-key="form.calibrator" :required="true" placeholder="Enter calibrator reading..." wireModel="form.calibrator" />
-                </div>
+                        <div data-field="hatchers.{{ $index }}.display_temp">
+                            <x-text-input
+                                label="Display Temp"
+                                name="hatchers_{{ $index }}_display_temp"
+                                error-key="form.hatchers.{{ $index }}.display_temp"
+                                :required="true"
+                                placeholder="Enter display temperature..."
+                                wireModel="form.hatchers.{{ $index }}.display_temp"
+                                type="number"
+                                step="0.01"
+                            />
+                        </div>
 
-                <div data-field="humidity_set_point">
-                    <x-text-input label="Humidity Set Point" name="humidity_set_point" error-key="form.humidity_set_point" :required="true" placeholder="Enter humidity set point..." wireModel="form.humidity_set_point" />
-                </div>
+                        <div data-field="hatchers.{{ $index }}.calibrator">
+                            <x-text-input
+                                label="Calibrator"
+                                name="hatchers_{{ $index }}_calibrator"
+                                error-key="form.hatchers.{{ $index }}.calibrator"
+                                :required="true"
+                                placeholder="Enter calibrator reading..."
+                                wireModel="form.hatchers.{{ $index }}.calibrator"
+                                type="number"
+                                step="0.01"
+                            />
+                        </div>
 
-                <div data-field="humidity_machine_reading">
-                    <x-text-input label="Humidity Machine Reading" name="humidity_machine_reading" error-key="form.humidity_machine_reading" :required="true" placeholder="Enter humidity machine reading..." wireModel="form.humidity_machine_reading" />
-                </div>
+                        <div data-field="hatchers.{{ $index }}.humidity_set_point">
+                            <x-text-input
+                                label="Humidity Set Point"
+                                name="hatchers_{{ $index }}_humidity_set_point"
+                                error-key="form.hatchers.{{ $index }}.humidity_set_point"
+                                :required="true"
+                                placeholder="Enter humidity set point..."
+                                wireModel="form.hatchers.{{ $index }}.humidity_set_point"
+                                type="number"
+                                step="0.01"
+                            />
+                        </div>
 
-                <div data-field="accuracy_photos">
-                    <x-photo-attach label="Photo of Display Next to Calibrator" name="accuracy_photos" />
-                </div>
+                        <div data-field="hatchers.{{ $index }}.humidity_machine_reading">
+                            <x-text-input
+                                label="Humidity Machine Reading"
+                                name="hatchers_{{ $index }}_humidity_machine_reading"
+                                error-key="form.hatchers.{{ $index }}.humidity_machine_reading"
+                                :required="true"
+                                placeholder="Enter humidity machine reading..."
+                                wireModel="form.hatchers.{{ $index }}.humidity_machine_reading"
+                                type="number"
+                                step="0.01"
+                            />
+                        </div>
+
+                        <div data-field="accuracy_photos_{{ $hatcher['id'] }}">
+                            <x-photo-attach label="Photo (Display next to Calibrator)" name="accuracy_photos_{{ $hatcher['id'] }}" />
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <p class="text-sm">No active hatchers found.</p>
+                    </div>
+                @endforelse
             </div>
         </x-progress-navigation>
     </form>

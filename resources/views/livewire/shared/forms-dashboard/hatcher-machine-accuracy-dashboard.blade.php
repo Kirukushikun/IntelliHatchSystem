@@ -111,16 +111,18 @@
                 </thead>
                 <tbody>
                     @forelse ($forms as $form)
-                        @php
-                            $formData = is_array($form->form_inputs) ? $form->form_inputs : (json_decode($form->form_inputs ?? '{}', true) ?: []);
-                            $machineName = $formData['machine_info']['name'] ?? 'N/A';
-                            $shift = $formData['shift'] ?? 'N/A';
-                        @endphp
+                        @php $formData = is_array($form->form_inputs) ? $form->form_inputs : (json_decode($form->form_inputs ?? '{}', true) ?: []); @endphp
                         <tr class="even:bg-slate-50 dark:even:bg-gray-700/50 hover:bg-slate-100 dark:hover:bg-gray-700">
                             <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p></td>
                             <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</p></td>
-                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $machineName }}</p></td>
-                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $shift }}</p></td>
+                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">
+                                @if(!empty($formData['hatchers']) && is_array($formData['hatchers']))
+                                    {{ collect($formData['hatchers'])->pluck('machine_info.name')->filter()->implode(', ') ?: 'N/A' }}
+                                @else
+                                    {{ $formData['machine_info']['name'] ?? 'N/A' }}
+                                @endif
+                            </p></td>
+                            <td class="p-4 py-5"><p class="text-sm text-slate-800 dark:text-slate-200">{{ $formData['shift'] ?? 'N/A' }}</p></td>
                             <td class="p-4 py-5 text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <button wire:click="viewDetails({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors">View</button>
@@ -145,17 +147,19 @@
         <!-- Mobile Card View -->
         <div class="md:hidden">
             @forelse($forms as $form)
-                @php
-                    $formData = is_array($form->form_inputs) ? $form->form_inputs : (json_decode($form->form_inputs ?? '{}', true) ?: []);
-                    $machineName = $formData['machine_info']['name'] ?? 'N/A';
-                    $shift = $formData['shift'] ?? 'N/A';
-                @endphp
+                @php $formData = is_array($form->form_inputs) ? $form->form_inputs : (json_decode($form->form_inputs ?? '{}', true) ?: []); @endphp
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4 space-y-3 mb-4">
                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $form->date_submitted ? $form->date_submitted->format('d M, Y g:i A') : 'N/A' }}</p>
                     <div class="space-y-2">
                         <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatchery Man:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $form->user ? ($form->user->first_name . ' ' . $form->user->last_name) : 'Unknown' }}</span></div>
-                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatcher:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $machineName }}</span></div>
-                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Shift:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $shift }}</span></div>
+                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hatcher:</span><span class="text-xs text-gray-900 dark:text-gray-200">
+                            @if(!empty($formData['hatchers']) && is_array($formData['hatchers']))
+                                {{ collect($formData['hatchers'])->pluck('machine_info.name')->filter()->implode(', ') ?: 'N/A' }}
+                            @else
+                                {{ $formData['machine_info']['name'] ?? 'N/A' }}
+                            @endif
+                        </span></div>
+                        <div class="flex justify-between"><span class="text-xs font-medium text-gray-500 dark:text-gray-400">Shift:</span><span class="text-xs text-gray-900 dark:text-gray-200">{{ $formData['shift'] ?? 'N/A' }}</span></div>
                     </div>
                     <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                         <button wire:click="viewDetails({{ $form->id }})" class="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 rounded-md hover:bg-blue-100 transition-colors">View</button>

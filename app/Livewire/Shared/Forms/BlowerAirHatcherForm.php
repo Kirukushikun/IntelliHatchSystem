@@ -74,7 +74,7 @@ class BlowerAirHatcherForm extends FormNavigation
         
         // Load hatchers
         $this->hatchers = Hatcher::where('isActive', true)
-            ->orderBy('hatcherName')
+            ->orderByRaw('LENGTH(hatcherName), hatcherName')
             ->get()
             ->mapWithKeys(function ($hatcher) {
                 return [$hatcher->id => $hatcher->hatcherName];

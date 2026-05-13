@@ -58,25 +58,25 @@ class PasgarScoreForm extends FormNavigation
         $this->form['personnel_name'] = $this->initPersonnelField();
 
         $this->psNumbers = PsNumber::where('isActive', true)
-            ->orderBy('psNumber')
+            ->orderByRaw('LENGTH(psNumber), psNumber')
             ->get()
             ->mapWithKeys(fn ($ps) => [$ps->id => $ps->psNumber])
             ->toArray();
 
         $this->houseNumbers = HouseNumber::where('isActive', true)
-            ->orderBy('houseNumber')
+            ->orderByRaw('LENGTH(houseNumber), houseNumber')
             ->get()
             ->mapWithKeys(fn ($house) => [$house->id => $house->houseNumber])
             ->toArray();
 
         $this->incubators = Incubator::where('isActive', true)
-            ->orderBy('incubatorName')
+            ->orderByRaw('LENGTH(incubatorName), incubatorName')
             ->get()
             ->mapWithKeys(fn ($inc) => [$inc->id => $inc->incubatorName])
             ->toArray();
 
         $this->hatchers = Hatcher::where('isActive', true)
-            ->orderBy('hatcherName')
+            ->orderByRaw('LENGTH(hatcherName), hatcherName')
             ->get()
             ->mapWithKeys(fn ($h) => [$h->id => $h->hatcherName])
             ->toArray();

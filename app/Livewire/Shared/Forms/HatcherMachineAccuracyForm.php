@@ -6,7 +6,6 @@ use App\Livewire\Configs\HatcherMachineAccuracyConfig;
 use App\Livewire\Components\FormNavigation;
 use App\Livewire\Shared\Forms\Traits\TempPhotoManager;
 use App\Models\Hatcher;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -26,16 +25,7 @@ class HatcherMachineAccuracyForm extends FormNavigation
     protected bool $disableShiftLogic = true;
 
     /** @var array */
-    public $hatchers = [];
-
-    /** @var array */
     public $hatcheryMen = [];
-
-    /** @var array */
-    public $completedHatchers = [];
-
-    /** @var int|null */
-    public ?int $uploadedBy = null;
 
     public function mount($formType = 'hatcher_machine_accuracy'): void
     {
@@ -46,16 +36,22 @@ class HatcherMachineAccuracyForm extends FormNavigation
         $this->schedule = $this->scheduleConfig();
         $this->recalculateVisibleSteps();
 
-        $this->hatchers = Hatcher::where('isActive', true)
-            ->orderBy('hatcherName')
-            ->get()
-            ->mapWithKeys(fn ($h) => [$h->id => $h->hatcherName])
-            ->toArray();
+        $activeHatchers = Hatcher::where('isActive', true)
+            ->orderByRaw('LENGTH(hatcherName), hatcherName')
+            ->get();
+
+        $this->form['hatchers'] = $activeHatchers->map(fn ($h) => [
+            'id'                       => $h->id,
+            'name'                     => $h->hatcherName,
+            'set_point_temp'           => '',
+            'display_temp'             => '',
+            'calibrator'               => '',
+            'humidity_set_point'       => '',
+            'humidity_machine_reading' => '',
+        ])->toArray();
 
         $this->hatcheryMen = $this->loadPersonnelByTags();
         $this->form['hatchery_man'] = $this->initPersonnelField();
-
-        $this->updateCompletedHatchers();
     }
 
     public function updated($name, $value): void
@@ -117,7 +113,7 @@ class HatcherMachineAccuracyForm extends FormNavigation
 
             DB::table('forms')->where('id', $formId)->update([
                 'form_inputs' => json_encode($this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos())),
-                'updated_at' => now(),
+                'updated_at'  => now(),
             ]);
 
             $this->sendFormToWebhook($formId);
@@ -129,7 +125,8 @@ class HatcherMachineAccuracyForm extends FormNavigation
             $firstKey = array_key_first($e->validator->errors()->messages());
             if ($firstKey) {
                 $fieldName = str_replace('form.', '', $firstKey);
-                $this->goToStepWithField($fieldName);
+                $baseField = explode('.', $fieldName)[0];
+                $this->goToStepWithField($baseField);
             }
             throw $e;
         } catch (\Exception $e) {
@@ -155,12 +152,12 @@ class HatcherMachineAccuracyForm extends FormNavigation
             }
 
             $formId = (int) DB::table('forms')->insertGetId([
-                'form_type_id' => $formTypeId,
-                'form_inputs' => json_encode($formInputs),
+                'form_type_id'   => $formTypeId,
+                'form_inputs'    => json_encode($formInputs),
                 'date_submitted' => now(),
-                'uploaded_by' => Auth::id(),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'uploaded_by'    => Auth::id(),
+                'created_at'     => now(),
+                'updated_at'     => now(),
             ]);
 
             DB::commit();
@@ -177,56 +174,60 @@ class HatcherMachineAccuracyForm extends FormNavigation
         $inputs = $this->form;
 
         $inputs['hatchery_man'] = $this->resolvePersonnelNames($this->form['hatchery_man'] ?? [], $this->hatcheryMen);
-        unset($inputs['hatcher']);
 
-        if (!empty($this->form['hatcher'])) {
+        $hatchers = [];
+        foreach ($this->form['hatchers'] as $entry) {
             $hatcher = DB::table('hatcher-machines')
-                ->where('id', $this->form['hatcher'])
+                ->where('id', $entry['id'])
                 ->first();
 
-            if ($hatcher) {
-                $inputs['machine_info'] = [
+            $hatchers[] = [
+                'machine_info' => [
                     'table' => 'hatcher-machines',
-                    'id' => $this->form['hatcher'],
-                    'name' => $hatcher->hatcherName,
-                ];
-            }
+                    'id'    => $entry['id'],
+                    'name'  => $hatcher ? $hatcher->hatcherName : ($entry['name'] ?? 'Unknown'),
+                ],
+                'set_point_temp'           => $entry['set_point_temp'],
+                'display_temp'             => $entry['display_temp'],
+                'calibrator'               => $entry['calibrator'],
+                'humidity_set_point'       => $entry['humidity_set_point'],
+                'humidity_machine_reading' => $entry['humidity_machine_reading'],
+            ];
         }
+
+        $inputs['hatchers'] = $hatchers;
 
         return $inputs;
     }
 
-    protected function updateCompletedHatchers(): void
+    protected function formInputsWithPhotos(array $baseInputs): array
     {
-        $today = now()->format('Y-m-d');
-        $formTypeName = $this->formTypeName();
+        foreach ($this->uploadedPhotoUrls as $photoKey => $urls) {
+            if (str_starts_with($photoKey, 'accuracy_photos_')) {
+                $hatcherId = (int) str_replace('accuracy_photos_', '', $photoKey);
 
-        $formTypeId = DB::table('form_types')
-            ->where('form_name', $formTypeName)
-            ->value('id');
-
-        if (!$formTypeId) {
-            $this->completedHatchers = [];
-            return;
-        }
-
-        $completedForms = DB::table('forms')
-            ->where('form_type_id', $formTypeId)
-            ->whereDate('date_submitted', $today)
-            ->whereNotNull('form_inputs')
-            ->get();
-
-        $this->completedHatchers = [];
-
-        foreach ($completedForms as $form) {
-            $formInputs = is_array($form->form_inputs)
-                ? $form->form_inputs
-                : json_decode($form->form_inputs, true);
-
-            if (isset($formInputs['machine_info']['id'])) {
-                $this->completedHatchers[] = $formInputs['machine_info']['id'];
+                foreach ($baseInputs['hatchers'] as $index => &$entry) {
+                    if ((int) ($entry['machine_info']['id'] ?? 0) === $hatcherId) {
+                        $entry['accuracy_photos'] = $urls;
+                        break;
+                    }
+                }
+                unset($entry);
+            } else {
+                if (!empty($urls)) {
+                    $baseInputs[$photoKey] = $urls;
+                }
             }
         }
+
+        foreach ($baseInputs['hatchers'] as &$entry) {
+            if (!isset($entry['accuracy_photos'])) {
+                $entry['accuracy_photos'] = [];
+            }
+        }
+        unset($entry);
+
+        return $baseInputs;
     }
 
     protected function sendFormToWebhook(int $formId): void
@@ -254,27 +255,32 @@ class HatcherMachineAccuracyForm extends FormNavigation
                 : json_decode($form->form_inputs, true);
             $formInputs = (array) $formInputs;
 
-            $machineInfo = $formInputs['machine_info'] ?? null;
+            $hatchers = $formInputs['hatchers'] ?? [];
+            $machineNames = collect($hatchers)
+                ->pluck('machine_info.name')
+                ->filter()
+                ->implode(', ');
 
             $payload = [
                 'form' => [
-                    'form_id' => $form->id,
+                    'form_id'   => $form->id,
                     'form_name' => $form->form_type_name ?: 'Unknown Form Type',
                 ],
-                'records' => $formInputs,
+                'records'        => $formInputs,
                 'date_submitted' => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
-                'uploaded_by' => $form->uploaded_by ? [
-                    'id' => $form->uploaded_by,
+                'uploaded_by'    => $form->uploaded_by ? [
+                    'id'   => $form->uploaded_by,
                     'name' => trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) ?: 'Unknown User',
                 ] : null,
-                'machine' => $machineInfo,
-                'message' => [
-                    'form_name' => $form->form_type_name ?: 'Unknown Form Type',
-                    'machine_name' => is_array($machineInfo) ? ($machineInfo['name'] ?? null) : null,
-                    'submitted_by' => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
-                    'date_time' => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
-                    'photos' => [],
-                    'shift' => $formInputs['shift'] ?? 'N/A',
+                'machines' => collect($hatchers)->map(fn ($h) => $h['machine_info'] ?? null)->filter()->values()->toArray(),
+                'message'  => [
+                    'form_name'     => $form->form_type_name ?: 'Unknown Form Type',
+                    'machine_name'  => $machineNames ?: null,
+                    'submitted_by'  => $form->uploaded_by ? trim(($form->first_name ?: '') . ' ' . ($form->last_name ?: '')) : null,
+                    'date_time'     => date('Y-m-d H:i:s', strtotime($form->date_submitted)),
+                    'photos'        => [],
+                    'shift'         => $formInputs['shift'] ?? 'N/A',
+                    'hatcher_count' => count($hatchers),
                 ],
                 'timestamp' => now()->toISOString(),
             ];
@@ -283,7 +289,7 @@ class HatcherMachineAccuracyForm extends FormNavigation
         } catch (\Exception $e) {
             Log::error('Exception occurred while sending form to webhook', [
                 'form_id' => $formId,
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }

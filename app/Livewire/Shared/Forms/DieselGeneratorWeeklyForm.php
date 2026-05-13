@@ -39,7 +39,7 @@ class DieselGeneratorWeeklyForm extends FormNavigation
         $this->personnelList = $this->loadPersonnelByTags();
         $this->form['technician_id'] = $this->initPersonnelField();
 
-        $this->genSetList = GetSet::orderBy('getSetName')
+        $this->genSetList = GetSet::orderByRaw('LENGTH(getSetName), getSetName')
             ->get()
             ->mapWithKeys(fn ($g) => [$g->id => $g->getSetName])
             ->toArray();

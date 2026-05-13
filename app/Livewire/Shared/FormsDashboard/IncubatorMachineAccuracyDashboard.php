@@ -237,16 +237,32 @@ class IncubatorMachineAccuracyDashboard extends Component
             $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
             $photos   = [];
 
-            $photoFields = ['accuracy_photos'];
+            // New format: per-incubator photos inside incubators array
+            foreach ($formData['incubators'] ?? [] as $incData) {
+                $incId    = $incData['machine_info']['id'] ?? null;
+                $photoKey = $incId ? "accuracy_photos_{$incId}" : null;
 
-            foreach ($photoFields as $photoField) {
-                if ($field !== null && $photoField !== $field) {
+                if ($field !== null && $photoKey !== $field) {
                     continue;
                 }
-                if (!isset($formData[$photoField])) {
-                    continue;
+
+                $raw = $incData['accuracy_photos'] ?? [];
+                if (is_string($raw)) {
+                    $raw = json_decode($raw, true) ?: [];
                 }
-                $raw = $formData[$photoField];
+                $incName = $incData['machine_info']['name'] ?? 'Incubator';
+                foreach ((array) $raw as $photo) {
+                    if (is_array($photo) && isset($photo['url'])) {
+                        $photos[] = ['url' => $photo['url'], 'name' => $incName];
+                    } elseif (is_string($photo)) {
+                        $photos[] = ['url' => $photo, 'name' => $incName];
+                    }
+                }
+            }
+
+            // Legacy format: top-level accuracy_photos
+            if ($field === null || $field === 'accuracy_photos') {
+                $raw = $formData['accuracy_photos'] ?? [];
                 if (is_string($raw)) {
                     $raw = json_decode($raw, true) ?: [];
                 }
