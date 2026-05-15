@@ -147,10 +147,15 @@
                                 $inc = \Illuminate\Support\Facades\DB::table('incubator-machines')->where('id', $formData['incubator_number'])->first();
                                 $incubatorName = $inc->incubatorName ?? 'N/A';
                             }
-                            $personnelDisplay = $formData['personnel_name'] ?? 'N/A';
-                            if (is_numeric($personnelDisplay)) {
-                                $personnelUser = \Illuminate\Support\Facades\DB::table('users')->where('id', $personnelDisplay)->first();
+                            $personnelRaw = $formData['personnel_name'] ?? 'N/A';
+                            if (is_array($personnelRaw)) {
+                                $personnelNames = \Illuminate\Support\Facades\DB::table('users')->whereIn('id', $personnelRaw)->get()->map(fn($u) => trim($u->first_name . ' ' . $u->last_name))->toArray();
+                                $personnelDisplay = $personnelNames ? implode(', ', $personnelNames) : 'N/A';
+                            } elseif (is_numeric($personnelRaw)) {
+                                $personnelUser = \Illuminate\Support\Facades\DB::table('users')->where('id', $personnelRaw)->first();
                                 $personnelDisplay = $personnelUser ? trim($personnelUser->first_name . ' ' . $personnelUser->last_name) : 'N/A';
+                            } else {
+                                $personnelDisplay = $personnelRaw;
                             }
                         @endphp
                         <tr class="even:bg-slate-50 dark:even:bg-gray-700/50 hover:bg-slate-100 dark:hover:bg-gray-700">
@@ -216,10 +221,15 @@
             @forelse ($forms as $form)
                 @php
                     $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
-                    $mPersonnelDisplay = $formData['personnel_name'] ?? 'N/A';
-                    if (is_numeric($mPersonnelDisplay)) {
-                        $mPersonnelUser = \Illuminate\Support\Facades\DB::table('users')->where('id', $mPersonnelDisplay)->first();
+                    $mPersonnelRaw = $formData['personnel_name'] ?? 'N/A';
+                    if (is_array($mPersonnelRaw)) {
+                        $mPersonnelNames = \Illuminate\Support\Facades\DB::table('users')->whereIn('id', $mPersonnelRaw)->get()->map(fn($u) => trim($u->first_name . ' ' . $u->last_name))->toArray();
+                        $mPersonnelDisplay = $mPersonnelNames ? implode(', ', $mPersonnelNames) : 'N/A';
+                    } elseif (is_numeric($mPersonnelRaw)) {
+                        $mPersonnelUser = \Illuminate\Support\Facades\DB::table('users')->where('id', $mPersonnelRaw)->first();
                         $mPersonnelDisplay = $mPersonnelUser ? trim($mPersonnelUser->first_name . ' ' . $mPersonnelUser->last_name) : 'N/A';
+                    } else {
+                        $mPersonnelDisplay = $mPersonnelRaw;
                     }
                 @endphp
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-lg p-4 space-y-3">

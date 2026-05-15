@@ -53,10 +53,15 @@
                             <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->selectedForm->date_submitted ? $this->selectedForm->date_submitted->format('d M, Y g:i A') : 'N/A' }}</span>
                         </div>
                         @php
-                            $modalPersonnel = $this->formData['personnel_name'] ?? 'N/A';
-                            if (is_numeric($modalPersonnel)) {
-                                $modalUser = \Illuminate\Support\Facades\DB::table('users')->where('id', $modalPersonnel)->first();
+                            $modalPersonnelRaw = $this->formData['personnel_name'] ?? 'N/A';
+                            if (is_array($modalPersonnelRaw)) {
+                                $modalNames = \Illuminate\Support\Facades\DB::table('users')->whereIn('id', $modalPersonnelRaw)->get()->map(fn($u) => trim($u->first_name . ' ' . $u->last_name))->toArray();
+                                $modalPersonnel = $modalNames ? implode(', ', $modalNames) : 'N/A';
+                            } elseif (is_numeric($modalPersonnelRaw)) {
+                                $modalUser = \Illuminate\Support\Facades\DB::table('users')->where('id', $modalPersonnelRaw)->first();
                                 $modalPersonnel = $modalUser ? trim($modalUser->first_name . ' ' . $modalUser->last_name) : 'N/A';
+                            } else {
+                                $modalPersonnel = $modalPersonnelRaw;
                             }
                         @endphp
                         <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
@@ -290,7 +295,19 @@
                     <div class="mb-6">
                         <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
                             <span class="text-sm font-medium text-gray-600 dark:text-gray-400">QC Personnel:</span>
-                            <span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['qc_personnel'] ?? 'N/A' }}</span>
+                            @php
+                                $qcRaw = $this->formData['qc_personnel'] ?? 'N/A';
+                                if (is_array($qcRaw)) {
+                                    $qcNames = \Illuminate\Support\Facades\DB::table('users')->whereIn('id', $qcRaw)->get()->map(fn($u) => trim($u->first_name . ' ' . $u->last_name))->toArray();
+                                    $qcDisplay = $qcNames ? implode(', ', $qcNames) : 'N/A';
+                                } elseif (is_numeric($qcRaw)) {
+                                    $qcUser = \Illuminate\Support\Facades\DB::table('users')->where('id', $qcRaw)->first();
+                                    $qcDisplay = $qcUser ? trim($qcUser->first_name . ' ' . $qcUser->last_name) : 'N/A';
+                                } else {
+                                    $qcDisplay = $qcRaw;
+                                }
+                            @endphp
+                            <span class="text-sm text-gray-900 dark:text-gray-200">{{ $qcDisplay }}</span>
                         </div>
                     </div>
 
