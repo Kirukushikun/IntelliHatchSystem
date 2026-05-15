@@ -505,10 +505,15 @@ class FormsPrintController extends Controller
                 $incubatorName = $inc->incubatorName ?? 'N/A';
             }
 
-            $personnelName = $inputs['personnel_name'] ?? 'N/A';
-            if (is_numeric($personnelName)) {
-                $personnelUser = DB::table('users')->where('id', $personnelName)->first();
+            $personnelRaw = $inputs['personnel_name'] ?? 'N/A';
+            if (is_array($personnelRaw)) {
+                $names = DB::table('users')->whereIn('id', $personnelRaw)->get()->map(fn ($u) => trim(($u->first_name ?? '').' '.($u->last_name ?? '')))->toArray();
+                $personnelName = $names ? implode(', ', $names) : 'N/A';
+            } elseif (is_numeric($personnelRaw)) {
+                $personnelUser = DB::table('users')->where('id', $personnelRaw)->first();
                 $personnelName = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
+            } else {
+                $personnelName = $personnelRaw;
             }
 
             return [
@@ -562,10 +567,22 @@ class FormsPrintController extends Controller
             $hatcherName = $hatcher->hatcherName ?? 'N/A';
         }
 
-        // Resolve personnel name if stored as user ID
-        if (isset($inputs['personnel_name']) && is_numeric($inputs['personnel_name'])) {
+        // Resolve personnel name if stored as user ID(s)
+        if (isset($inputs['personnel_name']) && is_array($inputs['personnel_name'])) {
+            $names = DB::table('users')->whereIn('id', $inputs['personnel_name'])->get()->map(fn ($u) => trim(($u->first_name ?? '').' '.($u->last_name ?? '')))->toArray();
+            $inputs['personnel_name'] = $names ? implode(', ', $names) : 'N/A';
+        } elseif (isset($inputs['personnel_name']) && is_numeric($inputs['personnel_name'])) {
             $personnelUser = DB::table('users')->where('id', $inputs['personnel_name'])->first();
             $inputs['personnel_name'] = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
+        }
+
+        // Resolve QC personnel if stored as user ID(s)
+        if (isset($inputs['qc_personnel']) && is_array($inputs['qc_personnel'])) {
+            $names = DB::table('users')->whereIn('id', $inputs['qc_personnel'])->get()->map(fn ($u) => trim(($u->first_name ?? '').' '.($u->last_name ?? '')))->toArray();
+            $inputs['qc_personnel'] = $names ? implode(', ', $names) : 'N/A';
+        } elseif (isset($inputs['qc_personnel']) && is_numeric($inputs['qc_personnel'])) {
+            $qcUser = DB::table('users')->where('id', $inputs['qc_personnel'])->first();
+            $inputs['qc_personnel'] = $qcUser ? trim(($qcUser->first_name ?? '').' '.($qcUser->last_name ?? '')) : 'N/A';
         }
 
         return view('admin.print.pasgar-score-detail', [
@@ -602,7 +619,10 @@ class FormsPrintController extends Controller
             $hatcherName = $hatcher->hatcherName ?? 'N/A';
         }
 
-        if (isset($inputs['personnel_name']) && is_numeric($inputs['personnel_name'])) {
+        if (isset($inputs['personnel_name']) && is_array($inputs['personnel_name'])) {
+            $names = DB::table('users')->whereIn('id', $inputs['personnel_name'])->get()->map(fn ($u) => trim(($u->first_name ?? '').' '.($u->last_name ?? '')))->toArray();
+            $inputs['personnel_name'] = $names ? implode(', ', $names) : 'N/A';
+        } elseif (isset($inputs['personnel_name']) && is_numeric($inputs['personnel_name'])) {
             $personnelUser = DB::table('users')->where('id', $inputs['personnel_name'])->first();
             $inputs['personnel_name'] = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
         }
