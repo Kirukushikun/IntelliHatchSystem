@@ -32,6 +32,13 @@
      })"
      @form-saved.window="sessionStorage.removeItem('ihs_pasgar_backup')"
 >
+    <div wire:offline class="mb-4 px-4 py-3 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-sm font-medium flex items-center gap-2">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 5.636a9 9 0 000 12.728M12 9v4m0 4h.01"/>
+        </svg>
+        <span>You are currently offline. Your data is saved locally and will sync when connection is restored.</span>
+    </div>
+
     <form wire:submit.prevent="submitForm" id="step-form" class="space-y-4" novalidate>
         @csrf
 
