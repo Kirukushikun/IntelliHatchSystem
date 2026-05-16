@@ -1,8 +1,37 @@
-<div x-data="{ formSubmitted: @entangle('formSubmitted') }"
+<div x-data="{
+        formSubmitted: @entangle('formSubmitted'),
+        _bk: 'ihs_pasgar_backup',
+        init() {
+            // Restore form state from sessionStorage if component was reset
+            const saved = sessionStorage.getItem(this._bk);
+            if (saved) {
+                try {
+                    const { form, ts } = JSON.parse(saved);
+                    const isStale = (Date.now() - ts) > 2 * 60 * 60 * 1000;
+                    const formIsEmpty = !$wire.form.hatch_date && !$wire.form.ps_number;
+                    if (!isStale && formIsEmpty && (form.hatch_date || form.ps_number)) {
+                        $wire.restoreForm(form);
+                    } else if (isStale) {
+                        sessionStorage.removeItem(this._bk);
+                    }
+                } catch(e) { sessionStorage.removeItem(this._bk); }
+            }
+
+            // Auto-save form state every 15 seconds
+            setInterval(() => {
+                const f = $wire.form;
+                if (f.hatch_date || f.ps_number || (f.samples && f.samples.length > 1)) {
+                    sessionStorage.setItem(this._bk, JSON.stringify({ form: f, ts: Date.now() }));
+                }
+            }, 15000);
+        }
+     }"
      x-on:focus-chick-weight.window="$nextTick(() => {
          let el = document.getElementById('chick_weight_' + $event.detail.index);
          if (el) el.focus();
-     })">
+     })"
+     @form-saved.window="sessionStorage.removeItem('ihs_pasgar_backup')"
+>
     <form wire:submit.prevent="submitForm" id="step-form" class="space-y-4" novalidate>
         @csrf
 

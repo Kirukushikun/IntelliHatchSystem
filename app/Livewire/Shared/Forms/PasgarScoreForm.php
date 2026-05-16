@@ -279,6 +279,32 @@ class PasgarScoreForm extends FormNavigation
         return PasgarScoreConfig::getMessages();
     }
 
+    public function restoreForm(array $data): void
+    {
+        $scalars = ['hatch_date', 'time_started', 'time_finished', 'ps_number', 'house_number', 'incubator_number', 'hatcher_number'];
+        foreach ($scalars as $field) {
+            if (isset($data[$field]) && $data[$field] !== '') {
+                $this->form[$field] = $data[$field];
+            }
+        }
+
+        if (!empty($data['personnel_name']) && is_array($data['personnel_name'])) {
+            $this->form['personnel_name'] = array_map('intval', $data['personnel_name']);
+        }
+        if (!empty($data['qc_personnel']) && is_array($data['qc_personnel'])) {
+            $this->form['qc_personnel'] = array_map('intval', $data['qc_personnel']);
+        }
+
+        if (!empty($data['samples']) && is_array($data['samples'])) {
+            $this->form['samples'] = $data['samples'];
+            $keys = array_column($data['samples'], '_key');
+            $this->nextSampleKey = ($keys ? max($keys) : 1) + 1;
+            $this->expandedSample = count($data['samples']) - 1;
+        }
+
+        $this->dispatch('showToast', message: 'Your previous form data has been restored.', type: 'info');
+    }
+
     public function submitForm()
     {
         $this->formSubmitted = true;
@@ -314,6 +340,8 @@ class PasgarScoreForm extends FormNavigation
             ]);
 
             $this->sendFormToWebhook($formId);
+
+            $this->dispatch('formSaved');
 
             session()->flash('success', 'Form submitted successfully!');
 
