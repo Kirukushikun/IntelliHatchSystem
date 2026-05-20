@@ -127,46 +127,4 @@
     </div>
 </div>
 
-<!-- Photo Viewer Modal -->
-@if(count($selectedPhotos) > 0)
-<div x-data="{ showPhotoModal: @entangle('showPhotoModal'), currentPhotoIndex: 0, selectedPhotos: @js($selectedPhotos) }"
-     x-init="currentPhotoIndex = Math.min(currentPhotoIndex, selectedPhotos.length - 1) || 0"
-     x-show="showPhotoModal"
-     x-transition:enter="transition ease-out duration-300"
-     x-transition:enter-start="opacity-0"
-     x-transition:enter-end="opacity-100"
-     x-transition:leave="transition ease-in duration-200"
-     x-transition:leave-start="opacity-100"
-     x-transition:leave-end="opacity-0"
-     class="fixed inset-0 z-50 overflow-y-auto bg-black/50 dark:bg-black/80"
-     style="display: none;">
-    <div class="flex min-h-full items-center justify-center p-4">
-        <div x-show="showPhotoModal"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl w-full max-w-sm">
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Photos</h3>
-                <button type="button" @click="showPhotoModal = false; $wire.closePhotoModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-            </div>
-            <div class="p-4">
-                <div class="relative w-full aspect-square bg-gray-900 rounded-lg overflow-hidden">
-                    <template x-if="selectedPhotos[currentPhotoIndex]"><img :src="selectedPhotos[currentPhotoIndex]?.url || ''" class="w-full h-full object-contain"></template>
-                    @if(count($selectedPhotos) > 1)
-                        <button type="button" @click="currentPhotoIndex = (currentPhotoIndex - 1 + selectedPhotos.length) % selectedPhotos.length" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full shadow-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                        <button type="button" @click="currentPhotoIndex = (currentPhotoIndex + 1) % selectedPhotos.length" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full shadow-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
-                    @endif
-                </div>
-                <div class="mt-3 text-center text-sm text-gray-600 dark:text-gray-400"><span x-text="currentPhotoIndex + 1"></span> / <span>{{ count($selectedPhotos) }}</span></div>
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 flex justify-end">
-                <button type="button" @click="showPhotoModal = false; $wire.closePhotoModal()" class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 cursor-pointer">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
+<x-photo-viewer-modal :photos="$selectedPhotos" />
