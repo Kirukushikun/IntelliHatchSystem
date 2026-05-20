@@ -2,20 +2,25 @@
         formSubmitted: @entangle('formSubmitted'),
         _bk: 'ihs_pasgar_backup',
         init() {
-            // Restore form state from sessionStorage if component was reset
-            const saved = sessionStorage.getItem(this._bk);
-            if (saved) {
-                try {
-                    const { form, ts } = JSON.parse(saved);
-                    const isStale = (Date.now() - ts) > 2 * 60 * 60 * 1000;
-                    const formIsEmpty = !$wire.form.hatch_date && !$wire.form.ps_number;
-                    if (!isStale && formIsEmpty && (form.hatch_date || form.ps_number)) {
-                        $wire.restoreForm(form);
-                    } else if (isStale) {
-                        sessionStorage.removeItem(this._bk);
-                    }
-                } catch(e) { sessionStorage.removeItem(this._bk); }
-            }
+            // Clear backup after successful submission (redirect kills the @form-saved listener)
+            @if(session('success'))
+                sessionStorage.removeItem(this._bk);
+            @else
+                // Restore form state from sessionStorage if component was reset
+                const saved = sessionStorage.getItem(this._bk);
+                if (saved) {
+                    try {
+                        const { form, ts } = JSON.parse(saved);
+                        const isStale = (Date.now() - ts) > 2 * 60 * 60 * 1000;
+                        const formIsEmpty = !$wire.form.hatch_date && !$wire.form.ps_number;
+                        if (!isStale && formIsEmpty && (form.hatch_date || form.ps_number)) {
+                            $wire.restoreForm(form);
+                        } else if (isStale) {
+                            sessionStorage.removeItem(this._bk);
+                        }
+                    } catch(e) { sessionStorage.removeItem(this._bk); }
+                }
+            @endif
 
             // Auto-save form state every 15 seconds
             setInterval(() => {
@@ -39,7 +44,8 @@
         <span>You are currently offline. Your data is saved locally and will sync when connection is restored.</span>
     </div>
 
-    <form wire:submit.prevent="submitForm" id="step-form" class="space-y-4" novalidate>
+    <form wire:submit.prevent="submitForm" id="step-form" class="space-y-4" novalidate
+          x-on:keydown.enter.prevent="if ($wire.isLastVisibleStep()) $wire.submitForm()">
         @csrf
 
         <x-progress-navigation

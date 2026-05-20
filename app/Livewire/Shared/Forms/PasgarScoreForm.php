@@ -317,27 +317,67 @@ class PasgarScoreForm extends FormNavigation
                 return;
             }
 
-            $formId = $this->storeSubmissionAndReturnId($this->formTypeName(), $this->formInputsForStorageWithoutPhotos());
-            $this->finalizePhotosForForm($formId);
+            // Duplicate detection: check for a recent identical submission (within 60 seconds)
+            $formTypeName = $this->formTypeName();
+            $formTypeId = DB::table('form_types')->where('form_name', $formTypeName)->value('id');
 
-            $finalInputs = $this->formInputsWithPhotos($this->formInputsForStorageWithoutPhotos());
-
-            // Embed per-sample photos and remove top-level keys
-            foreach ($this->form['samples'] as $i => $sample) {
-                $key = $sample['_key'] ?? null;
-                if ($key && isset($finalInputs['samples'][$i])) {
-                    foreach (['weighing_photo_' => 'weighing_photos', 'issue_photo_' => 'issue_photos'] as $prefix => $field) {
-                        $photoKey = $prefix . $key;
-                        $finalInputs['samples'][$i][$field] = $finalInputs[$photoKey] ?? [];
-                        unset($finalInputs[$photoKey]);
-                    }
-                }
+            if (!$formTypeId) {
+                throw new \Exception('Form type not found: ' . $formTypeName);
             }
 
-            DB::table('forms')->where('id', $formId)->update([
-                'form_inputs' => json_encode($finalInputs),
-                'updated_at'  => now(),
-            ]);
+            $duplicateExists = DB::table('forms')
+                ->where('form_type_id', $formTypeId)
+                ->where('uploaded_by', \Illuminate\Support\Facades\Auth::id())
+                ->where('created_at', '>=', now()->subSeconds(60))
+                ->exists();
+
+            if ($duplicateExists) {
+                $this->dispatch('showToast', message: 'This form was already submitted. Please wait before submitting again.', type: 'warning');
+                return;
+            }
+
+            // Cache the computed inputs once
+            $baseInputs = $this->formInputsForStorageWithoutPhotos();
+
+            // Single transaction: insert form, finalize photos, update with final inputs
+            DB::beginTransaction();
+
+            try {
+                $formId = (int) DB::table('forms')->insertGetId([
+                    'form_type_id' => $formTypeId,
+                    'form_inputs'  => json_encode($baseInputs),
+                    'date_submitted' => now(),
+                    'uploaded_by'  => \Illuminate\Support\Facades\Auth::id(),
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ]);
+
+                $this->finalizePhotosForForm($formId);
+
+                $finalInputs = $this->formInputsWithPhotos($baseInputs);
+
+                // Embed per-sample photos and remove top-level keys
+                foreach ($this->form['samples'] as $i => $sample) {
+                    $key = $sample['_key'] ?? null;
+                    if ($key && isset($finalInputs['samples'][$i])) {
+                        foreach (['weighing_photo_' => 'weighing_photos', 'issue_photo_' => 'issue_photos'] as $prefix => $field) {
+                            $photoKey = $prefix . $key;
+                            $finalInputs['samples'][$i][$field] = $finalInputs[$photoKey] ?? [];
+                            unset($finalInputs[$photoKey]);
+                        }
+                    }
+                }
+
+                DB::table('forms')->where('id', $formId)->update([
+                    'form_inputs' => json_encode($finalInputs),
+                    'updated_at'  => now(),
+                ]);
+
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
 
             $this->sendFormToWebhook($formId);
 
@@ -360,37 +400,6 @@ class PasgarScoreForm extends FormNavigation
                 'trace' => $e->getTraceAsString(),
             ]);
             $this->dispatch('showToast', message: 'Failed to submit form. Please try again.', type: 'error');
-        }
-    }
-
-    protected function storeSubmissionAndReturnId(string $formTypeName, array $formInputs): int
-    {
-        DB::beginTransaction();
-
-        try {
-            $formTypeId = DB::table('form_types')
-                ->where('form_name', $formTypeName)
-                ->value('id');
-
-            if (!$formTypeId) {
-                throw new \Exception('Form type not found: ' . $formTypeName);
-            }
-
-            $formId = (int) DB::table('forms')->insertGetId([
-                'form_type_id' => $formTypeId,
-                'form_inputs'  => json_encode($formInputs),
-                'date_submitted' => now(),
-                'uploaded_by'  => \Illuminate\Support\Facades\Auth::id(),
-                'created_at'   => now(),
-                'updated_at'   => now(),
-            ]);
-
-            DB::commit();
-
-            return $formId;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
         }
     }
 
