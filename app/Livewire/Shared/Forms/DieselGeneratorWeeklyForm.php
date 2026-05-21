@@ -97,7 +97,7 @@ class DieselGeneratorWeeklyForm extends FormNavigation
 
             // All photos are required
             $requiredPhotos = [
-                'photo_lub_leaks'           => 2,
+                'photo_battery_condition'   => 2,
                 'photo_lub_oil_level'       => 3,
                 'photo_cool_leaks'          => 4,
                 'photo_cool_radiator'       => 5,
@@ -105,13 +105,9 @@ class DieselGeneratorWeeklyForm extends FormNavigation
                 'photo_cool_coolant_level'  => 7,
                 'photo_cool_belt'           => 8,
                 'photo_fuel_leaks'          => 9,
-                'photo_air_intake_leaks'    => 10,
-                'photo_air_intake_cleaner'  => 11,
-                'photo_exhaust_leaks'       => 12,
-                'photo_engine_vibration'    => 13,
-                'photo_main_gen_air'        => 14,
-                'photo_main_gen_windings'   => 15,
-                'photo_switch_gear'         => 16,
+                'photo_engine_vibration'    => 10,
+                'photo_main_gen_windings'   => 11,
+                'photo_switch_gear'         => 12,
             ];
 
             foreach ($requiredPhotos as $photoKey => $step) {
@@ -120,14 +116,6 @@ class DieselGeneratorWeeklyForm extends FormNavigation
                     $this->goToStepWithField($photoKey);
                     return;
                 }
-            }
-
-            // Fire extinguisher photo required only when qty > 0
-            $fireQty = (int) ($this->form['fire_extinguisher_qty'] ?? 0);
-            if ($fireQty > 0 && empty($this->uploadedPhotoIds['photo_fire_extinguisher'])) {
-                $this->dispatch('showToast', message: 'Please upload a photo of the fire extinguisher(s).', type: 'error');
-                $this->goToStepWithField('photo_fire_extinguisher');
-                return;
             }
 
             if (!$this->ensureAllPhotosUploaded()) {

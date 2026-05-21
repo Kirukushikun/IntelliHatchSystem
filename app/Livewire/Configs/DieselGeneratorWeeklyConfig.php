@@ -11,10 +11,13 @@ class DieselGeneratorWeeklyConfig
             'form.technician_id.*'                      => 'integer|exists:users,id',
             'form.gen_set_number'                       => 'required|integer|exists:get-sets,id',
 
+            // BATTERY CONDITION
+            'form.battery_condition_status'              => 'required|in:Okay,Not Okay',
+            'form.battery_condition_problem'              => 'required|string|max:1000',
+            'form.battery_condition_corrective_action'    => 'required|string|max:1000',
+            'form.battery_voltage_reading'               => 'required|string|max:255',
+
             // LUBRICATION
-            'form.lub_leaks_status'                     => 'required|in:Okay,Not Okay',
-            'form.lub_leaks_problem'                    => 'required|string|max:1000',
-            'form.lub_leaks_corrective_action'          => 'required|string|max:1000',
             'form.lub_oil_level_status'                 => 'required|in:Okay,Not Okay',
             'form.lub_oil_level_problem'                => 'required|string|max:1000',
             'form.lub_oil_level_corrective_action'      => 'required|string|max:1000',
@@ -41,28 +44,12 @@ class DieselGeneratorWeeklyConfig
             'form.fuel_leaks_problem'                   => 'required|string|max:1000',
             'form.fuel_leaks_corrective_action'         => 'required|string|max:1000',
 
-            // AIR IN-TAKE
-            'form.air_intake_leaks_status'              => 'required|in:Okay,Not Okay',
-            'form.air_intake_leaks_problem'             => 'required|string|max:1000',
-            'form.air_intake_leaks_corrective_action'   => 'required|string|max:1000',
-            'form.air_intake_cleaner_status'            => 'required|in:Okay,Not Okay',
-            'form.air_intake_cleaner_problem'           => 'required|string|max:1000',
-            'form.air_intake_cleaner_corrective_action' => 'required|string|max:1000',
-
-            // EXHAUST
-            'form.exhaust_leaks_status'                 => 'required|in:Okay,Not Okay',
-            'form.exhaust_leaks_problem'                => 'required|string|max:1000',
-            'form.exhaust_leaks_corrective_action'      => 'required|string|max:1000',
-
             // ENGINE RELATED
             'form.engine_vibration_status'              => 'required|in:Okay,Not Okay',
             'form.engine_vibration_problem'             => 'required|string|max:1000',
             'form.engine_vibration_corrective_action'   => 'required|string|max:1000',
 
             // MAIN GENERATOR
-            'form.main_gen_air_status'                  => 'required|in:Okay,Not Okay',
-            'form.main_gen_air_problem'                 => 'required|string|max:1000',
-            'form.main_gen_air_corrective_action'       => 'required|string|max:1000',
             'form.main_gen_windings_status'             => 'required|in:Okay,Not Okay',
             'form.main_gen_windings_problem'            => 'required|string|max:1000',
             'form.main_gen_windings_corrective_action'  => 'required|string|max:1000',
@@ -73,19 +60,14 @@ class DieselGeneratorWeeklyConfig
             'form.switch_gear_corrective_action'        => 'required|string|max:1000',
 
             // TEST RUN
-            'form.test_run_conducted'                   => 'required|in:Conducted,Not Conducted',
+            'form.test_run_conducted'                   => 'required|in:Okay,Not Okay',
             'form.test_run_time'                        => 'required|string|max:500',
             'form.previous_running_time'                => 'required|string|max:255',
             'form.present_running_time'                 => 'required|string|max:255',
             'form.line_voltages'                        => 'required|string|max:500',
-            'form.line_amperes'                         => 'required|string|max:500',
             'form.hertz_reading'                        => 'required|string|max:255',
             'form.oil_pressure_kpa'                     => 'required|string|max:255',
-            'form.oil_temperature_f'                    => 'required|string|max:255',
             'form.running_condition'                    => 'required|in:Normal,Abnormal',
-
-            // FIRE EXTINGUISHER
-            'form.fire_extinguisher_qty'                => 'required|integer|min:0',
 
             // SUMMARY
             'form.notes'                                => 'required|string|max:2000',
@@ -111,9 +93,11 @@ class DieselGeneratorWeeklyConfig
             'form.gen_set_number.required'                       => 'Please select the diesel generator set.',
             'form.gen_set_number.exists'                         => 'Please select a valid diesel generator set.',
 
-            'form.lub_leaks_status.required'                     => 'Please indicate the lubrication leaks status.',
-            'form.lub_leaks_problem.required'                    => 'Please describe the problem or write "N/A".',
-            'form.lub_leaks_corrective_action.required'          => 'Please enter the corrective action or write "N/A".',
+            'form.battery_condition_status.required'              => 'Please indicate the battery condition status.',
+            'form.battery_condition_problem.required'             => 'Please describe the problem or write "N/A".',
+            'form.battery_condition_corrective_action.required'   => 'Please enter the corrective action or write "N/A".',
+            'form.battery_voltage_reading.required'              => 'Please enter the battery voltage reading.',
+
             'form.lub_oil_level_status.required'                 => 'Please indicate the oil level status.',
             'form.lub_oil_level_problem.required'                => 'Please describe the problem or write "N/A".',
             'form.lub_oil_level_corrective_action.required'      => 'Please enter the corrective action or write "N/A".',
@@ -138,24 +122,10 @@ class DieselGeneratorWeeklyConfig
             'form.fuel_leaks_problem.required'                   => 'Please describe the problem or write "N/A".',
             'form.fuel_leaks_corrective_action.required'         => 'Please enter the corrective action or write "N/A".',
 
-            'form.air_intake_leaks_status.required'              => 'Please indicate the air in-take leaks status.',
-            'form.air_intake_leaks_problem.required'             => 'Please describe the problem or write "N/A".',
-            'form.air_intake_leaks_corrective_action.required'   => 'Please enter the corrective action or write "N/A".',
-            'form.air_intake_cleaner_status.required'            => 'Please indicate the air cleaner restriction status.',
-            'form.air_intake_cleaner_problem.required'           => 'Please describe the problem or write "N/A".',
-            'form.air_intake_cleaner_corrective_action.required' => 'Please enter the corrective action or write "N/A".',
-
-            'form.exhaust_leaks_status.required'                 => 'Please indicate the exhaust leaks status.',
-            'form.exhaust_leaks_problem.required'                => 'Please describe the problem or write "N/A".',
-            'form.exhaust_leaks_corrective_action.required'      => 'Please enter the corrective action or write "N/A".',
-
             'form.engine_vibration_status.required'              => 'Please indicate the engine vibration status.',
             'form.engine_vibration_problem.required'             => 'Please describe the problem or write "N/A".',
             'form.engine_vibration_corrective_action.required'   => 'Please enter the corrective action or write "N/A".',
 
-            'form.main_gen_air_status.required'                  => 'Please indicate the main generator air inlet/outlet status.',
-            'form.main_gen_air_problem.required'                 => 'Please describe the problem or write "N/A".',
-            'form.main_gen_air_corrective_action.required'       => 'Please enter the corrective action or write "N/A".',
             'form.main_gen_windings_status.required'             => 'Please indicate the windings and electrical connections status.',
             'form.main_gen_windings_problem.required'            => 'Please describe the problem or write "N/A".',
             'form.main_gen_windings_corrective_action.required'  => 'Please enter the corrective action or write "N/A".',
@@ -169,15 +139,9 @@ class DieselGeneratorWeeklyConfig
             'form.previous_running_time.required'                => 'Please enter the previous running time reading.',
             'form.present_running_time.required'                 => 'Please enter the present running time reading.',
             'form.line_voltages.required'                        => 'Please enter the three line voltages reading.',
-            'form.line_amperes.required'                         => 'Please enter the three line amperes reading.',
             'form.hertz_reading.required'                        => 'Please enter the hertz reading.',
             'form.oil_pressure_kpa.required'                     => 'Please enter the oil pressure reading.',
-            'form.oil_temperature_f.required'                    => 'Please enter the oil temperature reading.',
             'form.running_condition.required'                    => 'Please indicate the running condition.',
-
-            'form.fire_extinguisher_qty.required'                 => 'Please enter the quantity of fire extinguishers.',
-            'form.fire_extinguisher_qty.integer'                  => 'Please enter a valid number.',
-            'form.fire_extinguisher_qty.min'                      => 'Quantity cannot be negative.',
 
             'form.notes.required'                                => 'Please enter notes or write "N/A".',
             'form.diesel_tank_level.required'                    => 'Please indicate the diesel tank level.',
@@ -197,10 +161,13 @@ class DieselGeneratorWeeklyConfig
             'technician_id'                        => [],
             'gen_set_number'                       => '',
 
+            // BATTERY CONDITION
+            'battery_condition_status'              => '',
+            'battery_condition_problem'              => '',
+            'battery_condition_corrective_action'    => '',
+            'battery_voltage_reading'               => '',
+
             // LUBRICATION
-            'lub_leaks_status'                     => '',
-            'lub_leaks_problem'                    => '',
-            'lub_leaks_corrective_action'          => '',
             'lub_oil_level_status'                 => '',
             'lub_oil_level_problem'                => '',
             'lub_oil_level_corrective_action'      => '',
@@ -227,28 +194,12 @@ class DieselGeneratorWeeklyConfig
             'fuel_leaks_problem'                   => '',
             'fuel_leaks_corrective_action'         => '',
 
-            // AIR IN-TAKE
-            'air_intake_leaks_status'              => '',
-            'air_intake_leaks_problem'             => '',
-            'air_intake_leaks_corrective_action'   => '',
-            'air_intake_cleaner_status'            => '',
-            'air_intake_cleaner_problem'           => '',
-            'air_intake_cleaner_corrective_action' => '',
-
-            // EXHAUST
-            'exhaust_leaks_status'                 => '',
-            'exhaust_leaks_problem'                => '',
-            'exhaust_leaks_corrective_action'      => '',
-
             // ENGINE RELATED
             'engine_vibration_status'              => '',
             'engine_vibration_problem'             => '',
             'engine_vibration_corrective_action'   => '',
 
             // MAIN GENERATOR
-            'main_gen_air_status'                  => '',
-            'main_gen_air_problem'                 => '',
-            'main_gen_air_corrective_action'       => '',
             'main_gen_windings_status'             => '',
             'main_gen_windings_problem'            => '',
             'main_gen_windings_corrective_action'  => '',
@@ -264,14 +215,9 @@ class DieselGeneratorWeeklyConfig
             'previous_running_time'                => '',
             'present_running_time'                 => '',
             'line_voltages'                        => '',
-            'line_amperes'                         => '',
             'hertz_reading'                        => '',
             'oil_pressure_kpa'                     => '',
-            'oil_temperature_f'                    => '',
             'running_condition'                    => '',
-
-            // FIRE EXTINGUISHER
-            'fire_extinguisher_qty'                => '',
 
             // SUMMARY
             'notes'                                => '',
@@ -285,7 +231,7 @@ class DieselGeneratorWeeklyConfig
     {
         return [
             1  => ['technician_id', 'gen_set_number'],
-            2  => ['lub_leaks_status', 'lub_leaks_problem', 'lub_leaks_corrective_action', 'photo_lub_leaks'],
+            2  => ['battery_condition_status', 'battery_condition_problem', 'battery_condition_corrective_action', 'battery_voltage_reading', 'photo_battery_condition'],
             3  => ['lub_oil_level_status', 'lub_oil_level_problem', 'lub_oil_level_corrective_action', 'photo_lub_oil_level'],
             4  => ['cool_leaks_status', 'cool_leaks_problem', 'cool_leaks_corrective_action', 'photo_cool_leaks'],
             5  => ['cool_radiator_status', 'cool_radiator_problem', 'cool_radiator_corrective_action', 'photo_cool_radiator'],
@@ -293,16 +239,11 @@ class DieselGeneratorWeeklyConfig
             7  => ['cool_coolant_level_status', 'cool_coolant_level_problem', 'cool_coolant_level_corrective_action', 'photo_cool_coolant_level'],
             8  => ['cool_belt_status', 'cool_belt_problem', 'cool_belt_corrective_action', 'photo_cool_belt'],
             9  => ['fuel_leaks_status', 'fuel_leaks_problem', 'fuel_leaks_corrective_action', 'photo_fuel_leaks'],
-            10 => ['air_intake_leaks_status', 'air_intake_leaks_problem', 'air_intake_leaks_corrective_action', 'photo_air_intake_leaks'],
-            11 => ['air_intake_cleaner_status', 'air_intake_cleaner_problem', 'air_intake_cleaner_corrective_action', 'photo_air_intake_cleaner'],
-            12 => ['exhaust_leaks_status', 'exhaust_leaks_problem', 'exhaust_leaks_corrective_action', 'photo_exhaust_leaks'],
-            13 => ['engine_vibration_status', 'engine_vibration_problem', 'engine_vibration_corrective_action', 'photo_engine_vibration'],
-            14 => ['main_gen_air_status', 'main_gen_air_problem', 'main_gen_air_corrective_action', 'photo_main_gen_air'],
-            15 => ['main_gen_windings_status', 'main_gen_windings_problem', 'main_gen_windings_corrective_action', 'photo_main_gen_windings'],
-            16 => ['switch_gear_status', 'switch_gear_problem', 'switch_gear_corrective_action', 'photo_switch_gear'],
-            17 => ['test_run_conducted', 'test_run_time', 'previous_running_time', 'present_running_time', 'line_voltages', 'line_amperes', 'hertz_reading', 'oil_pressure_kpa', 'oil_temperature_f', 'running_condition'],
-            18 => ['fire_extinguisher_qty', 'photo_fire_extinguisher'],
-            19 => ['notes', 'diesel_tank_level', 'refill_date', 'available_diesel_stock'],
+            10 => ['engine_vibration_status', 'engine_vibration_problem', 'engine_vibration_corrective_action', 'photo_engine_vibration'],
+            11 => ['main_gen_windings_status', 'main_gen_windings_problem', 'main_gen_windings_corrective_action', 'photo_main_gen_windings'],
+            12 => ['switch_gear_status', 'switch_gear_problem', 'switch_gear_corrective_action', 'photo_switch_gear'],
+            13 => ['test_run_conducted', 'test_run_time', 'previous_running_time', 'present_running_time', 'line_voltages', 'hertz_reading', 'oil_pressure_kpa', 'running_condition'],
+            14 => ['notes', 'diesel_tank_level', 'refill_date', 'available_diesel_stock'],
         ];
     }
 

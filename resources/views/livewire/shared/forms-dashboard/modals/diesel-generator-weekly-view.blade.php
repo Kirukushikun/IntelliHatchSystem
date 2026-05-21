@@ -38,8 +38,10 @@
 
                     @php
                         $sections = [
+                            ['title' => 'Battery Condition', 'items' => [
+                                ['key' => 'battery_condition', 'label' => 'Battery Condition (for 2 Batteries)'],
+                            ]],
                             ['title' => 'Lubrication', 'items' => [
-                                ['key' => 'lub_leaks', 'label' => 'Leaks'],
                                 ['key' => 'lub_oil_level', 'label' => 'Oil Level'],
                             ]],
                             ['title' => 'Cooling System', 'items' => [
@@ -52,18 +54,10 @@
                             ['title' => 'Fuel', 'items' => [
                                 ['key' => 'fuel_leaks', 'label' => 'Leaks'],
                             ]],
-                            ['title' => 'Air In-Take', 'items' => [
-                                ['key' => 'air_intake_leaks', 'label' => 'Leaks'],
-                                ['key' => 'air_intake_cleaner', 'label' => 'Air Cleaner Restriction'],
-                            ]],
-                            ['title' => 'Exhaust', 'items' => [
-                                ['key' => 'exhaust_leaks', 'label' => 'Leaks'],
-                            ]],
                             ['title' => 'Engine Related', 'items' => [
                                 ['key' => 'engine_vibration', 'label' => 'Vibration'],
                             ]],
                             ['title' => 'Main Generator', 'items' => [
-                                ['key' => 'main_gen_air', 'label' => 'Air Inlet/Outlet'],
                                 ['key' => 'main_gen_windings', 'label' => 'Windings & Electrical'],
                             ]],
                             ['title' => 'Switch Gear', 'items' => [
@@ -91,6 +85,11 @@
                         </div>
                     @endforeach
 
+                    {{-- Battery Voltage Reading --}}
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Battery Voltage Reading:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['battery_voltage_reading'] ?? 'N/A' }}</span></div>
+                    </div>
+
                     <div class="mb-6">
                         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Test Run</h4>
                         <div class="space-y-4">
@@ -99,10 +98,8 @@
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Previous Running Time:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['previous_running_time'] ?? 'N/A' }}</span></div>
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Present Running Time:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['present_running_time'] ?? 'N/A' }}</span></div>
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Line Voltages:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['line_voltages'] ?? 'N/A' }}</span></div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Line Amperes:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['line_amperes'] ?? 'N/A' }}</span></div>
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Hertz:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['hertz_reading'] ?? 'N/A' }}</span></div>
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Oil Pressure (kPa):</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['oil_pressure_kpa'] ?? 'N/A' }}</span></div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Oil Temperature (F):</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['oil_temperature_f'] ?? 'N/A' }}</span></div>
                             <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
                                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Running Condition:</span>
                                 @php $condition = $this->formData['running_condition'] ?? 'N/A'; @endphp
@@ -114,7 +111,6 @@
                     <div class="mb-6">
                         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Summary</h4>
                         <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium text-gray-600 dark:text-gray-400">Fire Extinguisher Qty:</span><span class="text-sm text-gray-900 dark:text-gray-200">{{ $this->formData['fire_extinguisher_qty'] ?? 'N/A' }}</span></div>
                             <div class="py-3 border-b border-gray-100 dark:border-gray-700">
                                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Notes:</span>
                                 <p class="text-sm text-gray-900 dark:text-gray-200 mt-1 whitespace-pre-wrap">{{ $this->formData['notes'] ?? 'N/A' }}</p>

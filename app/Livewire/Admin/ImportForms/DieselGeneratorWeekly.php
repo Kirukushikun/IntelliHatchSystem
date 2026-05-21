@@ -39,10 +39,10 @@ class DieselGeneratorWeekly extends Component
      */
     protected const SECTION_MAP = [
         [
-            'status_label' => 'LUBRICATION- Check for leaks',
-            'status_field' => 'lub_leaks_status',
-            'problem_field' => 'lub_leaks_problem',
-            'corrective_field' => 'lub_leaks_corrective_action',
+            'status_label' => 'BATTERY CONDITION',
+            'status_field' => 'battery_condition_status',
+            'problem_field' => 'battery_condition_problem',
+            'corrective_field' => 'battery_condition_corrective_action',
         ],
         [
             'status_label' => 'LUBRICATION- Check for oil level',
@@ -87,34 +87,10 @@ class DieselGeneratorWeekly extends Component
             'corrective_field' => 'fuel_leaks_corrective_action',
         ],
         [
-            'status_label' => 'AIR IN-TAKE (Check for leaks)',
-            'status_field' => 'air_intake_leaks_status',
-            'problem_field' => 'air_intake_leaks_problem',
-            'corrective_field' => 'air_intake_leaks_corrective_action',
-        ],
-        [
-            'status_label' => 'AIR IN-TAKE (Check for air cleaner restriction)',
-            'status_field' => 'air_intake_cleaner_status',
-            'problem_field' => 'air_intake_cleaner_problem',
-            'corrective_field' => 'air_intake_cleaner_corrective_action',
-        ],
-        [
-            'status_label' => 'EXHAUST- Check for leaks',
-            'status_field' => 'exhaust_leaks_status',
-            'problem_field' => 'exhaust_leaks_problem',
-            'corrective_field' => 'exhaust_leaks_corrective_action',
-        ],
-        [
             'status_label' => 'ENGINE RELATED - Check for unusual vibration',
             'status_field' => 'engine_vibration_status',
             'problem_field' => 'engine_vibration_problem',
             'corrective_field' => 'engine_vibration_corrective_action',
-        ],
-        [
-            'status_label' => 'MAIN GENERATOR - Check for air inlet and outlet from restrictions',
-            'status_field' => 'main_gen_air_status',
-            'problem_field' => 'main_gen_air_problem',
-            'corrective_field' => 'main_gen_air_corrective_action',
         ],
         [
             'status_label' => 'MAIN GENERATOR - Check for windings and electrical connections',
@@ -415,6 +391,9 @@ class DieselGeneratorWeekly extends Component
             $fields[$section['corrective_field']] = $correctiveVal ?: 'N/A';
         }
 
+        // Battery voltage reading
+        $fields['battery_voltage_reading'] = $this->findLabelValueAnywhere($labelValues, 'Battery Voltage Reading') ?: '';
+
         // Test run section
         $fields['test_run_conducted'] = $this->normalizeStatus(
             $this->findLabelValueAnywhere($labelValues, 'Actual test run')
@@ -423,10 +402,8 @@ class DieselGeneratorWeekly extends Component
         $fields['previous_running_time'] = $this->findLabelValueAnywhere($labelValues, 'Previous reading of running time') ?: '';
         $fields['present_running_time'] = $this->findLabelValueAnywhere($labelValues, 'Present reading of running time') ?: '';
         $fields['line_voltages'] = $this->findLabelValueAnywhere($labelValues, 'line voltages') ?: '';
-        $fields['line_amperes'] = $this->findLabelValueAnywhere($labelValues, 'line amperes') ?: '';
         $fields['hertz_reading'] = $this->findLabelValueAnywhere($labelValues, 'hertz') ?: '';
         $fields['oil_pressure_kpa'] = $this->findLabelValueAnywhere($labelValues, 'oil pressure') ?: '';
-        $fields['oil_temperature_f'] = $this->findLabelValueAnywhere($labelValues, 'oil temperature') ?: '';
         $fields['running_condition'] = $this->findLabelValueAnywhere($labelValues, 'running condition') ?: '';
         $fields['notes'] = $this->findLabelValueAnywhere($labelValues, 'Notes and other concerns') ?: 'N/A';
         $fields['diesel_tank_level'] = $this->findLabelValueAnywhere($labelValues, 'Diesel Tank Level') ?: '';

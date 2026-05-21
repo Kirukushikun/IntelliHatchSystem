@@ -299,15 +299,13 @@ class DieselGeneratorWeeklyDashboard extends Component
         $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
 
         $photoFields = [
-            'photo_lub_leaks', 'photo_lub_oil_level',
+            'photo_battery_condition',
+            'photo_lub_oil_level',
             'photo_cool_leaks', 'photo_cool_radiator', 'photo_cool_hose', 'photo_cool_coolant_level', 'photo_cool_belt',
             'photo_fuel_leaks',
-            'photo_air_intake_leaks', 'photo_air_intake_cleaner',
-            'photo_exhaust_leaks',
             'photo_engine_vibration',
-            'photo_main_gen_air', 'photo_main_gen_windings',
+            'photo_main_gen_windings',
             'photo_switch_gear',
-            'photo_fire_extinguisher',
         ];
 
         $photos = [];

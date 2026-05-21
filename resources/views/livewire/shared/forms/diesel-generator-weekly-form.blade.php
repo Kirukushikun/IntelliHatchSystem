@@ -43,17 +43,17 @@
                 </div>
             </div>
 
-            {{-- Step 2: LUBRICATION - Check for leaks --}}
+            {{-- Step 2: BATTERY CONDITION (for 2 Batteries) --}}
             <div data-step="2" class="space-y-4" @style(["display:none" => $currentStep !== 2])>
-                <x-title>LUBRICATION — CHECK FOR LEAKS</x-title>
+                <x-title>BATTERY CONDITION (FOR 2 BATTERIES)</x-title>
 
-                <div data-field="lub_leaks_status">
+                <div data-field="battery_condition_status">
                     <x-dropdown
-                        label="LUBRICATION - Check for leaks"
-                        name="lub_leaks_status"
-                        error-key="form.lub_leaks_status"
+                        label="BATTERY CONDITION (for 2 Batteries)"
+                        name="battery_condition_status"
+                        error-key="form.battery_condition_status"
                         placeholder="Select result"
-                        wire:model.live="form.lub_leaks_status"
+                        wire:model.live="form.battery_condition_status"
                         required
                     >
                         <option value="Okay">Okay</option>
@@ -61,32 +61,43 @@
                     </x-dropdown>
                 </div>
 
-                <div data-field="lub_leaks_problem" class="relative">
-                    <button type="button" @click="$wire.set('form.lub_leaks_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
+                <div data-field="battery_condition_problem" class="relative">
+                    <button type="button" @click="$wire.set('form.battery_condition_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="If not okay, explain why and identify the problem."
-                        name="lub_leaks_problem"
-                        error-key="form.lub_leaks_problem"
+                        name="battery_condition_problem"
+                        error-key="form.battery_condition_problem"
                         :required="true"
                         placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.lub_leaks_problem"
+                        wire:model.live="form.battery_condition_problem"
                     />
                 </div>
 
-                <div data-field="lub_leaks_corrective_action" class="relative">
-                    <button type="button" @click="$wire.set('form.lub_leaks_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
+                <div data-field="battery_condition_corrective_action" class="relative">
+                    <button type="button" @click="$wire.set('form.battery_condition_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-area
                         label="Corrective Action Taken"
-                        name="lub_leaks_corrective_action"
-                        error-key="form.lub_leaks_corrective_action"
+                        name="battery_condition_corrective_action"
+                        error-key="form.battery_condition_corrective_action"
                         :required="true"
                         placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.lub_leaks_corrective_action"
+                        wire:model.live="form.battery_condition_corrective_action"
                     />
                 </div>
 
-                <div data-field="photo_lub_leaks">
-                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_lub_leaks" required />
+                <div data-field="battery_voltage_reading">
+                    <x-text-input
+                        label="Battery Voltage Reading (see from genset monitor)"
+                        name="battery_voltage_reading"
+                        error-key="form.battery_voltage_reading"
+                        :required="true"
+                        placeholder="Enter battery voltage reading"
+                        wireModel="form.battery_voltage_reading"
+                    />
+                </div>
+
+                <div data-field="photo_battery_condition">
+                    <x-photo-attach label="Attach picture of battery voltage reading from genset monitor." name="photo_battery_condition" required />
                 </div>
             </div>
 
@@ -419,149 +430,8 @@
                 </div>
             </div>
 
-            {{-- Step 10: AIR IN-TAKE - Check for leaks --}}
+            {{-- Step 10: ENGINE RELATED - Check for unusual vibration --}}
             <div data-step="10" class="space-y-4" @style(["display:none" => $currentStep !== 10])>
-                <x-title>AIR IN-TAKE — CHECK FOR LEAKS</x-title>
-
-                <div data-field="air_intake_leaks_status">
-                    <x-dropdown
-                        label="AIR IN-TAKE - Check for leaks"
-                        name="air_intake_leaks_status"
-                        error-key="form.air_intake_leaks_status"
-                        placeholder="Select result"
-                        wire:model.live="form.air_intake_leaks_status"
-                        required
-                    >
-                        <option value="Okay">Okay</option>
-                        <option value="Not Okay">Not Okay</option>
-                    </x-dropdown>
-                </div>
-
-                <div data-field="air_intake_leaks_problem" class="relative">
-                    <button type="button" @click="$wire.set('form.air_intake_leaks_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-area
-                        label="If not okay, explain why and identify the problem."
-                        name="air_intake_leaks_problem"
-                        error-key="form.air_intake_leaks_problem"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.air_intake_leaks_problem"
-                    />
-                </div>
-
-                <div data-field="air_intake_leaks_corrective_action" class="relative">
-                    <button type="button" @click="$wire.set('form.air_intake_leaks_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-area
-                        label="Corrective Action Taken"
-                        name="air_intake_leaks_corrective_action"
-                        error-key="form.air_intake_leaks_corrective_action"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.air_intake_leaks_corrective_action"
-                    />
-                </div>
-
-                <div data-field="photo_air_intake_leaks">
-                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_air_intake_leaks" required />
-                </div>
-            </div>
-
-            {{-- Step 11: AIR IN-TAKE - Check for air cleaner restriction --}}
-            <div data-step="11" class="space-y-4" @style(["display:none" => $currentStep !== 11])>
-                <x-title>AIR IN-TAKE — CHECK FOR AIR CLEANER RESTRICTION</x-title>
-
-                <div data-field="air_intake_cleaner_status">
-                    <x-dropdown
-                        label="AIR IN-TAKE - Check for air cleaner restriction"
-                        name="air_intake_cleaner_status"
-                        error-key="form.air_intake_cleaner_status"
-                        placeholder="Select result"
-                        wire:model.live="form.air_intake_cleaner_status"
-                        required
-                    >
-                        <option value="Okay">Okay</option>
-                        <option value="Not Okay">Not Okay</option>
-                    </x-dropdown>
-                </div>
-
-                <div data-field="air_intake_cleaner_problem" class="relative">
-                    <button type="button" @click="$wire.set('form.air_intake_cleaner_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-area
-                        label="If not okay, explain why and identify the problem."
-                        name="air_intake_cleaner_problem"
-                        error-key="form.air_intake_cleaner_problem"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.air_intake_cleaner_problem"
-                    />
-                </div>
-
-                <div data-field="air_intake_cleaner_corrective_action" class="relative">
-                    <button type="button" @click="$wire.set('form.air_intake_cleaner_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-area
-                        label="Corrective Action Taken"
-                        name="air_intake_cleaner_corrective_action"
-                        error-key="form.air_intake_cleaner_corrective_action"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.air_intake_cleaner_corrective_action"
-                    />
-                </div>
-
-                <div data-field="photo_air_intake_cleaner">
-                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_air_intake_cleaner" required />
-                </div>
-            </div>
-
-            {{-- Step 12: EXHAUST - Check for leaks --}}
-            <div data-step="12" class="space-y-4" @style(["display:none" => $currentStep !== 12])>
-                <x-title>EXHAUST — CHECK FOR LEAKS</x-title>
-
-                <div data-field="exhaust_leaks_status">
-                    <x-dropdown
-                        label="EXHAUST - Check for leaks"
-                        name="exhaust_leaks_status"
-                        error-key="form.exhaust_leaks_status"
-                        placeholder="Select result"
-                        wire:model.live="form.exhaust_leaks_status"
-                        required
-                    >
-                        <option value="Okay">Okay</option>
-                        <option value="Not Okay">Not Okay</option>
-                    </x-dropdown>
-                </div>
-
-                <div data-field="exhaust_leaks_problem" class="relative">
-                    <button type="button" @click="$wire.set('form.exhaust_leaks_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-area
-                        label="If not okay, explain why and identify the problem."
-                        name="exhaust_leaks_problem"
-                        error-key="form.exhaust_leaks_problem"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.exhaust_leaks_problem"
-                    />
-                </div>
-
-                <div data-field="exhaust_leaks_corrective_action" class="relative">
-                    <button type="button" @click="$wire.set('form.exhaust_leaks_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-area
-                        label="Corrective Action Taken"
-                        name="exhaust_leaks_corrective_action"
-                        error-key="form.exhaust_leaks_corrective_action"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.exhaust_leaks_corrective_action"
-                    />
-                </div>
-
-                <div data-field="photo_exhaust_leaks">
-                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_exhaust_leaks" required />
-                </div>
-            </div>
-
-            {{-- Step 13: ENGINE RELATED - Check for unusual vibration --}}
-            <div data-step="13" class="space-y-4" @style(["display:none" => $currentStep !== 13])>
                 <x-title>ENGINE RELATED — CHECK FOR UNUSUAL VIBRATION</x-title>
 
                 <div data-field="engine_vibration_status">
@@ -607,55 +477,8 @@
                 </div>
             </div>
 
-            {{-- Step 14: MAIN GENERATOR - Check for air inlet and outlet from restrictions --}}
-            <div data-step="14" class="space-y-4" @style(["display:none" => $currentStep !== 14])>
-                <x-title>MAIN GENERATOR — CHECK FOR AIR INLET AND OUTLET FROM RESTRICTIONS</x-title>
-
-                <div data-field="main_gen_air_status">
-                    <x-dropdown
-                        label="MAIN GENERATOR - Check for air inlet and outlet from restrictions"
-                        name="main_gen_air_status"
-                        error-key="form.main_gen_air_status"
-                        placeholder="Select result"
-                        wire:model.live="form.main_gen_air_status"
-                        required
-                    >
-                        <option value="Okay">Okay</option>
-                        <option value="Not Okay">Not Okay</option>
-                    </x-dropdown>
-                </div>
-
-                <div data-field="main_gen_air_problem" class="relative">
-                    <button type="button" @click="$wire.set('form.main_gen_air_problem', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-area
-                        label="If not okay, explain why and identify the problem."
-                        name="main_gen_air_problem"
-                        error-key="form.main_gen_air_problem"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.main_gen_air_problem"
-                    />
-                </div>
-
-                <div data-field="main_gen_air_corrective_action" class="relative">
-                    <button type="button" @click="$wire.set('form.main_gen_air_corrective_action', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-area
-                        label="Corrective Action Taken"
-                        name="main_gen_air_corrective_action"
-                        error-key="form.main_gen_air_corrective_action"
-                        :required="true"
-                        placeholder='Write "N/A" if not applicable.'
-                        wire:model.live="form.main_gen_air_corrective_action"
-                    />
-                </div>
-
-                <div data-field="photo_main_gen_air">
-                    <x-photo-attach label="Attach necessary pictures or document for reference." name="photo_main_gen_air" required />
-                </div>
-            </div>
-
-            {{-- Step 15: MAIN GENERATOR - Check for windings and electrical connections --}}
-            <div data-step="15" class="space-y-4" @style(["display:none" => $currentStep !== 15])>
+            {{-- Step 11: MAIN GENERATOR - Check for windings and electrical connections --}}
+            <div data-step="11" class="space-y-4" @style(["display:none" => $currentStep !== 11])>
                 <x-title>MAIN GENERATOR — CHECK FOR WINDINGS AND ELECTRICAL CONNECTIONS</x-title>
 
                 <div data-field="main_gen_windings_status">
@@ -701,8 +524,8 @@
                 </div>
             </div>
 
-            {{-- Step 16: SWITCH GEAR - Check power distribution wiring and connections --}}
-            <div data-step="16" class="space-y-4" @style(["display:none" => $currentStep !== 16])>
+            {{-- Step 12: SWITCH GEAR - Check power distribution wiring and connections --}}
+            <div data-step="12" class="space-y-4" @style(["display:none" => $currentStep !== 12])>
                 <x-title>SWITCH GEAR — CHECK POWER DISTRIBUTION WIRING AND CONNECTIONS</x-title>
 
                 <div data-field="switch_gear_status">
@@ -748,23 +571,23 @@
                 </div>
             </div>
 
-            {{-- Step 17: Test Run --}}
-            <div data-step="17" class="space-y-4" @style(["display:none" => $currentStep !== 17])>
+            {{-- Step 13: Test Run --}}
+            <div data-step="13" class="space-y-4" @style(["display:none" => $currentStep !== 13])>
                 <x-title>ACTUAL TEST RUN</x-title>
 
                 <p class="text-sm text-gray-500 dark:text-gray-400 -mt-2">Actual test run for 1 hour with load.</p>
 
                 <div data-field="test_run_conducted">
                     <x-dropdown
-                        label="Actual test run for 1hr with load"
+                        label="Actual test run"
                         name="test_run_conducted"
                         error-key="form.test_run_conducted"
                         placeholder="Select"
                         wire:model.live="form.test_run_conducted"
                         required
                     >
-                        <option value="Conducted">Conducted</option>
-                        <option value="Not Conducted">Not Conducted</option>
+                        <option value="Okay">Okay</option>
+                        <option value="Not Okay">Not Okay</option>
                     </x-dropdown>
                 </div>
 
@@ -814,18 +637,6 @@
                     />
                 </div>
 
-                <div data-field="line_amperes" class="relative">
-                    <button type="button" @click="$wire.set('form.line_amperes', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-input
-                        label="Indicate the three (3) line amperes (A) reading"
-                        name="line_amperes"
-                        error-key="form.line_amperes"
-                        :required="true"
-                        placeholder='e.g. L1: 10A, L2: 10A, L3: 10A. Write "N/A" if not applicable.'
-                        wireModel="form.line_amperes"
-                    />
-                </div>
-
                 <div data-field="hertz_reading" class="relative">
                     <button type="button" @click="$wire.set('form.hertz_reading', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
                     <x-text-input
@@ -850,18 +661,6 @@
                     />
                 </div>
 
-                <div data-field="oil_temperature_f" class="relative">
-                    <button type="button" @click="$wire.set('form.oil_temperature_f', 'N/A')" class="absolute right-0 top-0 z-10 text-xs font-medium px-2 py-0.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-600 dark:text-gray-300 transition-colors">N/A</button>
-                    <x-text-input
-                        label="Indicate the oil temperature (°F)"
-                        name="oil_temperature_f"
-                        error-key="form.oil_temperature_f"
-                        :required="true"
-                        placeholder='Enter oil temperature in °F. Write "N/A" if not applicable.'
-                        wireModel="form.oil_temperature_f"
-                    />
-                </div>
-
                 <div data-field="running_condition">
                     <x-dropdown
                         label="Indicate running condition"
@@ -877,33 +676,8 @@
                 </div>
             </div>
 
-            {{-- Step 18: Fire Extinguisher --}}
-            <div data-step="18" class="space-y-4" @style(["display:none" => $currentStep !== 18])>
-                <x-title>QUANTITY OF FIRE EXTINGUISHER</x-title>
-
-                <div data-field="fire_extinguisher_qty">
-                    <x-text-input
-                        label="Quantity of Fire Extinguisher"
-                        name="fire_extinguisher_qty"
-                        error-key="form.fire_extinguisher_qty"
-                        type="number"
-                        :required="true"
-                        placeholder="Enter quantity"
-                        wireModel="form.fire_extinguisher_qty"
-                    />
-                </div>
-
-                <div data-field="photo_fire_extinguisher">
-                    @if(($form['fire_extinguisher_qty'] ?? '') !== '' && (int) ($form['fire_extinguisher_qty'] ?? 0) === 0)
-                        <x-photo-attach label="Photo of Fire Extinguisher (Optional)" name="photo_fire_extinguisher" :required="false" />
-                    @else
-                        <x-photo-attach label="Photo of Fire Extinguisher" name="photo_fire_extinguisher" required />
-                    @endif
-                </div>
-            </div>
-
-            {{-- Step 19: Summary & Diesel Status --}}
-            <div data-step="19" class="space-y-4" @style(["display:none" => $currentStep !== 19])>
+            {{-- Step 14: Summary & Diesel Status --}}
+            <div data-step="14" class="space-y-4" @style(["display:none" => $currentStep !== 14])>
                 <x-title>SUMMARY &amp; DIESEL STATUS</x-title>
 
                 <div data-field="notes" class="relative">
