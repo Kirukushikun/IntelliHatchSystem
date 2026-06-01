@@ -143,6 +143,14 @@ class FormController extends Controller
     }
 
     /**
+     * Display the incubator air speed weekly monitoring form page.
+     */
+    public function incubatorAirSpeed()
+    {
+        return view('shared.forms.incubator-air-speed');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Form $form)

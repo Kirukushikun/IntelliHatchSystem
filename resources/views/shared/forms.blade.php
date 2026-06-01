@@ -17,6 +17,7 @@
             'Incubator Rack Preventive Maintenance Checklist' => 'incubator-rack-pm',
             'Weekly Voltage and Ampere Monitoring' => 'weekly-volt-ampere',
             'Hatchery Diesel Generator Weekly Maintenance Checklist' => 'diesel-generator-weekly',
+            'Incubator Air Speed Weekly Monitoring' => 'incubator-air-speed',
         ];
 
         // Determine route prefix based on auth

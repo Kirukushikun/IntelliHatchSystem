@@ -106,4 +106,9 @@ class DashboardController extends Controller
     {
         return view('admin.diesel-generator-weekly-dashboard');
     }
+
+    public function incubatorAirSpeed()
+    {
+        return view('admin.incubator-air-speed-dashboard');
+    }
 }

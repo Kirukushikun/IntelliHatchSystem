@@ -83,6 +83,10 @@ Route::get('/forms/diesel-generator-weekly', function () {
     return view('shared.forms.diesel-generator-weekly');
 })->name('forms.diesel-generator-weekly');
 
+Route::get('/forms/incubator-air-speed', function () {
+    return view('shared.forms.incubator-air-speed');
+})->name('forms.incubator-air-speed');
+
 // Login routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
@@ -139,6 +143,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/diesel-generator-weekly-dashboard', [DashboardController::class, 'dieselGeneratorWeekly'])->name('admin.diesel-generator-weekly-dashboard');
 
+        Route::get('/admin/incubator-air-speed-dashboard', [DashboardController::class, 'incubatorAirSpeed'])->name('admin.incubator-air-speed-dashboard');
+
         Route::get('/admin/forms/hatcher-machine-accuracy', [FormController::class, 'hatcherMachineAccuracy'])->name('admin.forms.hatcher-machine-accuracy');
 
         Route::get('/admin/forms/plenum-temp-humidity', [FormController::class, 'plenumTempHumidity'])->name('admin.forms.plenum-temp-humidity');
@@ -160,6 +166,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/forms/weekly-volt-ampere', [FormController::class, 'weeklyVoltAmpere'])->name('admin.forms.weekly-volt-ampere');
 
         Route::get('/admin/forms/diesel-generator-weekly', [FormController::class, 'dieselGeneratorWeekly'])->name('admin.forms.diesel-generator-weekly');
+
+        Route::get('/admin/forms/incubator-air-speed', [FormController::class, 'incubatorAirSpeed'])->name('admin.forms.incubator-air-speed');
 
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
 
@@ -339,6 +347,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/forms/weekly-volt-ampere', [FormController::class, 'weeklyVoltAmpere'])->name('user.forms.weekly-volt-ampere');
 
         Route::get('/user/forms/diesel-generator-weekly', [FormController::class, 'dieselGeneratorWeekly'])->name('user.forms.diesel-generator-weekly');
+
+        Route::get('/user/forms/incubator-air-speed', [FormController::class, 'incubatorAirSpeed'])->name('user.forms.incubator-air-speed');
 
         Route::get('/user/incubator-machines', [IncubatorController::class, 'index'])->name('user.incubator-machines');
 

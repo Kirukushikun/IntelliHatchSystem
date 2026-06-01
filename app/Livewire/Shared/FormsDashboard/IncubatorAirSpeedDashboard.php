@@ -1,0 +1,408 @@
+<?php
+
+namespace App\Livewire\Shared\FormsDashboard;
+
+use App\Models\Form;
+use App\Models\FormType;
+use Livewire\Component;
+use Livewire\Attributes\Computed;
+use Livewire\WithPagination;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
+
+class IncubatorAirSpeedDashboard extends Component
+{
+    use WithPagination;
+
+    public string $search = '';
+    public string $dateFrom = '';
+    public string $dateTo = '';
+    public bool $showFilterDropdown = false;
+
+    public ?int $selectedFormId = null;
+    public FormType $formType;
+    public int $todayFormCount = 0;
+
+    public bool $showModal = false;
+    public bool $showPhotoModal = false;
+    public array $selectedPhotos = [];
+    public string $selectedPhotoField = '';
+    public array $formPhotos = [];
+    public int $currentPhotoIndex = 0;
+
+    public bool $showDeleteModal = false;
+    public ?int $formToDelete = null;
+
+    public int $perPage = 10;
+    public string $sortField = 'date_submitted';
+    public string $sortDirection = 'desc';
+    public int $page = 1;
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'dateFrom' => ['except' => ''],
+        'dateTo' => ['except' => ''],
+        'page' => ['except' => 1],
+        'sortField' => ['except' => 'date_submitted'],
+        'sortDirection' => ['except' => 'desc'],
+        'perPage' => ['except' => 10],
+    ];
+
+    public function mount(): void
+    {
+        $this->formType = FormType::where('form_name', 'Incubator Air Speed Weekly Monitoring')->where('isActive', true)->firstOrFail();
+        $this->calculateTodayFormCount();
+    }
+
+    protected function calculateTodayFormCount(): void
+    {
+        $this->todayFormCount = Form::where('form_type_id', $this->formType->id)
+            ->whereDate('date_submitted', now()->format('Y-m-d'))
+            ->count();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDateFrom(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDateTo(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
+    public function quickFilterToday(): void
+    {
+        $today = now()->format('Y-m-d');
+
+        if ($this->dateFrom === $today && $this->dateTo === $today) {
+            $this->reset(['dateFrom', 'dateTo']);
+        } else {
+            $this->dateFrom = $today;
+            $this->dateTo = $today;
+        }
+
+        $this->resetPage();
+    }
+
+    public function toggleFilterDropdown(): void
+    {
+        $this->showFilterDropdown = !$this->showFilterDropdown;
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'dateFrom', 'dateTo']);
+        $this->resetPage();
+    }
+
+    public function gotoPage($page): void
+    {
+        $page = (int) $page;
+
+        $totalPages = $this->baseQuery()->paginate($this->perPage)->lastPage();
+
+        if ($page < 1) {
+            $page = 1;
+        } elseif ($page > $totalPages) {
+            $page = $totalPages;
+        }
+
+        $this->page = $page;
+    }
+
+    protected function baseQuery(): Builder
+    {
+        $query = Form::where('form_type_id', $this->formType->id)
+            ->with(['user']);
+
+        $search = trim($this->search);
+        $terms = $search !== '' ? preg_split('/\s+/', $search) : [];
+        $terms = is_array($terms) ? array_values(array_filter($terms, static fn ($t) => is_string($t) && $t !== '')) : [];
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($terms, $search) {
+                $q->whereHas('user', function ($userQuery) use ($terms) {
+                    foreach ($terms as $term) {
+                        $userQuery->where(function ($nameQ) use ($term) {
+                            $nameQ->where('first_name', 'like', '%' . $term . '%')
+                                ->orWhere('last_name', 'like', '%' . $term . '%');
+                        });
+                    }
+                })
+                    ->orWhere(function ($subQ) use ($search) {
+                        $subQ->where('form_inputs', 'like', '%"machine_info":%')
+                            ->where('form_inputs', 'like', '%"name":%' . $search . '%');
+                    });
+            });
+        }
+
+        if ($this->dateFrom) {
+            $query->whereDate('date_submitted', '>=', $this->dateFrom);
+        }
+        if ($this->dateTo) {
+            $query->whereDate('date_submitted', '<=', $this->dateTo);
+        }
+
+        return $query;
+    }
+
+    #[Computed]
+    public function selectedForm()
+    {
+        if (!$this->selectedFormId) {
+            return null;
+        }
+
+        return Form::with(['user', 'formType'])->find($this->selectedFormId);
+    }
+
+    #[Computed]
+    public function formData()
+    {
+        if (!$this->selectedFormId) {
+            return [];
+        }
+
+        $freshForm = $this->freshSelectedFormRow();
+        if ($freshForm && $freshForm->form_inputs) {
+            return is_array($freshForm->form_inputs) ? $freshForm->form_inputs : (json_decode($freshForm->form_inputs, true) ?: []);
+        }
+
+        return [];
+    }
+
+    #[Computed]
+    public function machine_info()
+    {
+        if (!$this->selectedFormId) {
+            return [];
+        }
+
+        $freshForm = $this->freshSelectedFormRow();
+        if ($freshForm && $freshForm->form_inputs) {
+            $formData = is_array($freshForm->form_inputs) ? $freshForm->form_inputs : (json_decode($freshForm->form_inputs, true) ?: []);
+
+            if (isset($formData['machine_info'])) {
+                return $formData['machine_info'];
+            }
+
+            if (isset($formData['incubator']) && !empty($formData['incubator'])) {
+                $machineId = $formData['incubator'];
+                $machine = DB::table('incubator-machines')
+                    ->where('id', $machineId)
+                    ->first();
+
+                if ($machine) {
+                    return [
+                        'table' => 'incubator-machines',
+                        'id' => $machineId,
+                        'name' => $machine->incubatorName
+                    ];
+                }
+            }
+        }
+
+        return [
+            'table' => null,
+            'id' => null,
+            'name' => null
+        ];
+    }
+
+    #[Computed]
+    public function freshSelectedFormRow(): ?object
+    {
+        if (!$this->selectedFormId) {
+            return null;
+        }
+
+        return DB::table('forms')
+            ->where('id', $this->selectedFormId)
+            ->first();
+    }
+
+    public function viewDetails($formId): void
+    {
+        $this->selectedFormId = $formId;
+        $this->formPhotos = $this->getFormPhotos($formId);
+        $this->currentPhotoIndex = 0;
+        $this->showModal = true;
+    }
+
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->selectedFormId = null;
+        $this->formPhotos = [];
+    }
+
+    public function viewPhotos(string $field): void
+    {
+        $this->selectedPhotoField = $field;
+        $this->selectedPhotos = $this->getFormPhotos($this->selectedFormId, $field);
+        $this->showPhotoModal = true;
+    }
+
+    public function closePhotoModal(): void
+    {
+        $this->showPhotoModal = false;
+        $this->selectedPhotoField = '';
+        $this->selectedPhotos = [];
+    }
+
+    private function getFormPhotos(int $formId, string $field = null): array
+    {
+        try {
+            $form = Form::findOrFail($formId);
+            $formData = is_array($form->form_inputs) ? $form->form_inputs : [];
+
+            $photos = [];
+
+            $photoFields = [
+                'left_baggy_top_photos' => 'Left Baggy Top',
+                'left_baggy_middle_photos' => 'Left Baggy Middle',
+                'left_baggy_bottom_photos' => 'Left Baggy Bottom',
+                'right_baggy_top_photos' => 'Right Baggy Top',
+                'right_baggy_middle_photos' => 'Right Baggy Middle',
+                'right_baggy_bottom_photos' => 'Right Baggy Bottom',
+            ];
+
+            $fieldsToProcess = $field ? [$field => $photoFields[$field] ?? 'Photo'] : $photoFields;
+
+            foreach ($fieldsToProcess as $photoField => $label) {
+                if (isset($formData[$photoField])) {
+                    $fieldPhotos = $formData[$photoField];
+
+                    if (is_string($fieldPhotos)) {
+                        $decodedPhotos = json_decode($fieldPhotos, true);
+                        if (is_array($decodedPhotos)) {
+                            foreach ($decodedPhotos as $photo) {
+                                if (is_string($photo)) {
+                                    $photos[] = ['url' => $photo, 'name' => $label . ' Photo'];
+                                } elseif (is_array($photo) && isset($photo['url'])) {
+                                    $photos[] = ['url' => $photo['url'], 'name' => $photo['name'] ?? $label . ' Photo'];
+                                }
+                            }
+                        }
+                    } elseif (is_array($fieldPhotos)) {
+                        foreach ($fieldPhotos as $photo) {
+                            if (is_array($photo) && isset($photo['url'])) {
+                                $photos[] = ['url' => $photo['url'], 'name' => $photo['name'] ?? $label . ' Photo'];
+                            } elseif (is_string($photo)) {
+                                $photos[] = ['url' => $photo, 'name' => $label . ' Photo'];
+                            }
+                        }
+                    }
+                }
+            }
+
+            return $photos;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    public function getPhotoCount(string $field): int
+    {
+        if (!$this->selectedFormId) {
+            return 0;
+        }
+
+        return count($this->getFormPhotos($this->selectedFormId, $field));
+    }
+
+    public function deleteForm($formId): void
+    {
+        $this->formToDelete = $formId;
+        $this->showDeleteModal = true;
+    }
+
+    public function confirmDelete(): void
+    {
+        if ($this->formToDelete) {
+            $form = Form::findOrFail($this->formToDelete);
+            $formName = $form->formType->form_name ?? 'Unknown form';
+            $form->delete();
+
+            session()->flash('success', "Form '{$formName}' deleted successfully.");
+
+            $this->cancelDelete();
+        }
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteModal = false;
+        $this->formToDelete = null;
+    }
+
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+        $this->resetPage();
+    }
+
+    protected function getForms()
+    {
+        $query = $this->baseQuery();
+        $query->orderBy($this->sortField, $this->sortDirection);
+        return $query->paginate($this->perPage, ['*'], 'page', $this->page);
+    }
+
+    protected function getPaginationData()
+    {
+        $forms = $this->getForms();
+
+        $currentPage = $forms->currentPage();
+        $lastPage = $forms->lastPage();
+
+        if ($lastPage <= 3) {
+            $startPage = 1;
+            $endPage = $lastPage;
+        } else {
+            $startPage = max(1, $currentPage - 1);
+            $endPage = min($lastPage, $currentPage + 1);
+        }
+
+        $pages = [];
+        for ($i = $startPage; $i <= $endPage; $i++) {
+            $pages[] = $i;
+        }
+
+        return [
+            'forms' => $forms,
+            'pages' => $pages,
+            'currentPage' => $currentPage,
+            'lastPage' => $lastPage,
+        ];
+    }
+
+    public function render()
+    {
+        $paginationData = $this->getPaginationData();
+
+        return view('livewire.shared.forms-dashboard.incubator-air-speed-dashboard', [
+            'forms' => $paginationData['forms'],
+            'pages' => $paginationData['pages'],
+            'currentPage' => $paginationData['currentPage'],
+            'lastPage' => $paginationData['lastPage'],
+            'formType' => $this->formType,
+        ]);
+    }
+}
