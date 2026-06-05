@@ -507,13 +507,9 @@ class FormsPrintController extends Controller
 
             $personnelRaw = $inputs['personnel_name'] ?? 'N/A';
             if (is_array($personnelRaw)) {
-                $names = DB::table('users')->whereIn('id', $personnelRaw)->get()->map(fn ($u) => trim(($u->first_name ?? '').' '.($u->last_name ?? '')))->toArray();
-                $personnelName = $names ? implode(', ', $names) : 'N/A';
-            } elseif (is_numeric($personnelRaw)) {
-                $personnelUser = DB::table('users')->where('id', $personnelRaw)->first();
-                $personnelName = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
+                $personnelName = count($personnelRaw) ? implode(', ', $personnelRaw) : 'N/A';
             } else {
-                $personnelName = $personnelRaw;
+                $personnelName = $personnelRaw ?: 'N/A';
             }
 
             return [
@@ -567,22 +563,14 @@ class FormsPrintController extends Controller
             $hatcherName = $hatcher->hatcherName ?? 'N/A';
         }
 
-        // Resolve personnel name if stored as user ID(s)
+        // Resolve personnel name (already stored as names array)
         if (isset($inputs['personnel_name']) && is_array($inputs['personnel_name'])) {
-            $names = DB::table('users')->whereIn('id', $inputs['personnel_name'])->get()->map(fn ($u) => trim(($u->first_name ?? '').' '.($u->last_name ?? '')))->toArray();
-            $inputs['personnel_name'] = $names ? implode(', ', $names) : 'N/A';
-        } elseif (isset($inputs['personnel_name']) && is_numeric($inputs['personnel_name'])) {
-            $personnelUser = DB::table('users')->where('id', $inputs['personnel_name'])->first();
-            $inputs['personnel_name'] = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
+            $inputs['personnel_name'] = count($inputs['personnel_name']) ? implode(', ', $inputs['personnel_name']) : 'N/A';
         }
 
-        // Resolve QC personnel if stored as user ID(s)
+        // Resolve QC personnel (already stored as names array)
         if (isset($inputs['qc_personnel']) && is_array($inputs['qc_personnel'])) {
-            $names = DB::table('users')->whereIn('id', $inputs['qc_personnel'])->get()->map(fn ($u) => trim(($u->first_name ?? '').' '.($u->last_name ?? '')))->toArray();
-            $inputs['qc_personnel'] = $names ? implode(', ', $names) : 'N/A';
-        } elseif (isset($inputs['qc_personnel']) && is_numeric($inputs['qc_personnel'])) {
-            $qcUser = DB::table('users')->where('id', $inputs['qc_personnel'])->first();
-            $inputs['qc_personnel'] = $qcUser ? trim(($qcUser->first_name ?? '').' '.($qcUser->last_name ?? '')) : 'N/A';
+            $inputs['qc_personnel'] = count($inputs['qc_personnel']) ? implode(', ', $inputs['qc_personnel']) : 'N/A';
         }
 
         return view('admin.print.pasgar-score-detail', [
@@ -619,12 +607,9 @@ class FormsPrintController extends Controller
             $hatcherName = $hatcher->hatcherName ?? 'N/A';
         }
 
+        // Resolve personnel name (already stored as names array)
         if (isset($inputs['personnel_name']) && is_array($inputs['personnel_name'])) {
-            $names = DB::table('users')->whereIn('id', $inputs['personnel_name'])->get()->map(fn ($u) => trim(($u->first_name ?? '').' '.($u->last_name ?? '')))->toArray();
-            $inputs['personnel_name'] = $names ? implode(', ', $names) : 'N/A';
-        } elseif (isset($inputs['personnel_name']) && is_numeric($inputs['personnel_name'])) {
-            $personnelUser = DB::table('users')->where('id', $inputs['personnel_name'])->first();
-            $inputs['personnel_name'] = $personnelUser ? trim(($personnelUser->first_name ?? '') . ' ' . ($personnelUser->last_name ?? '')) : 'N/A';
+            $inputs['personnel_name'] = count($inputs['personnel_name']) ? implode(', ', $inputs['personnel_name']) : 'N/A';
         }
 
         return view('admin.print.pasgar-score-summary', [
