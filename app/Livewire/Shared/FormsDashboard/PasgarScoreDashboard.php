@@ -5,6 +5,7 @@ namespace App\Livewire\Shared\FormsDashboard;
 use App\Models\Form;
 use App\Models\FormType;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Livewire\Attributes\Computed;
@@ -31,6 +32,7 @@ class PasgarScoreDashboard extends Component
     public array $selectedPhotos = [];
     public int $currentPhotoIndex = 0;
 
+    public bool $isAdmin = false;
     public ?FormType $formType = null;
 
     protected $queryString = [
@@ -53,6 +55,7 @@ class PasgarScoreDashboard extends Component
 
         $this->typeId = $this->formType->id;
         $this->page = (int) request()->query('page', 1);
+        $this->isAdmin = in_array((int) Auth::user()->user_type, [0, 1]);
     }
 
     public function sortBy(string $field): void
@@ -328,8 +331,10 @@ class PasgarScoreDashboard extends Component
 
     public function printPasgarList(): void
     {
+        $routeName = $this->isAdmin ? 'admin.print.forms.pasgar-score' : 'user.print.forms.pasgar-score';
+
         $url = URL::temporarySignedRoute(
-            'admin.print.forms.pasgar-score',
+            $routeName,
             now()->addMinutes(10),
             [
                 'search' => $this->search,
@@ -345,8 +350,10 @@ class PasgarScoreDashboard extends Component
 
     public function printPasgarDetail(int $formId): void
     {
+        $routeName = $this->isAdmin ? 'admin.print.forms.pasgar-score-detail' : 'user.print.forms.pasgar-score-detail';
+
         $url = URL::temporarySignedRoute(
-            'admin.print.forms.pasgar-score-detail',
+            $routeName,
             now()->addMinutes(10),
             ['form_id' => $formId]
         );
@@ -356,8 +363,10 @@ class PasgarScoreDashboard extends Component
 
     public function printPasgarSummary(int $formId): void
     {
+        $routeName = $this->isAdmin ? 'admin.print.forms.pasgar-score-summary' : 'user.print.forms.pasgar-score-summary';
+
         $url = URL::temporarySignedRoute(
-            'admin.print.forms.pasgar-score-summary',
+            $routeName,
             now()->addMinutes(10),
             ['form_id' => $formId]
         );

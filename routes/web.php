@@ -363,6 +363,25 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/get-sets', [GetSetController::class, 'index'])->name('user.get-sets');
 
         Route::get('/user/change-password', [UserController::class, 'changePassword'])->name('user.change-password');
+
+        // PASGAR Score Dashboard & Print (QA/QC and Supervisor tagged users only)
+        Route::middleware('pasgar.access')->group(function () {
+            Route::get('/user/pasgar-score-dashboard', function () {
+                return view('user.pasgar-score-dashboard');
+            })->name('user.pasgar-score-dashboard');
+
+            Route::get('/user/print/forms/pasgar-score', [FormsPrintController::class, 'pasgarScore'])
+                ->middleware('signed')
+                ->name('user.print.forms.pasgar-score');
+
+            Route::get('/user/print/forms/pasgar-score-detail', [FormsPrintController::class, 'pasgarScoreDetail'])
+                ->middleware('signed')
+                ->name('user.print.forms.pasgar-score-detail');
+
+            Route::get('/user/print/forms/pasgar-score-summary', [FormsPrintController::class, 'pasgarScoreSummary'])
+                ->middleware('signed')
+                ->name('user.print.forms.pasgar-score-summary');
+        });
     });
     
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

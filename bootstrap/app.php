@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user' => \App\Http\Middleware\UserMiddleware::class,
             'api.key' => \App\Http\Middleware\ApiKeyMiddleware::class,
             'superadmin' => \App\Http\Middleware\SuperadminMiddleware::class,
+            'pasgar.access' => \App\Http\Middleware\PasgarAccessMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

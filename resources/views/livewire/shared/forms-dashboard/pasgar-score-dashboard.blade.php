@@ -187,12 +187,14 @@
                                         title="View Details">
                                         View
                                     </button>
+                                    @if($this->isAdmin)
                                     <button
                                         wire:click="deleteForm({{ $form->id }})"
                                         class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
                                         title="Delete Form">
                                         Delete
                                     </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -273,12 +275,14 @@
                             title="View Details">
                             View
                         </button>
+                        @if($this->isAdmin)
                         <button
                             wire:click="deleteForm({{ $form->id }})"
                             class="px-3 py-1 text-xs font-medium text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/40 rounded-md hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                             title="Delete Form">
                             Delete
                         </button>
+                        @endif
                     </div>
                 </div>
             @empty
@@ -311,7 +315,7 @@
     @include('livewire.shared.forms-dashboard.modals.pasgar-score-view')
 
     <!-- Delete Confirmation Modal -->
-    @if ($showDeleteModal)
+    @if ($this->isAdmin && $showDeleteModal)
         <div class="fixed inset-0 z-9999 flex items-center justify-center p-4" wire:ignore.self>
             <div class="fixed inset-0 bg-black/50" wire:click="cancelDelete"></div>
             <div class="relative w-full max-w-md p-6 bg-white dark:bg-gray-800 shadow-xl dark:shadow-2xl rounded-lg">

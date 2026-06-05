@@ -167,50 +167,63 @@
         }
     } else {
         // Hatchery user sidebar items (limited access)
-        $sidebarItems = [
-            [
-                'label' => 'Management',
-                'icon' => 'folder',
-                'dropdown' => true,
-                'children' => [
-                    [
-                        'label' => 'Incubator Machines',
-                        'href' => '/user/incubator-machines',
-                        'active' => 'user/incubator-machines*'
-                    ],
-                    [
-                        'label' => 'Hatcher Machines',
-                        'href' => '/user/hatcher-machines',
-                        'active' => 'user/hatcher-machines*'
-                    ],
-                    [
-                        'label' => 'Plenum Machines',
-                        'href' => '/user/plenum-machines',
-                        'active' => 'user/plenum-machines*'
-                    ],
-                    [
-                        'label' => 'PS Numbers',
-                        'href' => '/user/ps-numbers',
-                        'active' => 'user/ps-numbers*'
-                    ],
-                    [
-                        'label' => 'House Numbers',
-                        'href' => '/user/house-numbers',
-                        'active' => 'user/house-numbers*'
-                    ],
-                    [
-                        'label' => 'GenSet',
-                        'href' => '/user/get-sets',
-                        'active' => 'user/get-sets*'
-                    ]
+        $hasPasgarAccess = $user && $user->tags()->whereIn('name', ['QA/QC', 'Supervisor'])->exists();
+
+        $sidebarItems = [];
+
+        // PASGAR Score Dashboard (QA/QC and Supervisor tagged users only)
+        if ($hasPasgarAccess) {
+            $sidebarItems[] = [
+                'label' => 'PASGAR Score',
+                'href' => '/user/pasgar-score-dashboard',
+                'icon' => 'dashboard',
+                'active' => 'user/pasgar-score-dashboard*'
+            ];
+        }
+
+        $sidebarItems[] = [
+            'label' => 'Management',
+            'icon' => 'folder',
+            'dropdown' => true,
+            'children' => [
+                [
+                    'label' => 'Incubator Machines',
+                    'href' => '/user/incubator-machines',
+                    'active' => 'user/incubator-machines*'
+                ],
+                [
+                    'label' => 'Hatcher Machines',
+                    'href' => '/user/hatcher-machines',
+                    'active' => 'user/hatcher-machines*'
+                ],
+                [
+                    'label' => 'Plenum Machines',
+                    'href' => '/user/plenum-machines',
+                    'active' => 'user/plenum-machines*'
+                ],
+                [
+                    'label' => 'PS Numbers',
+                    'href' => '/user/ps-numbers',
+                    'active' => 'user/ps-numbers*'
+                ],
+                [
+                    'label' => 'House Numbers',
+                    'href' => '/user/house-numbers',
+                    'active' => 'user/house-numbers*'
+                ],
+                [
+                    'label' => 'GenSet',
+                    'href' => '/user/get-sets',
+                    'active' => 'user/get-sets*'
                 ]
-            ],
-            [
-                'label' => 'Forms',
-                'href' => '/user/forms',
-                'icon' => 'forms',
-                'active' => 'user/forms*'
             ]
+        ];
+
+        $sidebarItems[] = [
+            'label' => 'Forms',
+            'href' => '/user/forms',
+            'icon' => 'forms',
+            'active' => 'user/forms*'
         ];
     }
     
