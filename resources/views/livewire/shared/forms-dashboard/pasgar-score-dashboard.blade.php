@@ -187,6 +187,12 @@
                                         title="View Details">
                                         View
                                     </button>
+                                    <button
+                                        wire:click="downloadPasgarSummaryPdf({{ $form->id }})"
+                                        class="px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/40 rounded-md hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors"
+                                        title="Download Summary PDF">
+                                        PDF
+                                    </button>
                                     @if($this->isAdmin)
                                     <button
                                         wire:click="deleteForm({{ $form->id }})"
@@ -274,6 +280,12 @@
                             class="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors"
                             title="View Details">
                             View
+                        </button>
+                        <button
+                            wire:click="downloadPasgarSummaryPdf({{ $form->id }})"
+                            class="px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/40 rounded-md hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors"
+                            title="Download Summary PDF">
+                            PDF
                         </button>
                         @if($this->isAdmin)
                         <button

@@ -7,6 +7,7 @@ use App\Models\Form;
 use App\Models\FormType;
 use App\Models\User;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -619,6 +620,48 @@ class FormsPrintController extends Controller
             'incubatorName' => $incubatorName,
             'hatcherName' => $hatcherName,
         ]);
+    }
+
+    public function pasgarScoreSummaryPdf(Request $request)
+    {
+        $formId = (int) $request->query('form_id', 0);
+        $form = Form::findOrFail($formId);
+
+        $inputs = is_array($form->form_inputs) ? $form->form_inputs : (json_decode((string) $form->form_inputs, true) ?: []);
+
+        $houseNumber = 'N/A';
+        if (isset($inputs['house_number']) && $inputs['house_number'] !== '') {
+            $house = DB::table('house-numbers')->where('id', $inputs['house_number'])->first();
+            $houseNumber = $house->houseNumber ?? 'N/A';
+        }
+
+        $incubatorName = 'N/A';
+        if (isset($inputs['incubator_number']) && $inputs['incubator_number'] !== '') {
+            $inc = DB::table('incubator-machines')->where('id', $inputs['incubator_number'])->first();
+            $incubatorName = $inc->incubatorName ?? 'N/A';
+        }
+
+        $hatcherName = 'N/A';
+        if (isset($inputs['hatcher_number']) && $inputs['hatcher_number'] !== '') {
+            $hatcher = DB::table('hatcher-machines')->where('id', $inputs['hatcher_number'])->first();
+            $hatcherName = $hatcher->hatcherName ?? 'N/A';
+        }
+
+        if (isset($inputs['personnel_name']) && is_array($inputs['personnel_name'])) {
+            $inputs['personnel_name'] = count($inputs['personnel_name']) ? implode(', ', $inputs['personnel_name']) : 'N/A';
+        }
+
+        $dateLabel = $form->date_submitted ? $form->date_submitted->format('d-M-Y') : 'report';
+
+        $pdf = Pdf::loadView('admin.print.pasgar-score-summary-pdf', [
+            'form' => $form,
+            'inputs' => $inputs,
+            'houseNumber' => $houseNumber,
+            'incubatorName' => $incubatorName,
+            'hatcherName' => $hatcherName,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download("PASGAR-Summary-{$dateLabel}.pdf");
     }
 
     private function printForms(
