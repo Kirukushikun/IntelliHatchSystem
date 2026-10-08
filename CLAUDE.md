@@ -311,6 +311,11 @@ GOOGLE_DRIVE_CLIENT_SECRET=
 GOOGLE_DRIVE_REFRESH_TOKEN=
 GOOGLE_DRIVE_FOLDER_ID=
 GOOGLE_DRIVE_FOLDER_PATH=  # e.g. Backup/IHS
+R2_ACCESS_KEY_ID=          # Cloudflare R2 (S3-compatible) backup disk
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET=                 # R2 backup disk is enabled only when set
+R2_ENDPOINT=               # https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+R2_ROOT=                   # e.g. Backup/IHS
 ADMIN_NOTIFICATION_EMAIL=  # Admin notification recipient
 ```
 

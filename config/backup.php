@@ -163,10 +163,12 @@ return [
             /*
              * The disk names on which the backups will be stored.
              */
-            'disks' => [
+            'disks' => array_values(array_filter([
                 'local',
                 'google',
-            ],
+                // Cloudflare R2 — only enabled once R2 credentials are configured
+                env('R2_BUCKET') ? 'r2' : null,
+            ])),
 
             /*
              * Determines whether to allow backups to continue when some targets fail instead of failing completely.
