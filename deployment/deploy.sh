@@ -17,8 +17,11 @@ $COMPOSER install --no-dev --optimize-autoloader --working-dir="$APP_DIR"
 
 echo "==> [3/8] Installing & building frontend assets..."
 cd "$APP_DIR"
-npm ci --omit=dev
+# Vite/Tailwind are devDependencies — they're needed to build, so install them,
+# build, then drop them again.
+npm ci
 npm run build
+npm prune --omit=dev
 
 echo "==> [4/8] Running database migrations..."
 $PHP "$APP_DIR/artisan" migrate --force
