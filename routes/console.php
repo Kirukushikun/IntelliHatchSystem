@@ -13,6 +13,11 @@ Artisan::command('inspire', function () {
 Schedule::command('backup:run --only-db')->dailyAt('02:00');
 Schedule::command('backup:clean')->dailyAt('02:30');
 
+// Scheduler heartbeat — evidence for the System Health page that cron is still running
+Schedule::call(fn () => \App\Services\SystemHealth::recordSchedulerHeartbeat())
+    ->everyMinute()
+    ->name('system-health:heartbeat');
+
 // Schedule cleanup of orphaned photos every hour
 Schedule::command('photos:clean')
     ->hourly()

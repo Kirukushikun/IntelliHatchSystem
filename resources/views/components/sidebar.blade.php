@@ -8,6 +8,7 @@
     $userType = $user ? (int) $user->user_type : null;
     $isAdmin = in_array($userType, [0, 1]);  // superadmin (0) or admin (1)
     $isSuperadmin = $userType === 0;
+    $canViewSystemHealth = \App\Services\SystemHealth::canView($user);
 
     if ($isAdmin) {
         // Admin sidebar items (shared by admin and superadmin)
@@ -165,6 +166,15 @@
                 'active' => 'admin/danger-zone*'
             ];
         }
+
+        if ($canViewSystemHealth) {
+            $sidebarItems[] = [
+                'label' => 'System Health',
+                'href' => '/admin/system-health',
+                'icon' => 'system-health',
+                'active' => 'admin/system-health*'
+            ];
+        }
     } else {
         // Hatchery user sidebar items (limited access)
         $hasPasgarAccess = $user && $user->tags()->whereIn('name', ['QA/QC', 'Supervisor'])->exists();
@@ -228,14 +238,16 @@
     }
     
     // Helper function to check if any child is active
-    function hasActiveChild($item) {
-        if (!isset($item['children'])) return false;
-        foreach ($item['children'] as $child) {
-            if (request()->is($child['active'] ?? $child['href'])) {
-                return true;
+    if (!function_exists('hasActiveChild')) {
+        function hasActiveChild($item) {
+            if (!isset($item['children'])) return false;
+            foreach ($item['children'] as $child) {
+                if (request()->is($child['active'] ?? $child['href'])) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 @endphp
 
@@ -562,6 +574,10 @@ x-cloak>
                             @elseif($item['icon'] === 'import')
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
+                            @elseif($item['icon'] === 'system-health')
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h4l3-8 4 16 3-8h4"></path>
                                 </svg>
                             @elseif($item['icon'] === 'danger-zone')
                                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

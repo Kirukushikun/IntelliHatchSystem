@@ -314,6 +314,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/danger-zone', function () {
             return view('admin.danger-zone');
         })->name('admin.danger-zone');
+
+        Route::get('/admin/system-health', [\App\Http\Controllers\Admin\SystemHealthController::class, 'show'])->name('admin.system-health');
+        Route::get('/admin/system-health.json', [\App\Http\Controllers\Admin\SystemHealthController::class, 'json'])->name('admin.system-health.json');
     });
     
     // User routes

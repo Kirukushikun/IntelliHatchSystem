@@ -195,6 +195,8 @@ app/Livewire/
 | `/admin/import/*` | superadmin | CSV bulk form import |
 | `/admin/danger-zone` | superadmin | Data purge operations |
 | `/admin/user-activity-dashboard` | superadmin | User activity analytics |
+| `/admin/system-health` | superadmin | System health page (server, deps, queues, backups, uploads) |
+| `/admin/system-health.json` | superadmin | Same report as JSON — 503 on fail, 200 on warn |
 | `/admin/ps-numbers` | admin+ | PS Number management |
 | `/admin/house-numbers` | admin+ | House Number management |
 | `/admin/get-sets` | admin+ | GetSet management |
@@ -336,6 +338,7 @@ Proxy trust level set to `*` in `bootstrap/app.php`.
 |---------|---------|
 | `OpenRouterClient` | AI requests via OpenRouter API (`chat()`, `ask()`) |
 | `ActivityLogger` | Static audit trail logging (`log()`, `logForUser()`) |
+| `SystemHealth` | Single source for the system health page + JSON; thresholds in `SystemHealth::THRESHOLDS`; scheduler heartbeat file written every minute |
 
 ## Queue Jobs
 
