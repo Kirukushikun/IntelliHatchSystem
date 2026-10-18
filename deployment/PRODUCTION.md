@@ -233,9 +233,10 @@ cloudflared tunnel info intellihatch
 
 ---
 
-## 9. php.ini Tweaks (optional but recommended)
+## 9. php.ini Tweaks
 
-Edit `/etc/php/8.2/fpm/php.ini`:
+The overrides live in `deployment/php-ihs.ini` and `deploy.sh` installs them on every deploy as
+`/etc/php/8.4/fpm/conf.d/99-ihs.ini` and `/etc/php/8.4/cli/conf.d/99-ihs.ini`:
 
 ```ini
 upload_max_filesize = 64M
@@ -244,11 +245,15 @@ max_execution_time  = 300
 memory_limit        = 256M
 ```
 
-Then restart PHP-FPM:
+To apply them by hand without a full deploy:
 
 ```bash
+install -m 644 deployment/php-ihs.ini /etc/php/8.4/fpm/conf.d/99-ihs.ini
+install -m 644 deployment/php-ihs.ini /etc/php/8.4/cli/conf.d/99-ihs.ini
 systemctl restart php8.4-fpm
 ```
+
+Verify with `php -i | grep upload_max_filesize` (CLI) and the PHP runtime section of `/admin/system-health` (FPM).
 
 ---
 

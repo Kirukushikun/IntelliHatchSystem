@@ -33,6 +33,11 @@ echo "==> [6/8] Fixing storage permissions..."
 chown -R www-data:www-data "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
 chmod -R 775 "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
 
+echo "==> [6b/8] Installing PHP overrides (upload limits)..."
+for SAPI in fpm cli; do
+    install -m 644 "$APP_DIR/deployment/php-ihs.ini" "/etc/php/8.4/$SAPI/conf.d/99-ihs.ini"
+done
+
 echo "==> [7/8] Restarting queue workers..."
 $PHP "$APP_DIR/artisan" queue:restart
 supervisorctl restart intellihatch-worker:*
